@@ -1,0 +1,26 @@
+location: UK South
+resourceGroup: rg
+components:
+  secrets:
+    name: whatever
+    enableSoftDelete: true
+    enableKeyEncryptionKey: true
+    bitlockerregions:
+    - region: UK South
+    - region: UK West
+  logging:
+automation:
+  Runbook:
+    KeyVaultName: #keyvault
+    SelfSignedCrt: #pathtokeyvault
+    PersonalAccessToken: #pathtokeyvault
+    repourl: 
+    repotype: github
+    FolderPath: /dsc
+  DSC:
+    KeyVaultName: #keyvault
+    SelfSignedCrt: #pathtokeyvault
+    PersonalAccessToken: #pathtokeyvault
+    repourl: 
+    repotype: github
+    FolderPath: /runbook

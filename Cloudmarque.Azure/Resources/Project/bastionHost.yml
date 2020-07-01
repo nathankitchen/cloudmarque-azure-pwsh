@@ -1,0 +1,7 @@
+resourceGroupTag:
+location:
+
+bastionHosts:
+  - vnetTag:
+    bastionHostName:
+    bastionHostSubnetPrefix: # Optional if bastion host subnet 'AzureBastionHost' doesnt exist already.

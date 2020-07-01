@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Budgets": {
+            "type": "Array"
+        },
+        "AccountFlagName": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Consumption/budgets",
+            "apiVersion": "2019-10-01",
+            "name": "[parameters('Budgets')[copyIndex('BudgetCopy')].name]",
+            "properties": {
+                "category": "[parameters('Budgets')[copyIndex('BudgetCopy')].category]",
+                "amount": "[parameters('Budgets')[copyIndex('BudgetCopy')].amount]",
+                "timeGrain": "[parameters('Budgets')[copyIndex('BudgetCopy')].timegrain]",
+                "timePeriod": {
+                    "startDate": "[parameters('Budgets')[copyIndex('BudgetCopy')].startDate]",
+                    "endDate": "[parameters('Budgets')[copyIndex('BudgetCopy')].endDate]"
+                },
+                "notifications": "[parameters('Budgets')[copyIndex('BudgetCopy')].Notifications]",
+                "filter": {
+                    "tags": {
+                        "name": "[parameters('AccountFlagName')]",
+                        "operator": "Equal",
+                        "values": [
+                            "[parameters('Budgets')[copyIndex('BudgetCopy')].AccountNumber]"
+                        ]
+                    }
+                }
+            },
+            "copy": {
+                "name": "BudgetCopy",
+                "count": "[length(parameters('Budgets'))]"
+            }
+        }
+    ]
+}

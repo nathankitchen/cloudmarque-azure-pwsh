@@ -1,0 +1,85 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VaultName": {
+            "type": "String"
+        },
+        "Workspace": {
+            "type": "Object"
+        }
+    },
+    "variables": {
+        "BackupDiagnosticTypes": [
+            "AzureBackupReport",
+            "CoreAzureBackup",
+            "AddonAzureBackupJobs",
+            "AddonAzureBackupAlerts",
+            "AddonAzureBackupPolicy",
+            "AddonAzureBackupStorage",
+            "AddonAzureBackupProtectedInstance"
+        ],
+        "RecoveryDiagnosticTypes": [
+            "AzureSiteRecoveryJobs",
+            "AzureSiteRecoveryEvents",
+            "AzureSiteRecoveryReplicatedItems",
+            "AzureSiteRecoveryReplicationStats",
+            "AzureSiteRecoveryRecoveryPoints",
+            "AzureSiteRecoveryReplicationDataUploadRate",
+            "AzureSiteRecoveryProtectedDiskDataChurn"
+        ],
+        "copy": [
+            {
+                "name": "BackupDiagnosticTypesLogsCopy",
+                "count": "[length(variables('BackupDiagnosticTypes'))]",
+                "input": {
+                    "category": "[variables('BackupDiagnosticTypes')[copyIndex('BackupDiagnosticTypesLogsCopy')]]",
+                    "enabled": true,
+                    "retentionPolicy": {
+                        "days": 0,
+                        "enabled": false
+                    }
+                }
+            },
+            {
+                "name": "RecoveryDiagnosticTypesLogsCopy",
+                "count": "[length(variables('RecoveryDiagnosticTypes'))]",
+                "input": {
+                    "category": "[variables('RecoveryDiagnosticTypes')[copyIndex('RecoveryDiagnosticTypesLogsCopy')]]",
+                    "enabled": true,
+                    "retentionPolicy": {
+                        "days": 0,
+                        "enabled": false
+                    }
+                }
+            }
+        ],
+
+        "DiagnosticLogs": [
+            {
+                "name": "BackupDiagnostics",
+                "value": "[variables('BackupDiagnosticTypesLogsCopy')]"
+            },
+            {
+                "name": "RecoveryDiagnostics",
+                "value": "[variables('RecoveryDiagnosticTypesLogsCopy')]"
+            }
+        ]
+    },
+    "resources": [
+        {
+            "type": "Microsoft.RecoveryServices/Vaults/Providers/DiagnosticSettings",
+            "name": "[concat(parameters('VaultName'), '/Microsoft.Insights/', parameters('workspace').name, variables('DiagnosticLogs')[copyIndex('DiagnosticSettingsCopy')].name)]",
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "name": "[parameters('Workspace').name]",
+                "workspaceId": "[resourceId(parameters('Workspace').resourceGroupName, 'Microsoft.OperationalInsights/Workspaces/', parameters('Workspace').name)]",
+                "logs": "[variables('DiagnosticLogs')[copyIndex('DiagnosticSettingsCopy')].value]"
+            },
+            "copy": {
+                "name": "DiagnosticSettingsCopy",
+                "count": "[length(variables('DiagnosticLogs'))]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,89 @@
+- policyName: 7Days # 7 Daily
+  timeZone: UTC
+  instantRpRetentionRangeInDays: 2
+  schedule:
+    scheduleRunFrequency: Daily
+    scheduleRunTimes: ["2020-05-14T00:00:00.000Z"]
+    schedulePolicyType: SimpleSchedulePolicy
+  retention:
+    dailySchedule:
+      retentionTimes: ["2020-05-14T00:00:00.000Z"]
+      retentionDuration:
+        count: 7
+        durationType: Days
+    retentionPolicyType: LongTermRetentionPolicy
+
+- policyName: 31Days # 31 Daily
+  timeZone: UTC
+  instantRpRetentionRangeInDays: 2
+  schedule:
+    scheduleRunFrequency: Daily
+    scheduleRunTimes: ["2020-05-14T00:00:00.000Z"]
+    schedulePolicyType: SimpleSchedulePolicy
+  retention:
+    dailySchedule:
+      retentionTimes: ["2020-05-14T00:00:00.000Z"]
+      retentionDuration:
+        count: 31
+        durationType: Days
+    retentionPolicyType: LongTermRetentionPolicy
+
+- policyName: 1Year # 31 Daily, 12 Monthly
+  timeZone: UTC
+  instantRpRetentionRangeInDays: 2
+  schedule:
+    scheduleRunFrequency: Daily
+    scheduleRunTimes: ["2020-05-14T00:00:00.000Z"]
+    schedulePolicyType: SimpleSchedulePolicy
+  retention:
+    dailySchedule:
+      retentionTimes: ["2020-05-14T00:00:00.000Z"]
+      retentionDuration:
+        count: 31
+        durationType: Days
+    monthlySchedule:
+      retentionScheduleFormatType: Weekly
+      retentionScheduleWeekly:
+        daysOfTheWeek: [Sunday]
+        weeksOfTheMonth: [First]
+      retentionTimes: ["2020-05-14T00:00:00.000Z"]
+      retentionDuration:
+        count: 12
+        durationType: Months
+    retentionPolicyType: LongTermRetentionPolicy
+
+- policyName: 7Years # 31 Daily, 12 Monthly, 7 Yearly
+  timeZone: UTC
+  instantRpRetentionRangeInDays: 2
+  schedule:
+    scheduleRunFrequency: Daily
+    scheduleRunDays:
+    scheduleRunTimes: ["2020-05-14T00:00:00.000Z"]
+    schedulePolicyType: SimpleSchedulePolicy
+  retention:
+    dailySchedule:
+      retentionTimes: ["2020-05-14T00:00:00.000Z"]
+      retentionDuration:
+        count: 31
+        durationType: Days
+    monthlySchedule:
+      retentionScheduleFormatType: Weekly
+      retentionScheduleWeekly:
+        daysOfTheWeek: [Sunday]
+        weeksOfTheMonth: [First]
+      retentionTimes: ["2020-05-14T00:00:00.000Z"]
+      retentionDuration:
+        count: 12
+        durationType: Months
+    yearlySchedule:
+      retentionScheduleFormatType: Weekly
+      monthsOfYear: [January]
+      retentionScheduleDaily:
+      retentionScheduleWeekly:
+        daysOfTheWeek: [Sunday]
+        weeksOfTheMonth: [First]
+      retentionTimes: ["2020-05-14T00:00:00.000Z"]
+      retentionDuration:
+        count: 7
+        durationType: Years
+    retentionPolicyType: LongTermRetentionPolicy

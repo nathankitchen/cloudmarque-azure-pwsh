@@ -1,0 +1,82 @@
+resourceGrouptag:
+location: East US
+
+applicationInstrumentationKey: #optional
+
+appServicePlans:
+  - name: serviceplan1
+    sku: S1
+    region: East US
+    webapps:
+      - name: Exampleapp1s
+        runTime: TOMCAT|9.0-jre8 # Only Linux supported
+        slots:
+          - Production
+          - Staging
+      - name: Exampleapp2
+        runTime: PHP|7.3
+        slots: # autoswap enabled
+          - Production
+          - Staging
+  - name: serviceplan2
+    sku: S1
+    region: West US
+    webapps:
+      - name: Exampleapp3
+        runTime: PHP|7.3
+        slots:
+          - Production
+          - Staging
+      - name: Exampleapp4
+        runTime: TOMCAT|9.0-jre8
+        slots:
+          - Production
+          - Staging
+
+apiManagementServices:
+  - name:
+    region:
+    organization:
+    adminEmail:
+    sku:
+
+frontDoor:
+  hostName: ExampleFrontdoor
+  sessionAffinity: # Optional - leave empty or false for disabled
+  webApplicationFirewallPolicy: # Optional - FirewallPolicy
+  customDomains:
+    - domainName:
+      customCertificateVaultName: # optional - leave empty for frontdoor certificate
+      customCertificateSecretName: # optional - leave empty for frontdoor certificate
+      webApplicationFirewallPolicy: # optional - provide Azure waf policy
+      sessionAffinity: # Optional - true / false - False is default
+  backEndPools:
+    - name: mainExampleBackend
+      apps:
+        - Exampleapp1
+        - Exampleapp3
+        - webapp1
+      healthCheckPath: # Optional : Default is index.html
+      backendHostHeader: false # Optional : default is true. Required for easy auth scenarios
+      protocol: Http # Optional : Default is Https
+    - name: APIExampleBackend
+      apps:
+        - Exampleapp2
+      healthCheckPath: /index.html
+  rules:
+    - name: Examplerule1
+      pattern:
+        - /* # Mandatory for atleast one routing rule
+        - /all
+      backEndPoolname: mainExampleBackend
+    - name: Examplerule2
+      pattern:
+        - /api
+      backEndPoolname: APIExampleBackend
+contentDeliveryNetwork:
+  name:
+  sku: # standard_microsoft
+  attachObjectName: # storageName or webAppName
+
+monitoring:
+  applicationInstrumentationKey:

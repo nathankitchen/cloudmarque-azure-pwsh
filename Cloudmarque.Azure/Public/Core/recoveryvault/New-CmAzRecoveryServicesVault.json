@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "RecoveryServicesVaults": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.RecoveryServices/vaults",
+            "apiVersion": "2016-06-01",
+            "name": "[parameters('RecoveryServicesVaults')[copyIndex('recoveryVaultCopy')].name]",
+            "location": "[parameters('RecoveryServicesVaults')[copyIndex('recoveryVaultCopy')].location]",
+            "tags": {
+                "cm.service": "core.recovery"
+            },
+            "properties": {
+            },
+            "sku": {
+                "tier": "[parameters('RecoveryServicesVaults')[copyIndex('recoveryVaultCopy')].backupLevel]",
+                "name": "RS0"
+            },
+            "copy": {
+                "name": "recoveryVaultCopy",
+                "count": "[length(parameters('RecoveryServicesVaults'))]"
+            }
+        }
+    ]
+}

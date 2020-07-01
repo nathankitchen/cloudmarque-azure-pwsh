@@ -1,0 +1,54 @@
+tokens:
+  organisation: tms
+  salt: Acme Widgets
+  project: web
+  architecture:
+    core: core
+    code: code
+    iaas: iaas
+    paas: paas
+    endpoints: end
+    security: sec
+  environments:
+    default: shr
+    development: dev
+    integration: int
+    test: tst
+    production: prd
+  resources:
+    vm: vm
+    network: net
+    resourcegroup: rg
+    cdnprofile: cdnp
+    endpoint: ep
+    storage: dsk
+    loganalytics: la
+    appinsights: ai
+    workspace: ws
+    eventhub: eh
+    actiongroup: ag
+    actiongroupreceiver: agrec
+    keyvault: kv
+    computerName: cn
+generator:
+ - name: default
+   split: "-"
+   case: lower
+   fallback: random
+   components:
+    - source: organisation
+    - source: project
+    - source: environment
+    - source: resource
+    - source:
+       - type: random
+         max: 10
+         min: 1
+         digits: true
+         characters: lower
+ - name: random
+   split: "-"
+   case: lower
+   fallback: random
+   components:
+    - source: random

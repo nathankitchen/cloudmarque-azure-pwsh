@@ -1,0 +1,18 @@
+resourceGroupName: recoveryServicesVaults
+location: East US
+recoveryServicesVaults:
+- name: bk01
+  backupLevel: Standard
+  location: East US
+- name: bk02
+  backupLevel: Standard
+  location: SouthCentral US
+- name: bk03
+  backupLevel: Standard
+  location: West US
+- name: bk04
+  backupLevel: Standard
+  location: SouthCentral US
+- name: bk05
+  backupLevel: Standard
+  location: West US

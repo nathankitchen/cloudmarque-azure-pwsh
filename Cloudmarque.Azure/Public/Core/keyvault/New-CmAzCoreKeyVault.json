@@ -1,0 +1,189 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "KeyVaults": {
+            "type": "Array"
+        },
+        "ObjectID": {
+            "type": "string"
+        },
+        "Workspace": {
+            "type": "object"
+        },
+        "ActionGroup": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "workspaceRetentionPolicy": {
+            "enabled": true,
+            "days": 30
+        }
+    },
+    "resources": [
+        {
+            "name": "[concat('KeyvaultTemplates', copyIndex('KeyVaultCopy'))]",
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "outer"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                    },
+                    "resources": [
+                        {
+                            "name": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].name]",
+                            "type": "Microsoft.KeyVault/Vaults",
+                            "apiVersion": "2016-10-01",
+                            "location": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].location]",
+                            "tags": {
+                                "displayName": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].name]",
+                                "cm.service": "core.security"
+                            },
+                            "properties": {
+                                "enabledForDeployment": true,
+                                "enabledForTemplateDeployment": true,
+                                "enabledForDiskEncryption": true,
+                                "tenantId": "[subscription().tenantId]",
+                                "accessPolicies": [
+                                    {
+                                        "tenantId": "[subscription().tenantId]",
+                                        "objectId": "[parameters('ObjectID')]",
+                                        "permissions": {
+                                            "keys": [
+                                                "encrypt",
+                                                "decrypt",
+                                                "wrapKey",
+                                                "unwrapKey",
+                                                "sign",
+                                                "verify",
+                                                "get",
+                                                "list",
+                                                "create",
+                                                "update",
+                                                "import",
+                                                "delete",
+                                                "backup",
+                                                "restore",
+                                                "recover"
+                                            ],
+                                            "secrets": [
+                                                "get",
+                                                "list",
+                                                "set",
+                                                "delete",
+                                                "backup",
+                                                "restore",
+                                                "recover"
+                                            ],
+                                            "certificates": [
+                                                "get",
+                                                "list",
+                                                "delete",
+                                                "create",
+                                                "import",
+                                                "update",
+                                                "backup",
+                                                "restore",
+                                                "managecontacts",
+                                                "getissuers",
+                                                "listissuers",
+                                                "setissuers",
+                                                "deleteissuers",
+                                                "manageissuers",
+                                                "recover"
+                                            ],
+                                            "storage": [
+                                                "get",
+                                                "list",
+                                                "delete",
+                                                "set",
+                                                "update",
+                                                "regeneratekey",
+                                                "setsas",
+                                                "listsas",
+                                                "getsas",
+                                                "deletesas"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "sku": {
+                                    "name": "standard",
+                                    "family": "A"
+                                },
+                                "enableSoftDelete": true,
+                                "softDeleteRetentionInDays": 90,
+                                "enablePurgeProtection": true
+                            }
+                        },
+                        {
+                            "type": "Microsoft.KeyVault/Vaults/Providers/DiagnosticSettings",
+                            "name": "[concat(parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name, '/Microsoft.Insights/Service')]",
+                            "apiVersion": "2016-09-01",
+                            "location": "[parameters('Keyvaults')[copyIndex('KeyVaultCopy')].location]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.KeyVault/Vaults/', parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name)]"
+                            ],
+                            "properties": {
+                                "workspaceId": "[resourceId(parameters('Workspace').resourceGroupName, 'Microsoft.OperationalInsights/Workspaces', parameters('Workspace').name)]",
+                                "logs": [
+                                    {
+                                        "category": "AuditEvent",
+                                        "enabled": true,
+                                        "retentionPolicy": "[variables('workspaceRetentionPolicy')]"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Insights/ActivityLogAlerts",
+                            "apiVersion": "2017-04-01",
+                            "name": "[concat(parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name, 'Admin')]",
+                            "location": "Global",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.KeyVault/Vaults', parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name)]"
+                            ],
+                            "properties": {
+                                "scopes": [
+                                    "[subscription().Id]"
+                                ],
+                                "condition": {
+                                    "allOf": [
+                                        {
+                                            "field": "category",
+                                            "equals": "Administrative"
+                                        },
+                                        {
+                                            "field": "resourceId",
+                                            "equals": "[resourceId('Microsoft.KeyVault/Vaults', parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name)]"
+                                        }
+                                    ]
+                                },
+                                "actions": {
+                                    "actionGroups": [
+                                        {
+                                            "actionGroupId": "[resourceId(parameters('ActionGroup').resourceGroupName, 'Microsoft.Insights/ActionGroups', parameters('ActionGroup').name)]",
+                                            "webhookProperties": {}
+                                        }
+                                    ]
+                                },
+                                "enabled": true
+                            }
+                        }
+                    ]
+                }
+            },
+            "copy": {
+                "name": "KeyVaultCopy",
+                "count": "[length(parameters('Keyvaults'))]"
+            }
+        }
+    ]
+}

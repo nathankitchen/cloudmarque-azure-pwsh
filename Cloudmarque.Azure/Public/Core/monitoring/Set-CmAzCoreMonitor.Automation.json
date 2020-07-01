@@ -1,0 +1,105 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AutomationAccountName": {
+            "type": "string"
+        },
+        "UpdateSchedules": {
+            "type": "array"
+        },
+        "WorkspaceName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('ScheduleTemplates', copyIndex('ScheduleCopy'))]",
+            "copy": {
+                "name": "ScheduleCopy",
+                "count": "[length(parameters('UpdateSchedules'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "outer"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Automation/automationAccounts/jobSchedules",
+                            "apiVersion": "2015-10-31",
+                            "name": "[concat(parameters('AutomationAccountName'), '/', Guid(concat(parameters('AutomationAccountName'), Guid(parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name))))]",
+                            "properties": {
+                                "runbook": {
+                                    "name": "Patch-MicrosoftOMSComputers"
+                                },
+                                "schedule": {
+                                    "name": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name]"
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Automation/automationAccounts/schedules",
+                            "apiVersion": "2015-10-31",
+                            "name": "[concat(parameters('AutomationAccountName'), '/', parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name)]",
+                            "properties": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details]"
+                        },
+                        {
+                            "type": "Microsoft.Automation/automationAccounts/softwareUpdateConfigurations",
+                            "apiVersion": "2017-05-15-preview",
+                            "name": "[concat(parameters('AutomationAccountName'), '/Windows Updates')]",
+                            "properties": {
+                                "updateConfiguration": {
+                                    "operatingSystem": "Windows",
+                                    "windows": {
+                                        "includedUpdateClassifications": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].updateTypes]",
+                                        "rebootSetting": "IfRequired"
+                                    },
+                                    "targets": {
+                                        "azureQueries": [
+                                            {
+                                                "scope": [
+                                                    "[concat(subscription().Id)]"
+                                                ],
+                                                "tagSettings": {
+                                                    "tags": {
+                                                        "cm.update": [
+                                                            "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].tagValue]"
+                                                        ]
+                                                    },
+                                                    "filterOperator": "Any"
+                                                },
+                                                "locations": [
+                                                    "[resourceGroup().location]"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "duration": "PT2H"
+                                },
+                                "tasks": {
+                                },
+                                "scheduleInfo": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details]"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.OperationalInsights/Workspaces/LinkedServices",
+            "apiVersion": "2020-03-01-preview",
+            "name": "[concat(parameters('WorkspaceName'), '/automation')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "resourceId": "[resourceId('Microsoft.Automation/automationAccounts', parameters('AutomationAccountName'))]",
+                "provisioningState": "Succeeded"
+            }
+        }
+    ]
+}

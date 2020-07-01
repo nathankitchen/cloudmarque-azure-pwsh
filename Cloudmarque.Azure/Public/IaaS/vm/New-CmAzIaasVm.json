@@ -1,0 +1,349 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VirtualMachines": {
+            "type": "Array"
+        },
+        "KeyVault": {
+            "type": "Object"
+        },
+        "LocalAdminUsername": {
+            "type": "SecureString"
+        },
+        "LocalAdminPassword": {
+            "type": "SecureString"
+        },
+        "WorkspaceId": {
+            "type": "String"
+        },
+        "AutomationAccount": {
+            "type": "Object"
+        }
+    },
+    "resources": [
+        {
+            "name": "[concat('VirtualMachineLevelTemplates', copyIndex('VirtualMachinesCopy'))]",
+            "type": "Microsoft.Resources/Deployments",
+            "resourceGroup": "[parameters('VirtualMachines')[copyIndex('VirtualMachinesCopy')].resourceGroupName]",
+            "apiVersion": "2019-10-01",
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "VM": {
+                        "value": "[parameters('VirtualMachines')[copyIndex('VirtualMachinesCopy')]]"
+                    },
+                    "KeyVault": {
+                        "value": "[parameters('KeyVault')]"
+                    },
+                    "LocalAdminUsername": {
+                        "value": "[parameters('LocalAdminUsername')]"
+                    },
+                    "LocalAdminPassword": {
+                        "value": "[parameters('LocalAdminPassword')]"
+                    },
+                    "WorkspaceId": {
+                        "value": "[parameters('WorkspaceId')]"
+                    },
+                    "AutomationAccount": {
+                        "value": "[parameters('AutomationAccount')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "VM": {
+                            "type": "Object"
+                        },
+                        "KeyVault": {
+                            "type": "Object"
+                        },
+                        "LocalAdminUsername": {
+                            "type": "SecureString"
+                        },
+                        "LocalAdminPassword": {
+                            "type": "SecureString"
+                        },
+                        "WorkspaceId": {
+                            "type": "String"
+                        },
+                        "AutomationAccount": {
+                            "type": "Object"
+                        }
+                    },
+                    "variables": {
+                        "privateIPAllocationMethod": "[if(empty(parameters('VM').networking.ipAddress), 'Dynamic', 'Static')]",
+                        "subnetId": "[concat(parameters('VM').networking.virtualNetworkId, '/subnets/', parameters('VM').networking.subnetName)]",
+                        "nicId": "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Network/networkInterfaces', parameters('VM').nicName)]",
+                        "initDataDisks": "InitDataDisks",
+                        "initDataDisksExtensionResourceId": "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('initDataDisks'))]",
+                        "isWindows": "[equals(toLower(parameters('VM').osDisk.osType), 'windows')]",
+                        "windowsDeploymentDetails": {
+                            "monitoringAgentExtentionType": "MicrosoftMonitoringAgent",
+                            "monitoringAgentExtensionTypeHandlerVersion": "1.0",
+                            "monitoringAgentExtensionName": "MMAExtension",
+                            "dependencyAgentExtensionType": "DependencyAgentWindows",
+                            "diskEncryptionExtensionType": "AzureDiskEncryption",
+                            "diskEncryptionExtensionTypeHandler": "2.2",
+                            "dscExtensionName": "Microsoft.Powershell.DSC",
+                            "dscExtensionPublisher": "Microsoft.Powershell",
+                            "dscExtensionType": "DSC",
+                            "dscExtensionTypeHandler": "2.77",
+                            "customScriptExtentionPublisher": "Microsoft.Compute",
+                            "customScriptExtentionType": "CustomScriptExtension",
+                            "customScriptExtentionTypeHandlerVersion": "1.7",
+                            "osProfile": {
+                                "computerName": "[parameters('VM').computerName]",
+                                "adminUsername": "[parameters('LocalAdminUsername')]",
+                                "adminPassword": "[parameters('LocalAdminPassword')]",
+                                "windowsConfiguration": {
+                                    "provisionVMAgent": true,
+                                    "enableAutomaticUpdates": true
+                                },
+                                "allowExtensionOperations": true
+                            },
+                            "dscSettings": {
+                                "ModulesUrl": "",
+                                "SasToken": "",
+                                "ConfigurationFunction": "",
+                                "Properties": [
+                                    {
+                                        "Name": "RegistrationKey",
+                                        "Value": {
+                                            "UserName": "empty",
+                                            "Password": "PrivateSettingsRef:registrationKeyPrivate"
+                                        },
+                                        "TypeName": "System.Management.Automation.PSCredential"
+                                    },
+                                    {
+                                        "Name": "RegistrationUrl",
+                                        "Value": "[parameters('AutomationAccount').registrationUrl]",
+                                        "TypeName": "System.String"
+                                    },
+                                    {
+                                        "Name": "NodeConfigurationName",
+                                        "Value": "[parameters('AutomationAccount').nodeConfigurationName]",
+                                        "TypeName": "System.String"
+                                    }
+                                ]
+                            },
+                            "dscProtectedSettings": {
+                                "Items": {
+                                    "registrationKeyPrivate": "[parameters('AutomationAccount').primaryKey]"
+                                }
+                            },
+                            "driveMountCommand": "powershell.exe -ExecutionPolicy Bypass -NoLogo -Command \"Get-Disk 
+                                | Where-Object PartitionStyle -eq 'RAW' 
+                                | Initialize-Disk -PartitionStyle MBR -PassThru 
+                                | New-Partition -AssignDriveLetter -UseMaximumSize 
+                                | Format-Volume -FileSystem NTFS -Confirm:$false\""
+                        },
+                        "linuxDeploymentDetails": {
+                            "monitoringAgentExtentionType": "OmsAgentForLinux",
+                            "monitoringAgentExtensionTypeHandlerVersion": "1.4",
+                            "monitoringAgentExtensionName": "OMSExtension",
+                            "dependencyAgentExtensionType": "DependencyAgentLinux",
+                            "diskEncryptionExtensionType": "AzureDiskEncryptionForLinux",
+                            "diskEncryptionExtensionTypeHandler": "1.1",
+                            "dscExtensionName": "enabledsc",
+                            "dscExtensionPublisher": "Microsoft.OSTCExtensions",
+                            "dscExtensionType": "DSCForLinux",
+                            "dscExtensionTypeHandler": "2.0",
+                            "customScriptExtentionPublisher": "Microsoft.Azure.Extensions",
+                            "customScriptExtentionType": "CustomScript",
+                            "customScriptExtentionTypeHandlerVersion": "2.1",
+                            "osProfile": {
+                                "computerName": "[parameters('VM').computerName]",
+                                "adminUsername": "[parameters('LocalAdminUsername')]",
+                                "adminPassword": "[parameters('LocalAdminPassword')]",
+                                "linuxConfiguration": {
+                                    "provisionVMAgent": true
+                                },
+                                "allowExtensionOperations": true
+                            },
+                            "dscSettings": {
+                                "ExtensionAction": "Register",
+                                "NodeConfigurationName": "[parameters('AutomationAccount').nodeConfigurationName]"
+                            },
+                            "dscProtectedSettings": {
+                                "RegistrationUrl": "[parameters('AutomationAccount').registrationUrl]",
+                                "RegistrationKey": "[parameters('AutomationAccount').primaryKey]"
+                            },
+                            "driveMountCommand": "UUID0='$(blkid -s UUID -o value /dev/disk/azure/scsi1/lun0)'
+                                                  mkdir /data0
+                                                  echo 'UUID=$UUID0 /data0 ext4 defaults,nofail 0 0' >>/etc/fstab
+                                                  mount -a"
+                        },
+                        "deploymentDetails": "[if(variables('isWindows'), variables('windowsDeploymentDetails'), variables('linuxDeploymentDetails'))]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "apiVersion": "2019-12-01",
+                            "name": "[parameters('VM').nicName]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "[concat(parameters('VM').fullName,'_IP-Config')]",
+                                        "properties": {
+                                            "privateIPAddress": "[parameters('VM').networking.ipAddress]",
+                                            "privateIPAllocationMethod": "[variables('privateIPAllocationMethod')]",
+                                            "subnet": {
+                                                "id": "[variables('subnetId')]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "apiVersion": "2019-12-01",
+                            "name": "[parameters('VM').fullName]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[parameters('VM').nicName]"
+                            ],
+                            "properties": {
+                                "hardwareProfile": {
+                                    "VMSize": "[parameters('VM').size]"
+                                },
+                                "storageProfile": {
+                                    "imageReference": {
+                                        "publisher": "[parameters('VM').imageReference.publisher]",
+                                        "version": "[parameters('VM').imageReference.version]",
+                                        "offer": "[parameters('VM').imageReference.offer]",
+                                        "sku": "[parameters('VM').imageReference.sku]"
+                                    },
+                                    "osDisk": {
+                                        "osType": "[parameters('VM').osDisk.osType]",
+                                        "name": "[parameters('VM').osDisk.name]",
+                                        "createOption": "FromImage",
+                                        "diskSizeGB": "[parameters('VM').osDisk.diskSizeGB]"
+                                    },
+                                    "dataDisks": "[parameters('VM').dataDisks]"
+                                },
+                                "osProfile": "[variables('deploymentDetails').osProfile]",
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[variables('nicId')]"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "apiVersion": "2019-12-01",
+                            "name": "[concat(parameters('VM').fullName, '/', variables('initDataDisks'))]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[parameters('VM').fullName]"
+                            ],
+                            "properties": {
+                                "publisher": "[variables('deploymentDetails').customScriptExtentionPublisher]",
+                                "type": "[variables('deploymentDetails').customScriptExtentionType]",
+                                "typeHandlerVersion": "[variables('deploymentDetails').customScriptExtentionTypeHandlerVersion]",
+                                "autoUpgradeMinorVersion": true,
+                                "settings": {
+                                    "commandToExecute": "[variables('deploymentDetails').driveMountCommand]"
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "apiVersion": "2017-12-01",
+                            "name": "[concat(parameters('VM').fullName, '/', variables('deploymentDetails').dependencyAgentExtensionType)]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[variables('initDataDisksExtensionResourceId')]"
+                            ],
+                            "properties": {
+                                "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                                "type": "[variables('deploymentDetails').dependencyAgentExtensionType]",
+                                "typeHandlerVersion": "9.5",
+                                "autoUpgradeMinorVersion": true
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "apiVersion": "2017-12-01",
+                            "name": "[concat(parameters('VM').fullName, '/', variables('deploymentDetails').monitoringAgentExtensionName)]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[variables('initDataDisksExtensionResourceId')]"
+                            ],
+                            "properties": {
+                                "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                                "type": "[variables('deploymentDetails').monitoringAgentExtentionType]",
+                                "typeHandlerVersion": "[variables('deploymentDetails').monitoringAgentExtensionTypeHandlerVersion]",
+                                "autoUpgradeMinorVersion": true,
+                                "settings": {
+                                    "workspaceId": "[reference(parameters('WorkspaceId'), '2015-03-20').customerId]",
+                                    "stopOnMultipleConnections": true
+                                },
+                                "protectedSettings": {
+                                    "workspaceKey": "[listKeys(parameters('WorkspaceId'), '2015-03-20').primarySharedKey]"
+                                }
+                            }
+                        },
+                        {
+                            "condition": "[variables('isWindows')]",
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "name": "[concat(parameters('VM').fullName, '/', variables('deploymentDetails').dscExtensionName)]",
+                            "apiVersion": "2018-06-01",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[variables('initDataDisksExtensionResourceId')]"
+                            ],
+                            "properties": {
+                                "publisher": "[variables('deploymentDetails').dscExtensionPublisher]",
+                                "type": "[variables('deploymentDetails').dscExtensionType]",
+                                "typeHandlerVersion": "[variables('deploymentDetails').dscExtensionTypeHandler]",
+                                "autoUpgradeMinorVersion": true,
+                                "protectedSettings": "[variables('deploymentDetails').dscProtectedSettings]",
+                                "settings": "[variables('deploymentDetails').dscSettings]"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "name": "[concat(parameters('VM').fullName, '/DiskEncryption')]",
+                            "apiVersion": "2019-03-01",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dependencyAgentExtensionType)]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').monitoringAgentExtensionName)]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dscExtensionName)]"
+                            ],
+                            "properties": {
+                                "publisher": "Microsoft.Azure.Security",
+                                "type": "[variables('deploymentDetails').diskEncryptionExtensionType]",
+                                "typeHandlerVersion": "[variables('deploymentDetails').diskEncryptionExtensionTypeHandler]",
+                                "autoUpgradeMinorVersion": true,
+                                "settings": {
+                                    "EncryptionOperation": "EnableEncryption",
+                                    "KeyVaultURL": "[parameters('KeyVault').vaultUri]",
+                                    "KeyEncryptionAlgorithm": "RSA-OAEP",
+                                    "VolumeType": "All",
+                                    "KeyEncryptionKeyURL": "[parameters('KeyVault').keyEncryptionKeyUrl]",
+                                    "KeyVaultResourceId": "[parameters('KeyVault').resourceId]",
+                                    "KekVaultResourceId": "[parameters('KeyVault').resourceId]"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "copy": {
+                "name": "VirtualMachinesCopy",
+                "count": "[Length(parameters('VirtualMachines'))]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+location: UK South
+enableUkNhs: false 
+securityContacts:
+  primary:
+    email:                  # First set of contact details can have an email and phone set.
+    phone: 
+  additionalEmails: []

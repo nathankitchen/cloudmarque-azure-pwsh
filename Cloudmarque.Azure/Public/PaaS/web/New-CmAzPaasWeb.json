@@ -1,0 +1,144 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webAppName": {
+            "defaultValue": "AzureGoodApp",
+            "minLength": 2,
+            "type": "String",
+            "metadata": {
+                "description": "Base name of the resource such as web app name and app service plan "
+            }
+        },
+        "sku": {
+            "defaultValue": "F1",
+            "allowedValues": [
+                "F1",
+                "D1",
+                "B1",
+                "B2",
+                "B3",
+                "S1",
+                "S2",
+                "S3",
+                "P1",
+                "P2",
+                "P3",
+                "P4"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "The SKU of App Service Plan "
+            }
+        },
+        "linuxFxVersion": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "The Runtime stack of current web app"
+            }
+        },
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "kind": {
+            "defaultValue": "linux",
+            "allowedValues": [
+                "app",
+                "linux"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "OS type."
+            }
+        },
+        "stagingSlotName": {
+            "defaultValue": [
+                "production"
+            ],
+            "type": "Array"
+        },
+        "appServicePlanName": {
+            "type": "string"
+        },
+        "appInstrumatationKey": {
+            "defaultValue": "",
+            "type": "string"
+        }
+    },
+    "variables": {
+        "webAppPortalName": "[parameters('webAppName')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('appServicePlanName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('sku')]"
+            },
+            "kind": "[parameters('kind')]",
+            "properties": {
+                "reserved": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2019-08-01",
+            "name": "[variables('webAppPortalName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+            ],
+            "kind": "app",
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+                "siteConfig": {
+                    "linuxFxVersion": "[parameters('linuxFxVersion')]",
+                    "appSettings": [
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[if(equals(parameters('appInstrumatationKey'), 'none'), json('null'), array(parameters('appInstrumatationKey')))]"
+                        },
+                        {
+                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                            "value": "[if(equals(parameters('appInstrumatationKey'), 'none'), json('null'), concat('InstrumentationKey=', parameters('appInstrumatationKey')))]"
+                        },
+                        {
+                            "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                            "value": "[if(equals(parameters('appInstrumatationKey'), 'none'), json('null'), '~2')]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots",
+            "apiVersion": "2019-08-01",
+            "name": "[concat(variables('webAppPortalName'), '/', parameters('stagingSlotName')[copyIndex()])]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/Sites', variables('webAppPortalName'))]"
+            ],
+            "tags": {
+                "displayName": "webAppSlots"
+            },
+            "properties": {
+                "siteConfig": {
+                    "autoSwapSlotName": "[if(equals(parameters('stagingSlotName')[copyIndex()], parameters('stagingSlotName')[0]), json('null'), parameters('stagingSlotName')[0])]"
+                }
+            },
+            "resources": [],
+            "copy": {
+                "name": "StagingSlotCopy",
+                "count": "[length(parameters('stagingSlotName'))]",
+                "mode": "Parallel"
+            }
+        }
+    ]
+}

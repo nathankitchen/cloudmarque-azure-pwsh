@@ -1,0 +1,65 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "customerGroupId": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the tenant id of the Managed Service Provider"
+            }
+        }      
+    },
+    "variables": {
+        "mspName": "Trustmarque Solutions Ltd",
+        "managedByTenantId": "aa315405-b49f-4a6c-b54c-7fa4b20db80b",    // This is Trustmarque's Azure AD tenant ID
+        "mspRegistrationName": "[guid(variables('mspName'))]",
+        "mspAssignmentName": "[guid(variables('mspName'))]",
+        "mspOfferDescription": "Trustmarque Azure Managed Services",
+        "mspAuthorisations": [
+            {
+                "principalId": "8cd1d42a-3b9e-49bd-bc66-327ba4ff3323",
+                "principalIdDisplayName": "Trustmarque Managed Services Triage",
+                "roleDefinitionId": "acdd72a7-3385-48ef-bd42-f606fba81ae7"
+            },
+            {
+                "principalId": "[parameters('customerGroupId')]",
+                "principalIdDisplayName": "Trustmarque Managed Services Agents",
+                "roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c"
+            }
+        ]
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ManagedServices/registrationDefinitions",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('mspRegistrationName')]",
+            "properties": {
+                "registrationDefinitionName": "[variables('mspName')]",
+                "description": "[variables('mspOfferDescription')]",
+                "managedByTenantId": "[variables('managedByTenantId')]",
+                "authorizations": "[variables('mspAuthorisations')]"
+            }
+        },
+        {
+            "type": "Microsoft.ManagedServices/registrationAssignments",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('mspAssignmentName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedServices/registrationDefinitions/', variables('mspRegistrationName'))]"
+            ],
+            "properties": {
+                "registrationDefinitionId": "[resourceId('Microsoft.ManagedServices/registrationDefinitions/', variables('mspRegistrationName'))]"
+            }
+        }
+    ],
+    "outputs": {
+        "mspName": {
+            "type": "string",
+            "value": "[concat('Managed by', ' ', variables('mspName'))]"
+        },
+        "authorizations": {
+            "type": "array",
+            "value": "[variables('mspAuthorisations')]"
+        }
+    }
+}

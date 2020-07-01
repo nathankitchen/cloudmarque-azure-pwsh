@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VaultName": {
+            "type": "String"
+        },
+        "Policies": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.RecoveryServices/Vaults/BackupPolicies",
+            "apiVersion": "2016-06-01",
+            "name": "[concat(parameters('VaultName'), '/', parameters('Policies')[copyIndex('PolicyCopy')].policyName)]",
+            "properties": {
+                "backupManagementType": "AzureIaasVM",
+                "schedulePolicy": "[parameters('Policies')[copyIndex('PolicyCopy')].schedule]",
+                "retentionPolicy": "[parameters('Policies')[copyIndex('PolicyCopy')].retention]",
+                "timeZone": "[parameters('Policies')[copyIndex('PolicyCopy')].timeZone]",
+                "instantRpRetentionRangeInDays": "[parameters('Policies')[copyIndex('PolicyCopy')].instantRpRetentionRangeInDays]"
+            },
+            "Copy": {
+                "name": "PolicyCopy",
+                "Count": "[length(parameters('policies'))]"
+            }
+        }
+    ]
+}

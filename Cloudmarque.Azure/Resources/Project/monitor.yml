@@ -1,0 +1,63 @@
+name: testKeyvaultDeploy15
+location: UK South
+advisorLowCPUThresholdPercentage: 5     # Can be set to 0, 5, 10, 15 or 20
+actionGroups:
+- name: test
+  shortname: test   
+  armRoles:                    
+  emails: 
+  functions:
+  itsm:
+  logicApps:
+  notifications:
+  runbooks:
+  sms:
+  voice:
+  webhooks:
+
+# ** EXAMPLE ACTION GROUP **
+# - name: namevalue
+#   shortname :                         Has to be less than 12 characters, used for sms and emails
+
+# ** EXAMPLE RECEIVERS THAT CAN BE ADDED TO A ACTION GROUP **
+# armRoles:
+# - roleId:
+
+# emails:
+# - emailAddress:
+
+# functions:
+# - functionAppResourceId:
+#   httpTriggerUrl:                     The url used to trigger the function through http requests
+#   functionName:
+
+# itsm:
+# - connectionId:                       Unique id of ITSM connection in workspace
+#   ticketConfiguration:                JSON specifying the ITSM action configuration
+#   workspaceId:                        Log analytics workspace
+#   region:                             Central India, Japan East, South East Asia, Australia South East, UK South, West Central US, Canada Central, East US, West Europe
+
+# logicApps:
+# - resourceId:
+#   callbackUrl:                        Callback url used to trigger the logic app through http requests
+
+# notifications:
+# - emailAddress: 
+
+# runbooks:
+# - automationAccountId:                
+#   runbookName:
+#   serviceUri:                         Webhook service uri
+#   webhookResourceId:                  
+#   isGlobalRunbook:
+
+# sms:
+# - phoneNumber:
+#   countryCode:
+
+# voice: 
+# - phoneNumber:
+#   countryCode:
+
+# webhooks:
+#   serviceUri:

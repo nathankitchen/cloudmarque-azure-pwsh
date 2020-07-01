@@ -1,0 +1,34 @@
+name: my net
+addressSpace: 10.0.0.0/27
+subnets:
+  - name: net1
+    addressSpace: 10.1.0.0/27
+    udrs: default
+    nsg: some-nsg
+  - name: net2
+    addressSpace: 10.2.0.0/27
+    udrs: proxy
+    nsg: some-nsg
+
+udrs:
+  - name: default
+    csv: source.csv
+  - name: proxy
+    csv: source.csv
+
+nsgs:
+  - name: some-nsg
+    rulesets:
+      - general
+      - group2
+
+#application groups?
+rulesets:
+  - name: general
+    source: some.csv
+  - name: group2
+    source: g2.csv
+
+New-CmAzIaasNetworking -InputFile networking.yml
+
+New-CmAzIaasCompute -InputFile vm.yml

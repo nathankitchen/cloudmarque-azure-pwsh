@@ -1,0 +1,1 @@
+resourceGroupName,nsgName,ruleName,priority,direction,sourceIp,sourcePort,destinationIp,destinationPort,protocol,Access,Description

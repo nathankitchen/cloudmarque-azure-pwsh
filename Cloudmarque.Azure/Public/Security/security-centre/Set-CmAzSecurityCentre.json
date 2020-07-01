@@ -1,0 +1,130 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AssignUkNhs": {
+            "type": "bool"
+        },
+        "InitiativeLocation": {
+            "type": "string"
+        },
+        "SecurityContacts": {
+            "type": "object",
+            "metadata": {
+                "comments": "Workaround used for security contacts deployment, the first contact resource allows 'phone' and 'email' properties,
+                             but any additional contacts only allow 'email'"
+            }
+        },
+        "Workspace": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "dataExportNames": [
+            "MCAS",
+            "WDATP"
+        ],
+        "securityResources": [
+            "VirtualMachines",
+            "AppServices",
+            "SqlServers",
+            "SqlServerVirtualMachines",
+            "StorageAccounts",
+            "KubernetesService",
+            "ContainerRegistry",
+            "KeyVaults"
+        ],
+        "ukNHS": "UK and NHS",
+        "assignedBy": "Cloudmarque"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Security/securityContacts",
+            "apiVersion": "2017-08-01-preview",
+            "name": "default1",
+            "properties": {
+                "email": "[parameters('SecurityContacts').primary.email]",
+                "phone": "[parameters('SecurityContacts').primary.phone]",
+                "alertNotifications": "On",
+                "alertsToAdmins": "On"
+            }
+        },
+        {
+            "type": "Microsoft.Security/securityContacts",
+            "apiVersion": "2017-08-01-preview",
+            "name": "[concat('default', add(copyIndex('SecurityContactsCopy'), 2))]",
+            "properties": {
+                "email": "[parameters('SecurityContacts').additionalEmails[copyIndex('SecurityContactsCopy')]]",
+                "alertNotifications": "On",
+                "alertsToAdmins": "On"
+            },
+            "copy": {
+                "name": "SecurityContactsCopy",
+                "count": "[length(parameters('SecurityContacts').additionalEmails)]"
+            }
+        },
+        {
+            "type": "Microsoft.Security/pricings",
+            "apiVersion": "2018-06-01",
+            "name": "[variables('securityResources')[copyIndex('SecurityResourcesCopy')]]",
+            "properties": {
+                "pricingTier": "Standard"
+            },
+            "copy": {
+                "name": "SecurityResourcesCopy",
+                "count": "[length(variables('securityResources'))]",
+                "mode": "serial"
+            }
+        },
+        {
+            "type": "Microsoft.Security/autoProvisioningSettings",
+            "name": "default",
+            "apiVersion": "2017-08-01-preview",
+            "properties": {
+                "autoProvision": "On"
+            }
+        },
+        {
+            "type": "Microsoft.Security/workspaceSettings",
+            "apiVersion": "2017-08-01-preview",
+            "name": "default",
+            "properties": {
+                "scope": "[subscription().id]",
+                "workspaceId": "[concat(subscription().id,'/resourceGroups/', parameters('Workspace').ResourceGroupName, '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace').Name)]"
+            }
+        },
+        {
+            "type": "Microsoft.Security/settings",
+            "apiVersion": "2019-01-01",
+            "name": "[variables('dataExportNames')[copyIndex('DataExportCopy')]]",
+            "kind": "DataExportSettings",
+            "properties": {
+                "enabled": true
+            },
+            "copy": {
+                "name": "DataExportCopy",
+                "count": "[length(variables('dataExportNames'))]"
+            }
+        },
+        {
+            "condition": "[parameters('AssignUkNhs')]",
+            "type": "Microsoft.Authorization/policyAssignments",
+            "name": "[variables('ukNHS')]",
+            "apiVersion": "2019-09-01",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "metadata": {
+                "assignedBy": "[variables('assignedBy')]",
+                "category": "Regulatory Compliance"
+            },
+            "location": "[parameters('InitiativeLocation')]",
+            "properties": {
+                "displayName": "[variables('ukNHS')]",
+                "scope": "[subscription().id]",
+                "enforcementMode": "Default",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/3937f550-eedd-4639-9c5e-294358be442e"
+            }
+        }
+    ]
+}

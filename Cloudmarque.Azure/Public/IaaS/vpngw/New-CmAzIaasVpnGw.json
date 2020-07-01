@@ -1,0 +1,150 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String",
+            "metadata": {
+                "description": "location"
+            }
+        },
+        "vpnGwObject": {
+            "type": "Object",
+            "metadata": {
+                "description": "vpn object to with all required parameters"
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayName, '-', copyIndex('vpnGatewayCopy'), '-', uniqueString(resourceGroup().id))]",
+            "copy": {
+                "name": "vpnGatewayCopy",
+                "count": "[length(parameters('vpnGwObject').vpnGw)]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "outer"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                    },
+                    "resources": [
+                        {
+                            "condition": "[not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewaySubnetPrefix))]",
+                            "type": "Microsoft.Network/virtualNetworks/subnets",
+                            "apiVersion": "2019-04-01",
+                            "name": "[concat(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].virtualNetworkName, '/', 'GatewaySubnet')]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "addressPrefix": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewaySubnetPrefix]"
+                            }
+                        },
+                        {
+                            "apiVersion": "2019-04-01",
+                            "type": "Microsoft.Network/publicIPAddresses",
+                            "name": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayPublicIPName]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "publicIPAllocationMethod": "Dynamic"
+                            }
+                        },
+                        {
+                            "apiVersion": "2019-04-01",
+                            "type": "Microsoft.Network/virtualNetworkGateways",
+                            "name": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayName]",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[concat('Microsoft.Network/publicIPAddresses/', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayPublicIPName)]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "properties": {
+                                            "privateIPAllocationMethod": "Dynamic",
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].virtualNetworkName, 'GatewaySubnet')]"
+                                            },
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayPublicIPName)]"
+                                            }
+                                        },
+                                        "name": "vnetGatewayConfig"
+                                    }
+                                ],
+                                "sku": {
+                                    "name": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].sku]",
+                                    "tier": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].sku]"
+                                },
+                                "gatewayType": "Vpn",
+                                "vpnType": "RouteBased",
+                                "enableBgp": false,
+                                "vpnClientConfiguration": {
+                                    "vpnClientAddressPool": {
+                                        "addressPrefixes": [
+                                            "[if(and(not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.vpnAddressPool)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.rootCertificateName)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.clientRootCertData))), parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.vpnAddressPool, json('null'))]"
+                                        ]
+                                    },
+                                    "vpnClientRootCertificates": [
+                                        {
+                                            "name": "[if(and(not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.vpnAddressPool)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.rootCertificateName)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.clientRootCertData))), parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.rootCertificateName, json('null'))]",
+                                            "properties": {
+                                                "publicCertData": "[if(and(not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.vpnAddressPool)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.rootCertificateName)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.clientRootCertData))),  parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].p2s.clientRootCertData, json('null'))]"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "apiVersion": "2019-04-01",
+                            "condition": "[and(not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].s2s.cidrBlocks)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].s2s.clientSitePublicIP)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].s2s.sharedKey[0])))]",
+                            "type": "Microsoft.Network/localNetworkGateways",
+                            "name": "[concat('localGateway-', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayName)]",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "localNetworkAddressSpace": {
+                                    "addressPrefixes": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].s2s.cidrBlocks]"
+                                },
+                                "gatewayIpAddress": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].s2s.clientSitePublicIP]"
+                            }
+                        },
+                        {
+                            "apiVersion": "2019-04-01",
+                            "condition": "[and(not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].s2s.cidrBlocks)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].s2s.clientSitePublicIP)),not(empty(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].s2s.sharedKey[0])))]",
+                            "name": "[concat('localGateway', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayName)]",
+                            "type": "Microsoft.Network/connections",
+                            "location": "[parameters('location')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayName)]",
+                                "[resourceId('Microsoft.Network/localNetworkGateways', concat('localGateway', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayName))]"
+                            ],
+                            "properties": {
+                                "virtualNetworkGateway1": {
+                                    "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayName)]"
+                                },
+                                "localNetworkGateway2": {
+                                    "id": "[resourceId('Microsoft.Network/localNetworkGateways', concat('localGateway', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].gatewayName))]"
+                                },
+                                "connectionType": "IPsec",
+                                "routingWeight": 10,
+                                "sharedKey": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].s2s.sharedKey[0]]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+
+    }
+}

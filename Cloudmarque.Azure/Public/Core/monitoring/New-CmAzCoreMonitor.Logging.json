@@ -1,0 +1,199 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AppInsightsName": {
+            "type": "string"
+        },
+        "Solutions": {
+            "type": "array",
+            "defaultValue": [
+                {
+                    "planName": "KeyVaultAnalytics",
+                    "type": "KeyVaultAnalytics"
+                },
+                {
+                    "planName": "AzureActivity",
+                    "type": "AzureActivity"
+                },
+                {
+                    "planName": "AgentHealthAssessment",
+                    "type": "AgentHealthAssessment"
+                },
+                {
+                    "planName": "Updates",
+                    "type": "Updates"
+                },
+                {
+                    "planName": "VMInsights",
+                    "type": "VMInsights"
+                },
+                {
+                    "planName": "ServiceMap",
+                    "type": "ServiceMap"
+                }
+            ]
+        },
+        "StorageAccountName": {
+            "type": "string"
+        },
+        "WorkspaceName": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "storageServicesSuffix": "default",
+        "blobContainerNames": [
+            "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'), '/insights-logs-addonazurebackuppolicy')]",
+            "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'), '/insights-logs-azurebackupreport')]",
+            "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'), '/insights-logs-coreazurebackup')]",
+            "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'), '/insights-logs-networksecuritygroupflowevent')]"
+        ]
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2014-04-01",
+            "name": "[parameters('AppInsightsName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "cm.role": "core.appinsights."
+            },
+            "properties": {
+                "ApplicationId": "[parameters('AppInsightsName')]"
+            }
+        },
+        {
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "apiVersion": "2015-11-01-preview",
+            "name": "[parameters('workspaceName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "cm-service": "core.logging.loganalytics"
+            },
+            "properties": {
+                "sku": {
+                    "name": "pergb2018"
+                },
+                "retentionInDays": 90,
+                "features": {
+                    "searchVersion": 1,
+                    "legacy": 0,
+                    "enableLogAccessUsingOnlyResourcePermissions": true
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('workspaceName'), '/', subscription().subscriptionId)]",
+            "type": "Microsoft.OperationalInsights/workspaces/dataSources",
+            "apiVersion": "2015-11-01-preview",
+            "tags": {
+            },
+            "properties": {
+                "linkedResourceId": "[concat(subscription().Id, '/providers/Microsoft.Insights/eventTypes/management')]"
+            },
+            "kind": "AzureActivityLog",
+            "dependsOn": [
+                "[parameters('workspaceName')]"
+            ]
+        },
+        {
+            "apiVersion": "2015-11-01-preview",
+            "type": "Microsoft.OperationsManagement/Solutions",
+            "location": "[resourceGroup().location]",
+            "name": "[concat(parameters('Solutions')[copyIndex('SolutionsCopy')].type, '(', parameters('workspaceName'), ')')]",
+            "id": "[resourceId('microsoft.operationsManagement/Solutions', concat(parameters('Solutions')[copyIndex('SolutionsCopy')].type, '(', parameters('workspaceName'), ')'))]",
+            "properties": {
+                "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+            },
+            "dependsOn": [
+                "[parameters('workspaceName')]"
+            ],
+            "plan": {
+                "name": "[concat(parameters('Solutions')[copyIndex('SolutionsCopy')].type, '(', parameters('workspaceName'), ')')]",
+                "product": "[concat('OMSGallery/', parameters('Solutions')[copyIndex('SolutionsCopy')].type)]",
+                "promotionCode": "",
+                "publisher": "Microsoft"
+            },
+            "copy": {
+                "name": "SolutionsCopy",
+                "count": "[length(parameters('Solutions'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2018-07-01",
+            "name": "[parameters('StorageAccountName')]",
+            "location": "[resourceGroup().location]",
+            "kind": "StorageV2",
+            "tags": {
+                "cm.role": "core.storage"
+            },
+            "properties": {
+                "accessTier": "Hot",
+                "supportsHttpsTrafficOnly": true,
+                "largeFileSharesState": "disabled"
+            },
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "Resources": [
+                {
+                    "type": "Microsoft.Storage/storageAccounts/blobServices",
+                    "apiVersion": "2019-06-01",
+                    "name": "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'))]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]"
+                    ],
+                    "sku": {
+                        "name": "Standard_LRS",
+                        "tier": "Standard"
+                    },
+                    "properties": {
+                        "cors": {
+                            "corsRules": [
+                            ]
+                        },
+                        "deleteRetentionPolicy": {
+                            "enabled": false
+                        }
+                    }
+                },
+                {
+                    "type": "Microsoft.Storage/storageAccounts/fileServices",
+                    "apiVersion": "2019-06-01",
+                    "name": "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'))]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]"
+                    ],
+                    "sku": {
+                        "name": "Standard_LRS",
+                        "tier": "Standard"
+                    },
+                    "properties": {
+                        "cors": {
+                            "corsRules": [
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('blobContainerNames')[copyIndex('BlobContainerCopy')]]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('StorageAccountName'), variables('storageServicesSuffix'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            },
+            "copy": {
+                "name": "BlobContainerCopy",
+                "count": "[length(variables('blobContainerNames'))]"
+            }
+        }
+    ]
+}

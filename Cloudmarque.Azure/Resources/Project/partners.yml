@@ -1,0 +1,12 @@
+partners:
+- name: Acme Solutions Limited
+  tenantId: ffffffff-ffff-ffff-ffff-ffffffffffff
+  services:
+  - name: Azure Managed Services
+    assignments:
+    - name: Acme Readers
+      principalId: ffffffff-ffff-ffff-ffff-ffffffffffff
+      role: Reader
+    - name: Acme Contributors
+      principalId: ffffffff-ffff-ffff-ffff-ffffffffffff
+      role: Contributor

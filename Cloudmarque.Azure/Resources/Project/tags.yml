@@ -1,0 +1,10 @@
+resourceIds: []                         #Leave blank to apply tags to all resource in resourcegroup.
+resourceGroupName:                      #Leave blank if specific resource ids are provided
+tags:
+  mandatory:
+    cm-owner: s                         #owner name
+    cm-charge: s                        #cost code
+    cm-apps:  s                         #type
+    cm-delete: s                        #delete after days
+  custom:
+    customtag: s

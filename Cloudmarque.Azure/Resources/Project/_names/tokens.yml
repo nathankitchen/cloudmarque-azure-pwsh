@@ -1,0 +1,16 @@
+organisation: tms
+salt: Acme Widgets
+project: web
+architecture:
+  core: core
+  code: code
+  iaas: iaas
+  paas: paas
+  endpoints: end
+  security: sec
+environments:
+  default: shr
+  development: dev
+  integration: int
+  test: tst
+  production: prd

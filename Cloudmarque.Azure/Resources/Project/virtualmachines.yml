@@ -1,0 +1,29 @@
+location: UK South
+desiredConfigName: 
+automationAccountTag: 
+keyVault:
+  tag: core.security                                    # Optional, providing a keyvault will encrypt all vm disks
+  diskEncryptionKey:
+groups:
+  - name:                                               # Leave blank to have the vm collection provision its own resource group
+    virtualMachines:
+      - name: 
+        size: Standard_B2ms                         
+        imageReference:
+          publisher: Canonical
+          offer: UbuntuServer
+          sku: 18.04-LTS
+          version: latest
+        osDisk:
+          osType: Linux
+          diskSizeGB: 30       
+        dataDiskSizes: [10]                             # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          ipAddress:                                    # Leave blank for dynamic ip allocations
+          subnetName: default                           # Subnet belonging to the virtual network
+          virtualNetworkTag: test.default
+          
+  #NOTE: To allow disk encryption for Linux, you need to have at least 8gb of ram available and the vm needs to be generation 1.
+  #NOTE: Supported Linux distros for disk encryption are listed here https://docs.microsoft.com/en-us/azure/virtual-machines/linux/disk-encryption-overview#supported-vms-and-operating-systems        
+  #NOTE: Supported Linux Distros for DSC are listed here https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/dsc-linux
+  #NOTE: The DSC extension for Linux and the Azure Monitor virtual machine extension for Linux currently present a conflict and aren't supported in a side-by-side configuration. Don't use the two solutions together on the same VM.

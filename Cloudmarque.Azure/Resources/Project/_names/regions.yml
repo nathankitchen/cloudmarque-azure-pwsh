@@ -1,0 +1,16 @@
+regions:
+- name: EU North
+  aliases: ["test"]
+  shortname: eun
+- name: EU West
+  shortname: euw
+- name: UK South
+  shortname: uks
+- name: UK West
+  shortname: ukw
+- name: East US
+  shortname: eus
+- name: SouthCentral US
+  shortname: sus
+- name: West US
+  shortname: wus

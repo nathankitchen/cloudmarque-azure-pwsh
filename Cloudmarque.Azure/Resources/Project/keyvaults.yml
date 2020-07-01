@@ -1,0 +1,6 @@
+resourceGroupName: keyvaults
+location: UK South
+keyVaults:
+- name: test
+  type: Core
+  location: UK South
