@@ -22,9 +22,11 @@
 
 			if ($filecontent -eq "False" -or !$filecontent) {
 				Remove-Item $PROFILE.CurrentUserCurrentHost
+				Write-Verbose "Remove profile"
 			}
 			else {
 				$filecontent | Out-File $PROFILE.CurrentUserCurrentHost
+				Write-Verbose "Reset profile"
 			}
 		}
 		if ($global:CMAZ_CTX) {
