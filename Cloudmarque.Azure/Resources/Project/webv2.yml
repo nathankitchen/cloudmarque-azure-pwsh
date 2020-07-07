@@ -2,19 +2,21 @@ resourceGroupName: # Required to create new resource group
 resourceGrouptag:  # provide a service tag for exisiting or new resource group
 location: East US
 
-applicationInstrumentationKey: #optional
-
 appServicePlans:
   - name: serviceplan1
     sku: S1
     region: East US
     webapps:
       - name: Exampleapp1s
+        backendpool:
+         - mainExampleBackend
         runTime: TOMCAT|9.0-jre8 # Only Linux supported
         slots:
           - Production
           - Staging
       - name: Exampleapp2
+        backendpool:
+          - APIExampleBackend
         runTime: PHP|7.3
         slots: # autoswap enabled
           - Production
@@ -25,11 +27,15 @@ appServicePlans:
     webapps:
       - name: Exampleapp3
         runTime: PHP|7.3
+        backendpool:
+          - mainExampleBackend
         slots:
           - Production
           - Staging
       - name: Exampleapp4
         runTime: TOMCAT|9.0-jre8
+        backendpool:
+          - mainExampleBackend
         slots:
           - Production
           - Staging
@@ -54,15 +60,10 @@ frontDoor:
   backEndPools:
     - name: mainExampleBackend
       apps:
-        - Exampleapp1
-        - Exampleapp3
-        - webapp1
       healthCheckPath: # Optional : Default is index.html
       backendHostHeader: false # Optional : default is true. Required for easy auth scenarios
       protocol: Http # Optional : Default is Https
     - name: APIExampleBackend
-      apps:
-        - Exampleapp2
       healthCheckPath: /index.html
   rules:
     - name: Examplerule1
@@ -74,6 +75,7 @@ frontDoor:
       pattern:
         - /api
       backEndPoolname: APIExampleBackend
+
 contentDeliveryNetwork:
   name:
   sku: # standard_microsoft

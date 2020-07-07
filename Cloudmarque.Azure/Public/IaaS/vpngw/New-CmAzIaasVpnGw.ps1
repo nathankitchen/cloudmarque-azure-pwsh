@@ -1,29 +1,31 @@
-﻿<#
-	.Synopsis
-	 Set Virtual private network Gateway in Azure Vnet
+﻿function New-CmAzIaasVpnGw {
 
-	.Description
-	 Completes the following:
-		* This script creates Vpn Gateways in provided Vnets.
-		* Optionally configures P2s and S2s.
-		* Secrets and certificates are securely retrieved from Keyvault
+	<#
+		.Synopsis
+		Set Virtual private network Gateway in Azure Vnet
 
-	.Parameter SettingsFile
-     File path for the settings file to be converted into a settings object.
+		.Description
+		Completes the following:
+			* This script creates Vpn Gateways in provided Vnets.
+			* Optionally configures P2s and S2s.
+			* Secrets and certificates are securely retrieved from Keyvault
 
-    .Parameter SettingsObject
-     Object containing the configuration values required to run this cmdlet.
+		.Parameter SettingsFile
+		File path for the settings file to be converted into a settings object.
 
-	.Component
-	 IaaS
+		.Parameter SettingsObject
+		Object containing the configuration values required to run this cmdlet.
 
-	.Example
-	 New-CmAzIaasVpnGw -SettingsFile "VpnGw.yml"
+		.Component
+		IaaS
 
-	.Example
-	 New-CmAzIaasVpnGw -SettingsObject $settings
-#>
-function New-CmAzIaasVpnGw {
+		.Example
+		New-CmAzIaasVpnGw -SettingsFile "VpnGw.yml"
+
+		.Example
+		New-CmAzIaasVpnGw -SettingsObject $settings
+	#>
+
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
 	param(
 		[parameter(Mandatory = $true, ParameterSetName = "Settings File Path")]
@@ -51,8 +53,8 @@ function New-CmAzIaasVpnGw {
 
 			$SettingsObject.VpnGw | ForEach-Object -Parallel {
 
-				$_.virtualNetworkName = (Get-CmAzService -Service $_.vnetTag -ThrowIfUnavailable).name
-				$vnetObject = Get-AzVirtualNetwork -Name $_.virtualNetworkName
+				$_.VirtualNetworkName = (Get-CmAzService -Service $_.VnetTag -ThrowIfUnavailable).name
+				$vnetObject = Get-AzVirtualNetwork -Name $_.VirtualNetworkName
 
 				# Check if "GatewaySubnet Exists"
 
@@ -62,79 +64,84 @@ function New-CmAzIaasVpnGw {
 				if (!$gatewaySubnet) {
 
 					Write-Verbose "GatewaySubnet not found."
-					if (!$_.gatewaySubnetPrefix) {
-						Write-Error "GatewaySubnet doesnt exist, please provide GatewaySubnetPrefix to create one." -TargetObject $_.gatewaySubnetPrefix
+					if (!$_.GatewaySubnetPrefix) {
+						Write-Error "GatewaySubnet doesnt exist, please provide GatewaySubnetPrefix to create one." -TargetObject $_.GatewaySubnetPrefix
 					}
 
-					Write-Verbose "$($_.gatewaySubnetPrefix) will be used to create GatewaySubnet in Vnet"
+					Write-Verbose "$($_.GatewaySubnetPrefix) will be used to create GatewaySubnet in Vnet"
 				}
 				else {
 
 					Write-Verbose "GatewaySubnet Found!"
-					$_.gatewaySubnetPrefix = ""
+					$_.GatewaySubnetPrefix = ""
 				}
 
-				$_.gatewayPublicIpName = Get-CmAzResourceName `
+				$_.GatewayPublicIpName = Get-CmAzResourceName `
 					-Resource "PublicIPAddress" `
 					-Architecture "IaaS" `
 					-Region $env:location `
-					-Name $_.gatewayName
+					-Name $_.GatewayName
 
-				$_.gatewayName = Get-CmAzResourceName `
+				$_.GatewayName = Get-CmAzResourceName `
 					-Resource "VirtualNetworkGateway" `
 					-Architecture "IaaS" `
 					-Region $env:location `
-					-Name $_.gatewayName
+					-Name $_.GatewayName
 
-				if (!$_.p2s.vpnAddressPool -or !$_.p2s.KeyVaultTag -or !$_.p2s.rootCertificateName) {
+				if (!$_.P2s.VpnAddressPool -or !$_.P2s.KeyVaultTag -or !$_.P2s.RootCertificateName) {
 
 					Write-Verbose "P2s configuration not found."
-					$_.p2s.vpnAddressPool = ""
-					$_.p2s.clientRootCertData = ""
-					$_.p2s.rootCertificateName = ""
+					$_.P2s.VpnAddressPool = ""
+					$_.P2s.ClientRootCertData = ""
+					$_.P2s.RootCertificateName = ""
 				}
 				else {
 
-					$keyVaultService = Get-CmAzService -Service $_.p2s.KeyVaultTag -ThrowIfUnavailable
+					$keyVaultService = Get-CmAzService -Service $_.P2s.KeyVaultTag -ThrowIfUnavailable
 
 					# This approach is because Vpn Gw expects Raw certificate data
-					$keyVaultCertificateObject = Get-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $_.p2s.rootCertificateName
-					$_.p2s.clientRootCertData = [Convert]::ToBase64String($keyVaultCertificateObject.Certificate.GetRawCertData())
+					$keyVaultCertificateObject = Get-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $_.P2s.RootCertificateName
+					$_.P2s.ClientRootCertData = [Convert]::ToBase64String($keyVaultCertificateObject.Certificate.GetRawCertData())
 
-					if (!$_.p2s.clientRootCertData) {
+					if (!$_.P2s.ClientRootCertData) {
 
 						Write-Verbose "Certificate Not Found! P2s will not be configured."
-						$_.p2s.vpnAddressPool = ""
-						$_.p2s.rootCertificateName = ""
-						$_.p2s.clientRootCertData = ""
+						$_.P2s.VpnAddressPool = ""
+						$_.P2s.RootCertificateName = ""
+						$_.P2s.ClientRootCertData = ""
 					}
 					else {
-						Write-Verbose "Certificate $($_.p2s.rootCertificateName) found, p2s will be configured."
+						Write-Verbose "Certificate $($_.P2s.RootCertificateName) found, p2s will be configured."
 					}
 				}
-				if (!$_.s2s.clientSitePublicIP -or !$_.s2s.cidrBlocks -or !$_.s2s.KeyVaultTag ) {
+				if (!$_.S2s.ClientSitePublicIP -or !$_.S2s.CidrBlocks -or !$_.S2s.KeyVaultTag ) {
 
 					Write-Verbose "S2s configuration not found."
-					$_.s2s.cidrBlocks = @()
-					$_.s2s.clientSitePublicIP = ""
-					$_.s2s.sharedKey = ""
+					$_.S2s.CidrBlocks = @()
+					$_.S2s.ClientSitePublicIP = ""
+					$_.S2s.SharedKey = ""
 				}
 				else {
 					# This apporach is because Key vault reference cannot be used directly in Arm template because of conflict with copy
 					# SharedKeyObject is created to resolve with CLIXML type of object created when you run Az commands.
-					$_.s2s.sharedKey = [System.Collections.ArrayList]@()
-					$_.s2s.sharedKeyObject = (Get-AzKeyVaultSecret -Name $_.s2s.KeyVaultSecret -VaultName (Get-CmAzService -Service $_.s2s.KeyVaultTag -ThrowIfUnavailable).name).SecretValueText
-					$_.s2s.sharedKey.add($_.s2s.sharedKeyObject.ToString()) > $null
+					$_.S2s.SharedKey = [System.Collections.ArrayList]@()
+					$_.S2s.SharedKeyObject = (Get-AzKeyVaultSecret -Name $_.S2s.KeyVaultSecret -VaultName (Get-CmAzService -Service $_.S2s.KeyVaultTag -ThrowIfUnavailable).name).SecretValueText
+					$_.S2s.SharedKey.add($_.S2s.SharedKeyObject.ToString()) > $null
 
-					if (!$_.s2s.sharedKey) {
+					if (!$_.S2s.SharedKey) {
 
 						Write-Verbose "Secret could not be retrieved! S2s configuration will be skipped."
-						$_.s2s.cidrBlocks = @()
-						$_.s2s.clientSitePublicIP = ""
-						$_.s2s.sharedKey = ""
+						$_.S2s.CidrBlocks = @()
+						$_.S2s.ClientSitePublicIP = ""
+						$_.S2s.SharedKey = ""
 					}
 					else {
-						Write-Verbose "Secret '$($_.s2s.KeyVaultSecret)' was found, s2s will be configured."
+						Write-Verbose "Secret '$($_.S2s.KeyVaultSecret)' was found, s2s will be configured."
+						$_.S2s.localGatewayName = Get-CmAzResourceName `
+							-Resource "LocalNetworkGateway" `
+							-Architecture "IaaS" `
+							-Region $env:location `
+							-Name $_.GatewayName
 					}
 				}
 			}

@@ -9,24 +9,27 @@
                 "description": "location"
             }
         },
-        "BastionHost": {
+        "BastionHostObject": {
             "type": "Object",
             "metadata": {
                 "description": "Bastion Host object with all required parameters"
             }
         },
-        "WorkspaceId": {
-            "type": "string"
+        "Workspace": {
+            "type": "object",
+            "metadata": {
+                "description": "Hashtable containing workspace name and resourceID"
+            }
         }
     },
     "resources": [
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat(parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName, copyIndex('BastionHostCopy'))]",
+            "name": "[concat(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName, copyIndex('BastionHostCopy'))]",
             "copy": {
                 "name": "BastionHostCopy",
-                "count": "[length(parameters('BastionHost').bastionHosts)]"
+                "count": "[length(parameters('BastionHostObject').bastionHosts)]"
             },
             "properties": {
                 "mode": "Incremental",
@@ -40,19 +43,19 @@
                     },
                     "resources": [
                         {
-                            "condition": "[not(empty(parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionHostSubnetPrefix))]",
+                            "condition": "[not(empty(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostSubnetPrefix))]",
                             "type": "Microsoft.Network/virtualNetworks/subnets",
                             "apiVersion": "2019-04-01",
-                            "name": "[concat(parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].vnetName, '/', 'AzureBastionSubnet')]",
+                            "name": "[concat(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].vnetName, '/', 'AzureBastionSubnet')]",
                             "location": "[parameters('Location')]",
                             "properties": {
-                                "addressPrefix": "[parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionHostSubnetPrefix]"
+                                "addressPrefix": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostSubnetPrefix]"
                             }
                         },
                         {
                             "apiVersion": "2019-02-01",
                             "type": "Microsoft.Network/publicIpAddresses",
-                            "name": "[parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName]",
+                            "name": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName]",
                             "location": "[parameters('Location')]",
                             "sku": {
                                 "name": "Standard"
@@ -60,18 +63,18 @@
                             "properties": {
                                 "publicIPAllocationMethod": "static",
                                 "dnsSettings": {
-                                    "domainNameLabel": "[parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName]",
-                                    "fqdn": "[concat(parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName, '.eastus.cloudapp.azure.com')]"
+                                    "domainNameLabel": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName]",
+                                    "fqdn": "[concat(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName, '.eastus.cloudapp.azure.com')]"
                                 }
                             }
                         },
                         {
                             "apiVersion": "2019-12-01",
                             "type": "Microsoft.Network/bastionHosts",
-                            "name": "[parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName]",
+                            "name": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName]",
                             "location": "[parameters('Location')]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Network/publicIpAddresses', parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName)]"
+                                "[resourceId('Microsoft.Network/publicIpAddresses', parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName)]"
                             ],
                             "properties": {
                                 "ipConfigurations": [
@@ -79,10 +82,10 @@
                                         "name": "IpConf",
                                         "properties": {
                                             "subnet": {
-                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].vnetName, 'AzureBastionSubnet')]"
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].vnetName, 'AzureBastionSubnet')]"
                                             },
                                             "publicIPAddress": {
-                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName)]"
+                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName)]"
                                             }
                                         }
                                     }
@@ -90,19 +93,19 @@
                             }
                         },
                         {
-                            "condition": "[not(equals(parameters('WorkspaceId'), 'none'))]",
+                            "condition": "[not(empty(parameters('Workspace').Name))]",
                             "type": "Microsoft.Network/bastionHosts/Providers/DiagnosticSettings",
-                            "name": "[concat(parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName, '/Microsoft.Insights/Service', parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName)]",
+                            "name": "[concat(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName, '/Microsoft.Insights/Service')]",
                             "apiVersion": "2016-09-01",
-                            "location": "[parameters('Location')]",
+                            "location": "[parameters('Workspace').Location]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Network/bastionHosts', parameters('BastionHost').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName)]"
+                                "[resourceId('Microsoft.Network/bastionHosts', parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName)]"
                             ],
                             "properties": {
-                                "WorkspaceId": "[parameters('WorkspaceId')]",
+                                "WorkspaceId": "[parameters('Workspace').ResourceId]",
                                 "logs": [
                                     {
-                                        "category": "AuditEvent",
+                                        "category": "BastionAuditLogs",
                                         "enabled": true,
                                         "retentionPolicy": {
                                             "enabled": true,

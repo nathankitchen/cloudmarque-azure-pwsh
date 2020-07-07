@@ -10,7 +10,7 @@
 			* Creates Automation account for runbook, dsc or both.
 			* Creates Key vault certificate if not available.
 			* Create RunAsAccount and RunAsCertificate for Automation accounts.
-			* Optinally sync SCM source.
+			* Optionally sync code repository (tvfc | git | github).
 
 		.Parameter SettingsFile
 		 File path for the settings file to be converted into a settings object.
@@ -20,7 +20,6 @@
 
 		.Component
 		 Core
-
 
 		.Example
 		 New-CmAzCoreAutomation -SettingsFile "c:/directory/settingsFile.yml"
@@ -42,8 +41,8 @@
 
 			# Initializing settings file values
 
-			$AzSubscription = Get-AzSubscription
-			$ProjectContext = Get-CmAzContext -RequireAzure -ThrowIfUnavailable
+			$azSubscription = Get-AzSubscription
+			$projectContext = Get-CmAzContext -RequireAzure -ThrowIfUnavailable
 
 			if ($SettingsFile -and !$SettingsObject) {
 				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
@@ -54,7 +53,7 @@
 
 			foreach ($item in $SettingsObject.Automation.Keys) {
 
-				$RandomValue = Get-Random -Minimum 1001 -Maximum 9999
+				$randomValue = Get-Random -Minimum 1001 -Maximum 9999
 
 				# Set Account Type
 				if ($item -eq "dsc") {
@@ -64,40 +63,40 @@
 					$accountType = "runbook"
 				}
 				else {
-					Write-Error "$((get-date).TimeOfDay.ToString()) - Set type to be either runbook or dsc"
+					Write-Error "Set type to be either runbook or dsc"
 					Break
 				}
 
-				$Location = $SettingsObject.Location
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Location set to $Location"
+				$location = $SettingsObject.Location
+				Write-Verbose "Location set to $location"
 				Write-Verbose "creating automation account for $accountType"
-				if (!$Location) {
-					Write-Error "$((get-date).TimeOfDay.ToString()) - Location not found"
+				if (!$location) {
+					Write-Error "Location not found"
 					Break
 				}
 
 				$keyVaultName = $SettingsObject.Automation.$accountType.KeyVaultName
 				if (!$keyVaultName) {
-					Write-Error "$((get-date).TimeOfDay.ToString()) - Provide Key Vault For Certificate"
+					Write-Error "Provide Key Vault For Certificate"
 					break
 				}
 
 				$keyVault = Get-AzKeyVault -VaultName $keyVaultName
 
 				if (!$keyVault) {
-					Write-Error "$((get-date).TimeOfDay.ToString()) - Key Vault $keyVaultName doesnt exist. Please provide existing Key Vault Name"
+					Write-Error "Key Vault $keyVaultName doesnt exist. Please provide existing Key Vault Name"
 					Break
 				}
 
 				$certificateName = $SettingsObject.Automation.$accountType.CertificateName
 				if (!$certificateName) {
-					Write-Information "$((get-date).TimeOfDay.ToString()) - No KeyVault Certificate Provided.. A Generic certificate will be created"
-					$certificateName = "$accountType-$RandomValue"
+					Write-Information "No KeyVault Certificate Provided.. A new certificate will be created"
+					$certificateName = $SettingsObject.Automation.$accountType.CertificateName
 				}
 
 				$keyVaultCertificatePassword = $SettingsObject.Automation.$accountType.KeyVaultCertificatePassword
 				if (!$keyVaultCertificatePassword) {
-					Write-Error "$((get-date).TimeOfDay.ToString()) - No keyVault path or Password provided for Certificate...."
+					Write-Error "No keyVault path or Password provided for Certificate...."
 					break
 				}
 
@@ -109,66 +108,66 @@
 					$keyVaultPersonalAccessToken = $SettingsObject.Automation.$accountType.KeyVaultPersonalAccessToken
 
 					if (!$keyVaultPersonalAccessToken) {
-						Write-Error "$((get-date).TimeOfDay.ToString()) - No keyVault path or Password provided for Personal Access Token...."
+						Write-Error "No keyVault path or Password provided for Personal Access Token...."
 						break
 					}
 
-					$PersonalAccessToken = (Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $keyVaultPersonalAccessToken).SecretValue
-					if (!$PersonalAccessToken) {
-						Write-Error "$((get-date).TimeOfDay.ToString()) - No PAT found on key vault"
+					$personalAccessToken = (Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $keyVaultPersonalAccessToken).SecretValue
+					if (!$personalAccessToken) {
+						Write-Error "No PAT found on key vault"
 					}
 				}
 				else {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - No Repository provided $accountType"
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - SCM Intergration will be skipped ... "
+					Write-Verbose "No Repository provided $accountType"
+					Write-Verbose "SCM Intergration will be skipped ... "
 				}
 
 
-				$nameResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $Location -Name "Automation-$accountType"
-				$resourceGroup = New-AzResourceGroup -ResourceGroupName $nameResourceGroup -Location $Location -Force
-				Write-Verbose "$((get-date).TimeOfDay.ToString())  - Resource Group Created ......  $nameResourceGroup"
+				$nameResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $location -Name "Automation-$accountType"
+				$resourceGroup = New-AzResourceGroup -ResourceGroupName $nameResourceGroup -Location $location -Force
+				Write-Verbose "Resource Group Created : $nameResourceGroup"
 				$resourceGroup | Write-Verbose
 
 				# Creating Automation accountname using name generator
-				$automationAccountName = Get-CmAzResourceName -Resource "Automation" -Architecture "Core" -Region $Location -Name $accountType
+				$automationAccountName = Get-CmAzResourceName -Resource "Automation" -Architecture "Core" -Region $location -Name $accountType
 
 				# create Automation account
 				New-AzResourceGroupDeployment `
 					-ResourceGroupName $nameResourceGroup `
 					-TemplateFile "$PSScriptRoot\CmAzCoreAutomation.json" `
-					-WhatIf:$WhatIfPreference `
-					-accountName $automationAccountName `
-					-location $Location
+					-AccountName $automationAccountName `
+					-Location $location `
+					-Force
 
 				function KeyVaultSelfSignedCert {
 					param (
 						$keyVault,
-						$certificateName,
-						$subjectName,
-						$validityInMonths,
-						$renewDaysBefore
+						$CertificateName,
+						$SubjectName,
+						$ValidityInMonths,
+						$RenewDaysBefore
 					)
 
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Starting Certificate Generation..."
+					Write-Verbose "Starting Certificate Generation..."
 
 					$policy = New-AzKeyVaultCertificatePolicy `
-						-SubjectName $subjectName `
+						-SubjectName $SubjectName `
 						-ReuseKeyOnRenewal `
 						-IssuerName 'Self' `
-						-ValidityInMonths $validityInMonths `
-						-RenewAtNumberOfDaysBeforeExpiry $renewDaysBefore
+						-ValidityInMonths $ValidityInMonths `
+						-RenewAtNumberOfDaysBeforeExpiry $RenewDaysBefore
 
 					$keyVaultCertificate = Add-AzKeyVaultCertificate `
 						-VaultName $keyVault `
 						-CertificatePolicy $policy `
-						-Name $certificateName
+						-Name $CertificateName
 
 					while ( $keyVaultCertificate.Status -ne 'completed' ) {
 						Start-Sleep -Seconds 1
-						$keyVaultCertificate = Get-AzKeyVaultCertificateOperation -VaultName $keyVault -Name $certificateName
+						$keyVaultCertificate = Get-AzKeyVaultCertificateOperation -VaultName $keyVault -Name $CertificateName
 					}
 
-					(Get-AzKeyVaultCertificate -VaultName $keyVault -Name $certificateName).Certificate
+					(Get-AzKeyVaultCertificate -VaultName $keyVault -Name $CertificateName).Certificate
 				}
 
 				function CreateServicePrincipal {
@@ -177,149 +176,147 @@
 						[string] $applicationDisplayName
 					)
 
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Fetch Certificate Data from Keyvault"
-					$PfxCert = [Convert]::ToBase64String($Certificate.GetRawCertData())
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Fetch Certificate Data from Keyvault..Done!"
-					$Application = New-AzADApplication -DisplayName $applicationDisplayName -HomePage ("http://" + $applicationDisplayName) -IdentifierUris ("http://" + $RandomValue)
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Requires Application administrator or GLOBAL ADMIN"
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Trying to create Application Credential"
-					$ApplicationCredential = New-AzADAppCredential -ApplicationId $Application.ApplicationId -CertValue $PfxCert -StartDate $Certificate.NotBefore -EndDate $Certificate.NotAfter
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Trying to create Application Credential..Done!!"
+					Write-Verbose "Fetch Certificate Data from Keyvault"
+					$pfxCert = [Convert]::ToBase64String($Certificate.GetRawCertData())
+					Write-Verbose "Fetch Certificate Data from Keyvault..Done!"
+					$application = New-AzADApplication -DisplayName $applicationDisplayName -HomePage ("http://" + $applicationDisplayName) -IdentifierUris ("http://" + $randomValue)
+					Write-Verbose "Requires Application administrator or GLOBAL ADMIN"
+					Write-Verbose "Trying to create Application Credential"
+					$applicationCredential = New-AzADAppCredential -ApplicationId $application.ApplicationId -CertValue $pfxCert -StartDate $Certificate.NotBefore -EndDate $Certificate.NotAfter
+					Write-Verbose "Trying to create Application Credential..Done!!"
 					# Requires Application administrator or GLOBAL ADMIN
 					Write-Verbose "Working on creating service principal"
-					$ServicePrincipal = New-AzADServicePrincipal -ApplicationId $Application.ApplicationId
+					$servicePrincipal = New-AzADServicePrincipal -ApplicationId $application.ApplicationId
 					Write-Verbose "Service Principal created !!!"
-					$GetServicePrincipal = Get-AzADServicePrincipal -ObjectId $ServicePrincipal.Id
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Application credential: $ApplicationCredential"
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Service principal Id: $GetServicePrincipal"
+					$getServicePrincipal = Get-AzADServicePrincipal -ObjectId $servicePrincipal.Id
+					Write-Verbose "Application credential: $($applicationCredential)"
+					Write-Verbose "Service principal Id: $($getServicePrincipal)"
 
 					Start-Sleep -s 15
 					# Requires User Access Administrator or Owner.
 
-					Write-Verbose "((get-date).TimeOfDay.ToString()) - working on getting role assignment"
-					$GetRole = Get-AzRoleAssignment -ServicePrincipalName $Application.ApplicationId -ErrorAction SilentlyContinue
+					Write-Verbose "working on getting role assignment"
+					$getRole = Get-AzRoleAssignment -ServicePrincipalName $application.ApplicationId -ErrorAction SilentlyContinue
 
-					if (!$GetRole) {
+					if (!$getRole) {
 
-						Write-Verbose "((get-date).TimeOfDay.ToString()) - Role Assignment doesnt exist. Trying to create one"
-						$NewRole = New-AzRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $Application.ApplicationId -ErrorAction SilentlyContinue
+						Write-Verbose "Role Assignment doesnt exist. Trying to create one"
+						$newRole = New-AzRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $application.ApplicationId -ErrorAction SilentlyContinue
 
-						$Retries = 0;
+						$retries = 0;
 
-						While (!$NewRole -and $Retries -le 6) {
+						While (!$newRole -and $retries -le 6) {
 							Start-Sleep -s 10
-							New-AzRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $Application.ApplicationId | Write-Verbose -ErrorAction SilentlyContinue
-							$NewRole = Get-AzRoleAssignment -ServicePrincipalName $Application.ApplicationId -ErrorAction SilentlyContinue
-							$Retries++;
+							New-AzRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $application.ApplicationId | Write-Verbose -ErrorAction SilentlyContinue
+							$newRole = Get-AzRoleAssignment -ServicePrincipalName $application.ApplicationId -ErrorAction SilentlyContinue
+							$retries++;
 						}
 
-						Write-Verbose "((get-date).TimeOfDay.ToString()) - Contributer role assigned to service principal $($Application.ApplicationId)"
+						Write-Verbose "Contributer role assigned to service principal $($application.ApplicationId)"
 					}
 					else {
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - Role Assignment Already Present..."
-						Write-Verbose $GetRole
+						Write-Verbose "Role Assignment Already Present..."
+						Write-Verbose $getRole
 					}
-					return $Application;
+					return $application;
 				}
 				function CreateAutomationCertificateAsset {
 
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Trying to Pull Certificate Password from KeyVault"
-					$CertificatePassword = (Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $keyVaultCertificatePassword).SecretValue
+					Write-Verbose "Trying to Pull Certificate Password from KeyVault"
+					$certificatePassword = (Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $keyVaultCertificatePassword).SecretValue
 
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Trying to Pull Certificate from KeyVault"
-					$pfxFileByte = (Get-AzKeyVaultCertificate -VaultName $keyVaultName -Name $certificateName).Certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx, $CertificatePassword)
-					$PfxCertPathForRunAsAccount = Join-Path  -Path $($ProjectContext.ProjectRoot) ($certificateName + ".pfx")
+					Write-Verbose "Trying to Pull Certificate from KeyVault"
+					$pfxFileByte = (Get-AzKeyVaultCertificate -VaultName $keyVaultName -Name $certificateName).Certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx, $certificatePassword)
+					$pfxCertPathForRunAsAccount = Join-Path  -Path $($projectContext.ProjectRoot) ($certificateName + ".pfx")
 					# Write to a file
-					[System.IO.File]::WriteAllBytes($PfxCertPathForRunAsAccount, $pfxFileByte)
+					[System.IO.File]::WriteAllBytes($pfxCertPathForRunAsAccount, $pfxFileByte)
 
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Creating Automation Certificate Asset"
+					Write-Verbose "Creating Automation Certificate Asset"
 					Remove-AzAutomationCertificate -ResourceGroupName $nameResourceGroup -AutomationAccountName  $automationAccountName -Name "AzureRunAsCertificate" -ErrorAction SilentlyContinue
-					New-AzAutomationCertificate -ResourceGroupName $nameResourceGroup -AutomationAccountName  $automationAccountName -Path $PfxCertPathForRunAsAccount  -Name "AzureRunAsCertificate" -Password $CertificatePassword
+					New-AzAutomationCertificate -ResourceGroupName $nameResourceGroup -AutomationAccountName  $automationAccountName -Path $pfxCertPathForRunAsAccount  -Name "AzureRunAsCertificate" -Password $certificatePassword
 					Write-Verbose "Key Vault Certificate ported to Automation Certificate Asset successfully"
 				}
 				function CreateAutomationConnectionAsset {
 					param (
-						[string] $nameResourceGroup,
-						[string] $automationAccountName,
-						[string] $connectionAssetName,
-						[string] $connectionTypeName,
-						[System.Collections.Hashtable] $connectionFieldValues
+						[string] $ResourceGroup,
+						[string] $AutomationAccountName,
+						[string] $ConnectionAssetName,
+						[string] $ConnectionTypeName,
+						[System.Collections.Hashtable] $ConnectionFieldValues
 					)
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Creating Automation Connection Asset"
-					Remove-AzAutomationConnection -ResourceGroupName $nameResourceGroup -AutomationAccountName  $automationAccountName -Name $connectionAssetName -Force -ErrorAction SilentlyContinue
-					New-AzAutomationConnection -ResourceGroupName $nameResourceGroup -AutomationAccountName  $automationAccountName -Name $connectionAssetName -ConnectionTypeName $connectionTypeName -ConnectionFieldValues $connectionFieldValues
-					Write-Verbose "$((get-date).TimeOfDay.ToString())  - Automation connection $ConnectionAssetName' created successfully"
+					Write-Verbose "Creating Automation Connection Asset"
+					Remove-AzAutomationConnection -ResourceGroupName $ResourceGroup -AutomationAccountName  $AutomationAccountName -Name $ConnectionAssetName -Force -ErrorAction SilentlyContinue
+					New-AzAutomationConnection -ResourceGroupName $ResourceGroup -AutomationAccountName  $AutomationAccountName -Name $ConnectionAssetName -ConnectionTypeName $ConnectionTypeName -ConnectionFieldValues $ConnectionFieldValues
+					Write-Verbose "Automation connection $ConnectionAssetName created successfully"
 				}
 
-				[string]$ApplicationDisplayName = "AutomationAppAccount-$automationAccountName"
-				$SelfSignedCrtMonthstoExpire = 12
+				[string]$applicationDisplayName = "AutomationAppAccount-$automationAccountName"
 
 				# Mandatory Azure Default Vaules - DO NOT CHANGE
-				[string]$ConnectionAssetName = "AzureRunAsConnection"
-				[string]$ConnectionTypeName = "AzureServicePrincipal"
+				[string]$connectionAssetName = "AzureRunAsConnection"
+				[string]$connectionTypeName = "AzureServicePrincipal"
 
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Get Certificate from Keyvault"
+				Write-Verbose "Get Certificate from Keyvault"
 				$keyVaultSelfSignedCert = (Get-AzKeyVaultCertificate -VaultName $keyVaultName -Name $certificateName).Certificate
 
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Create New Certificate using keyvault If doesnot exist"
+				Write-Verbose "Create New Certificate using keyvault If doesnot exist"
 				if (!$keyVaultSelfSignedCert) {
 					try {
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - Certificate doesnot exist..."
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - Creating new certificate in keyvault: $keyVaultName"
+						Write-Verbose "Certificate doesnot exist..."
+						Write-Verbose "Creating new certificate in keyvault: $keyVaultName"
 						$keyVaultSelfSignedCert = KeyVaultSelfSignedCert  `
-							-keyVault $keyVaultName `
-							-certificateName $certificateName `
-							-subjectName "CN=$certificateName" `
-							-validityInMonths $SelfSignedCrtMonthstoExpire `
-							-renewDaysBefore 30
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - Certificate generated $certificateName : $($keyVaultSelfSignedCert.Thumbprint)"
+							-KeyVault $keyVaultName `
+							-CertificateName $certificateName `
+							-SubjectName "CN=$certificateName" `
+							-ValidityInMonths 12 `
+							-RenewDaysBefore 30
+						Write-Verbose "Certificate generated $certificateName : $($keyVaultSelfSignedCert.Thumbprint)"
 						$keyVaultSelfSignedCert = (Get-AzKeyVaultCertificate -VaultName $keyVaultName -Name $certificateName).Certificate
 					}
 					catch {
-						Write-Error "$((get-date).TimeOfDay.ToString()) - Certificate Generation failed"
+						Write-Error "Certificate Generation failed"
 						break
 					}
 				}
 				else {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Certificate found $certificateName : $($keyVaultSelfSignedCert.Thumbprint)"
+					Write-Verbose "Certificate found $certificateName : $($keyVaultSelfSignedCert.Thumbprint)"
 				}
 
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Create a service principal"
-				$servicePrincipal = CreateServicePrincipal -Certificate $keyVaultSelfSignedCert -applicationDisplayName $ApplicationDisplayName
+				Write-Verbose "Create a service principal"
+				$servicePrincipal = CreateServicePrincipal -Certificate $keyVaultSelfSignedCert -ApplicationDisplayName $applicationDisplayName
 
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Populate the ConnectionFieldValues"
+				Write-Verbose "Populate the ConnectionFieldValues"
 				$thumbprint = $keyVaultSelfSignedCert.Thumbprint
-				$ConnectionFieldValues = @{"ApplicationId" = $servicePrincipal.ApplicationId.ToString(); "TenantId" = $AzSubscription.TenantId; "CertificateThumbprint" = $thumbprint; "SubscriptionId" = $AzSubscription.SubscriptionId }
+				$connectionFieldValues = @{"ApplicationId" = $servicePrincipal.ApplicationId.ToString(); "TenantId" = $azSubscription.TenantId; "CertificateThumbprint" = $thumbprint; "SubscriptionId" = $azSubscription.SubscriptionId }
 
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Create an Automation connection asset named AzureRunAsConnection in the Automation account. This connection uses the service principal."
+				Write-Verbose "Create an Automation connection asset named AzureRunAsConnection in the Automation account. This connection uses the service principal."
 				CreateAutomationCertificateAsset
-				CreateAutomationConnectionAsset -nameResourceGroup $nameResourceGroup -automationAccountName $automationAccountName -ConnectionAssetName "AzureRunAsConnection" -connectionTypeName $ConnectionTypeName -connectionFieldValues $ConnectionFieldValues
+				CreateAutomationConnectionAsset -ResourceGroup $nameResourceGroup -AutomationAccountName $automationAccountName -ConnectionAssetName "AzureRunAsConnection" -ConnectionTypeName $connectionTypeName -ConnectionFieldValues $connectionFieldValues
 
 
 				try {
 					if ($repoUrl) {
 						if ($repoType -eq "tvfc") {
-							New-AzAutomationSourceControl -Name SCReposTFVC -repoUrl $repoUrl -SourceType VsoTfvc -AccessToken $PersonalAccessToken -ResourceGroupName $nameResourceGroup -AutomationAccountName $automationAccountName -folderPath $folderPath -EnableAutoSync
+							New-AzAutomationSourceControl -Name SCReposTFVC -RepoUrl $repoUrl -SourceType VsoTfvc -AccessToken $personalAccessToken -ResourceGroupName $nameResourceGroup -AutomationAccountName $automationAccountName -FolderPath $folderPath -EnableAutoSync
 						}
 						elseif ($repoType -eq "github") {
-							New-AzAutomationSourceControl -Name GithubSync -repoUrl $repoUrl -SourceType GitHub -AccessToken $PersonalAccessToken -Branch master -ResourceGroupName $nameResourceGroup -AutomationAccountName $automationAccountName -folderPath $folderPath
+							New-AzAutomationSourceControl -Name GithubSync -RepoUrl $repoUrl -SourceType GitHub -AccessToken $personalAccessToken -Branch master -ResourceGroupName $nameResourceGroup -AutomationAccountName $automationAccountName -FolderPath $folderPath
 						}
 						elseif ($repoType -eq "git") {
-							New-AzAutomationSourceControl -Name GitSync -repoUrl $repoUrl -SourceType VsoGit -AccessToken $PersonalAccessToken -Branch master -ResourceGroupName $nameResourceGroup -AutomationAccountName $automationAccountName -folderPath $folderPath -EnableAutoSync
+							New-AzAutomationSourceControl -Name GitSync -RepoUrl $repoUrl -SourceType VsoGit -AccessToken $personalAccessToken -Branch master -ResourceGroupName $nameResourceGroup -AutomationAccountName $automationAccountName -FolderPath $folderPath -EnableAutoSync
 						}
 						else {
-							Write-Error "Please choose correct repository - tvfc | git | github" -ErrorAction Continue
+							Write-Warning "Please choose correct repository - tvfc | git | github" -ErrorAction Continue
 						}
 
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - $repoType Added"
+						Write-Verbose "$repoType Added"
 					}
-
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - $repoType Added"
 				}
 				catch {
 					Write-Verbose "Repository couldn't be added"
 					write-Verbose "$($PSitem.ToString)"
 				}
+				Write-Verbose "Finished!"
 			}
 		}
 	}

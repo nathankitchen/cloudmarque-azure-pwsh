@@ -55,9 +55,8 @@ formats:
     components:
       - source: resource
       - source: name
-      - source: architecture
+      - source: environment
       - source: hash
-      - source: app
   - name: resourcegroup
     separator: "-"
     case: lower

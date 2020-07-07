@@ -7,7 +7,7 @@ vpnGw:
     sku:
     gatewaySubnetPrefix: #optional if you have dont have GatewaySubnet already in the Vnet.
     p2s:
-      vpnAdressPool: #VPN IP address pool ex: 172.0.0.0/16
+      vpnAddressPool: #VPN IP address pool ex: 172.0.0.0/16
       keyVaultTag: #Key Vault Name
       rootCertificateName: # Name of Certificate in Key Vault
     s2s:

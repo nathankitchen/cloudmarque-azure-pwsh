@@ -1,26 +1,30 @@
-﻿<#
-	.Synopsis
-	Creates Bastion host
+﻿function New-CmAzIaasBastionHost {
+	<#
+		.Synopsis
+		Creates Bastion host
 
-	.Description
-	Completes following:
-	* This script creates Bastion hosts in resource group.
-	* Creates 'AzureBastionSubnet' if not already exists.
-	* Azure Bastion provisions directly in your Azure Virtual Network,providing Bastion host or jump server as-a-service and integrated connectivity to all virtual machines in your virtual networking using RDP/SSH directly from and through your browser and the Azure portal experience.
+		.Description
+		Completes following:
+			* This script creates Bastion hosts in resource group.
+			* Creates 'AzureBastionSubnet' if not already exists.
+			* Azure Bastion provisions directly in your Azure Virtual Network, providing Bastion host or jump server as-a-service and integrated connectivity to all virtual machines in your virtual networking using RDP/SSH directly from and through your browser and the Azure portal experience.
 
-	.Parameter SettingsFile
-	File path for the settings file to be converted into a settings object.
+		.Parameter SettingsFile
+		File path for the settings file to be converted into a settings object.
 
-	.Parameter SettingsObject
-	Object containing the configuration values required to run this cmdlet.
+		.Parameter SettingsObject
+		Object containing the configuration values required to run this cmdlet.
 
-	.Component IaaS
+		.Component
+		IaaS
 
-	.Example
-	New-CmAzIaasBastionHost -settingsFile "BastionHostyml"
-	New-CmAzIaasBastionHost -settingsObject $BastionHostSettings
-#>
-function New-CmAzIaasBastionHost {
+		.Example
+		New-CmAzIaasBastionHost -settingsFile "BastionHostyml"
+
+		.Example
+		New-CmAzIaasBastionHost -settingsObject $BastionHostSettings
+	#>
+
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
 	param(
 		[parameter(Mandatory = $true, ParameterSetName = "Settings File")]
@@ -36,66 +40,66 @@ function New-CmAzIaasBastionHost {
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create Bastion Host in resource group")) {
 
 			if ($SettingsFile -and -not $SettingsObject) {
-                $SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-            }
-            elseif (-not $SettingsFile -and -not $SettingsObject) {
-                Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-            }
-
-			$env:Location = $SettingsObject.Location
-			$env:PermanentPSScriptRoot = $PSScriptRoot
-			$ResourceGroupName = (Get-CmAzService -Service $SettingsObject.resourceGroupTag -isResourceGroup -ThrowIfUnavailable).ResourceGroupName
-			$env:Rootfolder = (Get-cmAzContext).projectroot
-
-			Write-Verbose "$((get-date).TimeOfDay.ToString()) - Fetching workspace.."
-			$workspace = Get-CmAzService -Service $SettingsObject.workspaceTag
-			$workspace = Get-AzOperationalInsightsWorkspace -Name $workspace.name -ResourceGroupName $workspace.ResourceGroupName
-
-			if (!$workspace) {
-				$workspace.CustomerId = "none"
+				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
+			}
+			elseif (-not $SettingsFile -and -not $SettingsObject) {
+				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 			}
 
-			$SettingsObject.BastionHosts | ForEach-Object {
+			$env:location = $SettingsObject.Location
+			$env:permanentPSScriptRoot = $PSScriptRoot
+			$resourceGroupName = (Get-CmAzService -Service $SettingsObject.ResourceGroupTag -isResourceGroup -ThrowIfUnavailable).ResourceGroupName
+			$env:rootfolder = (Get-cmAzContext).projectroot
 
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Trying to set context"
-				Set-CmAzContext -Projectroot $env:Rootfolder
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Context set"
+			Write-Verbose "Fetching workspace.."
 
+			if (!$SettingsObject.WorkspaceTag) {
+				$bastionWorkspace = @{"Name" = ""; "ResourceId" = ""; "Location" = "" }
+			}
+			else {
+				Write-Verbose "Fetching workspace.."
+				$workspace = Get-CmAzService -Service $SettingsObject.WorkspaceTag
+				$workspace = Get-AzOperationalInsightsWorkspace -Name $workspace.Name -ResourceGroupName $workspace.ResourceGroupName
+				$bastionWorkspace = @{"Name" = $workspace.Name; "ResourceId" = $workspace.ResourceId; "Location" = $workspace.location }
+			}
+
+			$SettingsObject.BastionHosts | ForEach-Object -parallel {
 				$_.VnetName = (Get-CmAzService -Service $_.vnetTag).name
 				$VnetObject = Get-AzVirtualNetwork -Name $_.VnetName
 
 				$_.BastionPublicIPName = Get-CmAzResourceName -Resource "PublicIPAddress" `
 					-Architecture "IaaS" `
-					-Region $env:Location `
+					-Region $env:location `
 					-Name $_.BastionHostName
 
 				$_.BastionHostName = Get-CmAzResourceName -Resource "BastionHost" `
 					-Architecture "IaaS" `
-					-Region $env:Location `
+					-Region $env:location `
 					-Name $_.BastionHostName
 
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Checking if subnet 'AzureBastionSubnet' exists in Vnet"
-				$_.BastionHostSubnet = Get-AzVirtualNetworkSubnetConfig -Name "AzureBastionSubnet" `
+				Write-Verbose "Checking if subnet 'AzureBastionSubnet' exists in Vnet"
+				$bastionHostSubnet = Get-AzVirtualNetworkSubnetConfig -Name "AzureBastionSubnet" `
 					-VirtualNetwork $VnetObject -ErrorAction SilentlyContinue
 
-				if (!$_.BastionHostSubnet) {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - AzureBastionSubnet not found!"
+				if (!$bastionHostSubnet) {
+					Write-Verbose "AzureBastionSubnet not found!"
 					if (!$_.BastionHostSubnetPrefix) {
 						Write-Error "Subnet prefix for AzureBastionSubnet subnet not found. Please provide cidr"  -targetobject $_.BastionHostSubnetPrefix
 					}
 				}
 				else {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - 'AzureBastionSubnet' subnet Found!"
+					Write-Verbose "'AzureBastionSubnet' subnet Found!"
 					$_.BastionHostSubnetPrefix = ""
 				}
 			}
-			New-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName `
-				-TemplateFile "$env:PermanentPSScriptRoot\New-CmAzIaasBastionHost.json" `
+			New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
+				-TemplateFile "$env:permanentPSScriptRoot\New-CmAzIaasBastionHost.json" `
 				-BastionHostObject $SettingsObject `
-				-Location $env:Location `
-				-workspace $workspace.CustomerId `
+				-Location $env:location `
+				-Workspace $bastionWorkspace `
 				-Verbose
 		}
+		Write-Verbose "Finished!"
 	}
 	catch {
 		$PSCmdlet.ThrowTerminatingError($PSItem)

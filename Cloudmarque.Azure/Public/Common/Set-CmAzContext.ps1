@@ -55,6 +55,7 @@
 
         $global:CMAZ_CTX = New-Object PSObject -Property  @{Environment = $Environment; ProjectRoot = $ProjectRoot; BuildId= $BuildId};
         $global:CMAZ_CTX
+        $env:CMAZ_CTX_ENV = "Environment = $Environment `n  ProjectRoot=$ProjectRoot `n BuildId= $BuildId"
 
         if(!$(test-path $PROFILE.CurrentUserCurrentHost)){
           new-item $PROFILE.CurrentUserCurrentHost -ItemType file -Force

@@ -13,8 +13,8 @@
         {
             "type": "Microsoft.Automation/automationAccounts",
             "apiVersion": "2015-10-31",
-            "name": "[parameters('accountName')]",
-            "location": "[parameters('location')]",
+            "name": "[parameters('AccountName')]",
+            "location": "[parameters('Location')]",
             "dependsOn": [],
             "tags": {},
             "properties": {

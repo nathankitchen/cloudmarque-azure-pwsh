@@ -1,27 +1,46 @@
-﻿<#
-	.Synopsis
-	Creates networking solution
+﻿function New-CmAzIaasNetworking {
+	<#
+		.Synopsis
+		Creates networking solution
 
-	.Description
-	Completes following:
-	* Creates Vnets in multiple Resource Groups.
-	* Creates route tables and routes in multiple resource Groups.
-	* Creates NSGs in multiple resource Groups.
+		.Description
+		Completes following:
+			* Creates vnets and subnets. Optionally attach nsg and route tables to subnet.
+			* Creates route tables and routes.
+			* Creates network security groups.
+			* Configure resources in mulitple resource groups at once.
 
-	.Parameter SettingsFile
-	File path for the settings file to be converted into a settings object.
+		.Parameter SettingsFile
+		File path for the settings file to be converted into a settings object.
 
-	.Parameter SettingsObject
-	Object containing the configuration values required to run this cmdlet.
+		.Parameter SettingsObject
+		Object containing the configuration values required to run this cmdlet.
 
-	.Component IaaS
+		.Parameter VnetCsvFile
+		File path for the csv containing virtual network configurations.
+		Required headers: resourceGroupName|Location|vnetName|addressSpace|subnetName|cidr|networkSecurityGroup|routeTable
 
-	.Example
-    New-CmAzIaasNetworking -settingsFile "networking.yml"
-    New-CmAzIaasNetworking -vnetCsvFile "vnet.csv" -routeTableCsvFile "routeTable.csv"
-	New-CmAzIaasNetworking -settingsObject $VnetSettings
-#>
-function New-CmAzIaasNetworking {
+		.Parameter RouteTableCsvFile
+		File path for the csv containing route table configurations.
+		Required headers: resourceGroupName|tableName|routeName|cidr|nextHopType|nextHopIpAddress|notes
+
+		.Parameter NsgCsvFile
+		File path for the csv containing virtual network security group configurations.
+		Required headers: resourceGroupName|nsgName|ruleName|priority|direction|sourceIp|sourcePort|destinationIp|destinationPort|protocol|Access|Description
+
+		.Component
+		IaaS
+
+		.Example
+		New-CmAzIaasNetworking -settingsFile "networking.yml"
+
+		.Example
+		New-CmAzIaasNetworking -VnetCsvFile "vnet.csv" -RouteTableCsvFile "routeTable.csv" -NsgCsvFile "nsg.csv"
+
+		.Example
+		New-CmAzIaasNetworking -settingsObject $VnetSettings
+	#>
+
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
 	param(
 		[parameter(Mandatory = $true, ParameterSetName = "Settings Yml File")]
@@ -29,11 +48,11 @@ function New-CmAzIaasNetworking {
 		[parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
 		[Object]$SettingsObject,
 		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
-		[String]$vnetCsvFile,
+		[String]$VnetCsvFile,
 		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
-		[String]$routeTableCsvFile,
+		[String]$RouteTableCsvFile,
 		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
-		[String]$nsgCsvFile
+		[String]$NsgCsvFile
 	)
 
 	$ErrorActionPreference = "Stop"
@@ -42,22 +61,22 @@ function New-CmAzIaasNetworking {
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create networking solution")) {
 
-			if ($SettingsFile -and -not $SettingsObject -and -not $vnetCsvFile -and -not $routeTableCsvFile -and -not $nsgCsvFile ) {
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - Importing setting from Yml file"
+			if ($SettingsFile -and -not $SettingsObject -and -not $VnetCsvFile -and -not $RouteTableCsvFile -and -not $NsgCsvFile ) {
+				Write-Verbose "Importing setting from Yml file"
 				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
 			}
-			elseif (-not $SettingsFile -and -not $SettingsObject -and -not $vnetCsvFile -and -not $routeTableCsvFile -and -not $nsgCsvFile ) {
+			elseif (-not $SettingsFile -and -not $SettingsObject -and -not $VnetCsvFile -and -not $RouteTableCsvFile -and -not $NsgCsvFile ) {
 				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 			}
 
-			########################################## Code to Create Object from CSV ########################################
+  			# Code to Create Object from CSV
 
 			$resourceGroupObjectArray = [System.Collections.ArrayList]@()
 
-			if ($vnetCsvFile -or $routeTableCsvFile -or $nsgCsvFile)	{
-				if ($vnetCsvFile) {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Vnet CSV Found!!"
-					$vnetObjectFile = Import-Csv -Path $vnetCsvFile
+			if ($VnetCsvFile -or $RouteTableCsvFile -or $NsgCsvFile)	{
+				if ($VnetCsvFile) {
+					Write-Verbose "Vnet CSV Found!!"
+					$vnetObjectFile = Import-Csv -Path $VnetCsvFile
 					if ($vnetObjectFile.count -eq 1) {
 						$vnetFile = @($vnetObjectFile)
 					}
@@ -66,35 +85,35 @@ function New-CmAzIaasNetworking {
 					}
 				}
 				else {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Vnet CSV not found!!"
+					Write-Verbose "Vnet CSV not found!!"
 					$vnetFile = @($Null)
 				}
-				if ($routeTableCsvFile) {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Route Table CSV Found!!"
-					$routeTablesFile = Import-Csv -Path $routeTableCsvFile
+				if ($RouteTableCsvFile) {
+					Write-Verbose "Route Table CSV Found!!"
+					$routeTablesFile = Import-Csv -Path $RouteTableCsvFile
 				}
 				else {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Route Table CSV not Found!!"
+					Write-Verbose "Route Table CSV not Found!!"
 					$routeTablesFile = @($Null)
 				}
-				if ($nsgCsvFile) {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Nsg CSV Found!!"
-					$nsgFile = Import-Csv -Path $nsgCsvFile
+				if ($NsgCsvFile) {
+					Write-Verbose "Nsg CSV Found!!"
+					$nsgFile = Import-Csv -Path $NsgCsvFile
 				}
 				else {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Nsg CSV Not Found!!"
+					Write-Verbose "Nsg CSV Not Found!!"
 					$nsgFile = @($Null)
 				}
-				Write-Verbose "$((get-date).TimeOfDay.ToString()) - starting file merge"
+				Write-Verbose "starting file merge"
 				[System.Collections.ArrayList]$mergedFile = $vnetFile + $nsgFile + $routeTablesFile
 
 				if ($nsgFile) {
 					$nsgCsv = $mergedFile | Group-Object nsgName
 					foreach ($nsg in $nsgCsv) {
 						if ($nsg.name -like "*.csv") {
-							Write-Verbose "$((get-date).TimeOfDay.ToString()) - NSG: external CSV detected"
+							Write-Verbose "NSG: external CSV detected"
 							foreach ($externalNsg in $nsg.Group) {
-								$interimNsgCsvPath = "$(Split-Path $nsgCsvFile)/$($nsg.Name)"
+								$interimNsgCsvPath = "$(Split-Path $NsgCsvFile)/$($nsg.Name)"
 								$interimNsgCsvPath | Write-Verbose
 								$interimNsgFile = Import-Csv -Path $interimNsgCsvPath
 								$interimNsg = $interimNsgFile | Group-Object nsgName
@@ -116,7 +135,7 @@ function New-CmAzIaasNetworking {
 									$interimNsgObject | add-member -MemberType NoteProperty -Name Description -Value $externalNsg.Description
 									$interimNsgObjectArray.add($interimNsgObject) > $Null
 								}
-								Write-Verbose "$((get-date).TimeOfDay.ToString()) - starting merge"
+								Write-Verbose "starting merge"
 								$mergedFile.Remove($externalNsg)
 								$mergedFile += $interimNsgObjectArray
 							}
@@ -233,7 +252,7 @@ function New-CmAzIaasNetworking {
 					$nsgGroupObject = $nsgGroup | Group-Object ruleName
 					foreach ($nsg in $nsgGroupObject) {
 						if ($nsg.count -gt 1) {
-							Write-Error "$((get-date).TimeOfDay.ToString()) - Rule name not unique : '$($nsg.Name) in '$($nsg.Group.nsgName[0])' for Resource Group: '$($nsg.Group.resourceGroupName[0])'" -CategoryTargetName $nsg.Name -ErrorAction Stop
+							Write-Error "Rule name not unique : '$($nsg.Name) in '$($nsg.Group.nsgName[0])' for Resource Group: '$($nsg.Group.resourceGroupName[0])'" -CategoryTargetName $nsg.Name -ErrorAction Stop
 						}
 						$nsgruleObject = nsgruleObject -nsgGroupObject $nsg.Group
 						$nsgruleObjectList.Add($nsgruleObject) > $Null
@@ -249,43 +268,43 @@ function New-CmAzIaasNetworking {
 				foreach ($ResourceGroup in $ResourceGroupsFile) {
 					if ($ResourceGroup.Name) {
 						# Adding Vnets
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - working for $($ResourceGroup.Name)"
+						Write-Verbose "working for $($ResourceGroup.Name)"
 						$vnetsGroup = $ResourceGroup.Group | Group-Object vnetName
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - '$($ResourceGroup.Name)' has vnets = '$($($vnetsGroup.Name -notlike '').count)'"
+						Write-Verbose "'$($ResourceGroup.Name)' has vnets = '$($($vnetsGroup.Name -notlike '').count)'"
 						$vnetObjectArray = [System.Collections.ArrayList]@()
 						foreach ($vnet in $vnetsGroup) {
 							if ($vnet.name) {
 								$vnetObject = vnetObject -vnetGroup $vnet.Group -vnetName $vnet.Name
-								Write-Verbose "$((get-date).TimeOfDay.ToString()) - Adding vnet = '$($vnet.Name)' to RG = '$($ResourceGroup.Name)'"
+								Write-Verbose "Adding vnet = '$($vnet.Name)' to RG = '$($ResourceGroup.Name)'"
 								$vnetObjectArray.Add($vnetObject) > $Null
 							}
 						}
 						# Adding UDR
 						$routeTableGroup = $ResourceGroup.Group | Group-Object tableName
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - '$($ResourceGroup.Name)' has route tables = '$($($routeTableGroup.Name -notlike '').count)'"
+						Write-Verbose "'$($ResourceGroup.Name)' has route tables = '$($($routeTableGroup.Name -notlike '').count)'"
 						$routeTableObjectArray = [System.Collections.ArrayList]@()
 						foreach ($routeTable in $routeTableGroup) {
 							if ($routeTable.name) {
 								$routeTableObject = routeTableObject -routeTableGroup $routeTable.Group -tableName $routeTable.Name
-								Write-Verbose "$((get-date).TimeOfDay.ToString()) - Adding UDR = '$($routeTable.Name)' to RG = '$($ResourceGroup.Name)'"
+								Write-Verbose "Adding UDR = '$($routeTable.Name)' to RG = '$($ResourceGroup.Name)'"
 								$routeTableObjectArray.Add($routeTableObject) > $Null
 							}
 						}
 						# Adding NSG
 						$nsgGroup = $ResourceGroup.Group | Group-Object nsgName
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - '$($ResourceGroup.Name)' has route tables = '$($($nsgGroup.Name -notlike '').count)'"
+						Write-Verbose "'$($ResourceGroup.Name)' has route tables = '$($($nsgGroup.Name -notlike '').count)'"
 						$nsgObjectArray = [System.Collections.ArrayList]@()
 						foreach ($nsg in $nsgGroup) {
 							if ($nsg.name) {
 								$nsgObject = nsgObject -nsgGroup $nsg.Group -nsgName $nsg.Name
-								Write-Verbose "$((get-date).TimeOfDay.ToString()) - Adding nsg = '$($nsg.Name)' to RG = '$($ResourceGroup.Name)'"
+								Write-Verbose "Adding nsg = '$($nsg.Name)' to RG = '$($ResourceGroup.Name)'"
 								$nsgObjectArray.Add($nsgObject) > $Null
 							}
 						}
 						# Adding Objects to resourceGroup Object
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - Adding '$($ResourceGroup.Name)' to Resource Group Object List"
+						Write-Verbose "Adding '$($ResourceGroup.Name)' to Resource Group Object List"
 						Write-Verbose ""
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - ##############################################################"
+						Write-Verbose "##############################################################"
 						Write-Verbose ""
 
 						$ResourceGroupObject = @{
@@ -299,30 +318,30 @@ function New-CmAzIaasNetworking {
 
 				}
 			}
-			########################################## Arm Deployment ########################################
+			# Arm Deployment
 
 			if ($SettingsObject -and -not $ResourceGroupObjectArray) {
 				$resourceGroupObjectArray = $SettingsObject.ResourceGroups.clone()
 			}
 
-			Write-Verbose "$((get-date).TimeOfDay.ToString()) - Initiating deployment"
-			Write-Verbose "$((get-date).TimeOfDay.ToString()) - Setting environment Variables"
+			Write-Verbose "Initiating deployment"
+			Write-Verbose "Setting environment Variables"
 			try {
 				$env:PSScriptRoot = $PSScriptRoot
 				$env:context = "context.json"
 			}
 			catch {
-				write-verbose "$((get-date).TimeOfDay.ToString()) - Error setting environment variables. Make sure CmAzContext is set."
+				write-verbose "Error setting environment variables. Make sure CmAzContext is set."
 				$PSItem.ToString() | write-verbose
 			}
 			Save-Azcontext -Path $env:context -force
-			Write-Verbose "$((get-date).TimeOfDay.ToString()) - context set"
+			Write-Verbose "context set"
 
 			try {
 				$resourceGroupObjectArray | ForEach-Object -parallel {
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - Trying to Import context"
+					Write-Verbose "Trying to Import context"
 					Import-Azcontext -Path $env:context | Write-Verbose
-					Write-Verbose "$((get-date).TimeOfDay.ToString()) - context Imported"
+					Write-Verbose "context Imported"
 					if ($_.resourceGroupName) {
 						$ifResourceGroupExists = Get-AzResourceGroup -Name $_.resourceGroupName -ErrorAction SilentlyContinue
 						if (!$ifResourceGroupExists) {
@@ -337,18 +356,16 @@ function New-CmAzIaasNetworking {
 						if (!$_.networkSecurityGroups) {
 							$_.networkSecurityGroups = @(@{nsgName = "none"; rules = @(@{ruleName = "none"; description = "none"; priority = "none"; direction = "none"; sourceIp = "10.10.10.10"; sourcePort = 3389; destinationIp = "10.10.10.11"; destinationPort = 3389; protocol = "Tcp"; Access = "allow" }) })
 						}
-						Write-Verbose "$((get-date).TimeOfDay.ToString()) - Starting Deployment in Resourcegroup:'$($_.resourceGroupName)"
+						Write-Verbose "Starting Deployment in Resourcegroup:'$($_.resourceGroupName)"
 
 						New-AzResourceGroupDeployment `
-							-Name "$($_.resourceGroupName)-CmAz-Network-$((Get-Date -Format "yyyymmdd-hhmm"))" `
+							-Name "CmAz-Network-$((Get-Date -Format "yyyymmdd-hhmmss"))" `
 							-TemplateFile "$env:PSScriptRoot\New-CmAzIaasNetworking.json" `
 							-ResourceGroupName $_.resourceGroupName `
-							-vnetArmObject $_.vnets `
-							-routeTableArmObject $_.routeTables `
-							-nsgArmObject $_.networkSecurityGroups `
-							-Force `
-							-verbose `
-							-whatif:$whatifpreference
+							-VnetArmObject $_.vnets `
+							-RouteTableArmObject $_.routeTables `
+							-NsgArmObject $_.networkSecurityGroups `
+							-Force
 					}
 				}
 			}
@@ -357,8 +374,8 @@ function New-CmAzIaasNetworking {
 			}
 
 			Remove-Item -Path $env:context
-			Write-Verbose "$((get-date).TimeOfDay.ToString()) - Clearing context file..Done"
-			Write-Verbose "Networking is baked!!"
+			Write-Verbose "Clearing context file..Done"
+			Write-Verbose "Finished!"
 		}
 	}
 	catch {

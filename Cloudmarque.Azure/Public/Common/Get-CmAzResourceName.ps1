@@ -143,7 +143,6 @@
                 $nameSegments += $sb.ToString().Substring(0, $hashLength)
               }
           }
-          "app" {$nameSegments += ".azurewebsites.net"}
           "hash" {
 
             $hash = $nameSegments -Join $gen.separator
@@ -179,9 +178,6 @@
         $generatedName = $generatedName.Substring(0, $length)
       }
 
-      if($generatedName.contains("-.")){
-        $generatedName = $generatedName.Replace("-.",".")
-      }
       $generatedName
     }
     catch

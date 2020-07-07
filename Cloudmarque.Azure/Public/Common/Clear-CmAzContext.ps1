@@ -32,6 +32,9 @@
 		if ($global:CMAZ_CTX) {
 			Remove-Variable "CMAZ_CTX" -Scope "Global"
 		}
+		if($env:CMAZ_CTX_ENV){
+			$env:CMAZ_CTX_ENV = $null
+		}
 		Write-Verbose "Cloudmarque.Azure context cleared successfully"
 	}
 }
