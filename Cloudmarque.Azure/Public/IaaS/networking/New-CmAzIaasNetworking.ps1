@@ -155,7 +155,14 @@
 						subnetName           = $subnetName;
 						cidr                 = $subnetGroup.cidr;
 						networkSecurityGroup = $subnetGroup.networkSecurityGroup;
-						routeTable           = $subnetGroup.routeTable
+						routeTable           = $subnetGroup.routeTable;
+						ofVnet				 = $subnetGroup.vnetName
+					}
+					if(!$subnetObject.networkSecurityGroup){
+						$subnetObject.networkSecurityGroup = 'none'
+					}
+					if(!$subnetObject.routeTable){
+						$subnetObject.routeTable = 'none'
 					}
 					$subnetObject
 				}
@@ -313,14 +320,14 @@
 							routeTables           = $routeTableObjectArray;
 							networkSecurityGroups = $nsgObjectArray
 						}
-						$ResourceGroupObjectArray.Add($ResourceGroupObject) > $Null
+						$resourceGroupObjectArray.Add($ResourceGroupObject) > $Null
 					}
 
 				}
 			}
 			# Arm Deployment
 
-			if ($SettingsObject -and -not $ResourceGroupObjectArray) {
+			if ($SettingsObject -and -not $resourceGroupObjectArray) {
 				$resourceGroupObjectArray = $SettingsObject.ResourceGroups.clone()
 			}
 
@@ -338,9 +345,9 @@
 			Write-Verbose "context set"
 
 			try {
-				$resourceGroupObjectArray | ForEach-Object -parallel {
+				$resourceGroupObjectArray | ForEach-Object -Parallel {
 					Write-Verbose "Trying to Import context"
-					Import-Azcontext -Path $env:context | Write-Verbose
+					Import-Azcontext -Path $env:context > $null
 					Write-Verbose "context Imported"
 					if ($_.resourceGroupName) {
 						$ifResourceGroupExists = Get-AzResourceGroup -Name $_.resourceGroupName -ErrorAction SilentlyContinue
@@ -363,16 +370,17 @@
 							-TemplateFile "$env:PSScriptRoot\New-CmAzIaasNetworking.json" `
 							-ResourceGroupName $_.resourceGroupName `
 							-VnetArmObject $_.vnets `
+							-SubnetArmObject $_.vnets.subnets `
 							-RouteTableArmObject $_.routeTables `
 							-NsgArmObject $_.networkSecurityGroups `
-							-Force
+							-Force `
+							-verbose
 					}
 				}
 			}
 			catch {
 				$PSItem.ToString() | Write-Error
 			}
-
 			Remove-Item -Path $env:context
 			Write-Verbose "Clearing context file..Done"
 			Write-Verbose "Finished!"
