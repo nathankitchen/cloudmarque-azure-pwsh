@@ -1,7 +1,0 @@
-location: UK South
-windowsUpdateSchedules:
-  - name: WindowsVMUpdate
-    startTime: "2020-10-01T23:59:00"
-    expiryTime: "9999-12-31T23:59:00"
-    frequency: Week                       # Month, Week, Day
-    updateType: Critical                  # Critical, CriticalSecurity, Recommended, All

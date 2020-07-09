@@ -98,7 +98,7 @@
 				-AutomationAccountName $automationAccount.Name  `
 				-ErrorAction SilentlyContinue
 
-			if(!$automationAccountRegistration) {
+			if (!$automationAccountRegistration) {
 				Write-Error "Cannot find automation registration details." -Category InvalidArgument -CategoryTargetName "AutomationAccountTag"
 			}
 
@@ -111,6 +111,8 @@
 			$allResourceGroupNames = @()
 			$allVirtualMachines = @()
 			$virtualNetworks = @{ }
+
+			$daysOfWeek = [DayOfWeek].GetEnumNames()
 
 			foreach ($resourceGroup in $SettingsObject.Groups) {
 
@@ -154,6 +156,23 @@
 							"CreateOption" = "Empty";
 							"DiskSizeGB"   = $virtualMachine.DataDiskSizes[$i]
 						}
+					}
+
+					Write-Verbose "Building update tag.."
+					if ($virtualMachine.updateGroup -and $virtualMachine.updateFrequency) {
+
+						$scheduleSettings = Get-CmAzSettingsFile -Path "$PSScriptRoot/scheduletypes.yml"
+
+						$inValidScheduleSettings = 
+							!$scheduleSettings -or
+							!$scheduleSettings.UpdateGroups[$virtualMachine.updateGroup] -or 
+							(!$scheduleSettings.UpdateFrequencies[$virtualMachine.updateFrequency] -and $daysOfWeek -notcontains $virtualMachine.updateFrequency)
+							
+						if ($inValidScheduleSettings) {
+							Write-Error "No valid schedule settings." -Category ObjectNotFound -CategoryTargetName "scheduleTypeSettingsObject"
+						}
+
+						$virtualMachine.updateTag = @{ "cm-update" = "$($virtualMachine.updateGroup)-$($virtualMachine.updateFrequency)" }
 					}
 				}
 

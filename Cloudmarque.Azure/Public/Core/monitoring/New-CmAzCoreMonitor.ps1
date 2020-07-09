@@ -134,7 +134,6 @@ function New-CmAzCoreMonitor {
 				-AppInsightsName $appInsightsName `
 				-StorageAccountName $storageName `
 				-WorkspaceName $workspaceName `
-				-ServiceName $SettingsObject.services.logging `
 				-Force
 
 			Write-Verbose "Setting advisor configuration cpu threshold.."

@@ -7,9 +7,6 @@
         },
         "UpdateSchedules": {
             "type": "array"
-        },
-        "WorkspaceName": {
-            "type": "string"
         }
     },
     "resources": [
@@ -31,9 +28,18 @@
                     "contentVersion": "1.0.0.0",
                     "resources": [
                         {
+                            "type": "Microsoft.Automation/automationAccounts/schedules",
+                            "apiVersion": "2015-10-31",
+                            "name": "[concat(parameters('AutomationAccountName'), '/', parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name)]",
+                            "properties": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details]"
+                        },
+                        {
                             "type": "Microsoft.Automation/automationAccounts/jobSchedules",
                             "apiVersion": "2015-10-31",
-                            "name": "[concat(parameters('AutomationAccountName'), '/', Guid(concat(parameters('AutomationAccountName'), Guid(parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name))))]",
+                            "name": "[concat(parameters('AutomationAccountName'), '/', Guid(concat(parameters('AutomationAccountName'), parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name)))]",
+                            "dependsOn": [
+                                "[concat('Microsoft.Automation/automationAccounts/', parameters('AutomationAccountName'), '/schedules/', parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name)]"
+                            ],
                             "properties": {
                                 "runbook": {
                                     "name": "Patch-MicrosoftOMSComputers"
@@ -42,12 +48,6 @@
                                     "name": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name]"
                                 }
                             }
-                        },
-                        {
-                            "type": "Microsoft.Automation/automationAccounts/schedules",
-                            "apiVersion": "2015-10-31",
-                            "name": "[concat(parameters('AutomationAccountName'), '/', parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name)]",
-                            "properties": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details]"
                         },
                         {
                             "type": "Microsoft.Automation/automationAccounts/softwareUpdateConfigurations",
@@ -89,16 +89,6 @@
                         }
                     ]
                 }
-            }
-        },
-        {
-            "type": "Microsoft.OperationalInsights/Workspaces/LinkedServices",
-            "apiVersion": "2020-03-01-preview",
-            "name": "[concat(parameters('WorkspaceName'), '/automation')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "resourceId": "[resourceId('Microsoft.Automation/automationAccounts', parameters('AutomationAccountName'))]",
-                "provisioningState": "Succeeded"
             }
         }
     ]

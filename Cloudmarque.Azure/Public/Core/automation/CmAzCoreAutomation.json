@@ -2,13 +2,13 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "2.0.0.0",
     "parameters": {
-        "accountName": {
+        "AccountName": {
             "type": "String"
         },
-        "location": {
+        "Location": {
             "type": "String"
         }
-      },
+    },
     "resources": [
         {
             "type": "Microsoft.Automation/automationAccounts",

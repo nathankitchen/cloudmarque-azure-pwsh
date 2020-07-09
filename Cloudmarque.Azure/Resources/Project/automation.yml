@@ -2,18 +2,18 @@ location: UK South
 resourceGroup: rg
 automation:
   runbook:
-    keyVaultName: # Key Vault Name
-    certificateName: # Name of Certificate in Key Vault
-    keyVaultCertificatePassword: # Secret Name is Key Vault
-    keyVaultPersonalAccessToken: # keyvault secret name for PAT to access Repo
-    repoUrl: # https://github.com/dpandharkarGIT/azure-global.git
-    repoType: github # Options - github | git | tvfc
-    folderPath: /dsc # Path to folder which contains runbook or DSC files.
+    keyVaultName:                   # Key Vault Name
+    certificateName:                # Name of Certificate in Key Vault
+    keyVaultCertificatePassword:    # Secret Name is Key Vault
+    keyVaultPersonalAccessToken:    # keyvault secret name for PAT to access Repo
+    repoUrl:                        # 
+    repoType: github                # Options - github | git | tvfc
+    folderPath: /dsc                # Path to folder which contains runbook or DSC files.
   dsc:
-    keyVaultName: # Key Vault Name
-    certificateName: # Name of Certificate in Key Vault
-    keyVaultCertificatePassword: # Secret Name is Key Vault
-    keyVaultPersonalAccessToken: # keyvault secret name for PAT to access Repo
-    repoUrl: # https://github.com/dpandharkarGIT/azure-global.git
-    repoType: github # Options - github | git | tvfc
-    folderPath: /dsc # Path to folder which contains runbook or DSC files.
+    keyVaultName:                   # Key Vault Name
+    certificateName:                # Name of Certificate in Key Vault
+    keyVaultCertificatePassword:    # Secret Name is Key Vault
+    keyVaultPersonalAccessToken:    # keyvault secret name for PAT to access Repo
+    repoUrl:                        # 
+    repoType: github                # Options - github | git | tvfc
+    folderPath: /dsc                # Path to folder which contains runbook or DSC files.

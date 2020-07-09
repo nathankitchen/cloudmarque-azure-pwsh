@@ -1,22 +1,24 @@
 location: UK South
 desiredConfigName: 
-automationAccountTag: 
+automationAccountTag:
 keyVault:
   tag: core.security                                    # Optional, providing a keyvault will encrypt all vm disks
   diskEncryptionKey:
 groups:
   - name:                                               # Leave blank to have the vm collection provision its own resource group
     virtualMachines:
-      - name: 
-        size: Standard_B2ms                         
+      - name:
+        size: Standard_B2ms
+        updateGroup: critical
+        updateFrequency: tuesday                     
         imageReference:
-          publisher: Canonical
-          offer: UbuntuServer
-          sku: 18.04-LTS
+          publisher: MicrosoftWindowsDesktop
+          offer: Windows-10
+          sku: rs5-pro
           version: latest
         osDisk:
-          osType: Linux
-          diskSizeGB: 30       
+          osType: Windows
+          diskSizeGB: 127  
         dataDiskSizes: [10]                             # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
         networking:
           ipAddress:                                    # Leave blank for dynamic ip allocations

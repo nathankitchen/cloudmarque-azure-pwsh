@@ -206,6 +206,7 @@
                             "apiVersion": "2019-12-01",
                             "name": "[parameters('VM').fullName]",
                             "location": "[resourceGroup().location]",
+                            "tags": "[parameters('VM').updateTag]",
                             "dependsOn": [
                                 "[parameters('VM').nicName]"
                             ],
