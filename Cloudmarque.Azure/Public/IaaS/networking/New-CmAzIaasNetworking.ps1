@@ -310,10 +310,6 @@
 						}
 						# Adding Objects to resourceGroup Object
 						Write-Verbose "Adding '$($ResourceGroup.Name)' to Resource Group Object List"
-						Write-Verbose ""
-						Write-Verbose "##############################################################"
-						Write-Verbose ""
-
 						$ResourceGroupObject = @{
 							resourceGroupName     = $ResourceGroup.Name;
 							vnets                 = $vnetObjectArray;
@@ -321,6 +317,7 @@
 							networkSecurityGroups = $nsgObjectArray
 						}
 						$resourceGroupObjectArray.Add($ResourceGroupObject) > $Null
+						Write-Verbose "'$($ResourceGroup.Name)' Added"
 					}
 
 				}
