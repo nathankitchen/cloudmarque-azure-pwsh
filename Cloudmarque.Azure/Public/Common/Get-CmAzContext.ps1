@@ -44,7 +44,7 @@
     if ($ThrowIfUnavailable -And (-Not $global:CMAZ_CTX) -And (-Not $env:CMAZ_CTX_ENV)) {
       throw "No Cloudmarque Azure context is in place, please run Set-CmAzContext before running this command."
     }
-    elseif (-Not $global:CMAZ_CTX) {
+    elseif (-Not $global:CMAZ_CTX -And $env:CMAZ_CTX_ENV) {
       $global:CMAZ_CTX =  ConvertFrom-StringData -StringData $env:CMAZ_CTX_ENV
     }
     $global:CMAZ_CTX

@@ -19,7 +19,6 @@ Describe "*-CmAzContext Lifecycle Tests" {
 		}
 		It "Should fail when Azure is unavailable and -RequireAzure is set" {
 			{
-				Clear-AzContext -Force -Scope "Process"
 				Set-CmAzContext -ProjectRoot $projectRoot -Environment "Development"
 				Get-CmAzContext -ThrowIfUnavailable -RequireAzure
 			} | Should Throw "You must be logged into Azure. Please ensure you have an AzContext before running this command."
