@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "WebAppName": {
-            "defaultValue": "AzureGoodApp",
+            "defaultValue": "CmAzWebApp",
             "minLength": 2,
             "type": "String",
             "metadata": {
@@ -56,12 +56,6 @@
                 "description": "OS type."
             }
         },
-        "Apptag": {
-             "type": "String",
-            "metadata": {
-                "description": "application shortname"
-            }
-        },
         "StagingSlotName": {
             "defaultValue": [
                 "production"
@@ -102,9 +96,6 @@
                 "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]"
             ],
             "kind": "app",
-            "tags": {
-                "cm-paas-web": "[parameters('Apptag')]"
-            },
             "properties": {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]",
                 "siteConfig": {

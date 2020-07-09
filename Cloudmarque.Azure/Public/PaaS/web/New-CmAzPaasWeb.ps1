@@ -1,4 +1,4 @@
-function New-CmAzPaasWeb {
+﻿function New-CmAzPaasWeb {
 	<#
 		.Synopsis Create an Frontdoor with backing webapps
 
@@ -43,17 +43,16 @@ function New-CmAzPaasWeb {
 				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 			}
 
-			$resourceGroup = Get-CmAzService -Service $SettingsObject.ResourceGroupTag -Region $SettingsObject.Location -IsResourceGroup -ErrorAction SilentlyContinue
-			if (!$resourceGroup) {
-				$env:nameResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName
-				Write-Verbose "Resourcegroup with tag $($SettingsObject.ResourceGroupTag) not found. New Resource Group '$($env:nameResourceGroup)' will be created."
-				New-AzResourceGroup -ResourceGroupName $env:nameResourceGroup -Location $SettingsObject.location -Force
-			}
-			else {
-				$env:nameResourceGroup = $resourceGroup.ResourceGroupName
-			}
+			$env:nameResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName
+			New-AzResourceGroup -ResourceGroupName $env:nameResourceGroup -Location $SettingsObject.location -Force
 			$env:permanentPSScriptRoot = $PSScriptRoot
 
+			$frontdoorCheck = Get-AzFrontDoor -Name $SettingsObject.frontdoor.hostName -ResourceGroupName $env:nameResourceGroup -ErrorAction SilentlyContinue
+			if ($frontdoorCheck) {
+				Write-Verbose "Frontdoor by the name $($SettingsObject.frontdoor.hostName) already exists."
+				Remove-AzFrontDoor -Name $SettingsObject.frontdoor.hostName -ResourceGroupName $env:nameResourceGroup
+				Write-Verbose "Removed!"
+			}
 			if ($SettingsObject.monitoring.applicationInstrumentationKey) {
 				$env:applicationInstrumentationKey = $SettingsObject.monitoring.applicationInstrumentationKey
 			}
@@ -67,22 +66,19 @@ function New-CmAzPaasWeb {
 					Write-Verbose "Initiating deployment of webapp : $($app.Name)"
 					$kind = "linux"
 					$linuxFxVersion = $app.Runtime
-					$apptag = $app.Name
 					$_.Name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $_.Region -Name $_.Name
-					$app.Name = Get-CmAzResourceName -Resource "WebApp" -Architecture "PaaS" -Region $_.Region -Name $app.Name
+					$app.generatedName = Get-CmAzResourceName -Resource "WebApp" -Architecture "PaaS" -Region $_.Region -Name $app.Name
 
 					New-AzResourceGroupDeployment  `
-						-Name $app.Name `
+						-Name $app.generatedName `
 						-ResourceGroupName $env:nameResourceGroup `
 						-TemplateFile "$env:permanentPSScriptRoot\New-CmAzPaasWeb.json" `
-						-WhatIf:$WhatIfPreference `
-						-WebAppName $app.Name `
+						-WebAppName $app.generatedName `
 						-Kind $kind `
 						-LinuxFxVersion $linuxFxVersion  `
 						-AppServicePlanName $_.Name `
 						-Sku $_.Sku `
 						-Location $_.Region `
-						-Apptag $apptag `
 						-StagingSlotName ($app.Slots).ToArray() `
 						-AppInstrumatationKey $env:applicationInstrumentationKey `
 						-Force `
@@ -96,7 +92,6 @@ function New-CmAzPaasWeb {
 			$SettingsObject.ApiManagementServices | foreach-object -parallel {
 				if ($_.Name -and $_.Region -and $_.Organization -and $_.AdminEmail -and $_.Sku ) {
 					try {
-						$tag = @{"cm-paas-web" = $_.Name }
 						$_.Name = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Region $_.Region -Name $_.Name
 						Write-Verbose "Creating ApiManagementService $($_.Name)"
 						New-AzApiManagement `
@@ -105,8 +100,7 @@ function New-CmAzPaasWeb {
 							-Name $_.Name `
 							-Organization $_.Organization `
 							-AdminEmail $_.AdminEmail `
-							-Sku $_.Sku `
-							-Tag $tag
+							-Sku $_.Sku
 
 						while (!(([system.uri](Get-AzApiManagement -Name $_.Name -ResourceGroupName $env:nameResourceGroup).RuntimeUrl).Host)) {
 							Start-Sleep -minutes 5
@@ -186,7 +180,7 @@ function New-CmAzPaasWeb {
 			$frontendEndpointObjectArray.add($frontendEndpointObjectMain) > $null
 
 			Write-Verbose "FrontEnd Local Hostname:"
-			$frontendEndpointObjectMain
+			$frontendEndpointObjectMain | Write-Verbose
 
 			if ($SettingsObject.frontDoor.customDomains.domainName) {
 				foreach ($domain in $SettingsObject.frontDoor.customDomains) {
@@ -202,31 +196,19 @@ function New-CmAzPaasWeb {
 			}
 
 			# Create Back end pool Object
-			Write-Verbose "Initiating creation of Backend Endpoint Array of Backend Objects"
+			Write-Verbose "Initiating creation of Backend Pool"
 			$backEndPoolObjectArray = [System.Collections.ArrayList]@()
 			$healthProbeSettingObjectArray = [System.Collections.ArrayList]@()
 			$loadBalancingSettingObjectArray = [System.Collections.ArrayList]@()
 			$routingRuleObjectArray = [System.Collections.ArrayList]@()
 
 			foreach ($backEndPool in $SettingsObject.frontDoor.backEndPools) {
-				$backendObjectArray = [System.Collections.ArrayList]@()
-				foreach ($appname in $backEndPool.apps) {
-					Write-Verbose "Checking $($appname) type"
-					$appname = (Get-CmAzService -ServiceKey "cm-paas-web" -Service $appname).name
-					$resourceType = (Get-AzResource -ResourceGroupName $env:nameResourceGroup -Name $appname).ResourceType
-					Write-Verbose "Resource type identified to be : $($resourceType)"
 
-					if ($resourceType -eq "Microsoft.ApiManagement/service") {
-						$backEndDomainName = ([system.uri](Get-AzApiManagement -ResourceGroupName $env:nameResourceGroup -Name $appname).RuntimeUrl).Host
-					}
-					elseif ($resourceType -eq "Microsoft.Web/sites") {
-						$backEndDomainName = (Get-AzWebApp -ResourceGroupName $env:nameResourceGroup -Name  $appname).DefaultHostName
-					}
-					else {
-						Write-Verbose "Webapp $($appname) not found "
-						break
-					}
-					if (!$backEndPool.backendHostHeader) {
+				$backendObjectArray = [System.Collections.ArrayList]@()
+
+				$SettingsObject.appServicePlans.webapps | Where-Object { $_.backendpool -match $backEndPool.Name } | ForEach-Object {
+					$backEndDomainName = (Get-AzWebApp -ResourceGroupName $env:nameResourceGroup -Name  $_.generatedName).DefaultHostName
+					if (!$_.backendHostHeader) {
 						$backendHostHeader = ""
 					}
 					else {
@@ -235,9 +217,23 @@ function New-CmAzPaasWeb {
 					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
 					$backendObjectArray.Add($backEndObject) > $null
 				}
+
+				$SettingsObject.ApiManagementServices | Where-Object { $_.backendPool -eq $backEndPool.Name } | ForEach-Object {
+					$backEndDomainName = ([system.uri](Get-AzApiManagement -ResourceGroupName $env:nameResourceGroup -Name $_.name).RuntimeUrl).Host
+					if (!$_.backendHostHeader) {
+						$backendHostHeader = ""
+					}
+					else {
+						$backendHostHeader = $backEndDomainName
+					}
+					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
+					$backendObjectArray.Add($backEndObject) > $null
+				}
+
 				if (!$backEndPool.HealthCheckPath) {
 					$backEndPool.HealthCheckPath = "/index.html"
 				}
+
 				if (!$backEndPool.protocol) {
 					$backEndPool.protocol = "Https"
 				}
@@ -247,6 +243,7 @@ function New-CmAzPaasWeb {
 				elseif ($backEndPool.protocol -eq "HTTPS" -or $backEndPool.protocol -eq "https" -or $backEndPool.protocol -eq "Https") {
 					$backEndPool.protocol = "Https"
 				}
+
 				$healthProbeSettingObject = New-AzFrontDoorHealthProbeSettingObject -Name "HealthProbeSetting-$($backEndPool.Name)" -Path  $backEndPool.HealthCheckPath -Protocol $backEndPool.protocol
 				$loadBalancingSettingObject = New-AzFrontDoorLoadBalancingSettingObject -Name "Loadbalancingsetting-$($backEndPool.Name)"
 
@@ -273,14 +270,11 @@ function New-CmAzPaasWeb {
 						-BackendPoolName  $rule.backEndPoolName `
 						-PatternToMatch  $rule.Pattern
 				}
-				$routingRuleObject
 				$routingRuleObjectArray.Add($routingRuleObject) > $null
 			}
-
 			# Create Frontdoor
 			Write-Verbose "Initiating creation of Azure frontdoor"
-
-			New-AzFrontDoor -Name $SettingsObject.frontDoor.hostName `
+			$newAzFrontdoor = New-AzFrontDoor -Name $SettingsObject.frontDoor.hostName `
 				-ResourceGroupName $env:nameResourceGroup `
 				-FrontendEndpoint $frontendEndpointObjectArray `
 				-BackendPool $backEndPoolObjectArray `
@@ -288,10 +282,12 @@ function New-CmAzPaasWeb {
 				-LoadBalancingSetting $loadBalancingSettingObjectArray `
 				-RoutingRule $routingRuleObjectArray
 
+			$newAzFrontdoor | Write-Verbose
 
 			if ($SettingsObject.frontDoor.customDomains.domainName) {
 				foreach ($domain in $SettingsObject.frontDoor.customDomains) {
-					customDomainOnFrontDoorEnableHttps -domainName $domain.domainName -VaultName $domain.customCertificateVaultName -secretName $domain.customCertificateSecretName
+					$enableHttps = customDomainOnFrontDoorEnableHttps -domainName $domain.domainName -VaultName $domain.customCertificateVaultName -secretName $domain.customCertificateSecretName
+					$enableHttps | Write-Verbose
 				}
 			}
 

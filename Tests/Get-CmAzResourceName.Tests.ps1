@@ -198,16 +198,16 @@ Describe "Get-CmAzResourceName" {
             $name | Should -Be "plan-myappserviceplan-dev-uks-efffb94e"
         }
         It "Should get a WebApp name" {
-            $name = Get-CmAzResourceName -Resource "WebApp" -Architecture "Core" -Region "UK South" -Name "MyWebApp"
-            $name | Should -Be "app-mywebapp-core-953356fb.azurewebsites.net"
+            $name = Get-CmAzResourceName -Resource "WebApp" -Architecture "Core" -Region "UK South" -Name "MyWebApp" -IncludeBuild
+            $name | Should -Be "app-mywebapp-dev-909260e2-001"
         }
         It "Should get a FunctionApp name" {
-            $name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "Core" -Region "UK South" -Name "MyFunctionApp"
-            $name | Should -Be "func-myfunctionapp-core-11d29ba6.azurewebsites.net"
+            $name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "Core" -Region "UK South" -Name "MyFunctionApp" -IncludeBuild
+            $name | Should -Be "func-myfunctionapp-dev-001"
         }
         It "Should get a CloudService name" {
-            $name = Get-CmAzResourceName -Resource "CloudService" -Architecture "Core" -Region "UK South" -Name "MyCloudService"
-            $name | Should -Be "cld-mycloudservice-core-95858265.azurewebsites.net"
+            $name = Get-CmAzResourceName -Resource "CloudService" -Architecture "Core" -Region "UK South" -Name "MyCloudService" -IncludeBuild
+            $name | Should -Be "cld-mycloudservice-dev-71a7c051-001"
         }
         It "Should get a NotificationHubs name" {
             $name = Get-CmAzResourceName -Resource "NotificationHubs" -Architecture "Core" -Region "UK South" -Name "MyNotificationHubs"
