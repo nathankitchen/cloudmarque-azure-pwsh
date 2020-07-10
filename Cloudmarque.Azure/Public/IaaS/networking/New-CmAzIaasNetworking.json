@@ -8,12 +8,6 @@
                 "description": "vnet object with all required parameters"
             }
         },
-        "SubnetArmObject": {
-            "type": "Array",
-            "metadata": {
-                "description": "subnet object with all required parameters"
-            }
-        },
         "RouteTableArmObject": {
             "type": "Array",
             "metadata": {
@@ -53,121 +47,15 @@
                         "name": "subnets",
                         "count": "[length( parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets)]",
                         "input": {
-                            "name": "[ parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].subnetName]",
+                            "name": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].subnetName]",
                             "properties": {
-                                "addressPrefix": "[ parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].cidr]"
+                                "addressPrefix": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].cidr]",
+                                "networkSecurityGroup": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].networkSecurityGroup)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/networkSecurityGroups', parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].networkSecurityGroup), '\"}')), json('null'))]",
+                                "routeTable": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/routeTables', parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable), '\"}')), json('null'))]"
                             }
                         }
                     }
                 ]
-            }
-        },
-        {   "condition": "[and(not(equals(parameters('SubnetArmObject')[copyIndex('nsgdeploycopy')].networkSecurityGroup, 'none')), equals(parameters('SubnetArmObject')[copyIndex('nsgdeploycopy')].routeTable, 'none'))]",
-            "apiVersion": "2019-10-01",
-            "name": "[concat('Add-nsg-to-subnet-', copyIndex('nsgdeploycopy'))]",
-            "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[resourceGroup().name]",
-            "dependsOn": [
-                "routeTableDeploycopy"
-            ],
-            "copy": {
-                "name" : "nsgdeploycopy",
-                "count" : "[length( parameters('SubnetArmObject'))]",
-                "mode": "serial"
-            },
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                        {
-                            "apiVersion": "2019-12-01",
-                            "type": "Microsoft.Network/virtualNetworks/subnets",
-                            "name": "[concat(parameters('SubnetArmObject')[copyIndex('nsgdeploycopy')].ofVnet, '/', parameters('SubnetArmObject')[copyIndex('nsgdeploycopy')].subnetName)]",
-                            "location": "[resourceGroup().location]",
-                            "properties": {
-                                "addressPrefix": "[reference(resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', parameters('SubnetArmObject')[copyIndex('nsgdeploycopy')].ofVnet, parameters('SubnetArmObject')[copyIndex('nsgdeploycopy')].subnetName), '2019-12-01').addressPrefix]",
-                                "networkSecurityGroup": {
-                                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('SubnetArmObject')[copyIndex('nsgdeploycopy')].networkSecurityGroup)]"
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        },
-        {   "condition": "[and(not(equals(parameters('SubnetArmObject')[copyIndex('routeTableDeploycopy')].routeTable, 'none')), equals(parameters('SubnetArmObject')[copyIndex('routeTableDeploycopy')].networkSecurityGroup, 'none'))]",
-            "apiVersion": "2019-10-01",
-            "name": "[concat('Add-routeTable-to-subnet-', copyIndex('routeTableDeploycopy'))]",
-            "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[resourceGroup().name]",
-            "dependsOn": [
-                "nsgrtdeploy"
-            ],
-            "copy": {
-                "name" : "routeTableDeploycopy",
-                "count" : "[length( parameters('SubnetArmObject'))]",
-                "mode": "serial"
-            },
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                        {
-                            "apiVersion": "2019-12-01",
-                            "type": "Microsoft.Network/virtualNetworks/subnets",
-                            "name": "[concat(parameters('SubnetArmObject')[copyIndex('routeTableDeploycopy')].ofVnet, '/', parameters('SubnetArmObject')[copyIndex('routeTableDeploycopy')].subnetName)]",
-                            "location": "[resourceGroup().location]",
-                            "properties": {
-                                "addressPrefix": "[reference(resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', parameters('SubnetArmObject')[copyIndex('routeTableDeploycopy')].ofVnet, parameters('SubnetArmObject')[copyIndex('routeTableDeploycopy')].subnetName), '2019-12-01').addressPrefix]",
-                                "routeTable": {
-                                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('SubnetArmObject')[copyIndex('routeTableDeploycopy')].routeTable)]"
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        },
-         {  "condition": "[and(not(equals(parameters('SubnetArmObject')[copyIndex('nsgrtdeploy')].networkSecurityGroup, 'none')), not(equals(parameters('SubnetArmObject')[copyIndex('nsgrtdeploy')].routeTable, 'none')))]",
-            "apiVersion": "2019-10-01",
-            "name": "[concat('Add-routetable-and-nsg-to-subnet-', copyIndex('nsgrtdeploy'))]",
-            "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[resourceGroup().name]",
-            "dependsOn": [
-                "vnetCopy"
-            ],
-            "copy": {
-                "name" : "nsgrtdeploy",
-                "count" : "[length( parameters('SubnetArmObject'))]",
-                "mode": "serial"
-            },
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                        {
-                            "apiVersion": "2019-12-01",
-                            "type": "Microsoft.Network/virtualNetworks/subnets",
-                            "name": "[concat(parameters('SubnetArmObject')[copyIndex('nsgrtdeploy')].ofVnet, '/', parameters('SubnetArmObject')[copyIndex('nsgrtdeploy')].subnetName)]",
-                            "location": "[resourceGroup().location]",
-                            "properties": {
-                                "addressPrefix": "[reference(resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks/subnets', parameters('SubnetArmObject')[copyIndex('nsgrtdeploy')].ofVnet, parameters('SubnetArmObject')[copyIndex('nsgrtdeploy')].subnetName), '2019-12-01').addressPrefix]",
-                                "networkSecurityGroup": {
-                                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('SubnetArmObject')[copyIndex('nsgrtdeploy')].networkSecurityGroup)]"
-                                },
-                                "routeTable": {
-                                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('SubnetArmObject')[copyIndex('nsgrtdeploy')].routeTable)]"
-                                }
-                            }
-                        }
-                    ]
-                }
             }
         },
         {

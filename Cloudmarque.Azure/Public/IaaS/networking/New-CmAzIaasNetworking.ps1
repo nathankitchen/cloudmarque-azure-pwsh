@@ -156,13 +156,6 @@
 						cidr                 = $subnetGroup.cidr;
 						networkSecurityGroup = $subnetGroup.networkSecurityGroup;
 						routeTable           = $subnetGroup.routeTable;
-						ofVnet				 = $subnetGroup.vnetName
-					}
-					if(!$subnetObject.networkSecurityGroup){
-						$subnetObject.networkSecurityGroup = 'none'
-					}
-					if(!$subnetObject.routeTable){
-						$subnetObject.routeTable = 'none'
 					}
 					$subnetObject
 				}
@@ -367,7 +360,6 @@
 							-TemplateFile "$env:PSScriptRoot\New-CmAzIaasNetworking.json" `
 							-ResourceGroupName $_.resourceGroupName `
 							-VnetArmObject $_.vnets `
-							-SubnetArmObject $_.vnets.subnets `
 							-RouteTableArmObject $_.routeTables `
 							-NsgArmObject $_.networkSecurityGroups `
 							-Force `
@@ -379,7 +371,7 @@
 				$PSItem.ToString() | Write-Error
 			}
 			Remove-Item -Path $env:context
-			Write-Verbose "Clearing context file..Done"
+			Write-Verbose "Cleared environment."
 			Write-Verbose "Finished!"
 		}
 	}

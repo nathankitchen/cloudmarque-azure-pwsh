@@ -5,30 +5,13 @@ vpnGw:
   - gatewayName:
     vnetTag:
     sku:
-    gatewaySubnetPrefix: #optional if you have dont have GatewaySubnet already in the Vnet.
+    gatewaySubnetPrefix:      # Optional: Required only if you dont have GatewaySubnet already in the Vnet.
     p2s:
-      vpnAddressPool: #VPN IP address pool ex: 172.0.0.0/16
-      keyVaultTag: #Key Vault Name
-      rootCertificateName: # Name of Certificate in Key Vault
+      vpnAddressPool:         # VPN IP address pool ex: 172.0.0.0/16
+      keyVaultTag:            # Key Vault service tag
+      rootCertificateName:    # Name of uploaded certificate in Key Vault
     s2s:
       keyVaultTag:
-      keyVaultSecret:
-      clientSitePublicIP: #On site VPN Gateway public IP
-      cidrBlocks:
-
-
-  # - gatewayName:
-  #   vnetTag:
-  #   sku:
-  #   gatewaySubnetPrefix: #optional if you have dont have GatewaySubnet already in the Vnet.
-  #   p2s:
-  #     vpnAdressPool: #VPN IP address pool ex: 172.0.0.0/16
-  #     keyVaultTag: #Key Vault Name
-  #     rootCertificateName: # Name of Certificate in Key Vault
-  #   s2s:
-  #   keyVaultTag:
-  #     keyVaultSecret:
-  #     clientSitePublicIP: #On site VPN Gateway public IP
-  #     cidrBlocks:
-  #       -
-  #       -
+      keyVaultSecret:         # Name of secret in Key Vault
+      clientSitePublicIP:     # On site VPN Gateway public IP
+      cidrBlocks: []

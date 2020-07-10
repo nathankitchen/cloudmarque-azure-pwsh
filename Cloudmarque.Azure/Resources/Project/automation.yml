@@ -2,18 +2,18 @@ location: UK South
 resourceGroup: rg
 automation:
   runbook:
-    keyVaultName:                   # Key Vault Name
-    certificateName:                # Name of Certificate in Key Vault
-    keyVaultCertificatePassword:    # Secret Name is Key Vault
-    keyVaultPersonalAccessToken:    # keyvault secret name for PAT to access Repo
-    repoUrl:                        # 
-    repoType: github                # Options - github | git | tvfc
-    folderPath: /dsc                # Path to folder which contains runbook or DSC files.
+    keyVaultName:                   # Required: Key Vault Name
+    certificateName:                # Required: Name of Certificate in Key Vault
+    keyVaultCertificatePassword:    # Required: Name of secret in Key Vault
+    keyVaultPersonalAccessToken:    # Optional(only if repoURL): keyvault secret name for PAT to access Repo
+    repoUrl:                        # Optional: For repo intergration
+    repoType:                       # Optional(only if repoURL): github | git | tvfc
+    folderPath:                     # Optional(only if repoURL): Path to folder which contains runbook or DSC files.
   dsc:
-    keyVaultName:                   # Key Vault Name
-    certificateName:                # Name of Certificate in Key Vault
-    keyVaultCertificatePassword:    # Secret Name is Key Vault
-    keyVaultPersonalAccessToken:    # keyvault secret name for PAT to access Repo
-    repoUrl:                        # 
-    repoType: github                # Options - github | git | tvfc
-    folderPath: /dsc                # Path to folder which contains runbook or DSC files.
+    keyVaultName:                   # Required: Key Vault Name
+    certificateName:                # Required: Name of Certificate in Key Vault
+    keyVaultCertificatePassword:    # Required: Name of secret in Key Vault
+    keyVaultPersonalAccessToken:    # Optional(only if repoURL): keyvault secret name for PAT to access Repo
+    repoUrl:                        # Optional: For repo intergration
+    repoType:                       # Optional(only if repoURL): github | git | tvfc
+    folderPath:                     # Optional(only if repoURL): Path to folder which contains runbook or DSC files.
