@@ -203,7 +203,7 @@ Describe "Get-CmAzResourceName" {
         }
         It "Should get a FunctionApp name" {
             $name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "Core" -Region "UK South" -Name "MyFunctionApp" -IncludeBuild
-            $name | Should -Be "func-myfunctionapp-dev-001"
+            $name | Should -Be "func-myfunctionapp-dev-4f6634ae-001"
         }
         It "Should get a CloudService name" {
             $name = Get-CmAzResourceName -Resource "CloudService" -Architecture "Core" -Region "UK South" -Name "MyCloudService" -IncludeBuild

@@ -163,11 +163,11 @@
 
 						$scheduleSettings = Get-CmAzSettingsFile -Path "$PSScriptRoot/scheduletypes.yml"
 
-						$inValidScheduleSettings = 
+						$inValidScheduleSettings =
 							!$scheduleSettings -or
-							!$scheduleSettings.UpdateGroups[$virtualMachine.updateGroup] -or 
+							!$scheduleSettings.UpdateGroups[$virtualMachine.updateGroup] -or
 							(!$scheduleSettings.UpdateFrequencies[$virtualMachine.updateFrequency] -and $daysOfWeek -notcontains $virtualMachine.updateFrequency)
-							
+
 						if ($inValidScheduleSettings) {
 							Write-Error "No valid schedule settings." -Category ObjectNotFound -CategoryTargetName "scheduleTypeSettingsObject"
 						}

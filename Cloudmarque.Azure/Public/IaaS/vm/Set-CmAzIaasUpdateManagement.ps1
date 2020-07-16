@@ -90,7 +90,7 @@ function Set-CmAzIaasUpdateManagement {
 
 			Write-Verbose "Update schedule set to $($frequency).."
 			if ($frequency -eq $scheduleTypeSettingsObject.updateFrequencies.weekly) {
-				
+
 				$dayOfWeek = (get-date $scheduleSetting.StartTime).DayOfWeek
 				$frequencyTag = $dayOfWeek
 				$schedule.details.advancedSchedule.weekDays += $dayOfWeek
