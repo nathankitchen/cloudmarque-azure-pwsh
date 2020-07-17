@@ -114,4 +114,4 @@ stages:
             inputs:
               command: push
               packagesToPush: '$(Pipeline.Workspace)/pkg/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.nupkg'
-              publishVstsFeed: '01b1b0ed-adec-4221-ac76-17fb9a88008e/a8c931f2-f3d2-4263-b35d-d7517dc533ff'
+              publishVstsFeed: '$(VstsFeed)'

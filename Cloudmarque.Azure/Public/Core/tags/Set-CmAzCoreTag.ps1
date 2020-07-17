@@ -34,7 +34,7 @@
 	$ErrorActionPreference = "Stop"
 
 	function MergeHashTables() {
-		
+
 		param(
 			[parameter(Mandatory = $true)]
 			[hashtable]$hashtableToFilter,

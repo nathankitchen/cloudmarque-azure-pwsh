@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package >
   <metadata>
-    <id>Cloudmarque.Azure.Github</id>
+    <id>Cloudmarque.Azure</id>
     <version>0.0.1</version>
     <authors>trustmarque</authors>
     <owners>Trustmarque</owners>
