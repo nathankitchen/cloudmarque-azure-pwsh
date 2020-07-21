@@ -1,25 +1,28 @@
 ﻿function New-CmAzPaasWeb {
 	<#
-		.Synopsis Create an Frontdoor with backing webapps
+		.Synopsis
+		 Create an Frontdoor with backing webapps
 
-		.Description Completes following:
+		.Description
+		 Completes following:
 			* Creates Frontdoor
 			* Creates Webapp and attaches to frontdoor
 			* Optional API routing available
 
 		.Parameter SettingsFile
-		Path to configuration settings
+		 File path for the settings file to be converted into a settings object.
 
 		.Parameter SettingsObject
-		Provide Azure Object
+		 Object containing the configuration values required to run this cmdlet.
 
-		.Component PaaS
-
-		.Example
-		New-CmAzPaasWeb -SettingsFile ./web.yml
+		.Component
+		 PaaS
 
 		.Example
-		New-CmAzPaasWeb -SettingsObject $settings
+		 New-CmAzPaasWeb -SettingsFile ./web.yml
+
+		.Example
+		 New-CmAzPaasWeb -SettingsObject $settings
 	#>
 
 	[OutputType([System.Collections.ArrayList])]
@@ -34,6 +37,7 @@
 	$ErrorActionPreference = "Stop"
 
 	try {
+
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Azure - Frontdoor | Backendpool | Webapps along with routing rules")) {
 
 			if ($SettingsFile -and -not $SettingsObject) {
@@ -44,15 +48,19 @@
 			}
 
 			$env:nameResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName
-			New-AzResourceGroup -ResourceGroupName $env:nameResourceGroup -Location $SettingsObject.location -Force
+
+			New-AzResourceGroup -ResourceGroupName $env:nameResourceGroup -Location $SettingsObject.location -Tag @{ "cm-service" = $SettingsObject.ResourceGroupTag } -Force
+
 			$env:permanentPSScriptRoot = $PSScriptRoot
 
 			$frontdoorCheck = Get-AzFrontDoor -Name $SettingsObject.frontdoor.hostName -ResourceGroupName $env:nameResourceGroup -ErrorAction SilentlyContinue
+
 			if ($frontdoorCheck) {
 				Write-Verbose "Frontdoor by the name $($SettingsObject.frontdoor.hostName) already exists."
 				Remove-AzFrontDoor -Name $SettingsObject.frontdoor.hostName -ResourceGroupName $env:nameResourceGroup
 				Write-Verbose "Removed!"
 			}
+
 			if ($SettingsObject.monitoring.applicationInstrumentationKey) {
 				$env:applicationInstrumentationKey = $SettingsObject.monitoring.applicationInstrumentationKey
 			}
@@ -62,10 +70,10 @@
 
 			# Crawl across SettingsObject and create defined webapps
 			$SettingsObject.AppServicePlans | ForEach-Object -Parallel {
+
 				foreach ($app in $_.Webapps) {
+
 					Write-Verbose "Initiating deployment of webapp : $($app.Name)"
-					$kind = "linux"
-					$linuxFxVersion = $app.Runtime
 					$_.Name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $_.Region -Name $_.Name
 					$app.generatedName = Get-CmAzResourceName -Resource "WebApp" -Architecture "PaaS" -Region $_.Region -Name $app.Name
 
@@ -74,8 +82,8 @@
 						-ResourceGroupName $env:nameResourceGroup `
 						-TemplateFile "$env:permanentPSScriptRoot\New-CmAzPaasWeb.json" `
 						-WebAppName $app.generatedName `
-						-Kind $kind `
-						-LinuxFxVersion $linuxFxVersion  `
+						-Kind "linux" `
+						-LinuxFxVersion $app.Runtime `
 						-AppServicePlanName $_.Name `
 						-Sku $_.Sku `
 						-Location $_.Region `
@@ -90,31 +98,35 @@
 
 			#  Create FrontendEndpoint Object
 			$SettingsObject.ApiManagementServices | foreach-object -parallel {
-				if ($_.Name -and $_.Region -and $_.Organization -and $_.AdminEmail -and $_.Sku ) {
-					try {
-						$_.Name = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Region $_.Region -Name $_.Name
-						Write-Verbose "Creating ApiManagementService $($_.Name)"
-						New-AzApiManagement `
-							-ResourceGroupName $env:nameResourceGroup `
-							-Location $_.Region `
-							-Name $_.Name `
-							-Organization $_.Organization `
-							-AdminEmail $_.AdminEmail `
-							-Sku $_.Sku
 
-						while (!(([system.uri](Get-AzApiManagement -Name $_.Name -ResourceGroupName $env:nameResourceGroup).RuntimeUrl).Host)) {
-							Start-Sleep -minutes 5
-							Write-Verbose "Waiting for API To generate URL....."
-						}
-					}
-					catch {
-						Write-Verbose "There was some error or the API service is already present"
-					}
-
-					$url = ([system.uri](Get-AzApiManagement -Name $_.Name -ResourceGroupName $env:nameResourceGroup).RuntimeUrl).Host
-					Write-Verbose "Api url: $($url)"
-
+				if (!$_.Name -or !$_.Region -or !$_.Organization -or !$_.AdminEmail -or !$_.Sku ) {
+					Continue
 				}
+
+				try {
+
+					$_.Name = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Region $_.Region -Name $_.Name
+
+					Write-Verbose "Creating ApiManagementService $($_.Name)"
+					New-AzApiManagement `
+						-ResourceGroupName $env:nameResourceGroup `
+						-Location $_.Region `
+						-Name $_.Name `
+						-Organization $_.Organization `
+						-AdminEmail $_.AdminEmail `
+						-Sku $_.Sku
+
+					while (!(([system.uri](Get-AzApiManagement -Name $_.Name -ResourceGroupName $env:nameResourceGroup).RuntimeUrl).Host)) {
+						Start-Sleep -minutes 5
+						Write-Verbose "Waiting for API To generate URL....."
+					}
+				}
+				catch {
+					Write-Error "An error occurred, The API service is potentially already present" -ErrorAction Continue
+				}
+
+				$url = ([system.uri](Get-AzApiManagement -Name $_.Name -ResourceGroupName $env:nameResourceGroup).RuntimeUrl).Host
+				Write-Verbose "Api url: $($url)"
 			}
 			function customDomainOnFrontDoorEnableHttps {
 				param(
@@ -123,12 +135,14 @@
 					$secretName
 				)
 				if (!$vaultName) {
+
 					Enable-AzFrontDoorCustomDomainHttps -ResourceGroupName $env:nameResourceGroup `
 						-FrontDoorName $SettingsObject.frontDoor.hostName `
 						-FrontendEndpointName ($frontendEndpointObjectArray | Where-Object Hostname -eq $domainName).Name `
 						-MinimumTlsVersion "1.2"
 				}
 				else {
+
 					Enable-AzFrontDoorCustomDomainHttps -ResourceGroupName $env:nameResourceGroup `
 						-FrontDoorName $SettingsObject.frontDoor.hostName `
 						-FrontendEndpointName ($frontendEndpointObjectArray | Where-Object Hostname -eq $domainName).Name `
@@ -169,6 +183,7 @@
 						-HostName $domainName `
 						-SessionAffinityEnabledState $sessionAffinity
 				}
+
 				$frontendEndpointObject
 			}
 
@@ -183,7 +198,9 @@
 			$frontendEndpointObjectMain | Write-Verbose
 
 			if ($SettingsObject.frontDoor.customDomains.domainName) {
+
 				foreach ($domain in $SettingsObject.frontDoor.customDomains) {
+
 					Write-Verbose "Adding $($domain.domainName) Object"
 					$frontendEndpointObjectCustom = setFrontendEndpointObject -name (Get-CmAzResourceName -Resource "frontDoor" -Architecture "Core" -Region $SettingsObject.location -Name "frontendCustomObject")`
 						-domain $domain.domainName `
@@ -192,6 +209,7 @@
 
 					$frontendEndpointObjectArray.add($frontendEndpointObjectCustom) > $null
 				}
+
 				$frontendEndpointObjectArray
 			}
 
@@ -207,25 +225,31 @@
 				$backendObjectArray = [System.Collections.ArrayList]@()
 
 				$SettingsObject.appServicePlans.webapps | Where-Object { $_.backendpool -match $backEndPool.Name } | ForEach-Object {
+
 					$backEndDomainName = (Get-AzWebApp -ResourceGroupName $env:nameResourceGroup -Name  $_.generatedName).DefaultHostName
+
 					if (!$_.backendHostHeader) {
 						$backendHostHeader = ""
 					}
 					else {
 						$backendHostHeader = $backEndDomainName
 					}
+
 					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
 					$backendObjectArray.Add($backEndObject) > $null
 				}
 
 				$SettingsObject.ApiManagementServices | Where-Object { $_.backendPool -eq $backEndPool.Name } | ForEach-Object {
+
 					$backEndDomainName = ([system.uri](Get-AzApiManagement -ResourceGroupName $env:nameResourceGroup -Name $_.name).RuntimeUrl).Host
+
 					if (!$_.backendHostHeader) {
 						$backendHostHeader = ""
 					}
 					else {
 						$backendHostHeader = $backEndDomainName
 					}
+
 					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
 					$backendObjectArray.Add($backEndObject) > $null
 				}
@@ -262,7 +286,9 @@
 			}
 
 			foreach ($rule in $SettingsObject.frontDoor.rules) {
+
 				foreach ($endpointObject in $frontendEndpointObjectArray) {
+
 					$routingRuleObject = New-AzFrontDoorRoutingRuleObject -Name $rule.Name `
 						-FrontDoorName $SettingsObject.frontDoor.hostName `
 						-ResourceGroupName $env:nameResourceGroup `
@@ -270,8 +296,10 @@
 						-BackendPoolName  $rule.backEndPoolName `
 						-PatternToMatch  $rule.Pattern
 				}
+
 				$routingRuleObjectArray.Add($routingRuleObject) > $null
 			}
+
 			# Create Frontdoor
 			Write-Verbose "Initiating creation of Azure frontdoor"
 			$newAzFrontdoor = New-AzFrontDoor -Name $SettingsObject.frontDoor.hostName `
@@ -285,6 +313,7 @@
 			$newAzFrontdoor | Write-Verbose
 
 			if ($SettingsObject.frontDoor.customDomains.domainName) {
+
 				foreach ($domain in $SettingsObject.frontDoor.customDomains) {
 					$enableHttps = customDomainOnFrontDoorEnableHttps -domainName $domain.domainName -VaultName $domain.customCertificateVaultName -secretName $domain.customCertificateSecretName
 					$enableHttps | Write-Verbose
@@ -292,7 +321,9 @@
 			}
 
 			if ($SettingsObject.contentDeliveryNetwork.Name) {
+
 				$resourceType = (Get-AzResource -ResourceGroupName $env:nameResourceGroup -Name $SettingsObject.contentDeliveryNetwork.attachObjectName -ErrorAction SilentlyContinue).ResourceType
+
 				Write-Verbose "Resource type identified to be : $($resourceType)"
 
 				if ($resourceType -eq "Microsoft.Storage/storageAccounts") {
@@ -305,6 +336,7 @@
 					Write-Verbose "$($SettingsObject.contentDeliveryNetwork.attachObjectName) not found "
 					break
 				}
+
 				# Create a new profile and endpoint in one line
 				$cdn = New-AzCdnProfile -ProfileName $SettingsObject.contentDeliveryNetwork.Name -ResourceGroupName $env:nameResourceGroup -Sku $SettingsObject.contentDeliveryNetwork.Sku -Location $SettingsObject.location | `
 					New-AzCdnEndpoint -EndpointName $SettingsObject.contentDeliveryNetwork.Name -OriginName $SettingsObject.contentDeliveryNetwork.attachObjectName -OriginHostName $domain
@@ -313,13 +345,13 @@
 			}
 
 			# Clean up environment
+			Write-Verbose "Cleaning up environment..."
 			Remove-Item env:nameResourceGroup
-			Write-Verbose "Clean up environment..Done"
+
 			Write-Verbose "Finished!"
 		}
 	}
 	catch {
 		$PSCmdlet.ThrowTerminatingError($PSitem);
 	}
-
 }
