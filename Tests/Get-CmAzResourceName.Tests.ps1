@@ -1,4 +1,4 @@
-. $PSScriptRoot\Initialise-CmAzModule.ps1
+﻿. $PSScriptRoot\Initialise-CmAzModule.ps1
 
 $projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project"
 Set-CmAzContext -Environment "Development" -ProjectRoot $projectRoot
@@ -43,18 +43,6 @@ Describe "Get-CmAzResourceName" {
             $name | Should -Be "rg-keys-core-cebe9fa3"
         }
     }
-    # Context "Get a resource group name" {
-    #   It "Should get a name" {
-    #     Set-CmAzContext -Environment "Development" -ProjectRoot $projectRoot
-    #     $name = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region "UK South" -Name "Keys"
-    #     $name | Should -Be "rg-keys-core-001"
-    #   }
-    #   It "Should not double separators" {
-    #     Set-CmAzContext -Environment "Development" -ProjectRoot $projectRoot
-    #     $name = Get-CmAzResourceName -Resource "Sample2" -Architecture "Core" -Region "UK South" -Name "MyApp"
-    #     $name | Should -Be "default-myapp-dev-uks-001"
-    #   }
-    # }
     Context "Getting correct build ID operations" {
         It "Should append build ID" {
             $name = Get-CmAzResourceName -Resource "Budget" -Architecture "Core" -Region "UK South" -Name "MyBudget" -IncludeBuild

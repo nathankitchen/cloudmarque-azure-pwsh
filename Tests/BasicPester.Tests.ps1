@@ -1,4 +1,4 @@
-Describe 'Grouping using Context' {
+﻿Describe 'Grouping using Context' {
     Context 'Test Group 1 Boolean Tests' {
       It 'Should be true' { $true | Should -Be $true }
       It 'Should be true' { $true | Should -BeTrue }

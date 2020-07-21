@@ -1,4 +1,4 @@
-function Install-Dependencies() {
+﻿function Install-Dependencies() {
 
     <#
         .Synopsis

@@ -1,4 +1,4 @@
-. $PSScriptRoot\Initialise-CmAzModule.ps1
+﻿. $PSScriptRoot\Initialise-CmAzModule.ps1
 
 $projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project";
 $testProjectRoot = "$PSScriptRoot\TestProject"
@@ -19,12 +19,12 @@ Describe "*-CmAzContext Lifecycle Tests" {
 		}
 		It "Should fail when Azure is unavailable and -RequireAzure is set" {
 			{
+				Clear-AzContext -Force
 				Set-CmAzContext -ProjectRoot $projectRoot -Environment "Development"
 				Get-CmAzContext -ThrowIfUnavailable -RequireAzure
 			} | Should Throw "You must be logged into Azure. Please ensure you have an AzContext before running this command."
 		}
 		It "Should get the current context" {
-			Clear-AzContext -Force
 			Set-CmAzContext -ProjectRoot $projectRoot -Environment "Development"
 			Set-CmAzContext -ProjectRoot $projectRoot -Environment "Test"
 			$context = Get-CmAzContext -ThrowIfUnavailable

@@ -1,4 +1,4 @@
-# Dot-source all the build commands!
+﻿# Dot-source all the build commands!
 # Warning: to run these, you need Nuget installed on your PATH
 
 . .\Sync-CloudmarqueAzure.ps1

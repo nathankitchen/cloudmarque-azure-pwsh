@@ -1,12 +1,12 @@
-function Build-CloudmarqueAzure {
+﻿function Build-CloudmarqueAzure {
     <#
         .Synopsis
         Builds a new version of the Cloudmarque Azure Powershell tooling.
-    
+
         .Description
         Sets the target version number for the module, and then both packs the module
         as a NuGet package.
-    
+
         .Example
         # Build the package
         Build-CloudmarqueAzure -Version "1.0.0" -Suffix "nightly"

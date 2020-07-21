@@ -1,13 +1,13 @@
-function New-CloudmarqueAzureDocs {
+﻿function New-CloudmarqueAzureDocs {
 
     <#
         .Synopsis
          Publishes a new version of the Cloudmarque Azure Powershell tooling.
-    
+
         .Description
          Sets the target version number for the module, and then both packs and publishes
          the module as a NuGet package.
-    
+
         .Example
          Publish-CloudmarqueAzure -Package "$PSScriptRoot\publish\pkg\$module.*.nupkg"
     #>
