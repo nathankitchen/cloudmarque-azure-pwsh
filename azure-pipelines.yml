@@ -1,27 +1,61 @@
 trigger:
-- master
+- $(Branch)
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: windows-latest
 
 variables:
   major: 0
   minor: 0
-  version: $(major).$(minor).$(Build.BuildNumber)
+  version: $(major).$(minor).$(build.buildNumber)
   module: Cloudmarque.Azure
+  validBranch: eq(variables['Build.SourceBranch'], refs/heads/$(Branch))
 
 stages:
-
-- stage: 'Build'
-  displayName: 'Build artifact'
+- stage: Build
+  displayName: Build Cloudmarque.Azure
   jobs:
   - job: Build
-    displayName: 'Build Cloudmarque.Azure Artifact'
     steps:
-    - task: NuGetToolInstaller@1
-      displayName: Install NuGet
+    - task: PowerShell@2
       inputs:
-        versionSpec:
+        targetType: inline
+        workingDirectory: $(Build.SourcesDirectory)
+        errorActionPreference: stop
+        script: |
+          . .\init.ps1
+          Sync-CloudmarqueAzure
+
+- stage: Test
+  displayName: Test Cloudmarque.Azure
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: Test
+    steps:
+    - task: PowerShell@2
+      displayName: Run
+      inputs:
+        targetType: inline
+        workingDirectory: $(Build.SourcesDirectory)
+        errorActionPreference: stop
+        script: |
+          . .\init.ps1
+          Test-CloudmarqueAzure
+    - task: PublishTestResults@2
+      displayName: Publish
+      inputs:
+        testResultsFormat: NUnit
+        testResultsFiles: publish/tests/*.xml
+        failTaskOnFailedTests: true
+
+- stage: CreateCloudmarqueAzureArtifact
+  displayName: Create Cloudmarque.Azure Artifact
+  dependsOn: Test
+  condition: and(succeeded(), variables.validBranch)
+  jobs:
+  - job: CreateCloudmarqueAzureArtifact
+    steps:
     - task: PowerShell@2
       displayName: Build
       inputs:
@@ -29,89 +63,52 @@ stages:
         workingDirectory: $(Build.SourcesDirectory)
         script: |
           . .\init.ps1
-          Build-CloudmarqueAzure -Version "$(version)" -Suffix "$(PackageSuffix)"
-    - upload: publish/pkg/
-      displayName: 'Publish nuget artifact'
-      artifact: pkg
+          Build-CloudmarqueAzure -Version $(version) -Suffix $(PackageSuffix)
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: publish/pkg
+        ArtifactName: pkg   
 
-- stage: 'Test'
-  dependsOn: Build
-  displayName: 'Test cloudmarque.azure module'
-  jobs:
-  - job: Test
-    displayName: 'Testing repository and artifact'
-    steps:
-    - download: current
-      displayName: 'Download nuget artifact'
-      name: pkg
-    - task: NuGetToolInstaller@1
-      displayName: Install NuGet
-      inputs:
-        versionSpec:
-    - task: PowerShell@2
-      displayName: Test
-      inputs:
-        targetType: inline
-        workingDirectory: $(Build.SourcesDirectory)
-        script: |
-          copy-item -path "$(Pipeline.Workspace)\pkg\*" -destination "$(Build.SourcesDirectory)\" -Recurse -Verbose
-          . .\init.ps1
-          Test-CloudmarqueAzure
-    - task: PublishTestResults@2
-      displayName: Publish test results
-      inputs:
-        testResultsFormat: NUnit
-        testResultsFiles: publish/tests/*.xml
-        failTaskOnFailedTests: true
-
-- stage: 'Documenting'
-  displayName: 'Build document artifact to be consumed by Docs pipeline'
+- stage: CreateDocumentationArtifact
+  displayName: Create Documentation Artifact
   dependsOn: Test
-  condition: |
-      and(
-        succeeded(),
-        eq(variables['build.sourceBranch'], 'refs/heads/master')
-      )
+  condition: and(succeeded(), variables.validBranch)
   jobs:
-  - job: Documents
-    displayName: 'Build document artifact'
+  - job: CreateDocumentationArtifact
     steps:
-    - task: NuGetToolInstaller@1
-      displayName: Install NuGet
-      inputs:
-        versionSpec:
     - task: PowerShell@2
-      displayName: 'create document md files - artifact'
+      displayName: Build
       inputs:
         targetType: inline
         workingDirectory: $(Build.SourcesDirectory)
         script: |
           . .\init.ps1
           New-CloudmarqueAzureDocs
-    - upload: publish/docs/
-      artifact: docs
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: publish/docs
+        artifactName: docs
+        publishLocation: pipeline
 
-- stage: 'Publish'
-  displayName: 'Publish To CloudMarque.Azure'
-  dependsOn: Test
-  condition: |
-      and(
-        succeeded(),
-        eq(variables['build.sourceBranch'], 'refs/heads/master')
-      )
+- stage: PublishCloudmarqueAzureArtifactToFeed
+  displayName: Publish Cloudmarque.Azure Artifact To Feed
+  dependsOn: CreateCloudmarqueAzureArtifact
+  condition: and(succeeded(), variables.validBranch)
   jobs:
-  - deployment: Dev
-    displayName: 'Publish_artifact'
-    environment: Dev
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - download: current
-            name: pkg
-          - task: NuGetCommand@2
-            displayName: 'NuGet Push'
-            inputs:
-              command: push
-              packagesToPush: '$(Pipeline.Workspace)/pkg/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.nupkg'
-              publishVstsFeed: '$(VstsFeed)'
+  - job: PublishCloudmarqueAzureArtifactToFeed
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: Download
+      inputs:
+        buildType: current
+        downloadType: single
+        artifactName: pkg
+        downloadPath: $(Pipeline.Workspace)
+    - task: NuGetCommand@2
+      displayName: Nuget Push
+      inputs:
+        command: push
+        packagesToPush: $(Pipeline.Workspace)/**/*.nupkg;!$(Pipeline.Workspace)/**/*.symbols.nupkg
+        nuGetFeedType: internal
+        publishVstsFeed: $(VstsFeed)
+    
