@@ -54,7 +54,7 @@
 			$applicationInstrumentationKey = "none"
 
 			if ($SettingsObject.monitoring.applicationInstrumentationKey) {
-				Set-Variable -Name $applicationInstrumentationKeyVariableName -Value $SettingsObject.monitoring.applicationInstrumentationKey
+				$applicationInstrumentationKey = $SettingsObject.monitoring.applicationInstrumentationKey
 			}
 
 			New-AzResourceGroup -ResourceGroupName $resourceGroupName -Location $SettingsObject.location -Tag @{ "cm-service" = $SettingsObject.ResourceGroupTag } -Force
@@ -209,8 +209,6 @@
 			Write-Verbose "Frontend Local Hostname:"
 			$frontendEndpointObjectMain | Write-Verbose
 
-			Write-Verbose "testmatch"
-
 			if ($SettingsObject.frontDoor.customDomains.domainName) {
 
 				foreach ($domain in $SettingsObject.frontDoor.customDomains) {
@@ -357,7 +355,7 @@
 					break
 				}
 
-				# Create a new profile and endpoint in one lin
+				# Create a new profile and endpoint in one line
 				$cdn = New-AzCdnProfile -ProfileName $SettingsObject.contentDeliveryNetwork.Name -ResourceGroupName $resourceGroupName -Sku $SettingsObject.contentDeliveryNetwork.Sku -Location $SettingsObject.location | `
 				New-AzCdnEndpoint -EndpointName $SettingsObject.contentDeliveryNetwork.Name -OriginName $SettingsObject.contentDeliveryNetwork.attachObjectName -OriginHostName $domain
 
