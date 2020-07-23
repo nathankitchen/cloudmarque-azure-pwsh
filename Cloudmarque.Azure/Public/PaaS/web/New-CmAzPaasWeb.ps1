@@ -133,7 +133,7 @@
 				Write-Verbose "Api url: $($url)"
 			}
 
-			function customDomainOnFrontDoorEnableHttps {
+			function CustomDomainOnFrontDoorEnableHttps {
 				param(
 					$vaultName,
 					$domainName,
@@ -244,11 +244,11 @@
 
 					$backEndDomainName = (Get-AzWebApp -ResourceGroupName $resourceGroupName -Name  $_.generatedName).DefaultHostName
 
-					if (!$_.backendHostHeader) {
+					if ($_.backendHostHeader -ne $true) {
 						$backendHostHeader = ""
 					}
 					else {
-						$backendHostHeader = $backEndDomainName
+						$backendHostHeader = $_.backendHostHeader
 					}
 
 					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
@@ -260,28 +260,25 @@
 					$backEndDomainName = ([system.uri](Get-AzApiManagement -ResourceGroupName $resourceGroupName -Name $_.name).RuntimeUrl).Host
 
 					if (!$_.backendHostHeader) {
-						$backendHostHeader = ""
+						$backendHostHeader = $backEndDomainName
 					}
 					else {
-						$backendHostHeader = $backEndDomainName
+						$backendHostHeader = $_.backendHostHeader
 					}
 
 					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
 					$backendObjectArray.Add($backEndObject) > $null
 				}
 
-				if (!$backEndPool.HealthCheckPath) {
-					$backEndPool.HealthCheckPath = "/index.html"
+				if (!$backEndPool.healthCheckPath) {
+					$backEndPool.healthCheckPath = "/index.html"
 				}
 
 				if (!$backEndPool.protocol) {
 					$backEndPool.protocol = "Https"
 				}
-				elseif ($backEndPool.protocol -eq "HTTP" -or $backEndPool.protocol -eq "http" -or $backEndPool.protocol -eq "Http") {
-					$backEndPool.protocol = "Http"
-				}
-				elseif ($backEndPool.protocol -eq "HTTPS" -or $backEndPool.protocol -eq "https" -or $backEndPool.protocol -eq "Https") {
-					$backEndPool.protocol = "Https"
+				elseif($backEndPool.protocol -ne "Https" -and $backEndPool.protocol -ne "Http") {
+					Write-Error "Invalid backend pool protocol." -Category InvalidArgument -CategoryTargetName "SettingsObject.frontdoor.backendPools.protocol"
 				}
 
 				$healthProbeSettingObject = New-AzFrontDoorHealthProbeSettingObject -Name "HealthProbeSetting-$($backEndPool.Name)" -Path  $backEndPool.HealthCheckPath -Protocol $backEndPool.protocol
@@ -303,6 +300,12 @@
 
 			foreach ($rule in $SettingsObject.frontDoor.rules) {
 
+				$backendPool = $SettingsObject.frontDoor.backEndPools | Where-Object { $_.Name -eq $rule.backendPoolName } | Select-Object -First 1
+
+				if(!$backEndPool) {
+					Write-Error "Backend pool $($rule.backendPoolName) does not exist" -Category InvalidArgument -CategoryTargetName "SettingsObject.frontdoor.rules.backendPoolName"
+				}
+
 				foreach ($endpointObject in $frontendEndpointObjectArray) {
 
 					$routingRuleObject = New-AzFrontDoorRoutingRuleObject `
@@ -310,7 +313,7 @@
 						-FrontDoorName $frontdoorName `
 						-ResourceGroupName $resourceGroupName `
 						-FrontendEndpointName $endpointObject.Name `
-						-BackendPoolName  $rule.backEndPoolName `
+						-BackendPoolName  $backendPool.Name `
 						-PatternToMatch  $rule.Pattern
 				}
 
@@ -333,7 +336,7 @@
 			if ($SettingsObject.frontDoor.customDomains.domainName) {
 
 				foreach ($domain in $SettingsObject.frontDoor.customDomains) {
-					$enableHttps = customDomainOnFrontDoorEnableHttps -domainName $domain.domainName -VaultName $domain.customCertificateVaultName -secretName $domain.customCertificateSecretName
+					$enableHttps = CustomDomainOnFrontDoorEnableHttps -domainName $domain.domainName -VaultName $domain.customCertificateVaultName -secretName $domain.customCertificateSecretName
 					$enableHttps | Write-Verbose
 				}
 			}
