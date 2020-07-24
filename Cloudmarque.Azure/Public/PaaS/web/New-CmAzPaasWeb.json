@@ -126,9 +126,6 @@
                 "[resourceId('Microsoft.Web/Sites', variables('webAppPortalName'))]"
             ],
             "properties": {
-                "siteConfig": {
-                    "autoSwapSlotName": "[if(equals(parameters('StagingSlotName')[copyIndex()], parameters('StagingSlotName')[0]), json('null'), parameters('StagingSlotName')[0])]"
-                }
             },
             "resources": [],
             "copy": {
