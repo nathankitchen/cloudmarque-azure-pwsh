@@ -245,11 +245,10 @@
 
 					$backEndDomainName = (Get-AzWebApp -ResourceGroupName $resourceGroupName -Name  $_.generatedName).DefaultHostName
 
-					if ($_.backendHostHeader -ne $true) {
+					$backendHostHeader = $backEndDomainName
+
+					if ($_.backendHostHeader -eq $false) {
 						$backendHostHeader = ""
-					}
-					else {
-						$backendHostHeader = $_.backendHostHeader
 					}
 
 					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
@@ -260,11 +259,10 @@
 
 					$backEndDomainName = ([system.uri](Get-AzApiManagement -ResourceGroupName $resourceGroupName -Name $_.name).RuntimeUrl).Host
 
-					if (!$_.backendHostHeader) {
-						$backendHostHeader = $backEndDomainName
-					}
-					else {
-						$backendHostHeader = $_.backendHostHeader
+					$backendHostHeader = $backEndDomainName
+
+					if ($_.backendHostHeader -eq $false) {
+						$backendHostHeader = ""
 					}
 
 					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
