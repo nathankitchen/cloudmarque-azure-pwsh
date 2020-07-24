@@ -19,20 +19,20 @@
         [String]
         $Scope = "Auto"
     )
-    Process {
+    
+    $DebugPreference = "SilentlyContinue"
 
-        $modules =  @(
-            @{ Name = "Pester"; Version = "4.10.1" },
-            @{ Name = "PSScriptAnalyzer"; Version = "1.18.3" }
-        );
+    $modules =  @(
+        @{ Name = "Pester"; Version = "4.10.1" },
+        @{ Name = "PSScriptAnalyzer"; Version = "1.18.3" }
+    );
 
-        . ./Install-Dependencies.ps1
+    . ./Install-Dependencies.ps1
 
-        Install-Dependencies -AdditionalModules $modules -Scope $Scope -Verbose
+    Install-Dependencies -AdditionalModules $modules -Scope $Scope -Verbose
 
-        New-Item -Path "$PSScriptRoot\publish\" -Name $Project -ItemType Directory -Force | Out-Null
-        New-Item -Path "$PSScriptRoot\publish\tests\" -Name $Project -ItemType Directory -Force | Out-Null
+    New-Item -Path "$PSScriptRoot\publish\" -Name $Project -ItemType Directory -Force | Out-Null
+    New-Item -Path "$PSScriptRoot\publish\tests\" -Name $Project -ItemType Directory -Force | Out-Null
 
-        Invoke-Pester -Script ".\Tests\*" -OutputFile "$PSScriptRoot\publish\tests\nunit-results.xml" -OutputFormat 'NUnitXML'
-    }
+    Invoke-Pester -Script ".\Tests\*" -OutputFile "$PSScriptRoot\publish\tests\nunit-results.xml" -OutputFormat 'NUnitXML' -Force
 }
