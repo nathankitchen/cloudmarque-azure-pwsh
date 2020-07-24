@@ -141,6 +141,7 @@
 					$resourceGroupName,
 					$frontdoorName
 				)
+
 				if (!$vaultName) {
 
 					Enable-AzFrontDoorCustomDomainHttps `
@@ -155,7 +156,7 @@
 						-FrontDoorName $frontdoorName `
 						-FrontendEndpointName ($frontendEndpointObjectArray | Where-Object Hostname -eq $domainName).Name `
 						-Vault (Get-AzKeyVault -VaultName $vaultName).ResourceId `
-						-secretName $secretName `
+						-SecretName $secretName `
 						-SecretVersion (Get-AzKeyVaultSecret -VaultName kvaultcorerg -Name $secretName).Version `
 						-MinimumTlsVersion "1.0"
 				}
@@ -336,7 +337,14 @@
 			if ($SettingsObject.frontDoor.customDomains.domainName) {
 
 				foreach ($domain in $SettingsObject.frontDoor.customDomains) {
-					$enableHttps = CustomDomainOnFrontDoorEnableHttps -domainName $domain.domainName -VaultName $domain.customCertificateVaultName -secretName $domain.customCertificateSecretName
+
+					$enableHttps = CustomDomainOnFrontDoorEnableHttps `
+						-DomainName $domain.domainName  `
+						-VaultName $domain.customCertificateVaultName  `
+						-SecretName $domain.customCertificateSecretName  `
+						-ResourceGroupName $resourceGroupName `
+						-FrontDoorName $frontdoorName
+
 					$enableHttps | Write-Verbose
 				}
 			}
