@@ -1,5 +1,5 @@
 trigger:
-- $(Branch)
+- master
 
 pool:
   vmImage: windows-latest
@@ -9,7 +9,7 @@ variables:
   minor: 0
   version: $(major).$(minor).$(build.buildNumber)
   module: Cloudmarque.Azure
-  validBranch: eq(variables['Build.SourceBranch'], refs/heads/$(Branch))
+  createArtifacts: and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'Manual')))
 
 stages:
 - stage: Build
@@ -52,7 +52,7 @@ stages:
 - stage: CreateCloudmarqueAzureArtifact
   displayName: Create Cloudmarque.Azure Artifact
   dependsOn: Test
-  condition: and(succeeded(), variables.validBranch)
+  condition: and(succeeded(), variables.createArtifacts)
   jobs:
   - job: CreateCloudmarqueAzureArtifact
     steps:
@@ -72,7 +72,7 @@ stages:
 - stage: CreateDocumentationArtifact
   displayName: Create Documentation Artifact
   dependsOn: Test
-  condition: and(succeeded(), variables.validBranch)
+  condition: and(succeeded(), variables.createArtifacts)
   jobs:
   - job: CreateDocumentationArtifact
     steps:
@@ -93,7 +93,7 @@ stages:
 - stage: PublishCloudmarqueAzureArtifactToFeed
   displayName: Publish Cloudmarque.Azure Artifact To Feed
   dependsOn: CreateCloudmarqueAzureArtifact
-  condition: and(succeeded(), variables.validBranch)
+  condition: and(succeeded(), variables.createArtifacts)
   jobs:
   - job: PublishCloudmarqueAzureArtifactToFeed
     steps:
