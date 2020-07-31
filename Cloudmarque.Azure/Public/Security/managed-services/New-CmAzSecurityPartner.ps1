@@ -31,16 +31,26 @@
 	)
 	try {
 
-		Get-CmAzContext -RequireAzure
+        if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy managed service security groups.")) {
 
-		foreach ($partner in $SettingsObject.Partners) {
+            if ($SettingsFile -and !$SettingsObject) {
+                $SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
+            }
+            elseif (!$SettingsFile -and !$SettingsObject) {
+                Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
+            }
 
-			if ($PSCmdlet.ShouldProcess($SubscriptionId, "Allow $($partner.name) access to current subscription")) {
-				New-AzDeployment `
-					-Name "Cloudmarque.Azure.Partner" `
-					-TemplateParameterFile "./_templates/azuredeploy.parameters.json" `
-					-TemplateFile "./_templates/azuredeploy.json" `
-					-customerGroupId $CustomerGroupId
+			Get-CmAzContext -RequireAzure
+
+			foreach ($partner in $SettingsObject.Partners) {
+
+				if ($PSCmdlet.ShouldProcess($SubscriptionId, "Allow $($partner.name) access to current subscription")) {
+					New-AzDeployment `
+						-Name "Cloudmarque.Azure.Partner" `
+						-TemplateParameterFile "./_templates/azuredeploy.parameters.json" `
+						-TemplateFile "./_templates/azuredeploy.json" `
+						-customerGroupId $CustomerGroupId
+				}
 			}
 		}
 	}

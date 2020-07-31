@@ -15,24 +15,45 @@
 
     [CmdletBinding()]
     param(
-        [ValidateSet("Auto","AllUsers","CurrentUser")]
+        [ValidateSet("Auto", "AllUsers", "CurrentUser")]
         [String]
         $Scope = "Auto"
     )
     Process {
 
-        $modules =  @(
-            @{ Name = "Pester"; Version = "4.10.1" },
-            @{ Name = "PSScriptAnalyzer"; Version = "1.18.3" }
+        $modules = @(
+            @{ Name = "Pester"; Version = "5.0.2" },
+            @{ Name = "PSScriptAnalyzer"; Version = "1.19.1" }
         );
 
         . ./Install-Dependencies.ps1
 
         Install-Dependencies -AdditionalModules $modules -Scope $Scope -Verbose
 
-        New-Item -Path "$PSScriptRoot\publish\" -Name $Project -ItemType Directory -Force | Out-Null
-        New-Item -Path "$PSScriptRoot\publish\tests\" -Name $Project -ItemType Directory -Force | Out-Null
+        $publishPath = "$PSScriptRoot\publish"
+        $testDirectory = "\tests"
+        $testPath = "$publishPath\$testDirectory"
 
-        Invoke-Pester -Script ".\Tests\*" -OutputFile "$PSScriptRoot\publish\tests\nunit-results.xml" -OutputFormat 'NUnitXML'
+        New-Item -Path $publishPath -Name $Project -ItemType Directory -Force | Out-Null
+        New-Item -Path $testPath -Name $Project -ItemType Directory -Force | Out-Null
+
+        $configuration = [PesterConfiguration]@{
+            
+            Output = @{
+                Verbosity = "Detailed"
+            }
+            Run = @{
+                Path = ".$testDirectory\*"
+            }
+            Should = @{
+                ErrorAction = "Stop"
+            }
+            TestResult = @{
+                Enabled = $true
+                OutputPath = "$testPath\nunit-results.xml"
+            }
+        }
+
+        Invoke-Pester -Configuration $configuration
     }
 }

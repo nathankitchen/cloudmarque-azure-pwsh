@@ -323,24 +323,30 @@
 
 			Write-Verbose "Initiating deployment"
 			Write-Verbose "Setting environment Variables"
+
+			$context = ""
+
 			try {
 				$env:PSScriptRoot = $PSScriptRoot
-				$env:context = "context.json"
+				$context = "context.json"
 			}
 			catch {
 				write-verbose "Error setting environment variables. Make sure CmAzContext is set."
 				$PSItem.ToString() | write-verbose
 			}
-			Save-Azcontext -Path $env:context -force
-			Write-Verbose "context set"
+
+			Save-Azcontext -Path $context -Force
 
 			try {
 				$resourceGroupObjectArray | ForEach-Object -Parallel {
-					Write-Verbose "Trying to Import context"
-					Import-Azcontext -Path $env:context > $null
-					Write-Verbose "context Imported"
+
+					Write-Verbose "Importing context.."
+					Import-Azcontext -Path $using:context > $null
+
 					if ($_.resourceGroupName) {
+
 						$ifResourceGroupExists = Get-AzResourceGroup -Name $_.resourceGroupName -ErrorAction SilentlyContinue
+
 						if (!$ifResourceGroupExists) {
 							New-AzResourceGroup -Name $_.resourceGroupName -Location "UK South" -Force
 						}
@@ -370,8 +376,7 @@
 			catch {
 				$PSItem.ToString() | Write-Error
 			}
-			Remove-Item -Path $env:context
-			Write-Verbose "Cleared environment."
+
 			Write-Verbose "Finished!"
 		}
 	}
