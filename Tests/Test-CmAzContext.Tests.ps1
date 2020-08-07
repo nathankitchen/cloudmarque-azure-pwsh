@@ -80,12 +80,12 @@ Describe "*-CmAzContext Lifecycle Tests" {
 			Clear-CmAzContext
 		}
 
-		It "Should make the current context null" {		
-			$c2 | Should -Be $Null
+		It "Should remove the current context" {		
+			Get-CmAzContext | Should -Be $Null
 		}
 
 		It "Should clear profile on clearing CmAzContext" {
-			$filecontent = (Get-content $PROFILE.CurrentUserCurrentHost -Erroraction SilentlyContinue) | Should -Be $Null
+			$filecontent = (Get-Content $PROFILE.CurrentUserCurrentHost -Erroraction SilentlyContinue) | Should -Be $Null
 		}
 	}
 

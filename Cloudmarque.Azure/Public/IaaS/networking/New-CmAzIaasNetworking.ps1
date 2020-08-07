@@ -328,20 +328,21 @@
 
 			try {
 				$env:PSScriptRoot = $PSScriptRoot
-				$context = "context.json"
+				$env:context = "context.json"
 			}
 			catch {
 				write-verbose "Error setting environment variables. Make sure CmAzContext is set."
 				$PSItem.ToString() | write-verbose
 			}
 
-			Save-Azcontext -Path $context -Force
+			Save-Azcontext -Path $env:context -Force
 
 			try {
+				
 				$resourceGroupObjectArray | ForEach-Object -Parallel {
 
 					Write-Verbose "Importing context.."
-					Import-Azcontext -Path $using:context > $null
+					Import-Azcontext -Path $env:context > $null
 
 					if ($_.resourceGroupName) {
 
@@ -376,6 +377,9 @@
 			catch {
 				$PSItem.ToString() | Write-Error
 			}
+
+			Write-Verbose "Clearing environment.."
+			Remove-Item -Path $env:context	
 
 			Write-Verbose "Finished!"
 		}

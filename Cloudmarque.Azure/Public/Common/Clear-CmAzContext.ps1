@@ -8,33 +8,37 @@
 		 Removes the global variables that represent the Cloudmarque.Azure session,
 		 preventing further context-dependent commands from executing.
 
-   .Example
-	# Clear the current Cloudmarque.Azure context
-	Clear-CmAzContext
-  #>
+		.Example
+		 Clear-CmAzContext
+	#>
+
 	[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "", Justification = "Using a global variable for session state")]
 	[CmdletBinding()]
 	param()
-	process {
-		if ($(test-path $PROFILE.CurrentUserCurrentHost)) {
-			$value = "`$global:CMAZ_CTX = New-Object PSObject -Property  @{Environment = `"$($CMAZ_CTX.Environment)`"; ProjectRoot = `"$($CMAZ_CTX.ProjectRoot)`"; BuildId= `"$($CMAZ_CTX.BuildId)`"}"
-			$filecontent = (Get-content $PROFILE.CurrentUserCurrentHost) -notlike $value
+	
+	if ((Test-Path $PROFILE.CurrentUserCurrentHost)) {
+		
+		[string[]]$nonContextFileContent = Get-Content $PROFILE.CurrentUserCurrentHost
+		
+		$nonContextFileContent = $nonContextFileContent | Where-Object { !$_.StartsWith("`$global:CMAZ_CTX") }
 
-			if ($filecontent -eq "False" -or !$filecontent) {
-				Remove-Item $PROFILE.CurrentUserCurrentHost
-				Write-Verbose "Remove profile"
-			}
-			else {
-				$filecontent | Out-File $PROFILE.CurrentUserCurrentHost
-				Write-Verbose "Reset profile"
-			}
+		if (!$nonContextFileContent) {
+			Write-Verbose "Remove profile"
+			Remove-Item $PROFILE.CurrentUserCurrentHost
 		}
-		if ($global:CMAZ_CTX) {
-			Remove-Variable "CMAZ_CTX" -Scope "Global"
+		else {
+			Write-Verbose "Reset profile"
+			$nonContextFileContent | Out-File $PROFILE.CurrentUserCurrentHost
 		}
-		if($env:CMAZ_CTX_ENV){
-			Remove-Item env:CMAZ_CTX_ENV
-		}
-		Write-Verbose "Cloudmarque.Azure context cleared successfully"
 	}
+
+	if ($global:CMAZ_CTX) {
+		Remove-Variable "CMAZ_CTX" -Scope "Global"
+	}
+
+	if($env:CMAZ_CTX_ENV) {
+		Remove-Item env:CMAZ_CTX_ENV
+	}
+
+	Write-Verbose "Cloudmarque.Azure context cleared successfully"
 }

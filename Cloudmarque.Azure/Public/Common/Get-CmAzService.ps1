@@ -36,11 +36,11 @@
 
 		.Example
 		 Find a keyvault
-		 $ctx = Get-CmAzService -Service "core.keys" -Region "USEast"
+		 $keyVault = Get-CmAzService -Service "core-keys" -Region "USEast"
 
 		.Example
 		 Find a storage account for NSG logs
-		 $ctx = Get-CmAzService -Service "core.monitoring.logs.nsg" -Region "USEast" -ResourceType "Microsoft.Storage"
+		 $storageAccount = Get-CmAzService -Service "core-monitoring-logs-nsg" -Region "USEast" -ResourceType "Microsoft.Storage"
 	#>
 
 	[CmdletBinding()]
@@ -98,12 +98,10 @@
 			tags = $resource.tags
 		}
 	}
+	elseif ($ThrowIfUnavailable) {
+		Write-Error "Service not found. No resource with tag `"$($tag)`" could be found." -Category InvalidArgument -CategoryTargetName "ServiceKey : Service"
+	}
 	else {
-		if ($ThrowIfUnavailable) {
-			Write-Error "Service not found. No resource with tag `"$($tag)`" could be found." -Category InvalidArgument -CategoryTargetName "ServiceKey : Service"
-		}
-		else {
-			Write-Verbose "Service not found. No resource with tag `"$($tag)`" could be found."
-		}
+		Write-Verbose "Service not found. No resource with tag `"$($tag)`" could be found."
 	}
 }
