@@ -1,5 +1,6 @@
 location: UK South
 resourceGroup: rg
+
 automation:
   runbook:
     keyVaultName:                   # Required: Key Vault Name

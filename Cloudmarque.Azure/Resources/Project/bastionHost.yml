@@ -1,5 +1,6 @@
 resourceGroupTag:
 location:
+workspaceTag:
 
 bastionHosts:
   - vnetTag:

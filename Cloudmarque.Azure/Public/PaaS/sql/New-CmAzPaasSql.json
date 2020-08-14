@@ -1,0 +1,546 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "SqlObjectArray": {
+            "type": "array",
+            "metadata": {
+                "description": "The administrator password of the SQL logical server."
+            }
+        },
+        "Location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location to deploy database"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('Cm_', parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].data.ServerName, '_', parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].data.family)]",
+            "copy": {
+                "name": "SqlObjectArrayCopy",
+                "count": "[length(parameters('SqlObjectArray'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "SqlObject": {
+                        "value": "[parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].data]"
+                    },
+                    "Location": {
+                        "value": "[parameters('Location')]"
+                    },
+                    "adminPassword": {
+                        "reference": {
+                            "keyVault": {
+                                "id": "[parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].administratorLoginPassword.keyVaultid]"
+                            },
+                            "secretName": "[parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].administratorLoginPassword.secretName]"
+                        }
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "SqlObject": {
+                            "type": "object"
+                        },
+                        "Location": {
+                            "type": "string"
+                        },
+                        "adminPassword": {
+                            "type": "securestring"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.Sql'), not(parameters('sqlObject').sharedServer))]",
+                            "type": "Microsoft.Sql/servers",
+                            "apiVersion": "2019-06-01-preview",
+                            "location": "[parameters('Location')]",
+                            "name": "[parameters('sqlObject').serverName]",
+                            "properties": {
+                                "administratorLogin": "[parameters('sqlObject').administratorLogin]",
+                                "administratorLoginPassword": "[parameters('adminPassword')]"
+                            },
+                            "resources": [
+                                {
+                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.Sql'), not(empty(parameters('SqlObject').workSpace.Name)))]",
+                                    "type": "databases/Providers/DiagnosticSettings",
+                                    "name": "master/Microsoft.Insights/security",
+                                    "apiVersion": "2017-05-01-preview",
+                                    "dependsOn": [
+                                        "[concat('Microsoft.Sql/servers/', parameters('sqlObject').serverName)]"
+                                    ],
+                                    "properties": {
+                                        "WorkspaceId": "[parameters('SqlObject').workSpace.ResourceId]",
+                                        "logs": [
+                                            {
+                                                "category": "SQLSecurityAuditEvents",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.Sql'),not(empty(parameters('SqlObject').workSpace.Name)))]",
+                                    "type": "auditingSettings",
+                                    "name": "DefaultAuditingSettings",
+                                    "apiVersion": "2017-03-01-preview",
+                                    "dependsOn": [
+                                        "[concat('Microsoft.Sql/servers/', parameters('sqlObject').serverName)]"
+                                    ],
+                                    "properties": {
+                                        "State": "Enabled",
+                                        "isAzureMonitorTargetEnabled": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.Sql')]",
+                            "type": "Microsoft.Sql/servers/firewallRules",
+                            "apiVersion": "2015-05-01-preview",
+                            "dependsOn": [
+                                "[concat('Microsoft.Sql/servers/', parameters('sqlObject').serverName)]"
+                            ],
+                            "name": "[concat(parameters('sqlObject').serverName, '/', 'Cm-firewallRule-', copyIndex('firewallRulesCopy'))]",
+                            "properties": {
+                                "startIpAddress": "[parameters('sqlObject').firewallRules[copyIndex('firewallRulesCopy')].startIpAddress]",
+                                "endIpAddress": "[parameters('sqlObject').firewallRules[copyIndex('firewallRulesCopy')].endIpAddress]"
+                            },
+                            "copy": {
+                                "name": "firewallRulesCopy",
+                                "mode": "Serial",
+                                "batchSize": 1,
+                                "count": "[length(parameters('sqlObject').firewallRules)]"
+                            }
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.Sql')]",
+                            "type": "Microsoft.Sql/servers/databases",
+                            "apiVersion": "2019-06-01-preview",
+                            "location": "[parameters('Location')]",
+                            "name": "[concat(parameters('sqlObject').serverName, '/', parameters('sqlObject').databases[copyIndex('addDatabasesInElasticPool')])]",
+                            "dependsOn": [
+                                "[concat('Microsoft.Sql/servers/', parameters('sqlObject').serverName)]",
+                                "[concat('Microsoft.Sql/servers/', parameters('sqlObject').serverName ,'/elasticpools/', parameters('sqlObject').elasticPoolProperties.elasticPoolName)]"
+                            ],
+                            "sku": "[if(equals(parameters('SqlObject').type, 'single'), parameters('sqlObject').sku, json('null'))]",
+                            "properties": "[if(equals(parameters('SqlObject').type, 'elasticpool'), parameters('sqlObject').elasticPoolProperties, json('null'))]",
+                            "copy": {
+                                "name": "addDatabasesInElasticPool",
+                                "count": "[if(greater(length(parameters('sqlObject').databases), 1), length(parameters('sqlObject').databases), 1)]"
+                            },
+                            "resources": [
+                                {
+                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.Sql'), not(empty(parameters('SqlObject').workSpace.Name)))]",
+                                    "type": "Providers/DiagnosticSettings",
+                                    "name": "Microsoft.Insights/service",
+                                    "apiVersion": "2017-05-01-preview",
+                                    "dependsOn": [
+                                        "[concat('Microsoft.Sql/servers/', parameters('sqlObject').serverName ,'/databases/', parameters('sqlObject').databases[copyIndex('addDatabasesInElasticPool')])]"
+
+                                    ],
+                                    "properties": {
+                                        "WorkspaceId": "[parameters('SqlObject').workSpace.ResourceId]",
+                                        "logs": [
+                                            {
+                                                "category": "QueryStoreRuntimeStatistics",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "QueryStoreWaitStatistics",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "Errors",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "DatabaseWaitStatistics",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "Timeouts",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "Blocks",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "SQLInsights",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            }
+                                        ],
+                                        "metrics": [
+                                            {
+                                                "timeGrain": "AllMetrics",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "enabled": true,
+                                                    "days": "[parameters('SqlObject').logRetentionDays]"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.Sql'), not(empty(parameters('SqlObject').workSpace.Name)))]",
+                                    "type": "auditingSettings",
+                                    "name": "audit",
+                                    "apiVersion": "2017-03-01-preview",
+                                    "dependsOn": [
+                                        "[parameters('sqlObject').databases[copyIndex('addDatabasesInElasticPool')]]"
+                                    ],
+                                    "properties": {
+                                        "State": "Enabled",
+                                        "isAzureMonitorTargetEnabled": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "condition": "[and(equals(parameters('SqlObject').type, 'elasticpool'), equals(parameters('SqlObject').family, 'Microsoft.Sql'))]",
+                            "type": "Microsoft.Sql/servers/elasticPools",
+                            "apiVersion": "2017-10-01-preview",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Sql/servers/', parameters('sqlObject').serverName)]"
+                            ],
+                            "location": "[parameters('Location')]",
+                            "name": "[concat(parameters('sqlObject').serverName, '/', parameters('sqlObject').elasticPoolProperties.elasticPoolName)]",
+                            "sku": "[parameters('sqlObject').sku]",
+                            "properties": {
+                            }
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.DBforPostgreSQL')]",
+                            "apiVersion": "2017-12-01",
+                            "type": "Microsoft.DBforPostgreSQL/servers",
+                            "location": "[parameters('Location')]",
+                            "name": "[parameters('sqlObject').serverName]",
+                            "sku": "[if(equals(parameters('SqlObject').family, 'Microsoft.DBforPostgreSQL'), parameters('sqlObject').sku, json('null'))]",
+                            "properties": {
+                                "administratorLogin": "[parameters('sqlObject').administratorLogin]",
+                                "administratorLoginPassword": "[parameters('adminPassword')]",
+                                "createMode": "Default"
+                            },
+                            "resources": [
+                                {
+                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.DBforPostgreSQL'), not(empty(parameters('SqlObject').workSpace.Name)))]",
+                                    "type": "Providers/DiagnosticSettings",
+                                    "name": "Microsoft.Insights/security",
+                                    "apiVersion": "2017-05-01-preview",
+                                    "dependsOn": [
+                                        "[concat('Microsoft.DBforPostgreSQL/servers/', parameters('sqlObject').serverName)]"
+                                    ],
+                                    "properties": {
+                                        "WorkspaceId": "[parameters('SqlObject').workSpace.ResourceId]",
+                                        "logs": [
+                                            {
+                                                "category": "PostgreSQLLogs",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "QueryStoreRuntimeStatistics",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "QueryStoreWaitStatistics",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            }
+                                        ],
+                                        "metrics": [
+                                            {
+                                                "timeGrain": "AllMetrics",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "enabled": true,
+                                                    "days": "[parameters('SqlObject').logRetentionDays]"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.DBforPostgreSQL')]",
+                            "type": "Microsoft.DBforPostgreSQL/servers/firewallrules",
+                            "apiVersion": "2017-12-01",
+                            "dependsOn": [
+                                "[concat('Microsoft.DBforPostgreSQL/servers/', parameters('sqlObject').serverName)]"
+                            ],
+                            "location": "[parameters('Location')]",
+                            "name": "[concat(parameters('sqlObject').serverName,'/','Cm-firewallRule-', copyIndex('firewallRulesCopy'))]",
+                            "properties": {
+                                "startIpAddress": "[parameters('sqlObject').firewallRules[copyIndex('firewallRulesCopy')].startIpAddress]",
+                                "endIpAddress": "[parameters('sqlObject').firewallRules[copyIndex('firewallRulesCopy')].endIpAddress]"
+                            },
+                            "copy": {
+                                "name": "firewallRulesCopy",
+                                "mode": "Serial",
+                                "batchSize": 1,
+                                "count": "[length(parameters('sqlObject').firewallRules)]"
+                            }
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.DBforPostgreSQL')]",
+                            "name": "[concat(parameters('sqlObject').serverName, '/', parameters('sqlObject').databases[copyIndex('pgsqldatabaseArray')])]",
+                            "type": "Microsoft.DBforPostgreSQL/servers/databases",
+                            "apiVersion": "2017-12-01",
+                            "properties": {
+                                "charset": "utf8",
+                                "collation": "English_United States.1252"
+                            },
+                            "copy": {
+                                "name": "pgsqldatabaseArray",
+                                "count": "[if(greater(length(parameters('sqlObject').databases), 1), length(parameters('sqlObject').databases), 1)]"
+                            },
+                            "dependsOn": [
+                                "[concat('Microsoft.DBforPostgreSQL/servers/', parameters('sqlObject').serverName)]"
+                            ]
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.DBforMySQL')]",
+                            "apiVersion": "2017-12-01",
+                            "type": "Microsoft.DBforMySQL/servers",
+                            "location": "[parameters('Location')]",
+                            "name": "[parameters('sqlObject').serverName]",
+                            "sku": "[if(equals(parameters('SqlObject').family, 'Microsoft.DBforMySQL'), parameters('sqlObject').sku, json('null'))]",
+                            "properties": {
+                                "administratorLogin": "[parameters('sqlObject').administratorLogin]",
+                                "administratorLoginPassword": "[parameters('adminPassword')]",
+                                "createMode": "Default"
+                            },
+                            "resources": [
+                                {
+                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.DBforMySQL'), not(empty(parameters('SqlObject').workSpace.Name)))]",
+                                    "type": "Providers/DiagnosticSettings",
+                                    "name": "Microsoft.Insights/security",
+                                    "apiVersion": "2017-05-01-preview",
+                                    "dependsOn": [
+                                        "[concat('Microsoft.DBforMySQL/servers/', parameters('sqlObject').serverName)]"
+                                    ],
+                                    "properties": {
+                                        "WorkspaceId": "[parameters('SqlObject').workSpace.ResourceId]",
+                                        "logs": [
+                                            {
+                                                "category": "MySqlSlowLogs",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "MySqlAuditLogs",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            }
+                                        ],
+                                        "metrics": [
+                                            {
+                                                "timeGrain": "AllMetrics",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "enabled": true,
+                                                    "days": "[parameters('SqlObject').logRetentionDays]"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.DBforMySQL')]",
+                            "type": "Microsoft.DBforMySQL/servers/firewallrules",
+                            "apiVersion": "2017-12-01",
+                            "dependsOn": [
+                                "[concat('Microsoft.DBforMySQL/servers/', parameters('sqlObject').serverName)]"
+                            ],
+                            "location": "[parameters('Location')]",
+                            "name": "[concat(parameters('sqlObject').serverName,'/','Cm-firewallRule-', copyIndex('firewallRulesCopy'))]",
+                            "properties": {
+                                "startIpAddress": "[parameters('sqlObject').firewallRules[copyIndex('firewallRulesCopy')].startIpAddress]",
+                                "endIpAddress": "[parameters('sqlObject').firewallRules[copyIndex('firewallRulesCopy')].endIpAddress]"
+                            },
+                            "copy": {
+                                "name": "firewallRulesCopy",
+                                "mode": "Serial",
+                                "batchSize": 1,
+                                "count": "[length(parameters('sqlObject').firewallRules)]"
+                            }
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.DBforMySQL')]",
+                            "name": "[concat(parameters('sqlObject').serverName, '/', parameters('sqlObject').databases[copyIndex('mysqldatabaseArray')])]",
+                            "type": "Microsoft.DBforMySQL/servers/databases",
+                            "apiVersion": "2017-12-01",
+                            "properties": {
+                                "charset": "utf8",
+                                "collation": "utf8_general_ci"
+                            },
+                            "copy": {
+                                "name": "mysqldatabaseArray",
+                                "count": "[if(greater(length(parameters('sqlObject').databases), 1), length(parameters('sqlObject').databases), 1)]"
+                            },
+                            "dependsOn": [
+                                "[concat('Microsoft.DBforMySQL/servers/', parameters('sqlObject').serverName)]"
+                            ]
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.DBforMariaDB')]",
+                            "apiVersion": "2018-06-01",
+                            "type": "Microsoft.DBforMariaDB/servers",
+                            "location": "[parameters('Location')]",
+                            "name": "[parameters('sqlObject').serverName]",
+                            "sku": "[if(equals(parameters('SqlObject').family, 'Microsoft.DBforMariaDB'), parameters('sqlObject').sku, json('null'))]",
+                            "properties": {
+                                "administratorLogin": "[parameters('sqlObject').administratorLogin]",
+                                "administratorLoginPassword": "[parameters('adminPassword')]",
+                                "createMode": "Default"
+                            },
+                            "resources": [
+                                {
+                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.DBforMariaDB'), not(empty(parameters('SqlObject').workSpace.Name)))]",
+                                    "type": "Providers/DiagnosticSettings",
+                                    "name": "Microsoft.Insights/security",
+                                    "apiVersion": "2017-05-01-preview",
+                                    "dependsOn": [
+                                        "[concat('Microsoft.DBforMariaDB/servers/', parameters('sqlObject').serverName)]"
+                                    ],
+                                    "properties": {
+                                        "WorkspaceId": "[parameters('SqlObject').workSpace.ResourceId]",
+                                        "logs": [
+                                            {
+                                                "category": "MySqlSlowLogs",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            },
+                                            {
+                                                "category": "MySqlAuditLogs",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": "[parameters('SqlObject').logRetentionDays]",
+                                                    "enabled": true
+                                                }
+                                            }
+                                        ],
+                                        "metrics": [
+                                            {
+                                                "timeGrain": "AllMetrics",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "enabled": true,
+                                                    "days": "[parameters('SqlObject').logRetentionDays]"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.DBforMariaDB')]",
+                            "type": "Microsoft.DBforMariaDB/servers/firewallrules",
+                            "apiVersion": "2018-06-01",
+                            "dependsOn": [
+                                "[concat('Microsoft.DBforMariaDB/servers/', parameters('sqlObject').serverName)]"
+                            ],
+                            "location": "[parameters('Location')]",
+                            "name": "[concat(parameters('sqlObject').serverName,'/','Cm-firewallRule-', copyIndex('firewallRulesCopy'))]",
+                            "properties": {
+                                "startIpAddress": "[parameters('sqlObject').firewallRules[copyIndex('firewallRulesCopy')].startIpAddress]",
+                                "endIpAddress": "[parameters('sqlObject').firewallRules[copyIndex('firewallRulesCopy')].endIpAddress]"
+                            },
+                            "copy": {
+                                "name": "firewallRulesCopy",
+                                "mode": "Serial",
+                                "batchSize": 1,
+                                "count": "[length(parameters('sqlObject').firewallRules)]"
+                            }
+                        },
+                        {
+                            "condition": "[equals(parameters('SqlObject').family, 'Microsoft.DBforMariaDB')]",
+                            "name": "[concat(parameters('sqlObject').serverName, '/', parameters('sqlObject').databases[copyIndex('mariadatabaseArray')])]",
+                            "type": "Microsoft.DBforMariaDB/servers/databases",
+                            "apiVersion": "2018-06-01",
+                            "properties": {
+                                "charset": "utf8",
+                                "collation": "utf8_general_ci"
+                            },
+                            "copy": {
+                                "name": "mariadatabaseArray",
+                                "count": "[if(greater(length(parameters('sqlObject').databases), 1), length(parameters('sqlObject').databases), 1)]"
+                            },
+                            "dependsOn": [
+                                "[concat('Microsoft.DBforMariaDB/servers/', parameters('sqlObject').serverName)]"
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

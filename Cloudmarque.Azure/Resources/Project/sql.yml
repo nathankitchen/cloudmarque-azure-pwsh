@@ -1,0 +1,24 @@
+resourceGroupServiceTag:
+location:
+
+workSpaceServiceTag:
+logRetentionPeriodInDays:
+
+sqlConfig:
+  - family:                             # azureSql, postgres, mariaDb, mysql
+    type:                               # single, elasticPool, managed (only required if azureSql is used)
+    serverName:
+    version:                            # (Optional)
+    databaseNames:                      # (Optional) Uses server name if not databaseNames
+      -
+      -
+    administratorLogin:
+    keyvault:
+      serviceTag:                       # Key Vault cm-service tag value
+      passwordsecretName:
+    sku:
+      name:                             # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
+      capacity:                         # In Vcores for GP, BC, HS. In DTU for others.
+    firewallRules:                      # (Optional) Default range: 0.0.0.0 - 255.255.255.255
+        - startIpAddress:
+          endIpAddress:
