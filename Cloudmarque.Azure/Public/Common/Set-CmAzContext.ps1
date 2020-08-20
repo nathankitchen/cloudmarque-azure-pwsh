@@ -38,7 +38,7 @@
      	 The definition number of the current build.
 
     	.Component
-     	 Core
+     	 Common
 
     	.Example
      	 Set-CmAzContext -ProjectRoot "C:/MyProject"

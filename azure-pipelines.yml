@@ -1,113 +1,171 @@
+parameters:
+- name: ReleaseNotes
+  displayName: Release Notes
+  type: string
+  default: null
+- name: PreRelease
+  displayName: PreRelease Suffix
+  type: string
+  default: null
+- name: MajorRelease
+  displayName: Major Release
+  type: number
+  default: 0
+- name: MinorRelease
+  displayName: Minor Release
+  type: number
+  default: 0
+- name: PatchRelease
+  displayName: Patch Release
+  type: number
+  default: 0
+
 trigger:
 - master
 
 pool:
   vmImage: windows-latest
 
-variables:
-  major: 0
-  minor: 0
-  version: $(major).$(minor).$(build.buildNumber)
-  module: Cloudmarque.Azure
-  createArtifacts: and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'Manual')))
+variables: 
+  moduleName: Cloudmarque.Azure
+  version: ${{ parameters.MajorRelease }}.${{ parameters.MinorRelease }}.${{ parameters.PatchRelease }}
+  createArtifacts: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/pipelines_create_psgallery_github_release'), or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'Manual')))]
+  isRelease: $[and(eq(variables.createArtifacts, true), ne('${{ parameters.ReleaseNotes }}', 'null'))]
+  isPreRelease: $[ne('${{ parameters.PreRelease }}', 'null')]
+  
 
 stages:
 - stage: Build
   displayName: Build Cloudmarque.Azure
   jobs:
-  - job: Build
+  - job:
     steps:
     - task: PowerShell@2
       inputs:
-        targetType: inline
         workingDirectory: $(Build.SourcesDirectory)
-        errorActionPreference: stop
+        pwsh: true
+        failOnStderr: true
+        errorActionPreference: Stop
+        targetType: Inline
         script: |
           . .\init.ps1
+          . .\$(moduleName)\install-dependencies.ps1
           Sync-CloudmarqueAzure
-
 - stage: Test
   displayName: Test Cloudmarque.Azure
   dependsOn: Build
   condition: succeeded()
   jobs:
-  - job: Test
+  - job:
     steps:
     - task: PowerShell@2
-      displayName: Run
+      displayName: Run Tests
       inputs:
-        targetType: inline
         workingDirectory: $(Build.SourcesDirectory)
-        errorActionPreference: stop
+        pwsh: true
+        failOnStderr: true
+        errorActionPreference: Stop
+        targetType: Inline
         script: |
           . .\init.ps1
           Test-CloudmarqueAzure
     - task: PublishTestResults@2
-      displayName: Publish
+      displayName: Publish Tests
       inputs:
         testResultsFormat: NUnit
-        testResultsFiles: publish/tests/*.xml
+        testResultsFiles: $(moduleName)/publish/tests/*.xml
         failTaskOnFailedTests: true
-
-- stage: CreateCloudmarqueAzureArtifact
-  displayName: Create Cloudmarque.Azure Artifact
-  dependsOn: Test
-  condition: and(succeeded(), variables.createArtifacts)
-  jobs:
-  - job: CreateCloudmarqueAzureArtifact
-    steps:
-    - task: PowerShell@2
-      displayName: Build
-      inputs:
-        targetType: inline
-        workingDirectory: $(Build.SourcesDirectory)
-        script: |
-          . .\init.ps1
-          Build-CloudmarqueAzure -Version $(version) -Suffix $(PackageSuffix)
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: publish/pkg
-        ArtifactName: pkg   
 
 - stage: CreateDocumentationArtifact
   displayName: Create Documentation Artifact
   dependsOn: Test
-  condition: and(succeeded(), variables.createArtifacts)
+  condition: and(succeeded(), eq(variables.isRelease, true))
   jobs:
-  - job: CreateDocumentationArtifact
+  - job:
     steps:
     - task: PowerShell@2
-      displayName: Build
+      displayName: Build Artifact
       inputs:
-        targetType: inline
         workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        failOnStderr: true
+        errorActionPreference: Stop
+        targetType: Inline
         script: |
           . .\init.ps1
+          . .\$(moduleName)\install-dependencies.ps1
           New-CloudmarqueAzureDocs
     - task: PublishPipelineArtifact@1
+      displayName: Publish Artifact
       inputs:
         targetPath: publish/docs
         artifactName: docs
-        publishLocation: pipeline
+        publishLocation: Pipeline
 
-- stage: PublishCloudmarqueAzureArtifactToFeed
-  displayName: Publish Cloudmarque.Azure Artifact To Feed
-  dependsOn: CreateCloudmarqueAzureArtifact
-  condition: and(succeeded(), variables.createArtifacts)
+- stage: CreateCloudmarqueAzureArtifact
+  displayName: Create Cloudmarque.Azure Artifact
+  dependsOn: Test
+  condition: and(succeeded(), eq(variables.isRelease, true))
   jobs:
-  - job: PublishCloudmarqueAzureArtifactToFeed
+  - job:
     steps:
-    - task: DownloadBuildArtifacts@0
-      displayName: Download
+    - task: PowerShell@2
+      displayName: Update Manifest
       inputs:
-        buildType: current
-        downloadType: single
-        artifactName: pkg
-        downloadPath: $(Pipeline.Workspace)
-    - task: NuGetCommand@2
-      displayName: Nuget Push
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        failOnStderr: true
+        errorActionPreference: Stop
+        targetType: Inline
+        script: |
+          . .\init.ps1
+          . .\$(moduleName)\install-dependencies.ps1
+          Build-CloudmarqueAzure -Version $(version) -Suffix '${{ parameters.PreRelease }}' -ReleaseNotes '${{ parameters.ReleaseNotes }}'
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Module Artifact
       inputs:
-        command: push
-        packagesToPush: $(Pipeline.Workspace)/**/*.nupkg;!$(Pipeline.Workspace)/**/*.symbols.nupkg
-        nuGetFeedType: internal
-        publishVstsFeed: $(VstsFeed)
+        targetPath: $(moduleName)
+        artifactName: $(moduleName)
+        publishLocation: Pipeline
+
+- stage: Release
+  displayName: Release Cloudmarque.Azure
+  dependsOn: CreateCloudmarqueAzureArtifact
+  condition: succeeded()
+  jobs:
+  - deployment:
+    environment: Prod
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: GitHubRelease@1
+            inputs:
+              gitHubConnection: Trustmarque Github
+              repositoryName: Trustmarque/cloudmarque-azure-pwsh
+              action: create
+              target: $(Build.SourceVersion)
+              title: $(moduleName) $(version)
+              assetUploadMode: replace
+              isPreRelease: $(isPreRelease)
+              addChangeLog: false
+              tagSource: userSpecifiedTag
+              tag: v$(version)
+              releaseNotesSource: inline
+              releaseNotesInline: '${{ parameters.ReleaseNotes }}'
+          - task: PowerShell@2
+            inputs:
+              workingDirectory: $(Pipeline.Workspace)
+              pwsh: true
+              failOnStderr: true
+              errorActionPreference: Stop
+              targetType: Inline
+              script: |
+                . .\$(moduleName)\install-dependencies.ps1
+                
+                Publish-Module `
+                  -Path $(moduleName) `
+                  -NuGetApiKey $(NugetApiKey) `
+                  -Repository PSGallery `
+                  -SkipAutomaticTags `
+                  -Force

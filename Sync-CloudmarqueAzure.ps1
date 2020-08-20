@@ -20,6 +20,7 @@
         $Uninstall = $false
     )
     Process {
+
         $module = "Cloudmarque.Azure";
 
         # If we're explicitly asked to uninstall, nuke the installed module

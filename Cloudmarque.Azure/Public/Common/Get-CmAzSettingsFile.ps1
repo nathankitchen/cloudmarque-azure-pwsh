@@ -9,6 +9,9 @@
 		 callers to use whichever serialization format they prefer when defining and managing
 		 Cloudmarque settings.
 
+		.Component
+		 Common
+
 		.Example
 		 Get-CmAzSettingsFile -Path settings.yml
     #>

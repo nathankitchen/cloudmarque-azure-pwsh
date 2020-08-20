@@ -12,10 +12,6 @@
          Publish-CloudmarqueAzure -Package "$PSScriptRoot\publish\pkg\$module.*.nupkg"
     #>
 
-    . ./Install-Dependencies.ps1
-
-    Install-Dependencies -Verbose
-
     Import-Module "$PSScriptRoot/Cloudmarque.Azure" -Force
 
     if (!(Test-Path -Path "$PSScriptRoot/publish/")) { New-Item "$PSScriptRoot/publish/" -ItemType Directory }

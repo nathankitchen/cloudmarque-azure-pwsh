@@ -1,10 +1,11 @@
 ﻿<#
-	.Synopsis
-	This Azure Automation runbook removes resources with $deleteTag tag set to today.
+    
+    .Synopsis
+	 This Azure Automation runbook removes resources with $deleteTag tag set to today.
 
 	.Description
-	Completes the following:
-		* Connects to Azure AD with a Service Principal and Connect-AzAccount.
+	 Completes the following:
+	    * Connects to Azure AD with a Service Principal and Connect-AzAccount.
 		* Removes all the resources with $deleteTag tag matching today's date.
         * Removes resource groups with $deleteTag tag matching today's date.
 

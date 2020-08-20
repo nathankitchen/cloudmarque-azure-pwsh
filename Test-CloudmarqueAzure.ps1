@@ -3,12 +3,12 @@
     <#
         .Synopsis
          Runs Pester tests over the Cloudmarque.Azure module, publishing test results.
-
+        
         .Description
          Supports the development lifecycle by running defined tests to check whether
          commands are behaving as expected. Checks that all modules are in place before
          running them.
-
+        
         .Example
          Test-CloudmarqueAzure
     #>
@@ -19,19 +19,18 @@
         [String]
         $Scope = "Auto"
     )
+
     Process {
 
-        $modules = @(
-            @{ Name = "Pester"; Version = "5.0.2" },
-            @{ Name = "PSScriptAnalyzer"; Version = "1.19.1" }
+        $modules =  @(
+            @{ ModuleName = "Pester"; ModuleVersion = "5.0.2" },
+            @{ ModuleName = "PSScriptAnalyzer"; ModuleVersion = "1.19.1" }
         );
 
-        . ./Install-Dependencies.ps1
-
-        Install-Dependencies -AdditionalModules $modules -Scope $Scope -Verbose
+        . ./Cloudmarque.Azure/Install-Dependencies.ps1 -AdditionalModules $modules -Scope $Scope -ImportModules $true -Verbose
 
         $publishPath = "$PSScriptRoot\publish"
-        $testDirectory = "\tests"
+        $testDirectory = "tests"
         $testPath = "$publishPath\$testDirectory"
 
         New-Item -Path $publishPath -Name $Project -ItemType Directory -Force | Out-Null
@@ -43,7 +42,7 @@
                 Verbosity = "Detailed"
             }
             Run = @{
-                Path = ".$testDirectory\*"
+                Path = ".\$testDirectory\*"
             }
             Should = @{
                 ErrorAction = "Stop"

@@ -7,6 +7,9 @@
 		.Description
 		 Creates a new directory containing a sample environment for deployment.
 
+		.Component
+		 Common
+
 		.Example
 		 New-CmAzProject -Project "MyProject"
 	#>

@@ -13,7 +13,7 @@
 		 dependencies are not deployed.
 
 		.Component
-		 Global
+		 Common
 
 		.Parameter ServiceKey
 		 Represents the service key to search for. By default, this is "cm-service", but it can be overridden. Do so with

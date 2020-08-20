@@ -7,6 +7,9 @@ function Test-CmAzPackage {
 		.Description
 		 Returns a message, validating that the package has been correctly installed.
 
+		.Component
+     	 Common
+
 		.Example
 		 Test-CmAzPackage
 	#>

@@ -1,4 +1,5 @@
 ﻿function Get-CmAzResourceName {
+  
   <#
     .Synopsis
      Generates a name for a resource based on predefined naming conventions.
@@ -39,8 +40,8 @@
     .Example
      Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "Core" -Region "UK South" -Name "mywindows"
      Output: vmmywindowsa941
-
   #>
+
   [CmdletBinding()]
   [OutputType([PSObject])]
   param(
