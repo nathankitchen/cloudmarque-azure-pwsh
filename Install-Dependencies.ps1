@@ -54,7 +54,14 @@
                 }
 
                 Write-Verbose "Importing $($module.Name) version $($module.Version)..."
-                Import-Module -Name $module.Name -RequiredVersion $module.Version -Force
+                try {
+                    Import-Module -Name $module.Name -RequiredVersion $module.Version -Force
+                }catch [System.IO.FileLoadException] {
+                    $_.ToString() | Write-Verbose
+                }catch {
+                    $_
+                    break
+                }
             }
             else {
                 Write-Verbose "Skipping $($module.Name) $($module.Version): already available"

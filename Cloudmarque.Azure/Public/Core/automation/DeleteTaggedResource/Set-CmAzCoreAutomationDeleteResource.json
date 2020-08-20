@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AutomationAccountName": {
+            "type": "string"
+        },
+        "UpdateSchedule": {
+            "type": "Object"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Automation/automationAccounts/schedules",
+            "apiVersion": "2015-10-31",
+            "name": "[concat(parameters('AutomationAccountName'), '/', 'Delete-CmAzCoreTaggedResource_schedule')]",
+            "properties": "[parameters('UpdateSchedule')]"
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/jobSchedules",
+            "apiVersion": "2015-10-31",
+            "name": "[concat(parameters('AutomationAccountName'), '/', Guid(concat(parameters('AutomationAccountName'), parameters('UpdateSchedule').Name)))]",
+            "dependsOn": [
+                "[concat('Microsoft.Automation/automationAccounts/', parameters('AutomationAccountName'), '/schedules/', 'Delete-CmAzCoreTaggedResource_schedule')]"
+            ],
+            "properties": {
+                "runbook": {
+                    "name": "Delete-TaggedResource.Runbook"
+                },
+                "schedule": {
+                    "name": "Delete-CmAzCoreTaggedResource_schedule"
+                }
+            }
+        }
+    ]
+}

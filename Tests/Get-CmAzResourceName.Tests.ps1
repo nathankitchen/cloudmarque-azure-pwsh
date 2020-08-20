@@ -15,7 +15,7 @@ Describe "Get-CmAzResourceName" {
         }
 
         It "Should fail when no CmAzContext has been set" {
-            {   
+            {
                 Get-CmAzResourceName -Resource "ResourceGroup" -Architecture $architecture -Region $region -Name "Keys"
             } | Should -Throw "No Cloudmarque Azure context is in place, please run Set-CmAzContext before running this command."
         }
@@ -26,12 +26,12 @@ Describe "Get-CmAzResourceName" {
         BeforeAll {
             Set-CmAzContext -Environment "Development" -ProjectRoot $projectRoot
         }
-        
+
         It "Should not have double separators" {
             $name = Get-CmAzResourceName -Resource "Sample2" -Architecture $architecture -Region $region -Name "MyApp"
             $name | Should -Be "default-myapp-dev-uks-5c1753d6"
         }
-        
+
         It "Should not have seperator before domain name" {
             $name = Get-CmAzResourceName -Resource "WebApp" -Architecture $architecture -Region $region -Name "MyWebApp"
             $name | Should -Not -Contain "-.azurewebsites.net"
@@ -44,7 +44,7 @@ Describe "Get-CmAzResourceName" {
     }
 
     Context "Should report bad parameters" {
-        
+
         It "Should warn about regions that don't exist" {
             {
                 Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "IaaS" -Region "Timbuktoo" -Name "MyApp"
@@ -62,9 +62,8 @@ Describe "Get-CmAzResourceName" {
             $name | Should -Be "rg-keys-core-cebe9fa3"
         }
     }
-
     Context "Getting correct build ID operations" {
-        
+
         It "Should append build ID" {
             $name = Get-CmAzResourceName -Resource "Budget" -Architecture $architecture -Region $region -Name "MyBudget" -IncludeBuild
             $name | Should -Be "bud-mybudget-dev-uks-bbef0c49-001"
@@ -77,7 +76,7 @@ Describe "Get-CmAzResourceName" {
     }
 
     Context "Get names from the script" {
-        
+
         It "Should get a ResourceGroup name" {
             $name = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture $architecture -Region $region -Name "MyResourceGroup"
             $name | Should -Be "rg-myresourcegroup-core-b3760842"

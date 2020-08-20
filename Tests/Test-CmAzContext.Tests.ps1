@@ -14,7 +14,7 @@ Describe "*-CmAzContext Lifecycle Tests" {
 	Context "Get-CmAzContext" {
 
 		It "Should fail when no CmAzContext is available and -ThrowIfUnavailable is set" {
-			
+
 			{
 				Clear-CmAzContext
 				Get-CmAzContext -ThrowIfUnavailable
@@ -23,9 +23,9 @@ Describe "*-CmAzContext Lifecycle Tests" {
 		}
 
 		It "Should fail when Azure is unavailable and -RequireAzure is set" {
-			
+
 			{
-				Clear-AzContext -Force	
+				Clear-AzContext -Force
 				Get-CmAzContext -ThrowIfUnavailable -RequireAzure
 
 			} | Should -Throw "You must be logged into Azure. Please ensure you have an AzContext before running this command."
@@ -44,7 +44,7 @@ Describe "*-CmAzContext Lifecycle Tests" {
 	}
 
 	Context "Set-CmAzContext" {
-		
+
 		It "Should return the newly configured context" {
 
 			$devEnvironment = "Development"
@@ -52,13 +52,13 @@ Describe "*-CmAzContext Lifecycle Tests" {
 
 			$c1 = Set-CmAzContext -ProjectRoot $projectRoot -Environment $devEnvironment
 			$c2 = Set-CmAzContext -ProjectRoot $projectRoot -Environment $testEnvironment
-			
+
 			$c1.Environment | Should -Be $devEnvironment
 			$c2.Environment | Should -Be $testEnvironment
 		}
 
 		It "Should auto create a project root if confirmation parameter is y" {
-			
+
 			$testProjectRoot = "$PSScriptRoot\TestProject"
 
 			Set-CmAzContext -ProjectRoot $testProjectRoot -Environment "Development" -ProjectConfirmation "y"
@@ -74,7 +74,7 @@ Describe "*-CmAzContext Lifecycle Tests" {
 	}
 
 	Context "Clear-CmAzContext" {
-		
+
 		BeforeAll {
 			Set-CmAzContext -ProjectRoot $projectRoot -Environment "Development"
 			Clear-CmAzContext

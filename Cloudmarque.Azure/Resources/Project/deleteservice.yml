@@ -1,0 +1,9 @@
+location:                           # Automation account location
+automationAccountServiceTag:        # Automation account service tag (ex cm-service: coreAccount)
+
+schedule:                           # Optional (Below defaults are)
+  startDate:                        # Date format: yyyy-mm-dd (Default: Tomorrow)
+  startTime:                        # Time format: hh:mm:ss
+  endDate:                          # Date format: yyyy-mm-dd (Default: Never)
+  endTime:                          # Time format: hh:mm:ss
+  frequency:                        # daily/weekly/monthly    (Default: Daily)
