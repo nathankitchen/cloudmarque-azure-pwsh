@@ -18,7 +18,7 @@ param(
     $ImportModules = $false
 )
 
-$modules = (Import-PowerShellDataFile "./Cloudmarque.Azure/Cloudmarque.Azure.psd1").RequiredModules
+$modules = (Import-PowerShellDataFile "$PSScriptRoot/Cloudmarque.Azure.psd1").RequiredModules
 
 if ($additionalModules -and $additionalModules.Count -gt 0) {
     $modules += $AdditionalModules
