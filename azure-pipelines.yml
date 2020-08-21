@@ -120,7 +120,17 @@ stages:
         script: |
           . .\init.ps1
           . .\$(moduleName)\install-dependencies.ps1
-          Build-CloudmarqueAzure -Version $(version) -Suffix '${{ parameters.PreRelease }}' -ReleaseNotes '${{ parameters.ReleaseNotes }}'
+          
+          Write-Host "Null suffix"
+          $suffix = $null
+          
+          if([System.Convert]::ToBoolean('$(isPreRelease)')) {
+            Write-Host "Populate suffix"
+            $suffix = '${{ parameters.PreRelease }}'
+          }
+
+          Write-Host "Build"
+          Build-CloudmarqueAzure -Version $(version) -Suffix $suffix -ReleaseNotes '${{ parameters.ReleaseNotes }}'
     - task: PublishPipelineArtifact@1
       displayName: Publish Module Artifact
       inputs:
