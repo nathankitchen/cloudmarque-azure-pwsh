@@ -1,0 +1,18 @@
+- tableName:
+  routes:
+    - cidr:
+      nextHopType:
+      routeName:
+      nextHopIpAddress:
+- tableName:
+  routes:
+    - cidr:
+      nextHopType:
+      routeName:
+      nextHopIpAddress:
+- tableName:
+  routes:
+    - cidr:
+      nextHopType:
+      routeName:
+      nextHopIpAddress:

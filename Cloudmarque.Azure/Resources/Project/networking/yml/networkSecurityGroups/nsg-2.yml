@@ -1,0 +1,13 @@
+nsgName:
+
+rules:
+  - destinationIp:
+    ruleName:
+    destinationPort:
+    sourceIp:
+    Access:
+    sourcePort:
+    priority:
+    Description:
+    direction:
+    protocol:

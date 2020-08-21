@@ -1,0 +1,23 @@
+# you can provide any combination of routes or routegroups.
+# group files must exist in ./groups folder relative to file they are called from.
+
+- tableName:
+  routes:
+    - cidr:
+      nextHopType:
+      routeName:
+      nextHopIpAddress:
+- tableName:
+  routes:
+    - cidr:
+      nextHopType:
+      routeName:
+      nextHopIpAddress:
+- tableName:
+  routeGroup:
+    - DefaultRouteGroup
+  routes:
+    - cidr:
+      nextHopType:
+      routeName:
+      nextHopIpAddress:

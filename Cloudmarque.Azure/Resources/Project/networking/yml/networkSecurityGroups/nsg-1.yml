@@ -1,0 +1,31 @@
+# you can provide any combination of rules or rulegroups.
+# group files must exist in ./groups folder relative to file they are called from.
+
+- nsgName:
+  ruleGroup:
+    - DefaultNsgRules
+  rules:
+    - destinationIp:
+      ruleName:
+      destinationPort:
+      sourceIp:
+      Access:
+      sourcePort:
+      priority:
+      Description:
+      direction:
+      protocol:
+- nsgName:
+  ruleGroup:
+    - DefaultNsgRules
+  rules:
+    - destinationIp:
+      ruleName:
+      destinationPort:
+      sourceIp:
+      Access:
+      sourcePort:
+      priority:
+      Description:
+      direction:
+      protocol:

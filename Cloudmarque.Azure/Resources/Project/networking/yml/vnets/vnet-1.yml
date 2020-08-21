@@ -1,0 +1,13 @@
+vnetName: vnet-1
+
+location: UK South
+
+addressSpace:                  # Array of vnet cidr blocks
+  -
+
+subnets:
+  - cidr:
+    subnetName:
+    routeTable:                 # Optional
+    networkSecurityGroup:       # Optional
+

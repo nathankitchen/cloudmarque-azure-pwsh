@@ -1,0 +1,9 @@
+- routeName:
+  cidr:
+  nextHopType:
+  nextHopIpAddress:
+
+- routeName:
+  cidr:
+  nextHopType:
+  nextHopIpAddress:
