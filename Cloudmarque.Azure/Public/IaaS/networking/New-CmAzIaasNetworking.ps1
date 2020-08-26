@@ -266,7 +266,7 @@
 
 					foreach ($nsg in $nsgGroupObject) {
 
-						f ($nsg.count -gt 1) {
+						if ($nsg.count -gt 1) {
 							Write-Error "Rule name not unique : '$($nsg.Name) in '$($nsg.Group.nsgName[0])' for Resource Group: '$($nsg.Group.resourceGroupName[0])'" -CategoryTargetName $nsg.Name -ErrorAction Stop
 						}
 						$nsgruleObject = nsgruleObject -nsgGroupObject $nsg.Group
@@ -318,7 +318,7 @@
 
 						# Adding NSG
 						$nsgGroup = $ResourceGroup.Group | Group-Object nsgName
-						Write-Verbose "'$($ResourceGroup.Name)' has route tables = '$($($nsgGroup.Name -notlike '').count)'"
+						Write-Verbose "'$($ResourceGroup.Name)' has network security groups = '$($($nsgGroup.Name -notlike '').count)'"
 						$nsgObjectArray = [System.Collections.ArrayList]@()
 
 						foreach ($nsg in $nsgGroup) {

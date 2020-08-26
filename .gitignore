@@ -1,4 +1,8 @@
+
+# Cloudmarque default ignore files
+
 *projectroot*
 test
 package
 publish
+context.json
