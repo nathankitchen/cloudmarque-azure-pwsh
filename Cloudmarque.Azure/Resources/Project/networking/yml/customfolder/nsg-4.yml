@@ -1,6 +1,6 @@
 nsgName:
 ruleGroup:
-  - DefaultNsgRules
+  - defaultNsgRules
 rules:
   - destinationIp:
     ruleName:

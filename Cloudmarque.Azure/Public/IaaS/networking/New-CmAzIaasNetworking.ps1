@@ -1,38 +1,52 @@
 ﻿function New-CmAzIaasNetworking {
+	
 	<#
 		.Synopsis
-		Creates networking solution
+		 Creates networking solution
 
 		.Description
-		Completes following:
+		 Completes following:
 			* Creates vnets and subnets. Optionally attach nsg and route tables to subnet.
 			* Creates route tables and routes.
 			* Creates network security groups.
+			* Creates resource groups if doesn't exist.
 			* Configure resources in mulitple resource groups at once.
+			* Ability to optionally configure networking component independently.
 
 		.Parameter SettingsFile
-		File path for the settings file to be converted into a settings object.
+		 File path for the settings file to be converted into a settings object.
 
-		.Parameter VnetCsvFile
-		File path for the csv containing virtual network configurations.
-		Required headers: resourceGroupName|Location|vnetName|addressSpace|subnetName|cidr|networkSecurityGroup|routeTable
+		.Parameter VnetsCsvFile
+		 File path for the csv containing virtual network configurations.
+		 Required headers: resourceGroupName|location(optional)|vnetName|addressSpace|subnetName|cidr|networkSecurityGroup|routeTable.
 
-		.Parameter RouteTableCsvFile
-		File path for the csv containing route table configurations.
-		Required headers: resourceGroupName|tableName|routeName|cidr|nextHopType|nextHopIpAddress|notes
+		.Parameter RouteTablesCsvFile
+		 File path for the csv containing route table configurations.
+		 Required headers: resourceGroupName|location(optional)|tableName|routeName|cidr|nextHopType|nextHopIpAddress|notes
 
-		.Parameter NsgCsvFile
-		File path for the csv containing virtual network security group configurations.
-		Required headers: resourceGroupName|nsgName|ruleName|priority|direction|sourceIp|sourcePort|destinationIp|destinationPort|protocol|Access|Description
+		.Parameter NsgsCsvFile
+		 File path for the csv containing virtual network security group configurations.
+		 Required headers: resourceGroupName|location(optional)|nsgName|ruleName|priority|direction|sourceIp|sourcePort|destinationIp|destinationPort|protocol|Access|Description
+
+		.Parameter ResourceGroupsCsvFile
+		 File path for the csv containing resource Group and location mapping. By default location of first vnet is used to create resource group.
+		 Required headers: resourceGroupName|location
 
 		.Component
-		IaaS
+		 IaaS
 
 		.Example
-		New-CmAzIaasNetworking -settingsFile "networking.yml"
+		 New-CmAzIaasNetworking -settingsFile "networking.yml"
 
 		.Example
-		New-CmAzIaasNetworking -VnetCsvFile "vnet.csv" -RouteTableCsvFile "routeTable.csv" -NsgCsvFile "nsg.csv"
+		 New-CmAzIaasNetworking -VnetsCsvFile "vnet.csv" -RouteTablesCsvFile "routeTable.csv" -NsgsCsvFile "nsg.csv" -ResourceGroupCsvFile resourceGroup.csv -Confirm:$false
+
+		.Example
+		 New-CmAzIaasNetworking -VnetsCsvFile "vnet.csv" -RouteTablesCsvFile "routeTable.csv" -NsgsCsvFile "nsg.csv" -Confirm:$false
+
+		.Example
+		 New-CmAzIaasNetworking -RouteTablesCsvFile "routeTable.csv" -Confirm:$false
+
 	#>
 
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "High")]
@@ -40,11 +54,13 @@
 		[parameter(Mandatory = $true, ParameterSetName = "Settings Yml File")]
 		[String]$SettingsFile,
 		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
-		[String]$VnetCsvFile,
+		[String]$VnetsCsvFile,
 		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
-		[String]$RouteTableCsvFile,
+		[String]$RouteTablesCsvFile,
 		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
-		[String]$NsgCsvFile
+		[String]$NsgsCsvFile,
+		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
+		[String]$ResourceGroupsCsvFile
 	)
 
 	$ErrorActionPreference = "Stop"
@@ -53,21 +69,23 @@
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create networking solution")) {
 
-			if ($SettingsFile -and -not $SettingsObject -and -not $VnetCsvFile -and -not $RouteTableCsvFile -and -not $NsgCsvFile ) {
+			if ($SettingsFile -and -not $SettingsObject -and -not $VnetsCsvFile -and -not $RouteTablesCsvFile -and -not $NsgsCsvFile ) {
 				Write-Verbose "Importing setting from Yml file"
 				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
 			}
-			elseif (-not $SettingsFile -and -not $SettingsObject -and -not $VnetCsvFile -and -not $RouteTableCsvFile -and -not $NsgCsvFile ) {
+			elseif (-not $SettingsFile -and -not $SettingsObject -and -not $VnetsCsvFile -and -not $RouteTablesCsvFile -and -not $NsgsCsvFile ) {
 				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 			}
 
+			$resourceGroupObjectArray = [System.Collections.ArrayList]@()
+
 			# Code to Create Object from CSV
 
-			if ($VnetCsvFile -or $RouteTableCsvFile -or $NsgCsvFile -and !$SettingsObject)	{
+			if ($VnetsCsvFile -or $RouteTablesCsvFile -or $NsgsCsvFile -and !$SettingsObject)	{
 
-				if ($VnetCsvFile) {
+				if ($VnetsCsvFile) {
 					Write-Verbose "Vnet CSV Found."
-					$vnetObjectFile = Import-Csv -Path $VnetCsvFile
+					$vnetObjectFile = Import-Csv -Path $VnetsCsvFile
 
 					if ($vnetObjectFile.count -eq 1) {
 						$vnetFile = @($vnetObjectFile)
@@ -81,22 +99,27 @@
 					$vnetFile = @()
 				}
 
-				if ($RouteTableCsvFile) {
+				if ($RouteTablesCsvFile) {
 					Write-Verbose "Route Table CSV Found."
-					$routeTablesFile = Import-Csv -Path $RouteTableCsvFile
+					$routeTablesFile = Import-Csv -Path $RouteTablesCsvFile
 				}
 				else {
 					Write-Verbose "Route Table CSV not Found."
 					$routeTablesFile = @()
 				}
 
-				if ($NsgCsvFile) {
+				if ($NsgsCsvFile) {
 					Write-Verbose "Nsg CSV Found."
-					$nsgFile = Import-Csv -Path $NsgCsvFile
+					$nsgFile = Import-Csv -Path $NsgsCsvFile
 				}
 				else {
 					Write-Verbose "Nsg CSV Not Found."
 					$nsgFile = @()
+				}
+
+				if ($ResourceGroupsCsvFile) {
+					Write-Verbose "Resource Group CSV Found."
+					$resourceGroupslocation = Import-Csv -Path $ResourceGroupsCsvFile
 				}
 
 				Write-Verbose "Starting file merge."
@@ -109,38 +132,41 @@
 						Write-Verbose "NSG: external CSV detected"
 
 						foreach ($externalNsg in $nsg.Group) {
-							$interimNsgCsvPath = "$(Split-Path $NsgCsvFile)/$($nsg.Name)"
+							$interimNsgCsvPath = "$(Split-Path $NsgsCsvFile)/$($nsg.Name)"
 							$interimNsgCsvPath | Write-Verbose
 							$interimNsgFile = Import-Csv -Path $interimNsgCsvPath
 							$interimNsg = $interimNsgFile | Group-Object nsgName
 							$interimNsgObjectArray = [System.Collections.ArrayList]@()
 
 							foreach ($internalNsg in $interimNsg.Group) {
+
 								$interimNsgObject = New-Object -TypeName psobject -Property @{
-									"resourceGroupName" =  $internalNsg.resourceGroupName;
-									"nsgName" = $internalNsg.nsgName;
-									"ruleName" = $externalNsg.ruleName;
-									"priority" = $externalNsg.priority;
-									"direction" = $externalNsg.direction;
-									"sourceIp" = $externalNsg.sourceIp;
-									"sourcePort" = $externalNsg.sourcePort;
-									"destinationIp" = $externalNsg.destinationIp;
-									"destinationPort" = $externalNsg.destinationPort;
-									"protocol" = $externalNsg.protocol;
-									"Access" = $externalNsg.Access;
-									"Description" = $externalNsg.Description
+									"resourceGroupName" = $internalNsg.resourceGroupName;
+									"nsgName"           = $internalNsg.nsgName;
+									"location"          = $internalNsg.location;
+									"ruleName"          = $externalNsg.ruleName;
+									"priority"          = $externalNsg.priority;
+									"direction"         = $externalNsg.direction;
+									"sourceIp"          = $externalNsg.sourceIp;
+									"sourcePort"        = $externalNsg.sourcePort;
+									"destinationIp"     = $externalNsg.destinationIp;
+									"destinationPort"   = $externalNsg.destinationPort;
+									"protocol"          = $externalNsg.protocol;
+									"Access"            = $externalNsg.Access;
+									"Description"       = $externalNsg.Description
 								}
+
 								$interimNsgObjectArray.add($interimNsgObject) > $Null
 							}
-							Write-Verbose "starting merge"
+
+							Write-Verbose "Starting merge.."
 							$mergedFile.Remove($externalNsg)
 							$mergedFile += $interimNsgObjectArray
 						}
 					}
 				}
 
-				$ResourceGroupsFile = $mergedFile | Group-Object -Property resourceGroupName
-				$resourceGroupObjectArray = [System.Collections.ArrayList]@()
+				$resourceGroupsFile = $mergedFile | Group-Object -Property resourceGroupName
 
 				# Code to add vnet in the object
 				function subnetObject {
@@ -179,18 +205,18 @@
 						$addressSpace = $vnetGroup.addressSpace.ToString().split(',')
 					}
 
-					if ($vnetGroup.Location.count -gt 1) {
-						$Location = $vnetGroup.Location[0]
+					if ($vnetGroup.location.count -gt 1) {
+						$location = $vnetGroup.location[0]
 					}
 					else {
-						$Location = $vnetGroup.Location
+						$location = $vnetGroup.location
 					}
 
 					$vnetObject = @{
 						vnetName     = $vnetName;
 						addressSpace = $addressSpace;
 						subnets      = $subnetObjectList;
-						Location     = $Location
+						location     = $location
 					}
 
 					$vnetObject
@@ -226,13 +252,22 @@
 						$routeObjectList.Add($routeObject) > $Null
 					}
 
+					if ($routeTableGroup.location.count -gt 1) {
+						$location = $routeTableGroup.location[0]
+					}
+					else {
+						$location = $routeTableGroup.location
+					}
+
 					$routeTableObject = @{
 						tableName = $tableName;
 						routes    = $routeObjectList;
+						location  = $location
 					}
 
 					$routeTableObject
 				}
+
 				# Code to add Nsg rules in the object
 				function nsgruleObject {
 					param(
@@ -273,16 +308,24 @@
 						$nsgruleObjectList.Add($nsgruleObject) > $Null
 					}
 
+					if ($nsgGroup.location.count -gt 1) {
+						$location = $nsgGroup.location[0]
+					}
+					else {
+						$location = $nsgGroup.location
+					}
+
 					$nsgObject = @{
-						nsgName = $nsgName;
-						rules   = $nsgruleObjectList;
+						nsgName  = $nsgName;
+						rules    = $nsgruleObjectList;
+						location = $location
 					}
 
 					$nsgObject
 				}
 
 				# Create a unified Resource Group collection
-				foreach ($ResourceGroup in ($ResourceGroupsFile | Where-Object { $_.Name -notlike ''})) {
+				foreach ($ResourceGroup in ($resourceGroupsFile | Where-Object { $_.Name -notlike '' })) {
 
 					if ($ResourceGroup.Name) {
 						# Adding Vnets
@@ -330,18 +373,56 @@
 							}
 						}
 
+						# Default values if required for ARM template sanity checks
+						if (!$vnetObjectArray) {
+							$vnetObjectArray = @(@{vnetName = "none"; location = "uksouth"; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }) })
+						}
+
+						if (!$routeTableObjectArray) {
+							$routeTableObjectArray = @(@{tableName = "none"; routes = @(@{routeName = "none"; cidr = "0.0.0.0/0"; nextHopType = "VirtualAppliance"; nextHopIpAddress = "10.10.10.10" }) })
+						}
+
+						if (!$nsgObjectArray) {
+							$nsgObjectArray = @(@{nsgName = "none"; rules = @(@{ruleName = "none"; description = "none"; priority = "none"; direction = "none"; sourceIp = "10.10.10.10"; sourcePort = 3389; destinationIp = "10.10.10.11"; destinationPort = 3389; protocol = "Tcp"; Access = "allow" }) })
+						}
+
+						# Build Resource Group Config
+						$ifResourceGroupExists = Get-AzResourceGroup -Name $ResourceGroup.Name -ErrorAction SilentlyContinue
+
+						if (!$ifResourceGroupExists) {
+							$RGlocation = ($resourceGroupslocation | Where-Object { $_.resourceGroupName -like $ResourceGroup.Name }).location
+
+							if (!$RGlocation -and $vnetObjectArray[0].location ) {
+								$RGlocation = $vnetObjectArray[0].location
+							}
+
+							if (!$RGlocation) {
+								Write-Error "Resource Group doesnt exist and a location is also not provided to create one."
+							}
+
+							$createRG = $true
+						}
+						else {
+							$RGlocation = $ifResourceGroupExists.location
+							$createRG = $false
+						}
+
 						# Adding Objects to resourceGroup Object
 						Write-Verbose "Adding '$($ResourceGroup.Name)' to Resource Group Object List"
 						$ResourceGroupObject = @{
-							resourceGroupName     = $ResourceGroup.Name;
+							resourceGroup         = @{
+								name     = $ResourceGroup.Name;
+								location = $RGlocation;
+								createRG = $createRG;
+							};
 							vnets                 = $vnetObjectArray;
 							routeTables           = $routeTableObjectArray;
 							networkSecurityGroups = $nsgObjectArray
 						}
+
 						$resourceGroupObjectArray.Add($ResourceGroupObject) > $Null
 						Write-Verbose "'$($ResourceGroup.Name)' Added"
 					}
-
 				}
 			}
 
@@ -429,105 +510,109 @@
 					$routeTableObjectArray = [System.Collections.ArrayList]@()
 					$nsgObjectArray = [System.Collections.ArrayList]@()
 
+					$ResourceGroup = $_.ResourceGroupName
 					# Set Vnet object
-					$_.vnets | ForEach-Object {
-						$vnetObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "vnets" -hasGroups $false
-						$vnetObjectArray += $vnetObjectYml
+					
+					if ($_.vnets) {
+
+						$_.vnets | ForEach-Object {
+
+							$vnetObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "vnets" -hasGroups $false
+
+							$vnetObjectYml.subnets | Where-Object { $_.networkSecurityGroup -like '' } | ForEach-Object {
+								$_.networkSecurityGroup = ""
+							}
+
+							$vnetObjectYml.subnets | Where-Object { $_.routeTable -like '' } | ForEach-Object {
+								$_.routeTable = ""
+							}
+
+							$vnetObjectArray += $vnetObjectYml
+							Write-Verbose "Vnets from $_ added to '$ResourceGroup'"
+						}
 					}
 
 					# Set Route Table Object
-					$_.routeTables | ForEach-Object {
-						$routeTableObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "routeTables" -hasGroups $true
-						$routeTableObjectArray += $routeTableObjectYml
+					if ($_.routeTables) {
+
+						$_.routeTables | ForEach-Object {
+
+							$routeTableObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "routeTables" -hasGroups $true
+							$routeTableObjectArray += $routeTableObjectYml
+							Write-Verbose "Route tables from $_ added to '$ResourceGroup'"
+						}
 					}
 
 					# Set network Security group Object
-					$_.networkSecurityGroups | ForEach-Object {
-						$nsgObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "networkSecurityGroups" -hasGroups $true
-						$nsgObjectArray += $nsgObjectYml
+					if ($_.networkSecurityGroups) {
+
+						$_.networkSecurityGroups | ForEach-Object {
+							$nsgObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "networkSecurityGroups" -hasGroups $true
+							$nsgObjectArray += $nsgObjectYml
+							Write-Verbose "Network Security Groups from $_ added to '$ResourceGroup'"
+						}
+					}
+
+					# Default values if required for ARM template sanity checks
+					if (!$vnetObjectArray) {
+						$vnetObjectArray = @(@{vnetName = "none"; location = "uksouth"; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }) })
+					}
+
+					if (!$routeTableObjectArray) {
+						$routeTableObjectArray = @(@{tableName = "none"; routes = @(@{routeName = "none"; cidr = "0.0.0.0/0"; nextHopType = "VirtualAppliance"; nextHopIpAddress = "10.10.10.10" }) })
+					}
+
+					if (!$nsgObjectArray) {
+						$nsgObjectArray = @(@{nsgName = "none"; rules = @(@{ruleName = "none"; description = "none"; priority = "none"; direction = "none"; sourceIp = "10.10.10.10"; sourcePort = 3389; destinationIp = "10.10.10.11"; destinationPort = 3389; protocol = "Tcp"; Access = "allow" }) })
+					}
+
+					# Build Resource Group Config
+					$ifResourceGroupExists = Get-AzResourceGroup -Name $_.resourceGroupName -ErrorAction SilentlyContinue
+
+					if (!$ifResourceGroupExists) {
+						$RGlocation = $_.location
+
+						if (!$RGlocation -and $vnetObjectArray[0].location ) {
+							$RGlocation = $vnetObjectArray[0].location
+						}
+
+						if (!$RGlocation) {
+							Write-Error "Resource Group doesnt exist and a location is also not provided to create one."
+						}
+
+						$createRG = $true
+					}
+					else {
+						$RGlocation = $ifResourceGroupExists.location
+						$createRG = $false
 					}
 
 					# Adding Objects to resourceGroup Object
-					Write-Verbose "Adding '$($_.ResourceGroupName)' to Resource Group Object List"
+					Write-Verbose "Adding '$ResourceGroup' to Resource Group Object List"
 					$ResourceGroupObject = @{
-						resourceGroupName     = $_.ResourceGroupName;
+						resourceGroup         = @{
+							name     = $ResourceGroup;
+							location = $RGlocation;
+							createRG = $createRG;
+						};
 						vnets                 = $vnetObjectArray;
 						routeTables           = $routeTableObjectArray;
 						networkSecurityGroups = $nsgObjectArray
 					}
 
 					$resourceGroupObjectArray.Add($ResourceGroupObject) > $Null
-					Write-Verbose "'$($ResourceGroup.Name)' Added"
+					Write-Verbose "'$ResourceGroup' Added"
 				}
 			}
 
 			# Arm Deployment
-			if ($SettingsObject -and -not $resourceGroupObjectArray) {
-				$resourceGroupObjectArray = $SettingsObject.ResourceGroups.clone()
-			}
-
 			Write-Verbose "Initiating deployment"
-			Write-Verbose "Setting environment Variables"
 
-			$context = ""
-
-			try {
-				$env:PSScriptRoot = $PSScriptRoot
-				$env:context = "context.json"
-			}
-			catch {
-				write-verbose "Error setting environment variables. Make sure CmAzContext is set."
-				$PSItem.ToString() | write-verbose
-			}
-
-			Save-Azcontext -Path $env:context -Force
-
-			try {
-
-				$resourceGroupObjectArray | ForEach-Object -Parallel {
-
-					Write-Verbose "Importing context.."
-					Import-Azcontext -Path $env:context > $null
-
-					if ($_.resourceGroupName) {
-						$ifResourceGroupExists = Get-AzResourceGroup -Name $_.resourceGroupName -ErrorAction SilentlyContinue
-
-						if (!$ifResourceGroupExists) {
-							New-AzResourceGroup -Name $_.resourceGroupName -Location "UK South" -Force
-						}
-
-						if (!$_.vnets) {
-							$_.vnets = @(@{vnetName = "none"; location = "uksouth"; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }) })
-						}
-
-						if (!$_.routeTables) {
-							$_.routeTables = @(@{tableName = "none"; routes = @(@{routeName = "none"; cidr = "0.0.0.0/0"; nextHopType = "VirtualAppliance"; nextHopIpAddress = "10.10.10.10" }) })
-						}
-
-						if (!$_.networkSecurityGroups) {
-							$_.networkSecurityGroups = @(@{nsgName = "none"; rules = @(@{ruleName = "none"; description = "none"; priority = "none"; direction = "none"; sourceIp = "10.10.10.10"; sourcePort = 3389; destinationIp = "10.10.10.11"; destinationPort = 3389; protocol = "Tcp"; Access = "allow" }) })
-						}
-
-						Write-Verbose "Starting Deployment in Resourcegroup:'$($_.resourceGroupName)"
-
-						New-AzResourceGroupDeployment `
-							-Name "CmAz-Network-$((Get-Date -Format "yyyymmdd-hhmmss"))" `
-							-TemplateFile "$env:PSScriptRoot\New-CmAzIaasNetworking.json" `
-							-ResourceGroupName $_.resourceGroupName `
-							-VnetArmObject $_.vnets `
-							-RouteTableArmObject $_.routeTables `
-							-NsgArmObject $_.networkSecurityGroups `
-							-Force `
-							-verbose
-					}
-				}
-			}
-			catch {
-				$PSItem.ToString() | Write-Error
-			}
-
-			Write-Verbose "Clearing environment.."
-			Remove-Item -Path $env:context
+			New-AzDeployment `
+				-Name "CmAz-Network-Deploy" `
+				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.json `
+				-location $resourceGroupObjectArray[0].resourceGroup.location`
+				-networkingArrayObject $resourceGroupObjectArray
 
 			Write-Verbose "Finished."
 		}

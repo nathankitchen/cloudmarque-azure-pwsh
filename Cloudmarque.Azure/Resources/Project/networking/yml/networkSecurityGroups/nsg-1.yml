@@ -2,8 +2,9 @@
 # group files must exist in ./groups folder relative to file they are called from.
 
 - nsgName:
+  location: # Optional - defaults to resource group location
   ruleGroup:
-    - DefaultNsgRules
+    - defaultNsgRules
   rules:
     - destinationIp:
       ruleName:
@@ -17,7 +18,7 @@
       protocol:
 - nsgName:
   ruleGroup:
-    - DefaultNsgRules
+    - defaultNsgRules
   rules:
     - destinationIp:
       ruleName:

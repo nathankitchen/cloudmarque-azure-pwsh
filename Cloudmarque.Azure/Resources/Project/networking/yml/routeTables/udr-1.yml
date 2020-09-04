@@ -2,6 +2,7 @@
 # group files must exist in ./groups folder relative to file they are called from.
 
 - tableName:
+  location: # Optional - defaults to resource group location
   routes:
     - cidr:
       nextHopType:

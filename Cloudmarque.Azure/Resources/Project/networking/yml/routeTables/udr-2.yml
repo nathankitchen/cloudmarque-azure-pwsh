@@ -1,3 +1,5 @@
-tableName:                            # route table tableName
+tableName: # route table tableName
+location: # Optional - defaults to resource group location
+
 routeGroup:
   - DefaultRouteGroup

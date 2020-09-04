@@ -1,4 +1,5 @@
 nsgName:
+location: # Optional - defaults to resource group location
 
 rules:
   - destinationIp:

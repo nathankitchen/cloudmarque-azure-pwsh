@@ -1,129 +1,180 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "VnetArmObject": {
-            "type": "Array",
-            "metadata": {
-                "description": "vnet object with all required parameters"
-            }
-        },
-        "RouteTableArmObject": {
-            "type": "Array",
-            "metadata": {
-                "description": "route table object with all required parameters"
-            }
-        },
-        "NsgArmObject": {
-            "type": "Array",
-            "metadata": {
-                "description": "nsg object with all required parameters"
-            }
+        "networkingArrayObject": {
+            "type": "array"
         }
     },
     "variables": {
     },
     "resources": [
         {
-            "condition": "[not(equals(parameters('VnetArmObject')[copyIndex('vnetCopy')].vnetName, 'none'))]",
-            "type": "Microsoft.Network/virtualNetworks",
+            "condition": "[parameters('networkingArrayObject')[copyIndex('resourceGroupCopy')].resourceGroup.createRG]",
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2019-10-01",
+            "name": "[parameters('networkingArrayObject')[copyIndex('resourceGroupCopy')].resourceGroup.Name]",
+            "location": "[parameters('networkingArrayObject')[copyIndex('resourceGroupCopy')].resourceGroup.location]",
+            "copy": {
+                "name": "resourceGroupCopy",
+                "count": "[length(parameters('networkingArrayObject'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('Cm_network_deployment', '_',copyIndex('networkingArrayObjectCopy'))]",
+            "resourceGroup": "[parameters('networkingArrayObject')[copyIndex('networkingArrayObjectCopy')].resourceGroup.Name]",
             "dependsOn": [
-                "routeTableCopy",
-                "nsgCopy"
+                "resourceGroupCopy"
             ],
-            "apiVersion": "2019-12-01",
-            "name": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].vnetName]",
-            "location": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].Location]",
             "copy": {
-                "name": "vnetCopy",
-                "count": "[length( parameters('VnetArmObject'))]"
+                "name": "networkingArrayObjectCopy",
+                "count": "[length(parameters('networkingArrayObject'))]"
             },
             "properties": {
-                "addressSpace": {
-                    "addressPrefixes": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].addressSpace]"
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
                 },
-                "copy": [
-                    {
-                        "name": "subnets",
-                        "count": "[length( parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets)]",
-                        "input": {
-                            "name": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].subnetName]",
-                            "properties": {
-                                "addressPrefix": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].cidr]",
-                                "networkSecurityGroup": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].networkSecurityGroup)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/networkSecurityGroups', parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].networkSecurityGroup), '\"}')), json('null'))]",
-                                "routeTable": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/routeTables', parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable), '\"}')), json('null'))]"
+                "parameters": {
+                    "VnetArmObject": {
+                        "value": "[parameters('networkingArrayObject')[copyIndex('networkingArrayObjectCopy')].vnets]"
+                    },
+                    "RouteTableArmObject": {
+                        "value": "[parameters('networkingArrayObject')[copyIndex('networkingArrayObjectCopy')].routeTables]"
+                    },
+                    "NsgArmObject": {
+                        "value": "[parameters('networkingArrayObject')[copyIndex('networkingArrayObjectCopy')].networkSecurityGroups]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "VnetArmObject": {
+                            "type": "Array",
+                            "metadata": {
+                                "description": "vnet object with all required parameters"
+                            }
+                        },
+                        "RouteTableArmObject": {
+                            "type": "Array",
+                            "metadata": {
+                                "description": "route table object with all required parameters"
+                            }
+                        },
+                        "NsgArmObject": {
+                            "type": "Array",
+                            "metadata": {
+                                "description": "nsg object with all required parameters"
                             }
                         }
-                    }
-                ]
-            }
-        },
-        {
-            "condition": "[not(equals(parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].tableName, 'none'))]",
-            "name": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].tableName]",
-            "type": "Microsoft.Network/routeTables",
-            "apiVersion": "2019-12-01",
-            "location": "[resourceGroup().location]",
-            "copy": {
-                "name": "routeTableCopy",
-                "count": "[length( parameters('RouteTableArmObject'))]"
-            },
-            "properties": {
-                "copy": [
-                    {
-                        "name": "routes",
-                        "count": "[length(parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes)]",
-                        "input": {
-                            "name": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes[copyIndex('routes')].routeName]",
+                    },
+                    "resources": [
+                        {
+                            "condition": "[not(equals(parameters('VnetArmObject')[copyIndex('vnetCopy')].vnetName, 'none'))]",
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "dependsOn": [
+                                "routeTableCopy",
+                                "nsgCopy"
+                            ],
+                            "apiVersion": "2019-12-01",
+                            "name": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].vnetName]",
+                            "location": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].location)), parameters('VnetArmObject')[copyIndex('vnetCopy')].location, resourceGroup().location)]",
+                            "copy": {
+                                "name": "vnetCopy",
+                                "count": "[length(parameters('VnetArmObject'))]"
+                            },
                             "properties": {
-                                "addressPrefix": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes[copyIndex('routes')].cidr]",
-                                "nextHopType": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes[copyIndex('routes')].nextHopType]",
-                                "nextHopIpAddress": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes[copyIndex('routes')].nextHopIpAddress]"
+                                "addressSpace": {
+                                    "addressPrefixes": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].addressSpace]"
+                                },
+                                "copy": [
+                                    {
+                                        "name": "subnets",
+                                        "count": "[length( parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets)]",
+                                        "input": {
+                                            "name": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].subnetName]",
+                                            "properties": {
+                                                "addressPrefix": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].cidr]",
+                                                "networkSecurityGroup": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].networkSecurityGroup)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/networkSecurityGroups', parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].networkSecurityGroup), '\"}')), json('null'))]",
+                                                "routeTable": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/routeTables', parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable), '\"}')), json('null'))]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "condition": "[not(equals(parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].tableName, 'none'))]",
+                            "name": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].tableName]",
+                            "type": "Microsoft.Network/routeTables",
+                            "apiVersion": "2019-12-01",
+                            "location": "[if(not(empty(parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].location)), parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].location, resourceGroup().location)]",
+                            "copy": {
+                                "name": "routeTableCopy",
+                                "count": "[length( parameters('RouteTableArmObject'))]"
+                            },
+                            "properties": {
+                                "copy": [
+                                    {
+                                        "name": "routes",
+                                        "count": "[length(parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes)]",
+                                        "input": {
+                                            "name": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes[copyIndex('routes')].routeName]",
+                                            "properties": {
+                                                "addressPrefix": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes[copyIndex('routes')].cidr]",
+                                                "nextHopType": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes[copyIndex('routes')].nextHopType]",
+                                                "nextHopIpAddress": "[parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routes[copyIndex('routes')].nextHopIpAddress]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "condition": "[not(equals(parameters('NsgArmObject')[copyIndex('nsgCopy')].nsgName, 'none'))]",
+                            "apiVersion": "2019-12-01",
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "name": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].nsgName]",
+                            "location": "[if(not(empty(parameters('NsgArmObject')[copyIndex('nsgCopy')].location)), parameters('NsgArmObject')[copyIndex('nsgCopy')].location, resourceGroup().location)]",
+                            "copy": {
+                                "name": "nsgCopy",
+                                "count": "[length( parameters('NsgArmObject'))]"
+                            },
+                            "properties": {
+                                "copy": [
+                                    {
+                                        "name": "securityRules",
+                                        "count": "[length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules)]",
+                                        "input": {
+                                            "name": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].ruleName]",
+                                            "properties": {
+                                                "description": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].description]",
+                                                "priority": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].priority]",
+                                                "direction": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].direction]",
+                                                "sourceAddressPrefix": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourceIp), 1)), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourceIp[0], json('null'))]",
+                                                "sourcePortRange": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourcePort), 1)),  parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourcePort[0], json('null'))]",
+                                                "destinationAddressPrefix": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationIp), 1)), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationIp[0], json('null'))]",
+                                                "destinationPortRange": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationPort), 1)), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationPort[0], json('null'))]",
+                                                "SourceAddressPrefixes": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourceIp), 1)), json('null'), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourceIp)]",
+                                                "sourcePortRanges": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourcePort), 1)), json('null'), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourcePort)]",
+                                                "destinationAddressPrefixes": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationIp), 1)), json('null'), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationIp)]",
+                                                "destinationPortRanges": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationPort),1)), json('null'), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationPort)]",
+                                                "protocol": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].protocol]",
+                                                "Access": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].Access]"
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
-                    }
-                ]
-            }
-        },
-        {
-            "condition": "[not(equals(parameters('NsgArmObject')[copyIndex('nsgCopy')].nsgName, 'none'))]",
-            "apiVersion": "2019-12-01",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].nsgName]",
-            "location": "[resourceGroup().location]",
-            "copy": {
-                "name": "nsgCopy",
-                "count": "[length( parameters('NsgArmObject'))]"
-            },
-            "properties": {
-                "copy": [
-                    {
-                        "name": "securityRules",
-                        "count": "[length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules)]",
-                        "input": {
-                            "name": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].ruleName]",
-                            "properties": {
-                                "description": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].description]",
-                                "priority": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].priority]",
-                                "direction": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].direction]",
-                                "sourceAddressPrefix": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourceIp), 1)), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourceIp[0], json('null'))]",
-                                "sourcePortRange": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourcePort), 1)),  parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourcePort[0], json('null'))]",
-                                "destinationAddressPrefix": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationIp), 1)), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationIp[0], json('null'))]",
-                                "destinationPortRange": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationPort), 1)), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationPort[0], json('null'))]",
-                                "SourceAddressPrefixes": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourceIp), 1)), json('null'), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourceIp)]",
-                                "sourcePortRanges": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourcePort), 1)), json('null'), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].sourcePort)]",
-                                "destinationAddressPrefixes": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationIp), 1)), json('null'), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationIp)]",
-                                "destinationPortRanges": "[if(not(greater(length(parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationPort),1)), json('null'), parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].destinationPort)]",
-                                "protocol": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].protocol]",
-                                "Access": "[parameters('NsgArmObject')[copyIndex('nsgCopy')].rules[copyIndex('securityRules')].Access]"
-                            }
-                        }
-                    }
-                ]
+                    ]
+                }
             }
         }
     ],
     "outputs": {
-
     }
 }
