@@ -1,5 +1,5 @@
 ﻿function New-CmAzIaasNetworking {
-	
+
 	<#
 		.Synopsis
 		 Creates networking solution
@@ -375,15 +375,15 @@
 
 						# Default values if required for ARM template sanity checks
 						if (!$vnetObjectArray) {
-							$vnetObjectArray = @(@{vnetName = "none"; location = "uksouth"; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }) })
+							$vnetObjectArray = @(@{vnetName = "none"; location = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }) })
 						}
 
 						if (!$routeTableObjectArray) {
-							$routeTableObjectArray = @(@{tableName = "none"; routes = @(@{routeName = "none"; cidr = "0.0.0.0/0"; nextHopType = "VirtualAppliance"; nextHopIpAddress = "10.10.10.10" }) })
+							$routeTableObjectArray = @(@{tableName = "none"; location = ""; routes = @(@{routeName = "none"; cidr = "0.0.0.0/0"; nextHopType = "VirtualAppliance"; nextHopIpAddress = "10.10.10.10" }) })
 						}
 
 						if (!$nsgObjectArray) {
-							$nsgObjectArray = @(@{nsgName = "none"; rules = @(@{ruleName = "none"; description = "none"; priority = "none"; direction = "none"; sourceIp = "10.10.10.10"; sourcePort = 3389; destinationIp = "10.10.10.11"; destinationPort = 3389; protocol = "Tcp"; Access = "allow" }) })
+							$nsgObjectArray = @(@{nsgName = "none"; location = ""; rules = @(@{ruleName = "none"; description = "none"; priority = "none"; direction = "none"; sourceIp = "10.10.10.10"; sourcePort = 3389; destinationIp = "10.10.10.11"; destinationPort = 3389; protocol = "Tcp"; Access = "allow" }) })
 						}
 
 						# Build Resource Group Config
@@ -511,8 +511,8 @@
 					$nsgObjectArray = [System.Collections.ArrayList]@()
 
 					$ResourceGroup = $_.ResourceGroupName
+
 					# Set Vnet object
-					
 					if ($_.vnets) {
 
 						$_.vnets | ForEach-Object {
@@ -527,6 +527,10 @@
 								$_.routeTable = ""
 							}
 
+							$vnetObjectYml | Where-Object { $_.location -like '' } | ForEach-Object {
+								$_.location = ""
+							}
+
 							$vnetObjectArray += $vnetObjectYml
 							Write-Verbose "Vnets from $_ added to '$ResourceGroup'"
 						}
@@ -538,6 +542,11 @@
 						$_.routeTables | ForEach-Object {
 
 							$routeTableObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "routeTables" -hasGroups $true
+
+							$routeTableObjectYml | Where-Object { $_.location -like '' } | ForEach-Object {
+								$_.location = ""
+							}
+
 							$routeTableObjectArray += $routeTableObjectYml
 							Write-Verbose "Route tables from $_ added to '$ResourceGroup'"
 						}
@@ -548,6 +557,11 @@
 
 						$_.networkSecurityGroups | ForEach-Object {
 							$nsgObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "networkSecurityGroups" -hasGroups $true
+
+							$nsgObjectYml | Where-Object { $_.location -like '' } | ForEach-Object {
+								$_.location = ""
+							}
+
 							$nsgObjectArray += $nsgObjectYml
 							Write-Verbose "Network Security Groups from $_ added to '$ResourceGroup'"
 						}
@@ -555,15 +569,15 @@
 
 					# Default values if required for ARM template sanity checks
 					if (!$vnetObjectArray) {
-						$vnetObjectArray = @(@{vnetName = "none"; location = "uksouth"; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }) })
+						$vnetObjectArray = @(@{vnetName = "none"; location = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }) })
 					}
 
 					if (!$routeTableObjectArray) {
-						$routeTableObjectArray = @(@{tableName = "none"; routes = @(@{routeName = "none"; cidr = "0.0.0.0/0"; nextHopType = "VirtualAppliance"; nextHopIpAddress = "10.10.10.10" }) })
+						$routeTableObjectArray = @(@{tableName = "none"; location = ""; routes = @(@{routeName = "none"; cidr = "0.0.0.0/0"; nextHopType = "VirtualAppliance"; nextHopIpAddress = "10.10.10.10" }) })
 					}
 
 					if (!$nsgObjectArray) {
-						$nsgObjectArray = @(@{nsgName = "none"; rules = @(@{ruleName = "none"; description = "none"; priority = "none"; direction = "none"; sourceIp = "10.10.10.10"; sourcePort = 3389; destinationIp = "10.10.10.11"; destinationPort = 3389; protocol = "Tcp"; Access = "allow" }) })
+						$nsgObjectArray = @(@{nsgName = "none"; location = ""; rules = @(@{ruleName = "none"; description = "none"; priority = "none"; direction = "none"; sourceIp = "10.10.10.10"; sourcePort = 3389; destinationIp = "10.10.10.11"; destinationPort = 3389; protocol = "Tcp"; Access = "allow" }) })
 					}
 
 					# Build Resource Group Config
