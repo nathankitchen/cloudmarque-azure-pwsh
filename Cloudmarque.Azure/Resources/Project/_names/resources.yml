@@ -442,3 +442,23 @@ resources:
   minLength: 1
   maxLength: 64
   generator: standard
+- name: WVDWorkspace
+  shortname: wks
+  minLength: 1
+  maxLength: 64
+  generator: standard
+- name: WVDHostpool
+  shortname: hp
+  minLength: 1
+  maxLength: 64
+  generator: standard
+- name: WVDDesktopGroup
+  shortname: dg
+  minLength: 1
+  maxLength: 64
+  generator: standard
+- name: WVDApplicationGroup
+  shortname: ag
+  minLength: 1
+  maxLength: 64
+  generator: standard

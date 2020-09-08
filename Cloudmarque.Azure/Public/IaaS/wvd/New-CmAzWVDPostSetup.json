@@ -1,0 +1,114 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Environments": {
+            "type": "Array"
+        },
+        "LogAnalyticsID": {
+            "type": "String",
+            "defaultValue": "none"
+        }
+    },
+    "functions": [],
+    "variables": {
+       "LogAnalyticsIDExists": "[not(equals(parameters('LogAnalyticsID'), 'none'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('WVDHost_PostSetup_', parameters('Environments')[copyIndex('WVDHostPostSetup')].resourceGroupName)]",
+            "resourceGroup": "[parameters('Environments')[copyIndex('WVDHostPostSetup')].resourceGroupName]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "WVDEnvObject": {
+                        "value": "[parameters('Environments')[copyIndex('WVDHostPostSetup')]]"
+                    },
+                    "LogAnalyticsIDInner": {
+                        "value": "[parameters('LogAnalyticsID')]"
+                    },
+                    "LogAnalyticsIDExists": {
+                        "value": "[variables('LogAnalyticsIDExists')]"
+                    }
+                },
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "WVDEnvObject": {
+                            "type": "Object"
+                        },
+                        "LogAnalyticsIDInner": {
+                            "type": "String"
+                        },
+                        "LogAnalyticsIDExists": {
+                            "type": "Bool"
+                        }
+                    },
+                    "variables": {},
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "apiVersion": "2018-10-01",
+                            "name": "[concat(parameters('WVDEnvObject').hostVm.hostVmNamePrefix,'-', copyIndex('WVDHost'))]",
+                            "location": "[parameters('WVDEnvObject').hostVm.hostVmLocation]",
+                            "properties": {},
+                            "resources": [
+                                {
+                                    "condition": "[parameters('LogAnalyticsIDExists')]",
+                                    "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('WVDEnvObject').hostVm.hostVmNamePrefix,'-', copyIndex('WVDHost')))]"],
+                                    "type": "extensions",
+                                    "apiVersion": "2018-10-01",
+                                    "name": "DependencyAgentWindows",
+                                    "location": "[parameters('WVDEnvObject').hostVm.hostVmLocation]",
+                                    "properties": {
+                                        "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                                        "type": "DependencyAgentWindows",
+                                        "typeHandlerVersion": "9.10",
+                                        "autoUpgradeMinorVersion": true
+                                    }
+                                },
+                                {
+                                    "condition": "[parameters('LogAnalyticsIDExists')]",
+                                    "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('WVDEnvObject').hostVm.hostVmNamePrefix,'-', copyIndex('WVDHost')))]"],
+                                    "type": "extensions",
+                                    "apiVersion": "2018-10-01",
+                                    "name": "MicrosoftMonitoringAgent",
+                                    "location": "[parameters('WVDEnvObject').hostVm.hostVmLocation]",
+                                    "properties": {
+                                        "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                                        "type": "MicrosoftMonitoringAgent",
+                                        "typeHandlerVersion": "1.0",
+                                        "autoUpgradeMinorVersion": "true",
+                                        "settings": {
+                                            "workspaceId": "[if(parameters('LogAnalyticsIDExists'), reference(parameters('LogAnalyticsIDInner'), '2015-03-20').customerId, json('null'))]",
+                                            "azureResourceId": "[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('WVDEnvObject').hostVm.hostVmNamePrefix,'-', copyIndex('WVDHost')))]",
+                                            "stopOnMultipleConnections": false
+                                        },
+                                        "protectedSettings": {
+                                            "workspaceKey": "[if(parameters('LogAnalyticsIDExists'), listKeys(parameters('LogAnalyticsIDInner'), '2015-03-20').primarySharedKey, json('null'))]"
+                                        }
+                                    }
+                                }
+                            ],
+                            "copy": {
+                                "name": "WVDHost",
+                                "count": "[parameters('WVDEnvObject').hostVm.hostVmCount]"
+                            }
+                        }
+                    ]
+                }
+            },
+            "copy": {
+                "name": "WVDHostPostSetup",
+                "count": "[length(parameters('Environments'))]"
+            }
+        }
+    ],
+    "outputs": {}
+}

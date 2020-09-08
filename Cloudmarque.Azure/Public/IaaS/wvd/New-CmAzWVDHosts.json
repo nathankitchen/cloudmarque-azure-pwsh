@@ -1,0 +1,71 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Environments": {
+            "type": "Array"
+        },
+        "NestedTemplatesLocation": {
+            "type": "string",
+            "defaultValue": "https://catalogartifact.azureedge.net/publicartifacts/Microsoft.Hostpool-ARM-1.0.14-preview/managedDisks-"
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        // Microsoft Linked Template
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('WVDhosts-Setup_', parameters('Environments')[copyIndex('WVDHostsCopy')].workspaceName)]",
+            "resourceGroup": "[parameters('Environments')[copyIndex('WVDHostsCopy')].resourceGroupName]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('NestedTemplatesLocation'), toLower(parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmImageType), 'vm.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "artifactsLocation": {"value": "https://wvdportalstorageblob.blob.core.windows.net/galleryartifacts/Configuration.zip"},
+                    "vmImageVhdUri": {"value": ""},
+                    "storageAccountResourceGroupName": {"value": ""},
+                    "rdshImageSourceId": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.customImageId]"},
+                    "vmGalleryImageOffer": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmLatestImageOffer]"},
+                    "vmGalleryImagePublisher": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmLatestImagePublisher]"},
+                    "vmGalleryImageSKU": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmLatestImageSku]"},
+                    "rdshPrefix": {"value": "[concat(parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmNamePrefix,'-')]"},
+                    "rdshNumberOfInstances": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmCount]"},
+                    "rdshVMDiskType": {"value": "StandardSSD_LRS"},
+                    "rdshVmSize": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmSize]"},
+                    "enableAcceleratedNetworking": {"value": false},
+                    "administratorAccountUsername": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmAdmin]"},
+                    "administratorAccountPassword": {
+                        "reference": {
+                            "secretName": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmKeyVaultAdminSecret]",
+                            "keyVault": {
+                                "id": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostpool.keyVaultResourceId]"
+                            }
+                        }
+                    },
+                    "subnet-id": {"value": "[concat(parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmVnetID, '/subnets/', parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmSubnet)]"},
+                    "vhds": {"value": "[concat('vhds','/', concat(parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmNamePrefix,'-'))]"},
+                    "location": {"value": "[replace(parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmLocation,' ','')]"},
+                    "createNetworkSecurityGroup": {"value": false},
+                    "networkSecurityGroupId": {"value": ""},
+                    "networkSecurityGroupRules": {"value" : []},
+                    "vmInitialNumber": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmInitialNumber]"},
+                    "hostpoolName": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostpool.hostpoolName]"},
+                    "hostpoolToken": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostpool.hostpoolToken]"},
+                    "domain": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmDomain]"},
+                    "ouPath": {"value": "[parameters('Environments')[copyIndex('WVDHostsCopy')].hostVm.hostVmDomainOU]"}
+                }
+            },
+            "copy": {
+                "name": "WVDHostsCopy",
+                "mode" : "Parallel",
+                "count": "[length(parameters('Environments'))]"
+            }
+        }
+    ],
+    "outputs": {}
+}
