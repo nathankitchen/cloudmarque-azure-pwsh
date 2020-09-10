@@ -81,10 +81,10 @@ function New-CmAzCoreBillingRule {
 				elseif (!$budget.Thresholds) {
 					Write-Error "Please provide budget thresholds that are greater than 0." -Category InvalidArgument -CategoryTargetName "Budgets.Thresholds"
 				}
-				elseif (![DateTime]::TryParse($budget.StartDate, [ref]$validStartDate)) {
+				elseif (!$budget.StartDate -is [DateTime]) {
 					Write-Error "Please ensure the budget start date is a valid date." -Category InvalidArgument -CategoryTargetName "Budgets.StartDate"
 				}
-				elseif (![DateTime]::TryParse($budget.EndDate, [ref]$validEndDate)) {
+				elseif (!$budget.EndDate -is [DateTime]) {
 					Write-Error "Please ensure the budget end date is a valid date." -Category InvalidArgument -CategoryTargetName "Budgets.EndDate"
 				}
 
