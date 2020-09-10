@@ -79,7 +79,7 @@ stages:
 - stage: CreateDocumentationArtifact
   displayName: Create Documentation Artifact
   dependsOn: Test
-  condition: and(succeeded(), eq(variables.isRelease, true))
+  condition: and(succeeded(), eq(variables.createArtifacts, true))
   jobs:
   - job:
     steps:
