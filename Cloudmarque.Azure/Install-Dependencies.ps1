@@ -1,9 +1,10 @@
 ﻿<#
     .Synopsis
      Installs dependencies in order to use Cloudmarque.Azure
-    .Example
-     . ./Install-Dependencies.ps1
-     . ./Install-Dependencies.ps1 -Scope "Manual" -ImportModules $true
+    
+     .Example
+     . .\Install-Dependencies.ps1
+     . .\Install-Dependencies.ps1 -Scope "Manual" -ImportModules $true
 #>
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseSingularNouns", "", Justification = "")]
