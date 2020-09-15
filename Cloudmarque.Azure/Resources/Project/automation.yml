@@ -1,24 +1,13 @@
-location: UK South
-name: coreAccount                     # Service name
-resourceGroup: rg
+location: UK SOUTH
+name: trustmarque
 automation:
   runbook:
-    keyVaultName:                     # Required: Key Vault Name
-    certificateName:                  # Required: Name of Certificate in Key Vault
-    keyVaultPersonalAccessToken:      # Keyvault secret which contains password. This will be used for certificate
+    keyVaultName: kvaultcorerg
+    certificateName: democertificate2
+    keyVaultCertificatePassword: password1
     sourceControl:
-      keyVaultPersonalAccessToken:    # Optional(only if repoURL): keyvault secret name for PAT to access Repo
-      url:                            # Optional: For repo intergration
-      type:                           # Optional(only if repoURL): github | git | tvfc
-      branch:                         # Branch to pull from. Not required for tvfc. Default is master
-      folderPath:                     # Optional(only if repoURL): Path to folder which contains runbook or DSC files.
-  dsc:
-    keyVaultName:                     # Required: Key Vault Name
-    certificateName:                  # Required: Name of Certificate in Key Vault
-    keyVaultPersonalAccessToken:      # Keyvault secret which contains password. This will be used for certificate
-    sourceControl:
-      keyVaultPersonalAccessToken:    # Optional(only if repoURL): keyvault secret name for PAT to access Repo
-      url:                            # Optional: For repo intergration
-      type:                           # Optional(only if repoURL): github | git | tvfc
-      branch:
-      folderPath:                     # Optional(only if repoURL): Path to folder which contains runbook or DSC files.
+      url: https://github.com/Trustmarque/cloudmarque-azure-pwsh.git
+      type: github
+      keyVaultPersonalAccessToken: githubPAT
+      folderPath: /Cloudmarque.Azure/Private/Runbooks
+      branch: iaas_tagging_auto_delete

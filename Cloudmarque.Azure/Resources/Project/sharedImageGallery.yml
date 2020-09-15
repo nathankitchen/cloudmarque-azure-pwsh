@@ -1,0 +1,22 @@
+﻿resourceGroupServiceTag:             # For deployment to existing resource group | cm-service tag value for new resource group
+resourceGroupName:                   # For creating new resource groups
+location:                            # Shared Image gallery region
+
+galleryName:                         # Shared Image gallery name
+
+imageDefinitions:
+  - definitionName:
+    publisher:
+    offer:
+    sku:
+    location:                        #optional
+    osType:                          #optional
+    osState:                         #optional
+    endOfLifeDate:                   #optional
+    versions:
+      - version:
+        imageServiceTag:
+        endOfLifeDate:               #optional
+        replicaCount:                #optional
+        targetRegions:
+          - []

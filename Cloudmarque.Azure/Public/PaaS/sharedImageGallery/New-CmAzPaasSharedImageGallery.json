@@ -1,0 +1,133 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "GalleryName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Shared Image Gallery."
+            }
+        },
+        "Location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().Location]",
+            "metadata": {
+                "description": "Location of the Shared Image Gallery."
+            }
+        },
+        "ImageDefinitions": {
+            "type": "array"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/galleries",
+            "name": "[parameters('GalleryName')]",
+            "apiVersion": "2019-12-01",
+            "Location": "[parameters('Location')]",
+            "properties": {
+                "description": "Private Gallery Created by Cloudmarque"
+            }
+        },
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('Cm_', parameters('GalleryName'), '_', parameters('ImageDefinitions')[copyIndex('ImageDefinitionsCopy')].definitionName)]",
+            "copy": {
+                "name": "ImageDefinitionsCopy",
+                "count": "[length(parameters('ImageDefinitions'))]"
+            },
+            "dependsOn": [
+                "[parameters('GalleryName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "GalleryName": {
+                        "value": "[parameters('GalleryName')]"
+                    },
+                    "ImageDefinition": {
+                        "value": "[parameters('ImageDefinitions')[copyIndex('ImageDefinitionsCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "GalleryName": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "Name of the Shared Image Gallery."
+                            }
+                        },
+                        "ImageDefinition": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/galleries/images",
+                            "name": "[concat(parameters('GalleryName'), '/', parameters('ImageDefinition').definitionName)]",
+                            "apiVersion": "2019-12-01",
+                            "Location": "[parameters('ImageDefinition').location]",
+                            "properties": {
+                                "description": "Sample Gallery Image Description",
+                                "osType": "[parameters('ImageDefinition').osType]",
+                                "osState": "[parameters('ImageDefinition').osState]",
+                                "endOfLifeDate": "[parameters('ImageDefinition').endOfLifeDate]",
+                                "identifier": {
+                                    "publisher": "[parameters('ImageDefinition').publisher]",
+                                    "offer": "[parameters('ImageDefinition').offer]",
+                                    "sku": "[parameters('ImageDefinition').sku]"
+                                },
+                                "recommended": {
+                                    "vCPUs": "[if(not(empty(parameters('ImageDefinition').vCPUs)), parameters('ImageDefinition').vCPUs, json('null'))]",
+                                    "memory": "[if(not(empty(parameters('ImageDefinition').memory)), parameters('ImageDefinition').memory, json('null'))]"
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Compute/galleries/images/versions",
+                            "name": "[concat(parameters('GalleryName'), '/', parameters('ImageDefinition').definitionName,'/', parameters('ImageDefinition').versions[copyIndex('imageVersion')].version)]",
+                            "apiVersion": "2019-12-01",
+                            "Location": "[parameters('ImageDefinition').versions[copyIndex('imageVersion')].image.location]",
+                            "copy": {
+                                "count": "[length(parameters('ImageDefinition').versions)]",
+                                "name": "imageVersion"
+                            },
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Compute/galleries/images', parameters('GalleryName'),  parameters('ImageDefinition').definitionName)]"
+                            ],
+                            "properties": {
+                                "publishingProfile": {
+                                    "replicaCount": "[parameters('ImageDefinition').versions[copyIndex('imageVersion')].replicaCount]",
+                                    "excludeFromLatest": "false",
+                                    "endOfLifeDate": "[parameters('ImageDefinition').versions[copyIndex('imageVersion')].endOfLifeDate]",
+                                    "copy": [
+                                        {
+                                            "name": "targetRegions",
+                                            "count": "[length(parameters('ImageDefinition').versions[copyIndex('imageVersion')].targetRegions)]",
+                                            "input": {
+                                                "name": "[parameters('ImageDefinition').versions[copyIndex('imageVersion')].targetRegions[copyIndex('targetRegions')]]"
+                                            }
+                                        }
+                                    ]
+                                },
+                                "storageProfile": {
+                                    "source": {
+                                        "id": "[parameters('ImageDefinition').versions[copyIndex('imageVersion')].image.resourceId]"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+
+                }
+            }
+
+        }
+    ]
+}
