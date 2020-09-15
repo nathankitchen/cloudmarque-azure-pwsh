@@ -6,7 +6,10 @@
 
     .Description
      Returns a message, validating that the package has been correctly installed.
-
+    
+		.Component
+     Common
+     
     .Parameter Resource
      The type of the resource.
 

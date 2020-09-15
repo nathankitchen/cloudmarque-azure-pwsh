@@ -8,6 +8,9 @@
 		 Removes the global variables that represent the Cloudmarque.Azure session,
 		 preventing further context-dependent commands from executing.
 
+		.Component
+		 Common
+
 		.Example
 		 Clear-CmAzContext
 	#>

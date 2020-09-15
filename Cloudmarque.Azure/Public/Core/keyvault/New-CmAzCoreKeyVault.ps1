@@ -17,7 +17,7 @@ function New-CmAzCoreKeyVault {
 		 Object containing the configuration values required to run this cmdlet.
 
 		.Component
-		 Core.
+		 Core
 
         .Example
 		 New-CmAzCoreKeyVault -SettingsFile "c:/directory/settingsFile.yml"

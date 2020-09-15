@@ -9,8 +9,8 @@
     	 a range of commands that might be executed as part of a deployment. The project
     	 directory contains naming standards and pipelines to deploy.
 
-   		.Component
-    	 Commmon
+		.Component
+		 Common
 
    		.Parameter RequireAzure
     	 Throws an exception if no Azure Context is set, prompting the user to sign in
