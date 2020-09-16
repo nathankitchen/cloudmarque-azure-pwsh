@@ -48,8 +48,8 @@ stages:
         errorActionPreference: Stop
         targetType: Inline
         script: |
-          . .\init.ps1
           . .\$(moduleName)\install-dependencies.ps1
+          . .\init.ps1      
           Sync-CloudmarqueAzure
 - stage: Test
   displayName: Test Cloudmarque.Azure
