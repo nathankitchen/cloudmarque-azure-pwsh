@@ -240,7 +240,7 @@ resources:
 - name: Storageaccount
   shortname: st
   minLength: 1
-  maxLength: 64
+  maxLength: 24
   generator: storage
 - name: AzureStorSimple
   shortname: ssimp

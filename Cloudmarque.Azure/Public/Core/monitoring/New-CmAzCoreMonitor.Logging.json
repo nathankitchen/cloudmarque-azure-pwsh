@@ -34,9 +34,6 @@
                 }
             ]
         },
-        "StorageAccountName": {
-            "type": "string"
-        },
         "WorkspaceName": {
             "type": "string"
         },
@@ -45,13 +42,6 @@
         }
     },
     "variables": {
-        "storageServicesSuffix": "default",
-        "blobContainerNames": [
-            "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'), '/insights-logs-addonazurebackuppolicy')]",
-            "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'), '/insights-logs-azurebackupreport')]",
-            "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'), '/insights-logs-coreazurebackup')]",
-            "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'), '/insights-logs-networksecuritygroupflowevent')]"
-        ]
     },
     "resources": [
         {
@@ -122,81 +112,6 @@
             "copy": {
                 "name": "SolutionsCopy",
                 "count": "[length(parameters('Solutions'))]"
-            }
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2018-07-01",
-            "name": "[parameters('StorageAccountName')]",
-            "location": "[resourceGroup().location]",
-            "kind": "StorageV2",
-            "tags": {
-                "cm-service": "[parameters('ServiceContainer').storage]"
-            },
-            "properties": {
-                "accessTier": "Hot",
-                "supportsHttpsTrafficOnly": true,
-                "largeFileSharesState": "disabled"
-            },
-            "sku": {
-                "name": "Standard_LRS"
-            },
-            "Resources": [
-                {
-                    "type": "Microsoft.Storage/storageAccounts/blobServices",
-                    "apiVersion": "2019-06-01",
-                    "name": "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'))]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]"
-                    ],
-                    "sku": {
-                        "name": "Standard_LRS",
-                        "tier": "Standard"
-                    },
-                    "properties": {
-                        "cors": {
-                            "corsRules": [
-                            ]
-                        },
-                        "deleteRetentionPolicy": {
-                            "enabled": false
-                        }
-                    }
-                },
-                {
-                    "type": "Microsoft.Storage/storageAccounts/fileServices",
-                    "apiVersion": "2019-06-01",
-                    "name": "[concat(parameters('StorageAccountName'), '/', variables('storageServicesSuffix'))]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]"
-                    ],
-                    "sku": {
-                        "name": "Standard_LRS",
-                        "tier": "Standard"
-                    },
-                    "properties": {
-                        "cors": {
-                            "corsRules": [
-                            ]
-                        }
-                    }
-                }
-            ]
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-            "apiVersion": "2019-06-01",
-            "name": "[variables('blobContainerNames')[copyIndex('BlobContainerCopy')]]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('StorageAccountName'), variables('storageServicesSuffix'))]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]"
-            ],
-            "properties": {
-                "publicAccess": "None"
-            },
-            "copy": {
-                "name": "BlobContainerCopy",
-                "count": "[length(variables('blobContainerNames'))]"
             }
         }
     ]

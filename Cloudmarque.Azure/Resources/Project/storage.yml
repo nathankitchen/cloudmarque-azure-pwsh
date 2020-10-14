@@ -1,0 +1,166 @@
+resourceGroupName: blob                        # For creating new resource groups
+location: uk south
+service:
+  dependencies:
+    resourceGroup:                             # For deployment to exisiting resource Group
+  publish:
+    storage:
+    resourceGroup:                             # For creating new resource groups
+
+storageAccounts:
+  - storageAccountName: ExamplePublicApp       # Example Static website on blob
+    accountType: standard
+    blobContainer:
+      - name: $web
+        publicAccess: blob                     # Optional
+    minimumTlsVersion: TLS1_2
+    supportsHttpsTrafficOnly: True
+    allowBlobPublicAccess: True
+    networkAclsBypass: AzureServices
+    networkAclsDefaultAction: Allow
+
+  - storageAccountName: exampleZRS
+    location:                                   # Optional (Defaults to resource group location)
+    accountType: Standard                       # Standard | Premium
+    replication: ZRS                            # Optional - LRS (default)| ZRS | GRS | RAGRS. Applicable for standard account only
+    minimumTlsVersion: TLS1_2                   # Optional
+    supportsHttpsTrafficOnly: True              # Optional
+    allowBlobPublicAccess: True                 # Optional
+    networkAclsBypass: AzureServices            # Optional
+    networkAclsDefaultAction: Allow             # Optional
+    service:                                    # Optional
+      publish:
+        storage:
+
+  - storageAccountName: alldefault4190
+    replication: GRS
+    service:                                    # Optional
+      publish:
+        storage:
+
+  - storageAccountName: onlyblob4190
+    accountType: standard
+    blobContainer:
+      - name: blob1
+      - name: blob2
+      - name: blob3
+    minimumTlsVersion: TLS1_2                   # Optional
+    supportsHttpsTrafficOnly: True              # Optional
+    allowBlobPublicAccess: True                 # Optional
+    networkAclsBypass: AzureServices            # Optional
+    networkAclsDefaultAction: Allow             # Optional
+    service:                                    # Optional
+      publish:
+        storage:
+
+  - storageAccountName: onlyfileshare4190
+    accountType: standard
+    replication: GRS
+    fileShare:
+      - name: fileshare1
+        size: 200
+      - name: fileshare2
+    minimumTlsVersion: TLS1_2                   # Optional
+    supportsHttpsTrafficOnly: True              # Optional
+    allowBlobPublicAccess: True                 # Optional
+    networkAclsBypass: AzureServices            # Optional
+    networkAclsDefaultAction: Allow             # Optional
+    service:                                    # Optional
+      publish:
+        storage:
+
+  - storageAccountName: onlyqueue4190
+    accountType: standard
+    queue:
+      - queue1
+      - queue2
+      - queue3
+    service:                                    # Optional
+      publish:
+        storage:
+
+  - storageAccountName: onlytable4190
+    accountType: standard
+    table:
+      - table1
+      - table2
+      - table3
+    service:                                    # Optional
+      publish:
+        storage:
+
+  - storageAccountName: allofthem4190
+    accountType: standard
+    blobContainer:
+      - name: blob1
+      - name: blob2
+      - name: blob3
+    fileShare:
+      - name: fileshare1
+        size: 200
+      - name: fileshare2
+    queue:
+      - queue1
+      - queue2
+      - queue3
+    table:
+      - table1
+      - table2
+      - table3
+    minimumTlsVersion: TLS1_2                   # Optional
+    supportsHttpsTrafficOnly: True              # Optional
+    allowBlobPublicAccess: True                 # Optional
+    networkAclsBypass: AzureServices            # Optional
+    networkAclsDefaultAction: Allow             # Optional
+    service:                                    # Optional
+      publish:
+        storage:
+
+  - storageAccountName: premiumblob4190
+    location: UK South
+    accountType: Premium
+    kind: StorageV2
+    blobContainer:
+      - name: blob1
+      - name: blob2
+      - name: blob3
+    minimumTlsVersion: TLS1_2
+    supportsHttpsTrafficOnly: True
+    allowBlobPublicAccess: True
+    networkAclsBypass: AzureServices
+    networkAclsDefaultAction: Allow
+    service:                                    # Optional
+      publish:
+        storage:
+
+  - storageAccountName: premiumfs5466
+    location: UK South
+    accountType: Premium
+    kind: FileStorage
+    fileShare:
+      - name: Test1
+        size: 250
+      - name: Test2
+      - name: Test3
+        size: 100
+      - name: Test4
+        size: 500
+    minimumTlsVersion: TLS1_2                   # Optional
+    supportsHttpsTrafficOnly: True              # Optional
+    allowBlobPublicAccess: True                 # Optional
+    networkAclsBypass: AzureServices            # Optional
+    networkAclsDefaultAction: Allow             # Optional
+    service:                                    # Optional
+      publish:
+        storage:
+
+  - storageAccountName: premblockblob5466
+    accountType: Premium
+    kind: BlockBlobStorage
+    blobContainer:
+      - name: blob1
+      - name: blob2
+      - name: blob3
+    service:                                    # Optional
+      publish:
+        storage:

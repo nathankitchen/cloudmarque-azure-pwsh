@@ -83,7 +83,6 @@
 		$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
 		$profileName = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
 		$endpointName = Get-CmAzResourceName -Resource "Endpoint" -Architecture "PaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
-		$storageName = Get-CmAzResourceName -Resource "StorageAccount" -Architecture "PaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name -MaxLength 24
 
 		Write-Verbose "Deploying resource group: $resourceGroupName..."
 		$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.resourceGroup }
@@ -96,14 +95,31 @@
 			Register-AzResourceProvider -ProviderNamespace $providerNamespace
 		}
 
-		Write-Verbose "Deploying storage account: $storageName..."
-		New-AzResourceGroupDeployment `
-			-ResourceGroupName $resourceGroupName `
-			-TemplateFile "$PSScriptRoot/New-CmAzPaasWebStatic.Storage.json" `
-			-StorageAccountName $storageName `
-			-Location $SettingsObject.Location `
-			-StorageService $SettingsObject.service.publish.storage `
-			-Force > $null
+		Write-Verbose "Deploying storage account.."
+		$storageObject = @{
+			location = $SettingsObject.Location ;
+			service = @{
+				dependencies = @{
+					ResourceGroup = $SettingsObject.service.publish.resourceGroup
+				};
+				publish = @{
+					storage = $SettingsObject.service.publish.storage
+				}
+			}
+			storageAccounts = @(@{
+				storageAccountName = $SettingsObject.Name;
+				accountType = "Standard";
+				blobContainer = @(@{
+						name = "`$web";
+						publicAccess = "blob"
+					}
+				)
+			})
+		}
+
+		New-CmAzIaasStorage -SettingsObject $storageObject
+
+		$storageName = Get-CmAzResourceName -Resource "Storageaccount" -Architecture "IaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
 
 		Write-Verbose "Deploying cdn: $profileName..."
 		New-AzResourceGroupDeployment `
@@ -185,7 +201,7 @@
 		Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupName
 
 		Write-Verbose "Finished!"
-		
+
 		@{
 			ResourceGroupName = $resourceGroupName
 			ProfileName = $profileName

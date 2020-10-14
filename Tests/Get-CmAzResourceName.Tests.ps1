@@ -309,7 +309,7 @@ Describe "Get-CmAzResourceName" {
 
         It "Should get a Storageaccount name" {
             $name = Get-CmAzResourceName -Resource "Storageaccount" -Architecture $architecture -Region $region -Name "MyStorageaccount"
-            $name | Should -Be "stmystorageaccountbd0fa58a"
+            $name | Should -Be "stmystorageaccountbd0fa5"
         }
 
         It "Should get a AzureStorSimple name" {

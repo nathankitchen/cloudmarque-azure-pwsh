@@ -1,0 +1,197 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "StorageSettingsArray": {
+            "type": "array"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('CmAz_', parameters('StorageSettingsArray')[copyIndex('StorageCopy')].storageAccountName)]",
+            "copy": {
+                "name": "StorageCopy",
+                "count": "[length(parameters('StorageSettingsArray'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "StorageSettings": {
+                        "value": "[parameters('StorageSettingsArray')[copyIndex('StorageCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "StorageSettings": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Storage/storageAccounts",
+                            "apiVersion": "2019-06-01",
+                            "name": "[parameters('StorageSettings').storageAccountName]",
+                            "location": "[parameters('StorageSettings').location]",
+                            "sku": {
+                                "name": "[parameters('StorageSettings').accountType]",
+                                "tier": "[parameters('StorageSettings').tier]"
+                            },
+                            "kind": "[parameters('StorageSettings').kind]",
+                            "properties": {
+                                "minimumTlsVersion": "[parameters('StorageSettings').minimumTlsVersion]",
+                                "supportsHttpsTrafficOnly": "[parameters('StorageSettings').supportsHttpsTrafficOnly]",
+                                "allowBlobPublicAccess": "[parameters('StorageSettings').allowBlobPublicAccess]",
+                                "networkAcls": {
+                                    "bypass": "[parameters('StorageSettings').networkAclsBypass]",
+                                    "defaultAction": "[parameters('StorageSettings').networkAclsDefaultAction]",
+                                    "virtualNetworkRules": [],
+                                    "ipRules": []
+                                }
+                            },
+                            "tags": {
+                                "cm-service":  "[parameters('StorageSettings').service.publish.storage]"
+                            }
+                        },
+                        {
+                            "condition": "[not(equals(parameters('StorageSettings').kind, 'FileStorage'))]",
+                            "type": "Microsoft.Storage/storageAccounts/blobServices",
+                            "apiVersion": "2019-06-01",
+                            "name": "[concat(parameters('StorageSettings').storageAccountName, '/default')]",
+                            "dependsOn": [ "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageSettings').storageAccountName)]" ],
+                            "sku": {
+                                "name": "[parameters('StorageSettings').accountType]",
+                                "tier": "[parameters('StorageSettings').tier]"
+                            },
+                            "properties": {
+                                "cors": {
+                                    "corsRules": []
+                                },
+                                "deleteRetentionPolicy": {
+                                    "enabled": false
+                                }
+                            }
+                        },
+                        {
+                            "condition": "[not(contains(parameters('StorageSettings').blobContainer, 'none'))]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('StorageSettings').storageAccountName, 'default')]",
+                                "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageSettings').storageAccountName)]"
+                            ],
+                            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+                            "apiVersion": "2019-06-01",
+                            "name": "[concat(parameters('StorageSettings').storageAccountName, '/default/', toLower(parameters('StorageSettings').blobContainer[copyIndex('blobcopy')].name))]",
+                            "properties": {
+                                "defaultEncryptionScope": "$account-encryption-key",
+                                "denyEncryptionScopeOverride": false,
+                                "publicAccess": "[parameters('StorageSettings').blobContainer[copyIndex('blobcopy')].publicAccess]"
+                            },
+                            "copy": {
+                                "name": "blobcopy",
+                                "count": "[length(parameters('StorageSettings').blobContainer)]"
+                            }
+                        },
+                        {
+                            "condition": "[or(equals(parameters('StorageSettings').tier, 'Standard'), equals(parameters('StorageSettings').kind, 'FileStorage'))]",
+                            "type": "Microsoft.Storage/storageAccounts/fileServices",
+                            "apiVersion": "2019-06-01",
+                            "name": "[concat(parameters('StorageSettings').storageAccountName, '/default')]",
+                            "dependsOn": [ "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageSettings').storageAccountName)]" ],
+                            "sku": {
+                                "name": "[parameters('StorageSettings').accountType]",
+                                "tier": "[parameters('StorageSettings').tier]"
+                            },
+                            "properties": {
+                                "cors": {
+                                    "corsRules": []
+                                }
+                            }
+                        },
+                        {
+                            "condition": "[not(contains(parameters('StorageSettings').fileShare[copyIndex('sharecopy')].name, 'none'))]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('StorageSettings').storageAccountName, 'default')]",
+                                "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageSettings').storageAccountName)]"
+                            ],
+                            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+                            "apiVersion": "2019-06-01",
+                            "name": "[concat(parameters('StorageSettings').storageAccountName, '/default/', toLower(parameters('StorageSettings').fileShare[copyIndex('sharecopy')].name))]",
+                            "properties": {
+                                "accessTier": "[if(equals(parameters('StorageSettings').tier, 'Premium'), 'Premium','TransactionOptimized')]",
+                                "shareQuota": "[parameters('StorageSettings').fileShare[copyIndex('sharecopy')].size]",
+                                "enabledProtocols": "SMB"
+                            },
+                            "copy": {
+                                "name": "sharecopy",
+                                "count": "[length(parameters('StorageSettings').fileShare)]"
+                            }
+                        },
+                        {
+                            "condition": "[not(equals(parameters('StorageSettings').tier, 'Premium'))]",
+                            "type": "Microsoft.Storage/storageAccounts/queueServices",
+                            "apiVersion": "2019-06-01",
+                            "name": "[concat(parameters('StorageSettings').storageAccountName, '/default')]",
+                            "dependsOn": [ "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageSettings').storageAccountName)]" ],
+                            "properties": {
+                                "cors": {
+                                    "corsRules": []
+                                }
+                            }
+                        },
+                        {
+                            "condition": "[not(contains(parameters('StorageSettings').queue, 'none'))]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts/queueServices', parameters('StorageSettings').storageAccountName, 'default')]",
+                                "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageSettings').storageAccountName)]"
+                            ],
+                            "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+                            "apiVersion": "2019-06-01",
+                            "name": "[concat(parameters('StorageSettings').storageAccountName, '/default/', toLower(parameters('StorageSettings').queue[copyIndex('queuecopy')]))]",
+                            "properties": {
+                                "metadata": {}
+                            },
+                            "copy": {
+                                "name": "queuecopy",
+                                "count": "[length(parameters('StorageSettings').queue)]"
+                            }
+                        },
+                        {
+                            "condition": "[not(equals(parameters('StorageSettings').tier, 'Premium'))]",
+                            "type": "Microsoft.Storage/storageAccounts/tableServices",
+                            "apiVersion": "2019-06-01",
+                            "name": "[concat(parameters('StorageSettings').storageAccountName, '/default')]",
+                            "dependsOn": [ "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageSettings').storageAccountName)]" ],
+                            "properties": {
+                                "cors": {
+                                    "corsRules": []
+                                }
+                            }
+                        },
+                        {
+                            "condition": "[not(contains(parameters('StorageSettings').table, 'none'))]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts/tableServices', parameters('StorageSettings').storageAccountName, 'default')]",
+                                "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageSettings').storageAccountName)]"
+                            ],
+                            "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+                            "apiVersion": "2019-06-01",
+                            "name": "[concat(parameters('StorageSettings').storageAccountName, '/default/', toLower(parameters('StorageSettings').table[copyIndex('tablecopy')]))]",
+                            "copy": {
+                                "name": "tablecopy",
+                                "count": "[length(parameters('StorageSettings').table)]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

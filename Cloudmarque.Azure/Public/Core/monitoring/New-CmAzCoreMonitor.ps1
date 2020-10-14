@@ -130,19 +130,43 @@ function New-CmAzCoreMonitor {
 
 			Write-Verbose "Deploying logging resource Group ($loggingResourceGroupName).."
 			$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.loggingResourceGroup }
-			
+
 			New-AzResourceGroup `
 				-Name $loggingResourceGroupName `
 				-Location $SettingsObject.Location `
 				-Tag $resourceGroupServiceTag `
 				-Force
 
+			[System.Collections.Hashtable]$storageObject = @{
+				location = $SettingsObject.Location ;
+				service = @{
+					dependencies = @{
+						ResourceGroup = $SettingsObject.service.publish.loggingResourceGroup
+					};
+					publish = @{
+						storage = $SettingsObject.service.publish.storage
+					}
+				}
+				storageAccounts = @(@{
+					storageAccountName = $SettingsObject.Name;
+					accountType = "Standard";
+					blobContainer = @(
+						@{ name = "insights-logs-addonazurebackuppolicy"},
+						@{ name = "insights-logs-azurebackupreport"},
+						@{ name = "insights-logs-coreazurebackup"},
+						@{ name = "insights-logs-networksecuritygroupflowevent"}
+					)
+				})
+			}
+
+			Write-Verbose "Deploying Storage for Monitoring.."
+			New-CmAzIaasStorage -SettingsObject $storageObject
+
 			Write-Verbose "Deploying logging resources.."
 			New-AzResourceGroupDeployment `
 				-ResourceGroupName $loggingResourceGroupName `
 				-TemplateFile "$PSScriptRoot/New-CmAzCoreMonitor.Logging.json" `
 				-AppInsightsName $appInsightsName `
-				-StorageAccountName $storageName `
 				-ServiceContainer $SettingsObject.service.publish `
 				-WorkspaceName $workspaceName `
 				-Force

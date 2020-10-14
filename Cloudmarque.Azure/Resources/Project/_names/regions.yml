@@ -6,6 +6,8 @@ regions:
   shortname: euw
 - name: UK South
   shortname: uks
+- name: uksouth
+  shortname: uks
 - name: UK West
   shortname: ukw
 - name: East US
