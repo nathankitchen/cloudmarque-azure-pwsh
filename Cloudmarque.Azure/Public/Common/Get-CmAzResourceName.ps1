@@ -177,10 +177,20 @@
 
       $generatedName = $nameSegments -Join $gen.separator
 
+      if ($gen.removeCharacters) {
+
+        foreach ($charToRemove in $gen.removeCharacters) {
+          Write-Verbose "Removing $($charToRemove) from resource name..";
+          $generatedName = $generatedName -replace $charToRemove, ''
+        }
+      }
+
       if ($MaxLength -Gt 0) {
         $length = if ($generatedName.Length -Gt $MaxLength) { $MaxLength } else { $generatedName.Length }
         $generatedName = $generatedName.Substring(0, $length)
       }
+      
+      $generatedName = $generatedName.trimEnd("-")
 
       $generatedName
     }
