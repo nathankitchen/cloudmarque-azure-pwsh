@@ -1,26 +1,88 @@
 location: UK South
-resourceGroup: rg
-components:
-  secrets:
-    name: whatever
-    enableSoftDelete: true
-    enableKeyEncryptionKey: true
-    bitlockerregions:
-    - region: UK South
-    - region: UK West
-  logging:
-automation:
-  Runbook:
-    KeyVaultName: #keyvault
-    SelfSignedCrt: #pathtokeyvault
-    PersonalAccessToken: #pathtokeyvault
-    repourl: 
-    repotype: github
-    FolderPath: /dsc
-  DSC:
-    KeyVaultName: #keyvault
-    SelfSignedCrt: #pathtokeyvault
-    PersonalAccessToken: #pathtokeyvault
-    repourl: 
-    repotype: github
-    FolderPath: /runbook
+name: coreAccount
+
+service:
+  publish:
+    resourceGroup: coreRG
+    automation: coreAutomation
+    keyvault: corekeyvault
+    activityLogAlert: coreactivityLogAlert
+    appInsights: coreappInsights
+    solution: coresolution
+    storage: corestorage
+    workspace: coreworkspace
+    loggingResourceGroup: coreloggingResourceGroup
+    monitoringResourceGroup: coremonitoringResourceGroup
+    actionGroup: coreactionGroup
+
+automationSettings:
+budgetSettings:
+keyvaultSettings:
+monitorSettings:
+
+# All properties listed below are optional. You can use them to overwrite defaults.
+
+automation:                                     # Optional
+  runbook:                                      # Optional
+    certificateName:                            # Optional
+    keyVaultCertificatePasswordSecretName:      # Optional
+    service:                                    # Optional
+      dependencies:
+        keyvault:
+    sourceControl:                              # Optional
+      keyVaultPersonalAccessToken:              # Optional: (only if repoURL): keyvault secret name for PAT to access Repo.
+      url:                                      # Optional: For repo intergration.
+      type:                                     # Optional: (only if repoURL): github | git | tvfc.
+      branch:                                   # Optional: Branch to pull from. Not required for tvfc. Default is master.
+      folderPath:                               # Optional: (only if repoURL): Path to folder which contains runbook or DSC files.
+  dsc:
+    certificateName:                            # Optional
+    keyVaultCertificatePasswordSecretName:      # Optional
+    service:                                    # Optional
+      dependencies:
+        keyvault:
+    sourceControl:
+      keyVaultPersonalAccessToken:              # Optional (only if repoURL): keyvault secret name for PAT to access Repo.
+      url:                                      # Optional: For repo intergration.
+      type:                                     # Optional (only if repoURL): github | git | tvfc.
+      branch:
+      folderPath:
+
+budgets:                                        # Optional
+  - name:
+    category:                                   # Optional
+    accountNumber:                              # Optional
+    timeGrain:                                  # Optional
+    amount:
+    startDate:                                  # Optional
+    endDate:                                    # Optional
+    thresholds:                                 # Optional
+    service:
+      dependencies:
+        actiongroup:
+
+keyVaults:                                      # Optional
+- name:                                         # Optional
+  type:                                         # Optional
+  location:                                     # Optional
+  service:                                      # Optional
+    publish:                                    # Optional
+      keyvault:                                 # Optional
+      activityLogAlert:                         # Optional
+
+actionGroups:                                   # Optional
+- name:                                         # Optional
+  shortname:                                    # Optional
+  service:                                      # Optional
+    publish:                                    # Optional
+      actionGroup:                              # Optional
+  armRoles:                                     # Optional
+  emails:                                       # Optional
+  functions:                                    # Optional
+  itsm:                                         # Optional
+  logicApps:                                    # Optional
+  notifications:                                # Optional
+  runbooks:                                     # Optional
+  sms:                                          # Optional
+  voice:                                        # Optional
+  webhooks:                                     # Optional

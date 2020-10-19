@@ -16,6 +16,9 @@ function New-CmAzCoreKeyVault {
 		.Parameter SettingsObject
 		 Object containing the configuration values required to run this cmdlet.
 
+		.Parameter TagSettingsFile
+         File path for the tags settings file containing tags defination.
+
 		.Component
 		 Core
 
@@ -32,6 +35,7 @@ function New-CmAzCoreKeyVault {
 		[String]$SettingsFile,
 		[parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
 		[Object]$SettingsObject,
+		[AllowEmptyString()]
 		[String]$TagSettingsFile
 	)
 
@@ -68,7 +72,7 @@ function New-CmAzCoreKeyVault {
 				}
 
 				$keyVault.name = Get-CmAzResourceName -Resource "KeyVault" -Architecture "Core" -Region $keyVault.location -Name $keyVault.name -MaxLength 24
-			
+
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $keyVault
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "activityLogAlert" -ResourceServiceContainer $keyVault
 			}
@@ -91,7 +95,7 @@ function New-CmAzCoreKeyVault {
 
 			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
 			$actionGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.actiongroup -ThrowIfUnavailable -ThrowIfMultiple
-			
+
 			Write-Verbose "Deploying keyvaults..."
 			New-AzResourceGroupDeployment `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreKeyVault.json" `

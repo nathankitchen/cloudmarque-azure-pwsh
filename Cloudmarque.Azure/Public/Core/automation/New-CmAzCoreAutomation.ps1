@@ -18,6 +18,12 @@
 		.Parameter SettingsObject
 		 Object containing the configuration values required to run this cmdlet.
 
+		.Parameter TagSettingsFile
+         File path for the tags settings file containing tags defination.
+
+        .Parameter AutomationCertificatePassword
+         Certificate password used to create automation account run as certificate.
+
 		.Component
 		 Core
 
@@ -34,7 +40,9 @@
 		[String]$SettingsFile,
 		[parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
 		[Object]$SettingsObject,
-		[String]$TagSettingsFile
+		[AllowEmptyString()]
+		[String]$TagSettingsFile,
+		[Security.SecureString]$AutomationCertificatePassword
 	)
 
 	$ErrorActionPreference = "Stop"
@@ -65,6 +73,7 @@
 				}
 				elseif ($item -eq "runbook") {
 					$accountType = "runbook"
+					$item = "rnb"
 				}
 				else {
 					Write-Error "Set type to be either runbook or dsc."
@@ -83,18 +92,21 @@
 				$keyVault = Get-CmAzService -Service $SettingsObject.Automation.$accountType.service.dependencies.keyvault -Region $SettingsObject.location -ThrowIfUnavailable
 
 				$certificateName = $SettingsObject.Automation.$accountType.CertificateName
-				
+
 				if (!$certificateName) {
-					Write-Verbose "No KeyVault Certificate provided, a new certificate will be created..."
-					$certificateName = $SettingsObject.Automation.$accountType.CertificateName
+					Write-Verbose "No KeyVault Certificate secret provided. Default context name will be used. A new certificate will be created if required..."
+					$certificateName = "Automation-$item-$($SettingsObject.Name)"
 				}
 
-				$keyVaultCertificatePasswordSecretName = $SettingsObject.Automation.$accountType.keyVaultCertificatePasswordSecretName
-				
-				if (!$keyVaultCertificatePasswordSecretName) {
-					Write-Error "No keyVault path or Password provided for Certificate..."
-					break
+				if (!$AutomationCertificatePassword){
+					$keyVaultCertificatePasswordSecretName = $SettingsObject.Automation.$accountType.keyVaultCertificatePasswordSecretName
+					if (!$keyVaultCertificatePasswordSecretName) {
+						Write-Error "No keyVault path or Password provided for Certificate..."
+						break
+					}
+					$AutomationCertificatePassword = Get-AzKeyVaultSecret -VaultName $keyVault.name -Name $keyVaultCertificatePasswordSecretName
 				}
+
 
 				if ($SettingsObject.Automation.$accountType.sourceControl.url) {
 
@@ -116,7 +128,7 @@
 					if (!$repoType) {
 						$repoType = "github"
 					}
-					
+
 					$repoType = $repoType.ToLower()
 					if (!$folderPath) {
 						$folderPath = "/"
@@ -134,12 +146,12 @@
 				}
 
 				Write-Verbose "Creating Resource Group..."
-				$nameResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $location -Name $SettingsObject.name
+				$nameResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $location -Name "$item-$($SettingsObject.name)"
 				$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.resourceGroup }
 				$resourceGroup = New-AzResourceGroup -ResourceGroupName $nameResourceGroup -Location $location -Tag $resourceGroupServiceTag -Force
 
 				Write-Verbose "Creating Automation Account..."
-				$automationAccountName = Get-CmAzResourceName -Resource "Automation" -Architecture "Core" -Region $location -Name $SettingsObject.name
+				$automationAccountName = Get-CmAzResourceName -Resource "Automation" -Architecture "Core" -Region $location -Name "$item-$($SettingsObject.name)"
 
 				# Create Automation account
 				New-AzResourceGroupDeployment `
@@ -148,7 +160,7 @@
 					-AccountName $automationAccountName `
 					-Location $location `
 					-AutomationService $SettingsObject.service.publish.automation `
-					-Force
+					-Force > $Null
 
 				function KeyVaultSelfSignedCert {
 					param (
@@ -189,7 +201,7 @@
 
 					Write-Verbose "Fetch Certificate Data from Keyvault..."
 					$pfxCert = [Convert]::ToBase64String($Certificate.GetRawCertData())
-					
+
 					$application = Get-AzADApplication -DisplayName $applicationDisplayName -ErrorAction SilentlyContinue
 					if (!$application)	{
 						Write-Verbose "Application not found. Creating new application..."
@@ -199,11 +211,11 @@
 					#Needs Application administrator or GLOBAL ADMIN"
 					Write-Verbose "Creating Application Credential..."
 					New-AzADAppCredential -ApplicationId $application.ApplicationId -CertValue $pfxCert -StartDate $Certificate.NotBefore -EndDate $Certificate.NotAfter
-					
+
 					Write-Verbose "Checking for existing service principal..."
 					$servicePrincipal = Get-AzADServicePrincipal -ApplicationId $application.ApplicationId
 					if(!$servicePrincipal)	{
-						
+
 						while (!$servicePrincipal)	{
 							Write-Verbose "Trying to create new service principal..."
 							New-AzADServicePrincipal -ApplicationId $application.ApplicationId
@@ -240,14 +252,12 @@
 
 					return $application;
 				}
-				
+
 				function CreateAutomationCertificateAsset {
 					param (
-						$certificateName
+						$certificateName,
+						[Security.SecureString]$certificatePassword
 					)
-
-					Write-Verbose "Trying to Pull Certificate Password from KeyVault..."
-					$certificatePassword = Get-AzKeyVaultSecret -VaultName $keyVault.name -Name $keyVaultCertificatePasswordSecretName
 
 					Write-Verbose "Trying to Pull Certificate from KeyVault..."
 					$pfxFileByte = [System.Convert]::FromBase64String((Get-AzKeyVaultSecret -VaultName $keyVault.name -Name $certificateName).SecretValueText)
@@ -279,10 +289,10 @@
 						[string] $ConnectionTypeName,
 						[System.Collections.Hashtable] $ConnectionFieldValues
 					)
-					
+
 					Write-Verbose "Creating Automation Connection Asset..."
 					Remove-AzAutomationConnection -ResourceGroupName $ResourceGroup -AutomationAccountName  $AutomationAccountName -Name $ConnectionAssetName -Force -ErrorAction SilentlyContinue
-					New-AzAutomationConnection -ResourceGroupName $ResourceGroup -AutomationAccountName  $AutomationAccountName -Name $ConnectionAssetName -ConnectionTypeName $ConnectionTypeName -ConnectionFieldValues $ConnectionFieldValues
+					New-AzAutomationConnection -ResourceGroupName $ResourceGroup -AutomationAccountName  $AutomationAccountName -Name $ConnectionAssetName -ConnectionTypeName $ConnectionTypeName -ConnectionFieldValues $ConnectionFieldValues > $null
 				}
 
 				[string]$applicationDisplayName = "AutomationAppAccount-$automationAccountName"
@@ -290,7 +300,6 @@
 				Write-Verbose "Fetching Certificate from Keyvault..."
 				$keyVaultSelfSignedCert = (Get-AzKeyVaultCertificate -VaultName $keyVault.name -Name $certificateName).Certificate
 
-				Write-Verbose "Create New Certificate using keyvault if it doesn't exist..."
 				if (!$keyVaultSelfSignedCert) {
 					try {
 						Write-Verbose "Creating new certificate in keyvault: $($keyVault.name)..."
@@ -300,7 +309,7 @@
 							-SubjectName "CN=$certificateName" `
 							-ValidityInMonths 12 `
 							-RenewDaysBefore 30
-						
+
 						Write-Verbose "Certificate generated $certificateName : $($keyVaultSelfSignedCert.Thumbprint)..."
 						$keyVaultSelfSignedCert = (Get-AzKeyVaultCertificate -VaultName $keyVault.name -Name $certificateName).Certificate
 					}
@@ -314,18 +323,18 @@
 				}
 
 				# Creates Automation Certificate
-				$certificateValues = CreateAutomationCertificateAsset -CertificateName $certificateName
+				$certificateValues = CreateAutomationCertificateAsset -CertificateName $certificateName -CertificatePassword $AutomationCertificatePassword
 				$keyVaultSelfSignedPfxCert = New-Object -TypeName System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList @($certificateValues.certificatePath , $certificateValues.password)
 
 				Write-Verbose "Creating Service Principal..."
 				$servicePrincipal = CreateServicePrincipal -Certificate $keyVaultSelfSignedPfxCert -ApplicationDisplayName $applicationDisplayName
 
 				Write-Verbose "Populating ConnectionFieldValues..."
-				$connectionFieldValues = @{ 
-					"ApplicationId" = $servicePrincipal.ApplicationId.ToString(); 
-					"TenantId" = $azSubscription.TenantId; 
-					"CertificateThumbprint" = $keyVaultSelfSignedPfxCert.Thumbprint; 
-					"SubscriptionId" = $azSubscription.SubscriptionId 
+				$connectionFieldValues = @{
+					"ApplicationId" = $servicePrincipal.ApplicationId.ToString();
+					"TenantId" = $azSubscription.TenantId;
+					"CertificateThumbprint" = $keyVaultSelfSignedPfxCert.Thumbprint;
+					"SubscriptionId" = $azSubscription.SubscriptionId
 				}
 
 				Write-Verbose "Create an Automation connection asset named AzureRunAsConnection in the Automation account. This connection uses the service principal."
@@ -366,7 +375,7 @@
 						Write-Verbose "$PSitem..."
 					}
 				}
-				
+
 				Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $nameResourceGroup
 			}
 

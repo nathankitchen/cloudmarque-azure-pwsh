@@ -16,11 +16,16 @@ function New-CmAzCoreMonitor {
 		.Parameter SettingsObject
 		 Object containing the configuration values required to run this cmdlet.
 
+		.Parameter TagSettingsFile
+         File path for the tags settings file containing tags defination.
+
 		.Component
 		 Core
 
 		.Example
 		 New-CmAzCoreMonitor -SettingsFile "c:/directory/settingsFile.yml"
+
+		.Example
 		 New-CmAzCoreMonitor -SettingsObject $settings
 	#>
 
@@ -30,6 +35,7 @@ function New-CmAzCoreMonitor {
 		[string]$SettingsFile,
 		[parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
 		[object]$SettingsObject,
+		[AllowEmptyString()]
 		[String]$TagSettingsFile
 	)
 

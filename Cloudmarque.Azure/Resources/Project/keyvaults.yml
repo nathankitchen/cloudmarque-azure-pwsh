@@ -9,7 +9,7 @@ service:
     keyvault:
     activityLogAlert:
 keyVaults:
-- name: test
+- name: coreVault
   type: Core
   location: UK South
   service:

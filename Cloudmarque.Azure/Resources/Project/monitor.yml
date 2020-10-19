@@ -1,5 +1,5 @@
 name: testKeyvaultDeploy15
-location: UK South
+location: UK west
 advisorLowCPUThresholdPercentage: 5     # Can be set to 0, 5, 10, 15 or 20
 service:
   publish:
@@ -8,17 +8,17 @@ service:
     solution:
     storage:
     workspace:
-    loggingResourceGroup: 
+    loggingResourceGroup:
     monitoringResourceGroup:
     actionGroup:
 actionGroups:
-- name: test
-  shortname: test
+- name: DefaultActionGroup
+  shortname: DAG
   service:
     publish:
       actionGroup:
-  armRoles:                    
-  emails: 
+  armRoles:
+  emails:
   functions:
   itsm:
   logicApps:
@@ -55,20 +55,20 @@ actionGroups:
 #   callbackUrl:                        Callback url used to trigger the logic app through http requests
 
 # notifications:
-# - emailAddress: 
+# - emailAddress:
 
 # runbooks:
-# - automationAccountId:                
+# - automationAccountId:
 #   runbookName:
 #   serviceUri:                         Webhook service uri
-#   webhookResourceId:                  
+#   webhookResourceId:
 #   isGlobalRunbook:
 
 # sms:
 # - phoneNumber:
 #   countryCode:
 
-# voice: 
+# voice:
 # - phoneNumber:
 #   countryCode:
 
