@@ -1,5 +1,6 @@
-resourceGroupName: keyvaults
+resourceGroupName: coreAccount
 location: UK South
+
 service:
   dependencies:
     workspace:
@@ -8,6 +9,7 @@ service:
     resourceGroup:
     keyvault:
     activityLogAlert:
+
 keyVaults:
 - name: coreVault
   type: Core

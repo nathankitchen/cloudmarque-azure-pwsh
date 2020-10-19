@@ -15,10 +15,12 @@ service:
     monitoringResourceGroup: coremonitoringResourceGroup
     actionGroup: coreactionGroup
 
-automationSettings:
-budgetSettings:
-keyvaultSettings:
-monitorSettings:
+# Provider either path to individual settings file or define properties in this file. Local settings takes precedence.
+
+automationSettings: ./automation.yml           # Path to automation settings file.
+budgetSettings: ./budgets.yml                  # Path to budget settings file
+keyvaultSettings: ./keyvaults.yml               # Path to keyvault settings file
+monitorSettings: ./monitor.yml                 # Path to monitor settings file
 
 # All properties listed below are optional. You can use them to overwrite defaults.
 
@@ -70,19 +72,20 @@ keyVaults:                                      # Optional
       keyvault:                                 # Optional
       activityLogAlert:                         # Optional
 
-actionGroups:                                   # Optional
-- name:                                         # Optional
-  shortname:                                    # Optional
-  service:                                      # Optional
-    publish:                                    # Optional
-      actionGroup:                              # Optional
-  armRoles:                                     # Optional
-  emails:                                       # Optional
-  functions:                                    # Optional
-  itsm:                                         # Optional
-  logicApps:                                    # Optional
-  notifications:                                # Optional
-  runbooks:                                     # Optional
-  sms:                                          # Optional
-  voice:                                        # Optional
-  webhooks:                                     # Optional
+monitor:
+  actionGroups:                                   # Optional
+  - name:                                         # Optional
+    shortname:                                    # Optional
+    service:                                      # Optional
+      publish:                                    # Optional
+        actionGroup:                              # Optional
+    armRoles:                                     # Optional
+    emails:                                       # Optional
+    functions:                                    # Optional
+    itsm:                                         # Optional
+    logicApps:                                    # Optional
+    notifications:                                # Optional
+    runbooks:                                     # Optional
+    sms:                                          # Optional
+    voice:                                        # Optional
+    webhooks:                                     # Optional

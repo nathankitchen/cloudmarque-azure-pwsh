@@ -31,7 +31,10 @@ function New-CmAzCore {
 		 New-CmAzCore -SettingsFile "c:/directory/settingsFile.yml"
 
 		.Example
-		 New-CmAzCore -SettingsObject $settings
+         New-CmAzCore -SettingsObject $settings
+
+        .Example
+         New-CmAzCore -SettingsFile "c:/directory/settingsFile.yml" -AutomationCertificatePassword $automationPassword
 	#>
 
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
@@ -42,7 +45,7 @@ function New-CmAzCore {
         [Object]$SettingsObject,
         [AllowEmptyString()]
         [String]$TagSettingsFile,
-        [Security.SecureString]$AutomationCertificatePassword
+        [SecureString]$AutomationCertificatePassword
     )
 
     $ErrorActionPreference = "stop"
@@ -53,7 +56,6 @@ function New-CmAzCore {
 
             if ($SettingsFile -and -not $SettingsObject) {
                 $SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-                $Directory = (Get-Item $SettingsFile).DirectoryName
             }
             elseif (-not $SettingsFile -and -not $SettingsObject) {
                 Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
@@ -63,11 +65,13 @@ function New-CmAzCore {
             $SettingsObject.service.dependencies = $SettingsObject.service.publish
 
             # Core Monitoring
-            if (!$SettingsObject.actionGroups.name) {
+            if (!$SettingsObject.monitor.actionGroups.name) {
 
                 if (!$SettingsObject.monitorSettings) {
-                    $SettingsObject.monitorSettings = "$Directory/monitor.yml"
+                    Write-Error "Please provide settings for monitoring resources.." -Category ObjectNotFound -TargetObject $SettingsObject.monitorSettings
                 }
+
+                $SettingsObject.monitorSettings = Resolve-FilePath -NestedFile $SettingsObject.monitorSettings
 
                 $monitorObject = Get-CmAzSettingsFile -Path $SettingsObject.monitorSettings
                 $monitorObject.Name = $SettingsObject.Name
@@ -82,6 +86,7 @@ function New-CmAzCore {
                 Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actionGroup" -ResourceServiceContainer $monitorObject
             }
             else {
+                $SettingsObject.actionGroups = $SettingsObject.monitor.actionGroups
                 $monitorObject = $SettingsObject
             }
 
@@ -92,15 +97,17 @@ function New-CmAzCore {
             if (!$SettingsObject.budgets.name) {
 
                 if (!$SettingsObject.budgetSettings) {
-                    $SettingsObject.budgetSettings = "$Directory/budgets.yml"
+                    Write-Error "Please provide budget settings.." -Category ObjectNotFound -TargetObject $SettingsObject.budgets
                 }
+
+                $SettingsObject.budgetSettings = Resolve-FilePath -NestedFile $SettingsObject.budgetSettings
 
                 $budgetsObject = Get-CmAzSettingsFile -Path $SettingsObject.budgetSettings
                 $budgetsObject.location = $SettingsObject.location
                 Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actiongroup" -ResourceServiceContainer $budgetsObject -Isdependency
             }
             else {
-                $monitorObject = $SettingsObject
+                $budgetsObject = $SettingsObject
             }
 
             Write-Verbose "Setting budgets.."
@@ -114,8 +121,11 @@ function New-CmAzCore {
             if (!$SettingsObject.keyVaults.name) {
 
                 if (!$SettingsObject.keyvaultSettings) {
-                    $SettingsObject.keyvaultSettings = "$Directory/keyvaults.yml"
+                    Write-Error "Please provide keyvault settings.." -Category ObjectNotFound -TargetObject $SettingsObject.keyvaultSettings
                 }
+
+                $SettingsObject.keyvaultSettings = Resolve-FilePath -NestedFile $SettingsObject.keyvaultSettings
+
                 $keyVaultObject = Get-CmAzSettingsFile -Path $SettingsObject.keyvaultSettings
                 $keyVaultObject.resourceGroupName = $SettingsObject.resourceGroupName
                 $keyVaultObject.location = $SettingsObject.location
@@ -136,11 +146,13 @@ function New-CmAzCore {
             if (!$SettingsObject.automation.runbook.CertificateName -or !$SettingsObject.automation.runbook.keyVaultCertificatePasswordSecretName -or !$SettingsObject.automation.dsc.keyVaultCertificatePasswordSecretName -or !$SettingsObject.automation.dsc.CertificateName ) {
 
                 if (!$SettingsObject.automationSettings) {
-                    $SettingsObject.automationSettings = "$Directory/automation.yml"
+                    Write-Error "Please provide automation settings.." -Category ObjectNotFound -TargetObject $SettingsObject.automationSettings
                 }
 
+                $SettingsObject.automationSettings = Resolve-FilePath -NestedFile $SettingsObject.automationSettings
+
                 $automationObject = Get-CmAzSettingsFile -Path $SettingsObject.automationSettings
-                $automationObject.Name = $SettingsObject.resourceGroupName
+                $automationObject.Name = $SettingsObject.name
                 $automationObject.location = $SettingsObject.location
                 Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $automationObject -Isdependency
                 Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "automation" -ResourceServiceContainer $automationObject

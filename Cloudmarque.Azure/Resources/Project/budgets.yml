@@ -1,5 +1,6 @@
-
 location: UK South
+name: coreAccount
+
 service:
   dependencies:
     actiongroup:
