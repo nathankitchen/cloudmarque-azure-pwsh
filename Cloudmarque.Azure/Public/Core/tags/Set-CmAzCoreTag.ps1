@@ -136,7 +136,7 @@
 
 					try {
 						Write-Verbose "Fetching resources in $($resourceGroupId)..."
-						$existingResources += Get-AzResource -ResourceGroupName $resourceGroupId
+						$resources += Get-AzResource -ResourceGroupName $resourceGroupId
 					}
 					catch {
 						Write-Error "Issue locating resources in resource group: $($resourceGroupId)." -Category ObjectNotFound -CategoryTargetName "ResourceGroupIds"

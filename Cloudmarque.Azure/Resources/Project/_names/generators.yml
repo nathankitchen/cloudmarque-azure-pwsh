@@ -1,7 +1,6 @@
 formats:
   - name: standard
     separator: "-"
-    removeCharacters: [] 
     case: lower
     components:
       - source: resource

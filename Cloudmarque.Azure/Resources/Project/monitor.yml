@@ -8,7 +8,6 @@ service:
     solution:
     storage:
     workspace:
-    loggingResourceGroup:
     monitoringResourceGroup:
     actionGroup:
 actionGroups:

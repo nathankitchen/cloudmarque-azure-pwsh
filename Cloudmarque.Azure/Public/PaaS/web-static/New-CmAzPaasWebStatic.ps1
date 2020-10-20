@@ -97,7 +97,7 @@
 
 		Write-Verbose "Deploying storage account.."
 		$storageObject = @{
-			location = $SettingsObject.Location ;
+			location = $SettingsObject.Location;
 			service = @{
 				dependencies = @{
 					ResourceGroup = $SettingsObject.service.publish.resourceGroup
@@ -117,7 +117,7 @@
 			})
 		}
 
-		New-CmAzIaasStorage -SettingsObject $storageObject
+		New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags
 
 		$storageName = Get-CmAzResourceName -Resource "Storageaccount" -Architecture "IaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
 

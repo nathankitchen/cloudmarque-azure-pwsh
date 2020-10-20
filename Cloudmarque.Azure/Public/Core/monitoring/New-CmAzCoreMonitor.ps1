@@ -103,15 +103,16 @@ function New-CmAzCoreMonitor {
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actionGroup" -ResourceServiceContainer $actiongroup
 			}
 
-			Write-Verbose "Generating monitoring resource names.."
-			$monitoringResourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.Location -Name "Monitoring-($($SettingsObject.Name))"
+			Write-Verbose "Generating resource names.."
+			$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.Location -Name "monitoring-$($SettingsObject.name)"
+
     		$serviceHealthAlertName = Get-CmAzResourceName -Resource "ServiceHealthAlert" -Architecture "Core" -Region $SettingsObject.Location -Name $SettingsObject.Name
 
-			Write-Verbose "Deploying monitoring resource group ($monitoringResourceGroupName).."
+			Write-Verbose "Deploying resource group ($resourceGroupName).."
 			$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.monitoringResourceGroup }
 
 			New-AzResourceGroup `
-				-Name $monitoringResourceGroupName `
+				-Name $resourceGroupName `
 				-Location $SettingsObject.Location `
 				-Tag $resourceGroupServiceTag `
 				-Force
@@ -121,7 +122,7 @@ function New-CmAzCoreMonitor {
 
 			Write-Verbose "Deploying monitoring resources.."
 			New-AzResourceGroupDeployment `
-				-ResourceGroupName $monitoringResourceGroupName `
+				-ResourceGroupName $resourceGroupName `
 				-TemplateFile "$PSScriptRoot/New-CmAzCoreMonitor.Monitoring.json" `
 				-ActionGroups $SettingsObject.ActionGroups `
 				-ServiceHealthAlertName $serviceHealthAlertName `
@@ -130,24 +131,13 @@ function New-CmAzCoreMonitor {
 
 			Write-Verbose "Generating logging resource names.."
 			$appInsightsName = Get-CmAzResourceName -Resource "ApplicationInsights" -Architecture "Core" -Region $SettingsObject.Location -Name $SettingsObject.Name
-			$loggingResourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.Location -Name "Logging-($($SettingsObject.Name))"
-			$storageName = Get-CmAzResourceName -Resource "StorageAccount" -Architecture "Core" -Region $SettingsObject.Location -Name $SettingsObject.Name -MaxLength 24
 			$workspaceName = Get-CmAzResourceName -Resource "LogAnalyticsworkspace" -Architecture "Core" -Region $SettingsObject.Location -Name $SettingsObject.Name
 
-			Write-Verbose "Deploying logging resource Group ($loggingResourceGroupName).."
-			$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.loggingResourceGroup }
-
-			New-AzResourceGroup `
-				-Name $loggingResourceGroupName `
-				-Location $SettingsObject.Location `
-				-Tag $resourceGroupServiceTag `
-				-Force
-
 			[System.Collections.Hashtable]$storageObject = @{
-				location = $SettingsObject.Location ;
+				location = $SettingsObject.Location;
 				service = @{
 					dependencies = @{
-						ResourceGroup = $SettingsObject.service.publish.loggingResourceGroup
+						ResourceGroup = $SettingsObject.service.publish.monitoringResourceGroup
 					};
 					publish = @{
 						storage = $SettingsObject.service.publish.storage
@@ -165,12 +155,11 @@ function New-CmAzCoreMonitor {
 				})
 			}
 
-			Write-Verbose "Deploying Storage for Monitoring.."
-			New-CmAzIaasStorage -SettingsObject $storageObject
+			New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags
 
 			Write-Verbose "Deploying logging resources.."
 			New-AzResourceGroupDeployment `
-				-ResourceGroupName $loggingResourceGroupName `
+				-ResourceGroupName $resourceGroupName `
 				-TemplateFile "$PSScriptRoot/New-CmAzCoreMonitor.Logging.json" `
 				-AppInsightsName $appInsightsName `
 				-ServiceContainer $SettingsObject.service.publish `
@@ -187,8 +176,7 @@ function New-CmAzCoreMonitor {
 
 			Set-AzAdvisorConfiguration -LowCpuThreshold $SettingsObject.AdvisorLowCPUThresholdPercentage
 
-			$resourceGroupsToSet = @($monitoringResourceGroupName)
-			$resourceGroupsToSet += $loggingResourceGroupName
+			$resourceGroupsToSet = @($resourceGroupName)
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
 

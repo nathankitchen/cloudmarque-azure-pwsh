@@ -16,6 +16,9 @@
 		.Parameter SettingsObject
 		 Object containing the configuration values required to run this cmdlet.
 
+		.Parameter OmitTags
+		 Parmeter to specify if the cmdlet should handle its own tagging. 
+
 		.Component
 		 IaaS
 
@@ -32,7 +35,8 @@
 		[String]$SettingsFile,
 		[parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
 		[Object]$SettingsObject,
-		[String]$TagSettingsFile
+		[String]$TagSettingsFile,
+		[Switch]$OmitTags
 	)
 
 	$ErrorActionPreference = "Stop"
@@ -50,8 +54,7 @@
 		}
 
 		if ($SettingsObject.service.dependencies.resourceGroup) {
-			$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable
-			$SettingsObject.location = $resourceGroup.Location
+			$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable -ThrowIfMultiple
 		}
 
 		$SettingsObject.storageAccounts | ForEach-Object {
@@ -61,7 +64,7 @@
 			Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "storage" -ResourceServiceContainer $_
 
 			if (!$_.location) {
-				Write-Verbose "$($_.storageAccountName): No location configuraton found. It will be set to default location."
+				Write-Verbose "$($_.storageAccountName): No location configuraton found. It will be set to default location $($SettingsObject.Location)"
 				$_.location = $SettingsObject.location
 			}
 
@@ -165,7 +168,7 @@
 		Write-Verbose "Settings verified successfully. Initiating deployment."
 
 		if ($SettingsObject.service.dependencies.resourceGroup) {
-			$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable
+			$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable -ThrowIfMultiple
 			$SettingsObject.location = $resourceGroup.Location
 		}
 
@@ -182,7 +185,7 @@
 					Write-Verbose "Resource Group created: $($resourceGroup.ResourceGroupName)"
 
 					$resourceGroupsToSet = $resourceGroup.ResourceGroupName
-    }
+    			}
 				else {
 					Write-Verbose "Resource group doesn't exists and is required to be created. Please provide resource Group service tag to publish"
 				}
@@ -202,13 +205,18 @@
 			-TemplateFile "$PSScriptRoot/New-CmAzIaasStorage.json" `
 			-StorageSettingsArray $SettingsObject.storageAccounts `
 			-Force
+		
+		if($OmitTags) {
+			Write-Warning "Storage tagging omitted.."
+		}
+		else {
+			# Will run only if new resource Group is created
+			Write-Verbose "Tagging Initiated.."
+			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
 
-		# Will run only if new resource Group is created
-		Write-Verbose "Tagging Initiated.."
-		Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
-
-		$resourcesToSet += $SettingsObject.storageAccounts.storageAccountName
-		Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
+			$resourcesToSet += $SettingsObject.storageAccounts.storageAccountName
+			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
+		}
 
 		Write-Verbose "Finished."
 	}

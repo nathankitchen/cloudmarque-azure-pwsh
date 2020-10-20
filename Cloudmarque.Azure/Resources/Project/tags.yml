@@ -6,4 +6,3 @@ tags:
     cm-charge: s                        # Required - Cost code
     cm-apps:  s                         # Required - App name
   custom:
-    cm-delete:                          # Optional - Delete on date
