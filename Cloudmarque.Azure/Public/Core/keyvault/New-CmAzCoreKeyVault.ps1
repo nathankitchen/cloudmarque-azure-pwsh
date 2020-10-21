@@ -73,6 +73,14 @@ function New-CmAzCoreKeyVault {
 
 				$keyVault.name = Get-CmAzResourceName -Resource "KeyVault" -Architecture "Core" -Region $keyVault.location -Name $keyVault.name -MaxLength 24
 
+				if($null -eq $keyVault.enableSoftDelete) {
+					$keyVault.enableSoftDelete = $true;
+				}
+	
+				if (!$keyVault.softDeleteRetentionInDays) {
+					$keyVault.softDeleteRetentionInDays = 90;
+				}
+	
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $keyVault
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "activityLogAlert" -ResourceServiceContainer $keyVault
 			}
@@ -84,13 +92,16 @@ function New-CmAzCoreKeyVault {
 			$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.resourceGroup }
 			New-AzResourceGroup -Location $SettingsObject.location -Name $keyVaultResourceGroup -Tag $resourceGroupServiceTag -Force
 
-			$userObjectID = ""
 			$azCtx = (Get-AzContext).account
 
 			switch ($azCtx.type)
 			{
-				"ServicePrincipal" { $userObjectID = $azCtx.id }
-				"User" { $userObjectID = (Get-AzADUser -UserPrincipalName $azCtx.id).id }
+				"ServicePrincipal" { 
+					$objectId = (Get-AzADServicePrincipal -ApplicationId $azCtx.Id).id 
+				}
+				"User" { 
+					$objectId = (Get-AzADUser -UserPrincipalName $azCtx.id).id 
+				}
 			}
 
 			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
@@ -102,7 +113,7 @@ function New-CmAzCoreKeyVault {
 				-ResourceGroupName $keyVaultResourceGroup `
 				-ActionGroup $actionGroup `
 				-Keyvaults $SettingsObject.KeyVaults `
-				-ObjectId $UserObjectID `
+				-ObjectId $objectid `
 				-Workspace $workspace `
 				-Force
 

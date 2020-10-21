@@ -113,13 +113,13 @@
                                         }
                                     }
                                 ],
+                                "enableSoftDelete": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].enableSoftDelete]",
+                                "softDeleteRetentionInDays": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].softDeleteRetentionInDays]",
+                                "enablePurgeProtection": true,
                                 "sku": {
                                     "name": "standard",
                                     "family": "A"
-                                },
-                                "enableSoftDelete": true,
-                                "softDeleteRetentionInDays": 90,
-                                "enablePurgeProtection": true
+                                }
                             }
                         },
                         {

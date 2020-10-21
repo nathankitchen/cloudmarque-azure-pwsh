@@ -67,6 +67,8 @@ keyVaults:                                      # Optional
 - name:                                         # Optional
   type:                                         # Optional
   location:                                     # Optional
+  enableSoftDelete: true                        # Optional
+  softDeleteRetentionInDays: 10                 # Optional
   service:                                      # Optional
     publish:                                    # Optional
       keyvault:                                 # Optional

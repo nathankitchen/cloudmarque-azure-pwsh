@@ -14,6 +14,8 @@ keyVaults:
 - name: coreVault
   type: Core
   location: UK South
+  enableSoftDelete: true                           
+  softDeleteRetentionInDays: 10
   service:
     publish:
       keyvault:
