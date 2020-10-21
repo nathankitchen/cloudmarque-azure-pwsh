@@ -42,7 +42,7 @@
 		[Object]$SettingsObject,
 		[AllowEmptyString()]
 		[String]$TagSettingsFile,
-		[Security.SecureString]$AutomationCertificatePassword
+		[SecureString]$AutomationCertificatePassword
 	)
 
 	$ErrorActionPreference = "Stop"
@@ -53,7 +53,7 @@
 
 			# Initializing settings file values
 
-			$azSubscription = Get-AzSubscription
+			$azSubscription = Get-AzContext
 			$projectContext = Get-CmAzContext -RequireAzure -ThrowIfUnavailable
 
 			if ($SettingsFile -and !$SettingsObject) {
@@ -79,6 +79,10 @@
 					Write-Error "Set type to be either runbook or dsc."
 				}
 
+				if (!$SettingsObject.automation.$accountType){
+					$SettingsObject.automation.$accountType = @{}
+				}
+
 				Write-Verbose "Setting location set to $($SettingsObject.Location)..."
 				$location = $SettingsObject.Location
 
@@ -100,11 +104,13 @@
 
 				if (!$AutomationCertificatePassword){
 					$keyVaultCertificatePasswordSecretName = $SettingsObject.Automation.$accountType.keyVaultCertificatePasswordSecretName
+
 					if (!$keyVaultCertificatePasswordSecretName) {
 						Write-Error "No keyVault path or Password provided for Certificate..."
 						break
 					}
-					$AutomationCertificatePassword = Get-AzKeyVaultSecret -VaultName $keyVault.name -Name $keyVaultCertificatePasswordSecretName
+
+					$AutomationCertificatePassword = (Get-AzKeyVaultSecret -VaultName $keyVault.name -Name $keyVaultCertificatePasswordSecretName).SecretValue
 				}
 
 
@@ -256,7 +262,7 @@
 				function CreateAutomationCertificateAsset {
 					param (
 						$certificateName,
-						[Security.SecureString]$certificatePassword
+						[SecureString]$certificatePassword
 					)
 
 					Write-Verbose "Trying to Pull Certificate from KeyVault..."
@@ -268,16 +274,20 @@
 					$certCollection.Import($pfxFileByte, "", [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
 
 					#Export the .pfx file
-					$protectedCertificateBytes = $certCollection.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12, $certificatePassword.SecretValueText)
+					$certificatePasswordSecretValueText = $certificatePassword | ConvertFrom-SecureString -AsPlainText
+
+					$certificatePasswordSecretValueText
+
+					$protectedCertificateBytes = $certCollection.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12, $certificatePasswordSecretValueText)
 					[System.IO.File]::WriteAllBytes($PfxCertPathForRunAsAccount, $protectedCertificateBytes)
 
 					Write-Verbose "Creating Automation Certificate Asset..."
 					Remove-AzAutomationCertificate -ResourceGroupName $nameResourceGroup -AutomationAccountName  $automationAccountName -Name "AzureRunAsCertificate" -ErrorAction SilentlyContinue
-					New-AzAutomationCertificate -ResourceGroupName $nameResourceGroup -AutomationAccountName  $automationAccountName -Path $pfxCertPathForRunAsAccount  -Name "AzureRunAsCertificate" -Password $certificatePassword.SecretValue -Exportable
+					New-AzAutomationCertificate -ResourceGroupName $nameResourceGroup -AutomationAccountName  $automationAccountName -Path $pfxCertPathForRunAsAccount  -Name "AzureRunAsCertificate" -Password $certificatePassword -Exportable
 
 					@{
 						"certificatePath" = $PfxCertPathForRunAsAccount;
-						"password"        = $certificatePassword.SecretValueText
+						"password"        = $certificatePasswordSecretValueText
 					}
 				}
 
@@ -332,9 +342,9 @@
 				Write-Verbose "Populating ConnectionFieldValues..."
 				$connectionFieldValues = @{
 					"ApplicationId" = $servicePrincipal.ApplicationId.ToString();
-					"TenantId" = $azSubscription.TenantId;
+					"TenantId" = $azSubscription.Subscription.TenantId;
 					"CertificateThumbprint" = $keyVaultSelfSignedPfxCert.Thumbprint;
-					"SubscriptionId" = $azSubscription.SubscriptionId
+					"SubscriptionId" = $azSubscription.Subscription.id
 				}
 
 				Write-Verbose "Create an Automation connection asset named AzureRunAsConnection in the Automation account. This connection uses the service principal."
