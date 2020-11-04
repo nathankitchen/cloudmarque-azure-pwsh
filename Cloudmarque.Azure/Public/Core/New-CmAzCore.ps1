@@ -1,22 +1,23 @@
-﻿
+
 function New-CmAzCore {
 
     <#
-		.Synopsis
-		 Creates core solution.
+        .Synopsis
+         Helper function which wraps all the resources in Core and deploys them together.
 
-		.Description
-		 Completes the following:
-			* Deploys Cloudmarque Monitoring solutions with action groups.
-			* Deploys Automation solution for runbook and dsc.
-			* Deploys Key vaults.
-			* Deploys Billing rules.
+        .Description
+         Deploys a complete set of Core resources, representing a "Landing Zone" for wider deployments.
+         Deploys the following:
+          * Deploys Cloudmarque Monitoring solutions with action groups.
+          * Deploys Automation solution for runbook and dsc.
+          * Deploys Key vaults.
+          * Deploys Billing rules.
 
-		.Parameter SettingsFile
-		 File path for the settings file to be converted into a settings object.
+        .Parameter SettingsFile
+         File path for the settings file to be converted into a settings object.
 
-		.Parameter SettingsObject
-		 Object containing the configuration values required to run this cmdlet.
+        .Parameter SettingsObject
+         Object containing the configuration values required to run this cmdlet.
 
         .Parameter TagSettingsFile
          File path for the tags settings file containing tags defination.
@@ -24,13 +25,13 @@ function New-CmAzCore {
         .Parameter AutomationCertificatePassword
          Certificate password used to create automation account run as certificate.
 
-		.Component
-		 Core
+        .Component
+         Core
 
-		.Example
-		 New-CmAzCore -SettingsFile "c:/directory/settingsFile.yml"
+        .Example
+         New-CmAzCore -SettingsFile "c:/directory/settingsFile.yml"
 
-		.Example
+        .Example
          New-CmAzCore -SettingsObject $settings
 
         .Example

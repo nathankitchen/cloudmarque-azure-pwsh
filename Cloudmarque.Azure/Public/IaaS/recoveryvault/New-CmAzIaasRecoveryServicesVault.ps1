@@ -19,6 +19,9 @@ function New-CmAzIaasRecoveryServicesVault {
         .Parameter PolicySettingsObject
          The object representing the policy settings for this cmdlet.
 
+        .Parameter TagSettingsFile
+	     File path for the tag settings file to be converted into a tag settings object.
+
         .Component
          Core
 

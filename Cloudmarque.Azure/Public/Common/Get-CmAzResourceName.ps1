@@ -22,11 +22,14 @@
     .Parameter Name
      Custom value to provide contextual value to the resource.
 
-    .Parameter MaxLength
-     Max length of the name to be generated.
+    .Parameter SubscriptionName
+     Name of the subscription the resource will be deployed in, defaults to the current subscription in the azcontext.
 
     .Parameter IncludeBuild
      For VM and VMscalesets replaces hash with build ID. For all other resources appends build id to hash.
+
+    .Parameter MaxLength
+     Max length of the name to be generated.
 
     .Example
      Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region "UK South" -Name "DocsWebsite"

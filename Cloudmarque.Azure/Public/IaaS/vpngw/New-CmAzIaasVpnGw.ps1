@@ -2,28 +2,31 @@
 
 	<#
 		.Synopsis
-		Set Virtual private network Gateway in Azure Vnet
+		 Set Virtual private network Gateway in Azure Vnet
 
 		.Description
-		Completes the following:
+		 Completes the following:
 			* This script creates Vpn Gateways in provided Vnets.
 			* Optionally configures P2s and S2s.
 			* Secrets and certificates are securely retrieved from Keyvault
 
 		.Parameter SettingsFile
-		File path for the settings file to be converted into a settings object.
+		 File path for the settings file to be converted into a settings object.
 
 		.Parameter SettingsObject
-		Object containing the configuration values required to run this cmdlet.
+		 Object containing the configuration values required to run this cmdlet.
+
+		.Parameter TagSettingsFile
+	     File path for the tag settings file to be converted into a tag settings object.
 
 		.Component
-		IaaS
+		 IaaS
 
 		.Example
-		New-CmAzIaasVpnGw -SettingsFile "VpnGw.yml"
+		 New-CmAzIaasVpnGw -SettingsFile "VpnGw.yml"
 
 		.Example
-		New-CmAzIaasVpnGw -SettingsObject $settings
+		 New-CmAzIaasVpnGw -SettingsObject $settings
 	#>
 
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]

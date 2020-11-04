@@ -27,6 +27,9 @@
 			* Numeric
 			* Special
 
+		.Parameter TagSettingsFile
+	     File path for the tag settings file to be converted into a tag settings object.
+
 		.Component
 		 IaaS
 

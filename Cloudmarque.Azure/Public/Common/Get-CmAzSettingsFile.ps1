@@ -12,6 +12,9 @@
 		.Component
 		 Common
 
+		.Parameter Path
+		 The file path of the settings file to parse.
+
 		.Example
 		 Get-CmAzSettingsFile -Path settings.yml
     #>

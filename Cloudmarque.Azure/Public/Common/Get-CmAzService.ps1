@@ -34,6 +34,9 @@
 		 scripts where dependencies are mandatory prior to provisioning. By default this is false, no service will
 		 be returned but a "not found" message will be written in verbose mode.
 
+		.Parameter ThrowIfMultiple
+		 Indicates that an exception should be thrown if multiple resources are returned, by default this is false.
+
 		.Example
 		 Find a single keyvault
 		 $keyVault = Get-CmAzService -Service "core-keys" -Region "USEast" -ThrowIfMultiple

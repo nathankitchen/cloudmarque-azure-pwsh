@@ -16,6 +16,9 @@
 		.Parameter SettingsObject
 		 Object containing the configuration values required to run this cmdlet.
 
+		.Parameter TagSettingsFile
+	     File path for the tag settings file to be converted into a tag settings object.
+
 		.Component
 		 PaaS
 

@@ -10,6 +10,10 @@
 		.Component
 		 Common
 
+		.Parameter Project
+		 The filepath where the user's Cloudmarque project will be set.
+		 
+
 		.Example
 		 New-CmAzProject -Project "MyProject"
 	#>

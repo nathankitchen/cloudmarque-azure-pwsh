@@ -17,6 +17,9 @@
 		 An object including all the properties required to configure the target website, with a structure following the same convention
 		 as the YAML file. This allows properties to be dynamically generated rather than simply loaded from a file.
 
+		.Parameter TagSettingsFile
+	     File path for the tag settings file to be converted into a tag settings object.
+
 		.Component
 		 PaaS
 
