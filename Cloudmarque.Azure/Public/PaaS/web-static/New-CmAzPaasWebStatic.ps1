@@ -98,7 +98,7 @@
 			Register-AzResourceProvider -ProviderNamespace $providerNamespace
 		}
 
-		Write-Verbose "Deploying storage account.."
+		Write-Verbose "Deploying storage account..."
 		$storageObject = @{
 			location = $SettingsObject.Location;
 			service = @{
@@ -120,7 +120,8 @@
 			})
 		}
 
-		New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags
+		Write-Verbose "Creating storage account..."
+		New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags > $null
 
 		$storageName = Get-CmAzResourceName -Resource "Storageaccount" -Architecture "IaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
 
@@ -204,12 +205,5 @@
 		Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupName
 
 		Write-Verbose "Finished!"
-
-		@{
-			ResourceGroupName = $resourceGroupName
-			ProfileName = $profileName
-			EndpointName = $endpointName
-			StorageName = $storageName
-		}
 	}
 }
