@@ -17,7 +17,7 @@
 		 Object containing the configuration values required to run this cmdlet.
 
 		.Parameter TagSettingsFile
-	     File path for the tag settings file to be converted into a tag settings object.
+     	 File path for the tag settings file to be converted into a tag settings object.
 
 		.Component
 		 PaaS
@@ -27,6 +27,9 @@
 
 		.Example
 		 New-CmAzPaasWeb -SettingsObject $settings
+
+		.Example
+		 New-CmAzPaasWeb -SettingsObject $settings -TagSettingFile ./tag.yml
 	#>
 
 	[OutputType([System.Collections.ArrayList])]
@@ -52,374 +55,484 @@
 				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 			}
 
-			$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName
-			$frontdoorName = Get-CmAzResourceName -Resource "FrontDoor" -Architecture "PaaS" -Region $SettingsObject.location -Name $SettingsObject.frontdoor.hostName
+			$azContext = Get-AzContext
+
 			$applicationInstrumentationKey = "none"
 
-			if ($SettingsObject.monitoring.applicationInstrumentationKey) {
-				$applicationInstrumentationKey = $SettingsObject.monitoring.applicationInstrumentationKey
+			if ($SettingsObject.service.dependencies.appInsights) {
+
+				Write-Verbose "Fetching appinsights instrumentation key..."
+				$appInsightsService = Get-CmAzService -Service $SettingsObject.service.dependencies.appInsights -ThrowIfUnavailable -ThrowIfMultiple
+				$appInsights = Get-AzApplicationInsights -ResourceGroupName $appInsightsService.resourceGroupName -Name $appInsightsService.name
+
+				$applicationInstrumentationKey = $appInsights.InstrumentationKey
 			}
 
-			$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.resourceGroup }
-			New-AzResourceGroup -ResourceGroupName $resourceGroupName -Location $SettingsObject.location -Tag $resourceGroupServiceTag -Force
+			[System.Collections.ArrayList]$resourceGroupsToSet = @()
 
-			$frontdoorCheck = Get-AzFrontDoor -Name $frontdoorName -ResourceGroupName $resourceGroupName -ErrorAction SilentlyContinue
+			function New-ResourceGroup() {
 
-			if ($frontdoorCheck) {
-				Write-Verbose "Frontdoor by the name $($frontdoorName) already exists."
-				Remove-AzFrontDoor -Name $frontdoorName -ResourceGroupName $resourceGroupName
+				param(
+					$resourceGroupName,
+					$ResourceServiceContainer,
+					$GlobalServiceContainer,
+					$Region
+				)
+
+				$generatedResourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $Region -Name $resourceGroupName
+
+				Set-GlobalServiceValues -GlobalServiceContainer $GlobalServiceContainer -ServiceKey "resourceGroup" -ResourceServiceContainer $ResourceServiceContainer > $null
+				New-AzResourceGroup -ResourceGroupName $generatedResourceGroupName -Location $Region -Tag @{ "cm-service" = $ResourceServiceContainer.service.publish.resourceGroup } -Force > $null
+
+				$resourceGroupsToSet.Add($generatedResourceGroupName) > $Null
+
+				return $generatedResourceGroupName
 			}
 
 			# Crawl across SettingsObject and create defined webapps
-			$SettingsObject.AppServicePlans | ForEach-Object -Parallel {
 
-				. "$using:PSScriptRoot/../../../Private/Tagging/Set-GlobalServiceValues.ps1"
+			foreach ($webSolution in $SettingsObject.WebSolutions) {
 
-				$threadSettingsObject = $using:SettingsObject
-				$threadResourceGroupName = $using:resourceGroupName
+				if ($webSolution.AppServicePlans.Region.count -gt 1) {
+					$region = $webSolution.AppServicePlans[0].Region
+				}
+				else {
+					$region = $webSolution.AppServicePlans.Region
+				}
 
-				Set-GlobalServiceValues -GlobalServiceContainer $threadSettingsObject -ServiceKey "appServicePlan" -ResourceServiceContainer $_
-
-				foreach ($app in $_.Webapps) {
-
-					Write-Verbose "Initiating deployment of webapp : $($app.Name)"
-					$_.Name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $_.Region -Name $_.Name
-					$app.generatedName = Get-CmAzResourceName -Resource "WebApp" -Architecture "PaaS" -Region $_.Region -Name $app.Name
-
-					Set-GlobalServiceValues -GlobalServiceContainer $threadSettingsObject -ServiceKey "webapp" -ResourceServiceContainer $app
-
-					$app.service.publish.appServicePlan = $_.service.publish.appServicePlan
-
-					$slots = @()
-
-					if($app.Slots -Is [System.String]) {
-						$slots = $app.slots | Select-Object { @{ Name = $_; }}
+				if (!$region) {
+					if ($webSolution.apiManagementServices.Region.count -gt 1) {
+						$region = $webSolution.apiManagementServices[0].Region
 					}
 					else {
-						$slots = $app.slots
+						$region = $webSolution.apiManagementServices.Region
+					}
+				}
+
+				$webSolution.generatedResourceGroupName = New-ResourceGroup `
+					-ResourceGroupName $webSolution.Name `
+					-GlobalServiceContainer $SettingsObject `
+					-ResourceServiceContainer $webSolution `
+					-Region $region
+
+				if ($webSolution.AppServicePlans) {
+
+					foreach ($appServicePlan in $webSolution.AppServicePlans) {
+
+						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "appServicePlan" -ResourceServiceContainer $appServicePlan
+						$appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $appServicePlan.region -Name $appServicePlan.name
+
+						if (!$appServicePlan.kind) {
+							$appServicePlan.kind = "linux"
+						}
+
+						if (!$appServicePlan.region) {
+							Write-Error "Please provide region for service plan."
+						}
+
+						$appServicePlan.resourceGroupName = $webSolution.generatedResourceGroupName
+
+						foreach ($webapp in $appServicePlan.webapps) {
+
+							Write-Verbose "Generating Object for deployment of webapp : $($webapp.name)..."
+
+							if (!$webapp.region) {
+								$webapp.region = $appServicePlan.region
+							}
+
+							$webapp.webAppGeneratedName = Get-CmAzResourceName -Resource "WebApp" -Architecture "PaaS" -Region $webapp.region -Name $webapp.name
+
+							Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "webapp" -ResourceServiceContainer $webapp
+
+							if (!$webapp.Slots) {
+								$webapp.slotsObject = @(@{ name = "none"; service = @{ publish = @{ slot = 'none' } } })
+							}
+							else {
+								$webapp.slotsObject = [System.Collections.ArrayList]@()
+
+								foreach ($slot in $webapp.Slots) {
+
+									if ($slot -Is [System.String]) {
+										$slotObject = @{ Name = $slot }
+									}
+									else {
+										$slotObject = $slot
+									}
+
+									Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "slot" -ResourceServiceContainer $slotObject
+
+									Write-Verbose "Adding slot: $($slotObject.name) to webapp : $($webapp.Name)..."
+									$webapp.slotsObject.Add($slotObject) > $null
+								}
+							}
+
+							if ($webapp.contentDeliveryNetwork.Name) {
+
+								$webapp.contentDeliveryNetwork.Name = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Region $webapp.region -Name $webapp.contentDeliveryNetwork.Name
+
+								Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "cdn" -ResourceServiceContainer $webapp.contentDeliveryNetwork
+								Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "endpoint" -ResourceServiceContainer $webapp.contentDeliveryNetwork
+							}
+							else {
+								$webapp.contentDeliveryNetwork = @{
+									Name    = "none";
+									sku     = "standard_microsoft";
+									service = @{
+										publish = @{
+											cdn      = 'none';
+											endpoint = 'none'
+										}
+									}
+								}
+							}
+
+							if ($webapp.enableAppInsight) {
+								$webapp.applicationInstrumentationKey = $applicationInstrumentationKey
+							}
+							else {
+								$webapp.applicationInstrumentationKey = 'none'
+							}
+
+						}
+					}
+				}
+
+				if ($webSolution.ApiManagementServices ) {
+
+					$webSolution.ApiManagementServices | forEach-Object {
+
+						if (!$_.Name -or !$_.publisherName -or !$_.publisherEmail -or !$_.Sku ) {
+							Write-Error "Api gateway is missing mandatory parameters. Please provide name, region, organization, admin email and sku."
+						}
+
+						if (!$_.region) {
+							Write-Error "Please provide region for api management service"
+						}
+
+						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "apiManagement" -ResourceServiceContainer $_
+
+						$_.resourceGroupName = $webSolution.generatedResourceGroupName
+
+						if (!$_.skucount) {
+							$_.skucount = 1
+						}
+
+						$_.generatedName = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Region $_.Region -Name $_.Name
 					}
 
-					foreach ($slot in $slots) {
-						Set-GlobalServiceValues -GlobalServiceContainer $threadSettingsObject -ServiceKey "slot" -ResourceServiceContainer $slot
+
+				}
+			}
+
+			if ($SettingsObject.WebSolutions.appServicePlans) {
+
+				if ($SettingsObject.WebSolutions.AppServicePlans.Region.count -gt 1) {
+					$region = $SettingsObject.WebSolutions.AppServicePlans[0].Region
+				}
+				else {
+					$region = $SettingsObject.WebSolutions.AppServicePlans.Region
+				}
+
+				[System.Collections.ArrayList]$AppServiceDetails = @()
+				$AppServiceDetails += $SettingsObject.WebSolutions.AppServicePlans
+
+				Write-Verbose "Initiating deployment of webapps..."
+
+				New-AzDeployment  `
+					-Name "CmAzWebStack_Parent" `
+					-Location $region `
+					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-Webapp.json" `
+					-AppServiceDetails $AppServiceDetails
+			}
+
+			if ($SettingsObject.WebSolutions.ApiManagementServices) {
+
+				if ($SettingsObject.WebSolutions.ApiManagementServices.Region.count -gt 1) {
+					$region = $SettingsObject.WebSolutions.ApiManagementServices[0].Region
+				}
+				else {
+					$region = $SettingsObject.WebSolutions.ApiManagementServices.Region
+				}
+
+				[System.Collections.ArrayList]$ApiManagementServices = @()
+				$ApiManagementServices += $SettingsObject.WebSolutions.ApiManagementServices
+
+				Write-Verbose "Initiating deployment of api management services..."
+
+				New-AzDeployment  `
+					-Name "CmAzApiManagementServices_Parent" `
+					-Location $region `
+					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-ApiManagementServices.json" `
+					-ApiManagementServices $ApiManagementServices
+			}
+
+
+			if ($SettingsObject.frontdoor) {
+
+				# Frontdoor configuration:
+				$frontendEndpointObjectArray = [System.Collections.ArrayList]@()
+
+				$frontdoorRG = New-ResourceGroup -resourceGroupName $SettingsObject.frontdoor.name `
+					-GlobalServiceContainer $SettingsObject `
+					-ResourceServiceContainer $SettingsObject.frontdoor `
+					-Region $SettingsObject.frontdoor.region
+
+				Write-Verbose "Initiating compilation of Frontends..."
+
+				$frontdoorSuppliedHostName = $SettingsObject.frontdoor.name
+				$SettingsObject.frontdoor.name = Get-CmAzResourceName -Resource "FrontDoor" -Architecture "PaaS" -Region $SettingsObject.frontdoor.region -Name $SettingsObject.frontdoor.name
+
+				# Frontdoor Front endpoints configuration
+
+				if ($SettingsObject.frontdoor.service.dependencies.webApplicationFirewallPolicy) {
+
+					$webApplicationFirewallPolicyService = @{
+						id = (Get-CmAzService -Service $SettingsObject.frontdoor.service.dependencies.webApplicationFirewallPolicy -ThrowIfUnavailable -ThrowIfMultiple).ResourceId
 					}
+				}
+				else {
+					$webApplicationFirewallPolicyService = "none"
+				}
 
-					New-AzResourceGroupDeployment  `
-						-Name $app.generatedName `
-						-ResourceGroupName $threadResourceGroupName `
-						-TemplateFile "$using:PSScriptRoot\New-CmAzPaasWeb.json" `
-						-WebAppName $app.generatedName `
-						-Kind "linux" `
-						-LinuxFxVersion $app.Runtime `
-						-AppServicePlanName $_.Name `
-						-Sku $_.Sku `
-						-Location $_.region `
-						-SlotNames $slots `
-						-AppInstrumatationKey $using:applicationInstrumentationKey `
-						-ServiceContainer $app.service.publish `
-						-Force
+				$frontendEndpointObjectMain = @{
+					frontEndName                           = $SettingsObject.frontdoor.name;
+					domainName                             = "$($SettingsObject.frontdoor.name).azurefd.net"
+					sessionAffinity                        = $SettingsObject.frontdoor.sessionAffinity
+					webApplicationFirewallPolicyResourceId = $webApplicationFirewallPolicyService
+				}
 
-					if ($app.contentDeliveryNetwork.profileName -And $app.contentDeliveryNetwork.endpointName) {
+				Write-Verbose "Frontdoor Azure FQDN: $($SettingsObject.frontdoor.name).azurefd.net..."
 
-						$app.contentDeliveryNetwork.profileName = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Region $_.region -Name $app.contentDeliveryNetwork.profileName
-						$app.contentDeliveryNetwork.endpointName = Get-CmAzResourceName -Resource "Endpoint" -Architecture "PaaS" -Region $_.region -Name $app.contentDeliveryNetwork.endpointName
+				$frontendEndpointObjectArray.Add($frontendEndpointObjectMain) > $Null
 
-						Write-Verbose "Resource type identified to be : $($resourceType)"
-		
-						$webApp = Get-AzWebApp -ResourceGroupName $threadResourceGroupName -Name $app.generatedName -ErrorAction SilentlyContinue
+				if ($SettingsObject.frontDoor.customDomains.domainName) {
 
-						if ($webApp) {
-							$domain = ($webApp).DefaultHostName
+					$SettingsObject.frontDoor.customDomains | forEach-Object {
+
+						Write-Verbose "Adding $($_.domainName) to FrontDoor endpoint configuration..."
+
+						if ($_.service.dependencies.webApplicationFirewallPolicy) {
+							$CustomWebApplicationFirewallPolicyService = @{
+								id = (Get-CmAzService -Service $_.service.dependencies.webApplicationFirewallPolicy -ThrowIfUnavailable -ThrowIfMultiple).ResourceId
+							}
 						}
 						else {
-							Write-Verbose "$($app.generatedName) not found."
+							$CustomWebApplicationFirewallPolicyService = 'none'
 						}
 
-						Set-GlobalServiceValues -GlobalServiceContainer $threadSettingsObject -ServiceKey "cdn" -ResourceServiceContainer $app.contentDeliveryNetwork
-						Set-GlobalServiceValues -GlobalServiceContainer $threadSettingsObject -ServiceKey "endpoint" -ResourceServiceContainer $app.contentDeliveryNetwork
-
-						if (!(Get-AzCdnProfile -ProfileName $app.contentDeliveryNetwork.profileName)) {
-							New-AzCdnProfile `
-							-ProfileName $app.contentDeliveryNetwork.profileName `
-							-ResourceGroupName $threadResourceGroupName `
-							-Sku $app.contentDeliveryNetwork.Sku `
-							-Location $_.region `
-							-Tag @{ "cm-service" = $app.contentDeliveryNetwork.service.publish.cdn }
+						$frontendEndpointObjectCustom = @{
+							frontEndName                           = $_.domainName.replace('.', '-');
+							domainName                             = $_.domainName
+							sessionAffinity                        = $_.sessionAffinity
+							webApplicationFirewallPolicyResourceId = $CustomWebApplicationFirewallPolicyService
 						}
 
-						if (!(Get-AzCdnEndpoint -ProfileName $app.contentDeliveryNetwork.profileName -ResourceGroupName $threadResourceGroupName)) {
-							New-AzCdnEndpoint `
-								-EndpointName $app.contentDeliveryNetwork.endpointName `
-								-ProfileName $app.contentDeliveryNetwork.profileName `
-								-Location $_.region `
-								-ResourceGroupName $threadResourceGroupName `
-								-OriginName $app.generatedName `
-								-OriginHostName $domain `
-								-Tag @{ "cm-service" = $app.contentDeliveryNetwork.service.publish.endpoint }
+						$frontendEndpointObjectArray.add($frontendEndpointObjectCustom) > $null
+					}
+				}
+
+				$SettingsObject.FrontDoor.frontendEndpoints = $frontendEndpointObjectArray
+
+				# Frondoor backendpools configuration
+
+				Write-Verbose "Initiating compilation of Backend Pools..."
+
+				foreach ($backEndPool in $SettingsObject.frontDoor.backEndPools) {
+
+					if (($SettingsObject.Websolutions.appServicePlans.webapps.backendpool -contains $backEndPool.Name) -or ($SettingsObject.Websolutions.ApiManagementServices.backendPool -contains $backEndPool.Name)) {
+
+						Write-Verbose "Adding backend pool: $($backEndPool.Name) to FrontDoor backend configuration..."
+
+						$backEndPool.backends = [System.Collections.ArrayList]@()
+
+						$SettingsObject.Websolutions.appServicePlans.webapps | Where-Object { $_.backendpool -match $backEndPool.Name } | forEach-Object {
+
+							$address = "$($_.webAppGeneratedName).azurewebsites.net"
+							$backendHostHeader = $address
+
+							if ($_.backendHostHeader -eq $false) {
+								$backendHostHeader = ""
+							}
+
+							if (!$_.weight) {
+								$_.weight = 100
+							}
+
+							if (!$_.priority) {
+								$_.priority = 1
+							}
+
+							$backEndObject = @{
+								Address           = $address;
+								httpPort          = 80;
+								httpsPort         = 443;
+								weight            = $_.weight ;
+								priority          = $_.priority ;
+								enabledState      = "Enabled";
+								backendHostHeader = $backendHostHeader
+							}
+
+							$backEndPool.backends.Add($backEndObject) > $null
+						}
+
+						$SettingsObject.Websolutions.ApiManagementServices | Where-Object { $_.backendPool -eq $backEndPool.Name } | forEach-Object {
+
+							$address = "$($_.generatedName).azure-api.net"
+							$backendHostHeader = $address
+
+							if ($_.backendHostHeader -eq $false) {
+								$backendHostHeader = ""
+							}
+
+							if (!$_.weight) {
+								$_.weight = 100
+							}
+
+							if (!$_.priority) {
+								$_.priority = 1
+							}
+
+							$backEndObject = @{
+								Address           = $address;
+								httpPort          = 80;
+								httpsPort         = 443;
+								weight            = $_.weight ;
+								priority          = $_.priority ;
+								enabledState      = "Enabled";
+								backendHostHeader = $backendHostHeader
+							}
+
+							$backEndPool.backends.Add($backEndObject) > $null
+						}
+
+						if (!$backEndPool.healthCheckPath) {
+							$backEndPool.healthCheckPath = "/index.html"
+						}
+
+						if (!$backEndPool.protocol) {
+							$backEndPool.protocol = "Https"
+						}
+						elseif ($backEndPool.protocol -ne "Https" -and $backEndPool.protocol -ne "Http") {
+							Write-Error "Invalid backend pool protocol." -Category InvalidArgument -CategoryTargetName "SettingsObject.frontdoor.backendPools.protocol"
+						}
+					}
+					else {
+						Write-Error "Backend pool: $($backEndPool.Name) not found" -Category ObjectNotFound -TargetObject $backEndPool.Name
+					}
+				}
+
+				# Frondoor routing rules configuration
+
+				Write-Verbose "Initiating compilation of routing rules..."
+
+				foreach ($routingRule in $SettingsObject.frontDoor.rules) {
+
+					Write-Verbose "Adding backend pool: $($routingRule.Name) to FrontDoor routing rule configuration..."
+
+					$routingRule.frontendEndpoints = [System.Collections.ArrayList]@()
+
+					if (!$routingRule.endpoints){
+						$routingRule.endpoints = @($frontdoorSuppliedHostName)
+					}
+
+					foreach ($endpoint in $routingRule.endpoints) {
+
+						if ($endpoint -match $frontdoorSuppliedHostName) {
+							$endpoint = $SettingsObject.frontdoor.name
+						}
+						else {
+							$endpoint = $endpoint.replace('.', '-')
+						}
+
+						$frontEndPointObject = @{
+							id = "/subscriptions/$($azContext.Subscription.Id)/resourcegroups/$frontdoorRG/providers/Microsoft.Network/Frontdoors/$($SettingsObject.frontdoor.name)/FrontendEndpoints/$endpoint"
+						}
+
+						$routingRule.frontendEndpoints.Add($frontEndPointObject) > $Null
+					}
+
+					if (!$routingRule.acceptedProtocols) {
+						$routingRule.acceptedProtocols = @("Https", "Http")
+					}
+
+					if ($routingRule.enableCaching) {
+						$routingRule.cacheConfiguration = @{
+							queryParameterStripDirective = "StripNone";
+							dynamicCompression           = "Enabled"
+						}
+					}else {
+						$routingRule.cacheConfiguration = 'none'
+					}
+				}
+
+				New-AzResourceGroupDeployment  `
+					-Name "CmAz_Frontdoor" `
+					-ResourceGroupName $frontdoorRG `
+					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-Frontdoor.json" `
+					-Frontdoor $SettingsObject.frontdoor `
+					-Verbose
+
+				if ($SettingsObject.frontDoor.customDomains.domainName) {
+
+					function CustomDomainOnFrontDoorEnableHttps {
+						param(
+							$CustomDomainsObject
+						)
+
+						if (!$CustomDomainsObject.customCertificateSecretName) {
+
+							Write-Verbose "Enabling TLS with Azure Frontdoor managed certificates on Domain: $($CustomDomainsObject.domainName)..."
+
+							Enable-AzFrontDoorCustomDomainHttps `
+								-ResourceGroupName $frontdoorRG `
+								-FrontDoorName $SettingsObject.frontdoor.name `
+								-FrontendEndpointName $CustomDomainsObject.domainName.replace('.', '-') `
+								-MinimumTlsVersion "1.2"
+						}
+						else {
+
+							Write-Verbose "Enabling TLS with Azure custom certificates on Domain: $($CustomDomainsObject.domainName)..."
+
+							Enable-AzFrontDoorCustomDomainHttps `
+								-ResourceGroupName $frontdoorRG `
+								-FrontDoorName $SettingsObject.frontdoor.name `
+								-FrontendEndpointName $CustomDomainsObject.domainName.replace('.', '-')`
+								-Vault $CustomDomainsObject.vaultService.ResourceId `
+								-SecretName $CustomDomainsObject.customCertificateSecretName `
+								-SecretVersion $CustomDomainsObject.customCertificateSecretVersion `
+								-MinimumTlsVersion "1.2"
+
 						}
 					}
 
-					Write-Verbose "$($app.Name) is created"
-				}
-			}
+					$customDomainStatus = Get-AzFrontDoorFrontendEndpoint -FrontDoorName $SettingsObject.frontdoor.name -ResourceGroupName $frontdoorRG
 
-			#  Create FrontendEndpoint Object
-			$SettingsObject.ApiManagementServices | ForEach-Object -Parallel {
+					$SettingsObject.frontDoor.customDomains | Where-Object { $_.enableHttps -eq $true } | forEach-Object {
 
-				if (!$_.Name -or !$_.Region -or !$_.Organization -or !$_.AdminEmail -or !$_.Sku ) {
-					Continue
-				}
+						if ($_.customCertificateSecretName) {
 
-				. "$using:PSScriptRoot/../../../Private/Tagging/Set-GlobalServiceValues.ps1"
+							Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $_ -Isdependency
+							$_.vaultService = Get-CmAzService -Service $_.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 
-				Set-GlobalServiceValues -GlobalServiceContainer $using:SettingsObject -ServiceKey "apiManagement" -ResourceServiceContainer $_
+							if (!$_.customCertificateSecretVersion) {
+								$_.customCertificateSecretVersion = (Get-AzKeyVaultSecret -VaultName $_.vaultService.Name -Name $_.customCertificateSecretName).Version
+							}
+						}
 
-				$threadResourceGroupName = $using:resourceGroupName
+						$domainName = $_.domainName
 
-				try {
-
-					$_.Name = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Region $_.Region -Name $_.Name
-
-					Write-Verbose "Creating ApiManagementService $($_.Name)"
-
-					$apiManagementServiceTag = New-Object "System.Collections.Generic.Dictionary``2[System.String,System.String]"
-					$apiManagementServiceTag.Add("cm-service", $_.service.publish.apiManagement)
-
-					New-AzApiManagement `
-						-ResourceGroupName $threadResourceGroupName `
-						-Location $_.Region `
-						-Name $_.Name `
-						-Organization $_.Organization `
-						-AdminEmail $_.AdminEmail `
-						-Sku $_.Sku `
-						-Tag $apiManagementServiceTag
-
-					while (!(([system.uri](Get-AzApiManagement -Name $_.Name -ResourceGroupName $threadResourceGroupName).RuntimeUrl).Host)) {
-						Start-Sleep -minutes 5
-						Write-Verbose "Waiting for API To generate URL....."
+						if (($customDomainStatus | Where-Object { $_.Hostname -eq $domainName }).CustomHttpsProvisioningState -eq "Disabled") {
+							CustomDomainOnFrontDoorEnableHttps -CustomDomainsObject $_
+						}
+						else {
+							Write-Verbose "$($_.domainName) already has TLS enabled and certificates deployed..."
+							$customDomainStatus | Where-Object { $_.Hostname -eq $domainName }
+						}
 					}
 				}
-				catch {
-					Write-Warning "An error occurred, The API service is potentially already present $PSItem"
-				}
-
-				$url = ([system.uri](Get-AzApiManagement -Name $_.Name -ResourceGroupName $threadResourceGroupName).RuntimeUrl).Host
-				Write-Verbose "Api url: $($url)"
 			}
 
-			function CustomDomainOnFrontDoorEnableHttps {
-				param(
-					$vaultName,
-					$domainName,
-					$secretName,
-					$resourceGroupName,
-					$frontdoorName
-				)
-
-				if (!$vaultName) {
-
-					Enable-AzFrontDoorCustomDomainHttps `
-						-ResourceGroupName $resourceGroupName `
-						-FrontDoorName $frontdoorName `
-						-FrontendEndpointName ($frontendEndpointObjectArray | Where-Object Hostname -eq $domainName).Name `
-						-MinimumTlsVersion "1.2"
-				}
-				else {
-					Enable-AzFrontDoorCustomDomainHttps `
-						-ResourceGroupName $resourceGroupName `
-						-FrontDoorName $frontdoorName `
-						-FrontendEndpointName ($frontendEndpointObjectArray | Where-Object Hostname -eq $domainName).Name `
-						-Vault (Get-AzKeyVault -VaultName $vaultName).ResourceId `
-						-SecretName $secretName `
-						-SecretVersion (Get-AzKeyVaultSecret -VaultName kvaultcorerg -Name $secretName).Version `
-						-MinimumTlsVersion "1.0"
-				}
-			}
-
-			$frontendEndpointObjectArray = [System.Collections.ArrayList]@()
-
-			function SetFrontendEndpointObject {
-				param (
-					$domainName,
-					$sessionAffinity,
-					$webApplicationFirewallPolicy,
-					$name
-				)
-
-				if ($sessionAffinity) {
-					$sessionAffinity = "Enabled"
-				}
-				else {
-					$sessionAffinity = "Disabled"
-				}
-
-				Write-Verbose "Initiating creation of frontend endpoint object.."
-				if ($SettingsObject.frontDoor.webApplicationFirewallPolicy) {
-
-					$frontendEndpointObject = New-AzFrontDoorFrontendEndpointObject `
-						-Name $name `
-						-HostName $domainName `
-						-SessionAffinityEnabledState $sessionAffinity `
-						-WebApplicationFirewallPolicyLink $webApplicationFirewallPolicy
-				}
-				else {
-
-					$frontendEndpointObject = New-AzFrontDoorFrontendEndpointObject `
-						-Name $name `
-						-HostName $domainName `
-						-SessionAffinityEnabledState $sessionAffinity
-				}
-
-				$frontendEndpointObject
-			}
-
-			$frontendEndpointObjectMain = SetFrontendEndpointObject `
-					-Name $frontdoorName `
-					-DomainName "$frontdoorName.azurefd.net" `
-					-SessionAffinity $SettingsObject.frontDoor.sessionAffinity `
-					-WebApplicationFirewallPolicy $SettingsObject.frontDoor.webApplicationFirewallPolicy
-
-			$frontendEndpointObjectArray.add($frontendEndpointObjectMain) > $null
-
-			Write-Verbose "Frontend Local Hostname:"
-			$frontendEndpointObjectMain | Write-Verbose
-
-			if ($SettingsObject.frontDoor.customDomains.domainName) {
-
-				foreach ($domain in $SettingsObject.frontDoor.customDomains) {
-
-					Write-Verbose "Adding $($domain.domainName) Object"
-
-					$name = (Get-CmAzResourceName -Resource "frontDoor" -Architecture "Core" -Region $SettingsObject.location -Name "frontendCustomObject")
-
-					$frontendEndpointObjectCustom = SetFrontendEndpointObject `
-						-Name $name `
-						-Domain $domain.domainName `
-						-SessionAffinity $domain.sessionAffinity `
-						-WebApplicationFirewallPolicy $domain.webApplicationFirewallPolicy
-
-					$frontendEndpointObjectArray.add($frontendEndpointObjectCustom) > $null
-				}
-
-				$frontendEndpointObjectArray
-			}
-
-			# Create Back end pool Object
-			Write-Verbose "Initiating creation of Backend Pool"
-			$backEndPoolObjectArray = [System.Collections.ArrayList]@()
-			$healthProbeSettingObjectArray = [System.Collections.ArrayList]@()
-			$loadBalancingSettingObjectArray = [System.Collections.ArrayList]@()
-			$routingRuleObjectArray = [System.Collections.ArrayList]@()
-
-			foreach ($backEndPool in $SettingsObject.frontDoor.backEndPools) {
-
-				$backendObjectArray = [System.Collections.ArrayList]@()
-
-				$SettingsObject.appServicePlans.webapps | Where-Object { $_.backendpool -match $backEndPool.Name } | ForEach-Object {
-
-					$backEndDomainName = (Get-AzWebApp -ResourceGroupName $resourceGroupName -Name $_.generatedName).DefaultHostName
-
-					$backendHostHeader = $backEndDomainName
-
-					if ($_.backendHostHeader -eq $false) {
-						$backendHostHeader = ""
-					}
-
-					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
-					$backendObjectArray.Add($backEndObject) > $null
-				}
-
-				$SettingsObject.ApiManagementServices | Where-Object { $_.backendPool -eq $backEndPool.Name } | ForEach-Object {
-
-					$backEndDomainName = ([system.uri](Get-AzApiManagement -ResourceGroupName $resourceGroupName -Name $_.name).RuntimeUrl).Host
-
-					$backendHostHeader = $backEndDomainName
-
-					if ($_.backendHostHeader -eq $false) {
-						$backendHostHeader = ""
-					}
-
-					$backEndObject = New-AzFrontDoorBackendObject -Address $backEndDomainName -BackendHostHeader $backendHostHeader
-					$backendObjectArray.Add($backEndObject) > $null
-				}
-
-				if (!$backEndPool.healthCheckPath) {
-					$backEndPool.healthCheckPath = "/index.html"
-				}
-
-				if (!$backEndPool.protocol) {
-					$backEndPool.protocol = "Https"
-				}
-				elseif($backEndPool.protocol -ne "Https" -and $backEndPool.protocol -ne "Http") {
-					Write-Error "Invalid backend pool protocol." -Category InvalidArgument -CategoryTargetName "SettingsObject.frontdoor.backendPools.protocol"
-				}
-
-				$healthProbeSettingObject = New-AzFrontDoorHealthProbeSettingObject -Name "HealthProbeSetting-$($backEndPool.Name)" -Path  $backEndPool.HealthCheckPath -Protocol $backEndPool.protocol
-				$loadBalancingSettingObject = New-AzFrontDoorLoadBalancingSettingObject -Name "Loadbalancingsetting-$($backEndPool.Name)"
-
-				$backEndPoolObject = New-AzFrontDoorBackendPoolObject -Name $backEndPool.Name `
-					-FrontDoorName $frontdoorName `
-					-ResourceGroupName $resourceGroupName `
-					-Backend $backendObjectArray `
-					-HealthProbeSettingsName "HealthProbeSetting-$($backEndPool.Name)" `
-					-LoadBalancingSettingsName "Loadbalancingsetting-$($backEndPool.Name)"
-
-				Write-Verbose "Backend Pool Object Created for $($backEndPool.Name)"
-
-				$backEndPoolObjectArray.Add($backEndPoolObject) > $null
-				$healthProbeSettingObjectArray.Add($healthProbeSettingObject) > $null
-				$loadBalancingSettingObjectArray.Add($loadBalancingSettingObject) > $null
-			}
-
-			foreach ($rule in $SettingsObject.frontDoor.rules) {
-
-				$backendPool = $SettingsObject.frontDoor.backEndPools | Where-Object { $_.Name -eq $rule.backendPoolName } | Select-Object -First 1
-
-				if(!$backEndPool) {
-					Write-Error "Backend pool $($rule.backendPoolName) does not exist" -Category InvalidArgument -CategoryTargetName "SettingsObject.frontdoor.rules.backendPoolName"
-				}
-
-				foreach ($endpointObject in $frontendEndpointObjectArray) {
-
-					$routingRuleObject = New-AzFrontDoorRoutingRuleObject `
-						-Name $rule.Name `
-						-FrontDoorName $frontdoorName `
-						-ResourceGroupName $resourceGroupName `
-						-FrontendEndpointName $endpointObject.Name `
-						-BackendPoolName  $backendPool.Name `
-						-PatternToMatch  $rule.Pattern
-				}
-
-				$routingRuleObjectArray.Add($routingRuleObject) > $null
-			}
-
-			# Create Frontdoor
-			Write-Verbose "Initiating creation of Azure frontdoor"
-			New-AzFrontDoor `
-				-Name $frontdoorName `
-				-ResourceGroupName $resourceGroupName `
-				-FrontendEndpoint $frontendEndpointObjectArray `
-				-BackendPool $backEndPoolObjectArray `
-				-HealthProbeSetting $healthProbeSettingObjectArray `
-				-LoadBalancingSetting $loadBalancingSettingObjectArray `
-				-RoutingRule $routingRuleObjectArray `
-				-Tag @{ "cm-service" = $SettingsObject.service.publish.frontdoor }
-
-			if ($SettingsObject.frontDoor.customDomains.domainName) {
-
-				foreach ($domain in $SettingsObject.frontDoor.customDomains) {
-
-					$enableHttps = CustomDomainOnFrontDoorEnableHttps `
-						-DomainName $domain.domainName  `
-						-VaultName $domain.customCertificateVaultName  `
-						-SecretName $domain.customCertificateSecretName  `
-						-ResourceGroupName $resourceGroupName `
-						-FrontDoorName $frontdoorName
-
-					$enableHttps | Write-Verbose
-				}
-			}
-
-			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupName
+			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
 
 			Write-Verbose "Finished!"
 		}

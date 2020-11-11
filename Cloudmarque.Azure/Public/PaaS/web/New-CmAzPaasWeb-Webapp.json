@@ -1,0 +1,206 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AppServiceDetails": {
+            "type": "Array"
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('Cm_AppService_', copyIndex('appServiceDetailsCopy'))]",
+            "resourceGroup": "[parameters('AppServiceDetails')[copyIndex('appServiceDetailsCopy')].resourceGroupName]",
+            "copy": {
+                "name": "appServiceDetailsCopy",
+                "count": "[length(parameters('AppServiceDetails'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "appServiceObject": {
+                        "Value": "[parameters('AppServiceDetails')[copyIndex('appServiceDetailsCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "appServiceObject": {
+                            "type": "object"
+                        }
+                    },
+                    "variables": {
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Web/serverfarms",
+                            "apiVersion": "2018-02-01",
+                            "name": "[parameters('appServiceObject').name]",
+                            "location": "[parameters('appServiceObject').region]",
+                            "sku": {
+                                "name": "[parameters('appServiceObject').sku]"
+                            },
+                            "kind": "[parameters('appServiceObject').kind]",
+                            "tags": {
+                                "cm-service": "[parameters('appServiceObject').service.publish.appServicePlan]"
+                            },
+                            "properties": {
+                                "reserved": true
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Resources/Deployments",
+                            "apiVersion": "2019-10-01",
+                            "name": "[concat('Cm_webapp_', copyIndex('webAppCopy'))]",
+                            "resourceGroup": "[resourceGroup().name]",
+                            "copy": {
+                                "name": "webAppCopy",
+                                "count": "[length(parameters('appServiceObject').webapps)]"
+                            },
+                            "dependsOn": [
+                                "[parameters('appServiceObject').name]"
+                            ],
+                            "properties": {
+                                "mode": "Incremental",
+                                "expressionEvaluationOptions": {
+                                    "scope": "inner"
+                                },
+                                "parameters": {
+                                    "webAppObject": {
+                                        "value": "[parameters('appServiceObject').webapps[copyIndex('webAppCopy')]]"
+                                    },
+                                    "appServicePlanName": {
+                                        "value": "[parameters('appServiceObject').Name]"
+                                    }
+                                },
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "parameters": {
+                                        "webAppObject": {
+                                            "type": "object"
+                                        },
+                                        "appServicePlanName": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "resources": [
+                                        {
+                                            "type": "Microsoft.Web/sites",
+                                            "apiVersion": "2019-08-01",
+                                            "name": "[parameters('webAppObject').webAppGeneratedName]",
+                                            "location": "[parameters('webAppObject').region]",
+                                            "kind": "app",
+                                            "tags": {
+                                                "cm-service": "[parameters('webAppObject').service.publish.webapp]"
+                                            },
+                                            "properties": {
+                                                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+                                                "siteConfig": {
+                                                    "linuxFxVersion": "[parameters('webAppObject').runTime]",
+                                                    "appSettings": [
+                                                        {
+                                                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                                            "value": "[if(equals(parameters('webAppObject').applicationInstrumentationKey, 'none'), json('null'), parameters('webAppObject').applicationInstrumentationKey)]"
+                                                        },
+                                                        {
+                                                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                                                            "value": "[if(equals(parameters('webAppObject').applicationInstrumentationKey, 'none'), json('null'), concat('InstrumentationKey=', parameters('webAppObject').applicationInstrumentationKey))]"
+                                                        },
+                                                        {
+                                                            "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                                                            "value": "[if(equals(parameters('webAppObject').applicationInstrumentationKey, 'none'), json('null'), '~2')]"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "condition": "[not(equals(parameters('webAppObject').slotsObject[0].name, 'none'))]",
+                                            "type": "Microsoft.Web/sites/slots",
+                                            "apiVersion": "2019-08-01",
+                                            "name": "[concat(parameters('webAppObject').webAppGeneratedName, '/', parameters('webAppObject').slotsObject[copyIndex('SlotsCopy')].name)]",
+                                            "tags": {
+                                                "cm-service": "[parameters('webAppObject').slotsObject[copyIndex('SlotsCopy')].service.publish.slot]"
+                                            },
+                                            "location": "[parameters('webAppObject').region]",
+                                            "dependsOn": [
+                                                "[parameters('webAppObject').webAppGeneratedName]"
+                                            ],
+                                            "copy": {
+                                                "name": "SlotsCopy",
+                                                "count": "[length(parameters('webAppObject').slotsObject)]"
+                                            },
+                                            "properties": {}
+                                        },
+                                        {
+                                            "condition": "[not(equals(parameters('webAppObject').contentDeliveryNetwork.name, 'none'))]",
+                                            "name": "[parameters('webAppObject').contentDeliveryNetwork.name]",
+                                            "type": "Microsoft.Cdn/profiles",
+                                            "location": "[parameters('webAppObject').region]",
+                                            "apiVersion": "2020-04-15",
+                                            "tags": {
+                                                "cm-service": "[parameters('webAppObject').contentDeliveryNetwork.service.publish.cdn]"
+                                            },
+                                            "sku": {
+                                                "name": "[parameters('webAppObject').contentDeliveryNetwork.sku]"
+                                            },
+                                            "properties": {},
+                                            "resources": [
+                                                {
+                                                    "condition": "[not(equals(parameters('webAppObject').contentDeliveryNetwork.name, 'none'))]",
+                                                    "name": "[concat('endpoint-cdn-', parameters('webAppObject').webAppGeneratedName)]",
+                                                    "type": "endpoints",
+                                                    "location": "[parameters('webAppObject').region]",
+                                                    "apiVersion": "2020-04-15",
+                                                    "dependsOn": [
+                                                        "[parameters('webAppObject').contentDeliveryNetwork.name]",
+                                                        "[parameters('webAppObject').webAppGeneratedName]"
+                                                    ],
+                                                    "tags": {
+                                                        "cm-service": "[parameters('webAppObject').contentDeliveryNetwork.service.publish.endpoint]"
+                                                    },
+                                                    "properties": {
+                                                        "originHostHeader": "[reference(parameters('webAppObject').webAppGeneratedName).hostNames[0]]",
+                                                        "isHttpAllowed": true,
+                                                        "isHttpsAllowed": true,
+                                                        "queryStringCachingBehavior": "IgnoreQueryString",
+                                                        "contentTypesToCompress": [
+                                                            "text/plain",
+                                                            "text/html",
+                                                            "text/css",
+                                                            "application/x-javascript",
+                                                            "text/javascript"
+                                                        ],
+                                                        "isCompressionEnabled": true,
+                                                        "origins": [
+                                                            {
+                                                                "name": "origin1",
+                                                                "properties": {
+                                                                    "hostName": "[reference(parameters('webAppObject').webAppGeneratedName).hostNames[0]]"
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

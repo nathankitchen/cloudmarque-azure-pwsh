@@ -1,0 +1,96 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Frontdoor": {
+            "type": "Object"
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "apiVersion": "2020-01-01",
+            "type": "Microsoft.Network/frontDoors",
+            "name": "[parameters('Frontdoor').Name]",
+            "location": "global",
+            "properties": {
+                "loadBalancingSettings": [
+                    {
+                        "name": "loadBalancingSettingsCommon",
+                        "properties": {
+                            "sampleSize": 4,
+                            "successfulSamplesRequired": 2
+                        }
+                    }
+                ],
+                "copy": [
+                    {
+                        "name": "frontendEndpoints",
+                        "count": "[length(parameters('Frontdoor').frontendEndpoints)]",
+                        "input": {
+                            "name": "[parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].frontEndName]",
+                            "properties": {
+                                "hostName": "[parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].domainName]",
+                                "sessionAffinityEnabledState": "[if(equals(parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].sessionAffinity,''), 'Disabled', parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].sessionAffinity)]",
+                                "webApplicationFirewallPolicyLink": "[if(equals(parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].webApplicationFirewallPolicyResourceId,'none'), json('null'), parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].webApplicationFirewallPolicyResourceId)]",
+                                "resourceState": "Enabled"
+                            }
+                        }
+                    },
+                    {
+                        "name": "healthProbeSettings",
+                        "count": "[length(parameters('Frontdoor').backendPools)]",
+                        "input": {
+                            "name": "[concat('hps-', parameters('Frontdoor').backendPools[copyIndex('healthProbeSettings')].Name)]",
+                            "properties": {
+                                "path": "[parameters('Frontdoor').backendPools[copyIndex('healthProbeSettings')].healthCheckPath]",
+                                "protocol": "[parameters('Frontdoor').backendPools[copyIndex('healthProbeSettings')].protocol]",
+                                "intervalInSeconds": 120
+                            }
+                        }
+                    },
+                    {
+                        "name": "routingRules",
+                        "count": "[length(parameters('Frontdoor').rules)]",
+                        "input": {
+                            "name": "[parameters('Frontdoor').rules[copyIndex('routingRules')].Name]",
+                            "properties": {
+                                "frontendEndpoints": "[parameters('Frontdoor').rules[copyIndex('routingRules')].frontendEndpoints]",
+                                "acceptedProtocols": "[parameters('Frontdoor').rules[copyIndex('routingRules')].acceptedProtocols]",
+                                "patternsToMatch": "[parameters('Frontdoor').rules[copyIndex('routingRules')].pattern]",
+                                "routeConfiguration": {
+                                    "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
+                                    "forwardingProtocol": "MatchRequest",
+                                    "backendPool": {
+                                        "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', parameters('Frontdoor').Name, parameters('Frontdoor').rules[copyIndex('routingRules')].backEndPoolname)]"
+                                    },
+                                    "cacheConfiguration": "[if(equals(parameters('Frontdoor').rules[copyIndex('routingRules')].cacheConfiguration, 'none'), json('null'), parameters('Frontdoor').rules[copyIndex('routingRules')].cacheConfiguration)]"
+                                },
+                                "enabledState": "Enabled"
+                            }
+                        }
+                    },
+                    {
+                        "name": "backendPools",
+                        "count": "[length(parameters('Frontdoor').backendPools)]",
+                        "input": {
+                            "name": "[parameters('Frontdoor').backendPools[copyIndex('backendPools')].Name]",
+                            "properties": {
+                                "backends": "[parameters('Frontdoor').backendPools[copyIndex('backendPools')].backends]",
+                                "loadBalancingSettings": {
+                                    "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', parameters('Frontdoor').Name, 'loadBalancingSettingsCommon')]"
+                                },
+                                "healthProbeSettings": {
+                                    "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', parameters('Frontdoor').Name, concat('hps-', parameters('Frontdoor').backendPools[copyIndex('backendPools')].Name))]"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "enabledState": "Enabled"
+            }
+        }
+    ],
+    "outputs": {}
+}

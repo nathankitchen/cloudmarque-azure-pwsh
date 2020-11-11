@@ -1,0 +1,63 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ApiManagementServices": {
+            "type": "Array"
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('Cm_ApiManagementService_', copyIndex('ApiManagementServicesCopy'))]",
+            "resourceGroup": "[parameters('ApiManagementServices')[copyIndex('ApiManagementServicesCopy')].resourceGroupName]",
+            "copy": {
+                "name": "ApiManagementServicesCopy",
+                "count": "[length(parameters('ApiManagementServices'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "apiManagementServiceObject": {
+                        "Value": "[parameters('ApiManagementServices')[copyIndex('ApiManagementServicesCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "apiManagementServiceObject": {
+                            "type": "object"
+                        }
+                    },
+                    "variables": {
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.ApiManagement/service",
+                            "apiVersion": "2019-12-01",
+                            "name": "[parameters('apiManagementServiceObject').generatedName]",
+                            "location": "[parameters('apiManagementServiceObject').region]",
+                            "sku": {
+                                "name": "[parameters('apiManagementServiceObject').sku]",
+                                "capacity": "[parameters('apiManagementServiceObject').skuCount]"
+                            },
+                            "properties": {
+                                "publisherEmail": "[parameters('apiManagementServiceObject').publisherEmail]",
+                                "publisherName": "[parameters('apiManagementServiceObject').publisherName]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
