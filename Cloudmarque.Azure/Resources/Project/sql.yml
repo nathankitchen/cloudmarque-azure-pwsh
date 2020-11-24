@@ -33,7 +33,7 @@ sqlConfig:
     passwordsecretName:
     sku:                                # Database / Elastic Pool SKU
       name:                             # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
-      capacity:                         # In Vcores for GP, BC, HS. In DTU for others.
+      capacity:                         # Provide number of Vcores for GP, BC, HS. Provide value of DTU for others.
     firewallRules:                      # (Optional) Default range: 0.0.0.0 - 255.255.255.255
       - startIpAddress:
         endIpAddress:
@@ -47,4 +47,4 @@ sqlConfig:
     passwordsecretName:
     sku:
       name:                             # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
-      capacity:                         # In Vcores for GP, BC, HS. In DTU for others.
+      capacity:                         # Provide number of Vcores for GP, BC, HS. Provide value of DTU for others.

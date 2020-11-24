@@ -20,7 +20,7 @@
 	     File path for the tag settings file to be converted into a tag settings object.
 
 		.Parameter OmitTags
-		 Parmeter to specify if the cmdlet should handle its own tagging. 
+		 Parmeter to specify if the cmdlet should handle its own tagging.
 
 		.Component
 		 IaaS
@@ -79,11 +79,11 @@
 					"$($_)_LRS"
 				}
 				"standard" {
-					if (!$_.replication) {
+					if (!$replication) {
 						"$($_)_LRS"
 					}
 					else {
-						"$($_)_$($replication)"
+						"$($_)_$replication"
 					}
 				}
 				default {
@@ -208,7 +208,7 @@
 			-TemplateFile "$PSScriptRoot/New-CmAzIaasStorage.json" `
 			-StorageSettingsArray $SettingsObject.storageAccounts `
 			-Force
-		
+
 		if($OmitTags) {
 			Write-Warning "Storage tagging omitted.."
 		}
