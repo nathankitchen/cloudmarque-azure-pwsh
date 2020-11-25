@@ -49,6 +49,7 @@ webSolutions:
             contentDeliveryNetwork:
               name:
               sku:
+              region: westeurope                                        # Cdns use a different location schema than other resources E.g. Instead of EU West its westeurope
               service:
                 publish:
                   cdn:
@@ -87,6 +88,7 @@ webSolutions:
 frontDoor:
   name: ExampleFrontdoor
   sessionAffinity:                                                  # Optional - leave empty or false for disabled
+  region: WestEurope                                                # Sets the region of the containing resource group, frontdoors are always global.
   service:
     dependencies:
       webApplicationFirewallPolicy:                                 # Optional - Provide cm-service tag of frontdoor firewall policy
@@ -114,8 +116,8 @@ frontDoor:
         - /*                                                        # Mandatory for atleast one routing rule
         - /all
       backEndPoolname: mainExampleBackend
-      acceptedProtocols:                                            # Optional: Default is both http and https
-        - https
+      acceptedProtocols:                                            # Optional: Default is both Http and Https
+        - Https
       endpoints:                                                    # Optional - For Domain based routing
         - customdomain1
       enableCaching: true                                           # Optional - Default is false

@@ -177,6 +177,7 @@
 								$webapp.contentDeliveryNetwork = @{
 									Name    = "none";
 									sku     = "standard_microsoft";
+									region  = "Global"
 									service = @{
 										publish = @{
 											cdn      = 'none';
