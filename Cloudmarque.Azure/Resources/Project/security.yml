@@ -1,11 +1,13 @@
 location: UK South
-enableUkNhs: false 
+enableUkNhs: True 
 service:
   dependencies:
-    workspace:
-    
+    workspace: Core-Test-Ws
 securityContacts:
   primary:
-    email:                  # First set of contact details can have an email and phone set.
-    phone: 
-  additionalEmails: []
+    email: security.test1@cloudmarque.com                # First set of contact details can have an email and phone set.
+    phone: +447911111111
+  additionalEmails: [
+    security.test2@cloudmarque.com,
+    security.test3@cloudmarque.com
+  ]

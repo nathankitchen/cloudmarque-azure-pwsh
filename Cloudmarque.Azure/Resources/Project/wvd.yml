@@ -1,17 +1,17 @@
-logAnalyticsTag: log.analyticsnew                                   # (Optional) Uses Cloudmarque service locator.
-azureDeploymentLocation: UK South                                   # (Optional, default: UK South) The location where the deployment logs are stored.
+logAnalyticsTag: log.analyticsnew                                     # (Optional) Uses Cloudmarque service locator.
+azureDeploymentLocation: UK South                                     # (Optional, default: UK South) The location where the deployment logs are stored.
 
 wvdEnvironments:
-- wvdEnvironmentName: wvd-uks                                       # Used to generate the names of the Azure resources.
-  wvdEnvironmentLocation: East US                                   # Currently WVD is only available within the US.
-  workspaceFriendlyName: wvd-uks test                               # Used to display the friendly name to the user on the login portal.
+- wvdEnvironmentName: wvd-uks                                         # Used to generate the names of the Azure resources.
+  wvdEnvironmentLocation: East US                                     # Currently WVD is only available within the US.
+  workspaceFriendlyName: wvd-uks test                                 # Used to display the friendly name to the user on the login portal.
   hostpool:
-    hostpoolFriendlyName: wvd-uks                                   # Used to display the friendly name to the user on the login portal.
+    hostpoolFriendlyName: wvd-uks                                     # Used to display the friendly name to the user on the login portal.
     hostpoolType: Personal                                            # (Optional, Default : Pooled) Options are 'Pooled' or 'Personal'.
     hostpoolBalancing: Automatic                                      # (Optional, Default : DepthFirst) Options for "Pooled" are 'DepthFirst' or 'BreadthFirst', Options for "Personal" are 'Automatic' or 'Direct'.
     hostpoolMaxSessions: 5                                            # (Optional, Default : 10) The number of users allowed on a 'pooled' resource.
   hostVm:
-    hostVmNamePrefix: wvd-uks                                       # Windows computer name, Maximum length of 13, minus 1 for every power of 10 requested machines.
+    hostVmNamePrefix: wvd-uks                                         # Windows computer name, Maximum length of 13, minus 1 for every power of 10 requested machines.
     hostVmLocation: UK South                                          # (Optional, Default : wvdEnvironmentLocation) The location for the WVD hosts to reside, this can be different to the WVD environment.
     hostVmSize: Standard_DS1_v2                                       # (Optional, Default : Standard_DS4_v2) Azure virtual machine size.
     hostVmImageType: CustomImage                                      # (Optional, Default : Gallery) Options are Gallery or CustomImage.
@@ -25,14 +25,13 @@ wvdEnvironments:
     hostVmKeyVaultAdminSecret: DomainPass                             # The name of the secret in the above Keyvault which holds the hostVmAdmin password.
     hostVmCount: 1                                                    # Number of WVD hosts required.
 
-
-- wvdEnvironmentName: wvd-eus                                       # Used to generate the names of the Azure resources.
-  wvdEnvironmentLocation: East US                                   # Currently WVD is only available within the US.
-  workspaceFriendlyName: wvd-eus test                               # Used to display the friendly name to the user on the login portal.
+- wvdEnvironmentName: wvd-eus                                         # Used to generate the names of the Azure resources.
+  wvdEnvironmentLocation: East US                                     # Currently WVD is only available within the US.
+  workspaceFriendlyName: wvd-eus test                                 # Used to display the friendly name to the user on the login portal.
   hostpool:
-    hostpoolFriendlyName: wvd-eus                                   # Used to display the friendly name to the user on the login portal.
+    hostpoolFriendlyName: wvd-eus                                     # Used to display the friendly name to the user on the login portal.
   hostVm:
-    hostVmNamePrefix: wvd-eus                                       # Windows computer name, Maximum length of 13, minus 1 for every power of 10 requested machines.
+    hostVmNamePrefix: wvd-eus                                         # Windows computer name, Maximum length of 13, minus 1 for every power of 10 requested machines.
     hostVmVnet: vnet-eus-mainline                                     # Uses Cloudmarque service locator.
     hostVmSubnet: default                                             # The name of the subnet within the above vnet to join.
     hostVmDomain: ciabtest.internal                                   # The domain to join the hosts to.

@@ -1,11 +1,22 @@
+location: UK South
 service:
   dependencies:
-    automation:
-    logAnalytics:
-location: UK South
+    automation: Core-Test-Auto
+
 windowsUpdateSchedules:
-  - name: WindowsVMUpdate
-    startTime: "2020-10-01T23:59:00"
-    expiryTime: "9999-12-31T23:59:00"
-    frequency: Weekly                     # Monthly, Weekly, Daily
+  - name: WindowsVMUpdateCritical
+    frequency: Daily                      # Monthly, Weekly, Daily
     updateGroup: Critical                 # Critical, CriticalSecurity, Recommended, All
+    location: UK South                    # Optional: defaults to root location is empty
+  - name: WindowsVMUpdateRecommended
+    startTime: "2020-12-04T00:00:00"
+    expiryTime: "9999-12-31T23:59:00"     # Optional set to a year from today if empty
+    frequency: Weekly                     # Monthly, Weekly, Daily
+    updateGroup: Recommended              # Critical, CriticalSecurity, Recommended, All
+    location: UK South                    # Optional: defaults to root location is empty
+  - name: WindowsVMUpdateaLL
+    startTime: "2040-10-01T00:00:00"
+    expiryTime: "3000-12-31T23:59:00"     # Optional set to a year from today if empty
+    frequency: Daily                      # Monthly, Weekly, Daily
+    updateGroup: All                      # Critical, CriticalSecurity, Recommended, All
+    location: UK West                    # Optional: defaults to root location is empty

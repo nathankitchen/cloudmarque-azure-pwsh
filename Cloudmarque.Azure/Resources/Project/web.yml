@@ -1,127 +1,133 @@
-﻿service:
-  dependencies:
-    keyvault:
-    appInsights:                                        # Required to enable app insights on webapp
+service:
   publish:
-    resourceGroup:
-    appServicePlan:
-    webapp:
-    apiManagement:
-    frontDoor:
-    frontdoorResourceGroup:
-    cdn:
-    endpoint:
-    slot:
+    resourceGroup: Web-Test-Rg
+    appServicePlan: Web-Test-Asp
+    webapp: Web-Test-Webapp
+    apiManagement: Web-Test-Api
+    frontDoor: Web-Test-Fd
+    frontdoorResourceGroup: Web-Test-Fd-Rg
+    cdn: Web-test-Cdn
+    endpoint: Web-test-Endpoint
+    slot: Web-Test-Slot
+  dependencies:
+    appInsights: Core-Test-Ai                                 # Required to enable app insights on webapp
+    keyvault: Core-Test-Kv
+    webApplicationFirewallPolicy:                             # Optional - Provide cm-service tag of frontdoor firewall policy
 
 webSolutions:
-  - name:
+- name: Web-Test-Rg1
+  service:
+    publish:
+      resourceGroup:
+  appServicePlans:
+  - name: Web-Test-Asp1
     service:
-          publish:
-            resourceGroup:
-    appServicePlans:
-      - name: serviceplan1
+      publish:
+        appServicePlan:
+    sku: S1
+    region: UK South
+    webapps:
+    - name: Web-Test-Webapp1                                  # Default to app serviceplan region
+      backendpool: Web-Test-Be1
+      enableAppInsight: true                                  # Optional - Default is false. True requires service dependency - appInsights
+      backendHostHeader: true                                 # Optional - Default is true. Required for easy auth scenarios
+      weight:                                                 # Optional
+      priority:                                               # Optional
+      runTime: TOMCAT|9.0-jre8                                # Only Linux supported
+      service:
+        publish:
+          webapp:
+      slots:
+        - name: Production
+          service:
+            publish:
+              slot:
+      contentDeliveryNetwork:
+        name: Web-Test-Cdn1
+        sku: Standard_Microsoft                               # Standard_microsoft
+        region: westeurope                                    # Cdns use a different location schema than other resources E.g. Instead of EU West its westeurope.
         service:
           publish:
-            appServicePlan:
-        sku: S1
-        region: East US
-        webapps:
-          - name: Exampleapp1s
-            region:                                                 # Default to app serviceplan region
-            backendpool: mainExampleBackend
-            enableAppInsight: false                                 # Optional - Default is false. True requires service dependency - appInsights
-            backendHostHeader: false                                # Optional - Default is true. Required for easy auth scenarios
-            weight:                                                 # Optional
-            priority:                                               # Optional
-            runTime: TOMCAT|9.0-jre8                                # Only Linux supported
-            service:
-              publish:
-                webapp:
-            slots:
-              - name: Production
-                service:
-                  publish:
-                    slot:
-              - name: Staging
-                service:
-                  publish:
-                    slot:
-            contentDeliveryNetwork:
-              name:
-              sku:
-              region: westeurope                                        # Cdns use a different location schema than other resources E.g. Instead of EU West its westeurope
-              service:
-                publish:
-                  cdn:
-                  endpoint:
-          - name: Exampleapp2s
-            region:                                                 # Default to app serviceplan region
-            backendpool: mainExampleBackend
-            enableAppInsight: false                                 # Optional - Default is false. True requires service dependency - appInsights
-            backendHostHeader: false                                # Optional - Default is true. Required for easy auth scenarios
-            weight:                                                 # Optional
-            priority:                                               # Optional
-            runTime: TOMCAT|9.0-jre8                                # Only Linux supported
-            service:
-              publish:
-                webapp:
-            slots:
-              - Production
-              - staging
-
+            cdn:
+            endpoint:
+  - name: Web-Test-Asp2
+    service:
+      publish:
+        appServicePlan:
+    sku: F1
+    region: UK South
+    webapps:
+    - name: Web-Test-Webapp2                                  # Default to app serviceplan region
+      runTime: PHP|7.3                                        # Only Linux supported
+      backendpool: Web-Test-Be2
+      enableAppInsight: false                                 # Optional - Default is false. True requires service dependency - appInsights
+      backendHostHeader: false                                # Optional - Default is true. Required for easy auth scenarios
+      weight:                                                 # Optional
+      priority:                                               # Optional
+      service:
+        publish:
+          webapp:
+      slots:
+        - Production
     apiManagementServices:
-      - name:
-        region:                                                     # Optional - Defaults to global location
-        service:
-          publish:
-            apiManagement:
-        publisherName:
-        publisherEmail:
-        sku:
-        skuCount:                                                   # Optional - Default is 1
-        backendpool: APIExampleBackend
-        backendHostHeader: false                                    # Optional - Default is true. Required for easy auth scenarios
-        weight:                                                     # Optional
-        priority:                                                   # Optional
-
+    - name: Web-Test-Api1
+      region: UK South                                        # Optional - Defaults to global location
+      publisherName: Cloudmarque
+      publisherEmail: testAdminEmail@Cloudmarque.com
+      sku: Basic
+      skuCount:                                               # Optional - Default is 1
+      backendpool: Web-Test-Be2
+      backendHostHeader: false                                # Optional - Default is true. Required for easy auth scenarios
+      weight:                                                 # Optional
+      priority:                                               # Optional
+      service:
+        publish:
+          apiManagement:
 
 frontDoor:
-  name: ExampleFrontdoor
-  sessionAffinity:                                                  # Optional - leave empty or false for disabled
-  region: WestEurope                                                # Sets the region of the containing resource group, frontdoors are always global.
-  service:
-    dependencies:
-      webApplicationFirewallPolicy:                                 # Optional - Provide cm-service tag of frontdoor firewall policy
-    publish:
-      frontdoor:
-      frontdoorResourceGroup:
+  name: Web-Test-Fd
+  sessionAffinity: Enabled                                    # Optional - Enabled / Disabled - Disabled is Default
+  region: WestEurope                                          # Sets the region of the containing resource group, frontdoors are always global.
   customDomains:
-    - domainName: customdomain1
-      enableHttps: true                                             # Optional - Default is false
-      service:
-        dependencies:
-          keyvault:                                                 # Optional - leave empty for Azure provided certificate
-          webApplicationFirewallPolicy:                             # Optional - Provide cm-service tag of frontdoor firewall policy
-      customCertificateSecretName:                                  # Optional - leave empty for Azure provided certificate
-      sessionAffinity:                                              # Optional - true / false - False is Default
+
+  - domainName: int02.cloudmarque.com
+    enableHttps: true                                         # Optional - Default is false
+    sessionAffinity: Enabled                                  # Optional - Enabled / Disabled - Disabled is Default
+    customCertificateSecretName:                              # Optional - Leave empty for Azure provided certificate
+    service:
+      dependencies:
+        keyvault:                                             # Optional - Leave empty for Azure provided certificate
+        webApplicationFirewallPolicy:                         # Optional - Provide cm-service tag of frontdoor firewall policy
+
+  - domainName: int03.cloudmarque.com
+    enableHttps: false                                        # Optional - Default is false
+    sessionAffinity: Disabled                                 # Optional - Enabled / Disabled - Disabled is Default
+    customCertificateSecretName:                              # Optional - Leave empty for Azure provided certificate
+    service:
+      dependencies:
+        keyvault:                                             # Optional - Leave empty for Azure provided certificate
+        webApplicationFirewallPolicy:                         # Optional - Provide cm-service tag of frontdoor firewall policy
+
   backEndPools:
-    - name: mainExampleBackend
-      healthCheckPath:                                              # Optional - Default is index.html
-      protocol: Https                                               # Optional - Default is Https
-    - name: APIExampleBackend
-      healthCheckPath: /api.html
+  - name: Web-Test-Be1
+    healthCheckPath: /test1.html                              # Optional : Default is index.html
+    protocol: Http                                            # Optional : Default is Https
+  - name: Web-Test-Be2
+    healthCheckPath:
+    protocol:
   rules:
-    - name: Examplerule1
-      pattern:
-        - /*                                                        # Mandatory for atleast one routing rule
-        - /all
-      backEndPoolname: mainExampleBackend
-      acceptedProtocols:                                            # Optional: Default is both Http and Https
-        - Https
-      endpoints:                                                    # Optional - For Domain based routing
-        - customdomain1
-      enableCaching: true                                           # Optional - Default is false
-    - name: Examplerule2
-      pattern:
-        - /api
-      backEndPoolname: APIExampleBackend
+  - name: Web-Test-Rule1
+    pattern:
+      - /*                                                    # Mandatory for at least one routing rule
+      - /all
+    backEndPoolname: Web-Test-Be1
+    acceptedProtocols:                                        # Optional: Default is both Http and Https
+      - Https
+    endpoints:                                                # Optional - For Domain based routing                                                  # Optional - For Domain based routing
+      - int02.cloudmarque.com
+      - int03.cloudmarque.com
+    enableCaching: true                                       # Optional - Default is false
+  - name: Web-Test-Rule2
+    pattern:
+      - /api
+    backEndPoolname: Web-Test-Be2

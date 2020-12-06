@@ -1,34 +1,22 @@
 location: UK South
-name: coreAccount
+name: Core-Test-Auto1919122
 service:
   dependencies:
-    keyvault:
+    keyvault: Core-Test-Kv
+    workspace: Core-Test-Ws
   publish:
-    resourceGroup:
-    automation:
+    resourceGroup: Core-Test-Auto-Rg
+    automation: Core-Test-Auto
 
 automation:
-  runbook:
-    certificateName:                                              # Optional: Name of Certificate in Key Vault.
-    keyVaultCertificatePasswordSecretName:                        # Optional: Keyvault secret which contains password. This will be used for certificate. This can be overwritten by passing cmdline password
-    service:
-      dependencies:
-        keyvault:
-    sourceControl:
-      keyVaultPersonalAccessToken:                                # Optional: (only if repoURL): keyvault secret name for PAT to access Repo.
-      url:                                                        # Optional: For repo intergration.
-      type:                                                       # Optional: (only if repoURL): github | git | tvfc.
-      branch:                                                     # Optional: Branch to pull from. Not required for tvfc. Default is master.
-      folderPath:                                                 # Optional: (only if repoURL): Path to folder which contains runbook or DSC files.
-  dsc:
-    certificateName:                                              # Optional: Name of Certificate in Key Vault.
-    keyVaultCertificatePasswordSecretName:                        # Optional: Keyvault secret which contains password. This will be used for certificate. This can be overwritten by passing cmdline password
-    service:
-      dependencies:
-        keyvault:
-    sourceControl:
-      keyVaultPersonalAccessToken:                                # Optional (only if repoURL): keyvault secret name for PAT to access Repo.
-      url:                                                        # Optional: For repo intergration.
-      type:                                                       # Optional (only if repoURL): github | git | tvfc.
-      branch:
-      folderPath:
+  certificateName:                                              # Optional: Name of Certificate in Key Vault.
+  certificateSecretName: Core-Test-Auto-Pass1                   # Optional: Keyvault secret which contains password. This will be used for certificate. This can be overwritten by passing cmdline password
+  service:
+    dependencies:
+      keyvault:
+  sourceControl:
+    keyVaultPersonalAccessToken:                                # Optional: (only if repoURL): keyvault secret name for PAT to access Repo.
+    url:                                                        # Optional: For repo intergration.
+    type:                                                       # Optional: (only if repoURL): github | git | tvfc.
+    branch:                                                     # Optional: Branch to pull from. Not required for tvfc. Default is master.
+    folderPath:                                                 # Optional: (only if repoURL): Path to folder which contains runbook or DSC files.

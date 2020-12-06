@@ -2,17 +2,11 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "SqlObjectArray": {
-            "type": "array",
-            "metadata": {
-                "description": "The administrator password of the SQL logical server."
-            }
+        "Servers": {
+            "type": "array"
         },
         "Location": {
-            "type": "string",
-            "metadata": {
-                "description": "Location to deploy database"
-            }
+            "type": "string"
         }
     },
     "variables": {},
@@ -20,10 +14,10 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat('Cm_', parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].data.ServerName, '_', parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].data.family)]",
+            "name": "[concat('Cm_', parameters('Servers')[copyIndex('ServerCopy')].resourceDetails.ServerName, '_', parameters('Servers')[copyIndex('ServerCopy')].resourceDetails.family)]",
             "copy": {
-                "name": "SqlObjectArrayCopy",
-                "count": "[length(parameters('SqlObjectArray'))]"
+                "name": "ServerCopy",
+                "count": "[length(parameters('Servers'))]"
             },
             "properties": {
                 "mode": "Incremental",
@@ -32,7 +26,7 @@
                 },
                 "parameters": {
                     "SqlObject": {
-                        "value": "[parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].data]"
+                        "value": "[parameters('Servers')[copyIndex('ServerCopy')].resourceDetails]"
                     },
                     "Location": {
                         "value": "[parameters('Location')]"
@@ -40,9 +34,9 @@
                     "adminPassword": {
                         "reference": {
                             "keyVault": {
-                                "id": "[parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].administratorLoginPassword.keyVaultid]"
+                                "id": "[parameters('Servers')[copyIndex('ServerCopy')].adminLoginPassword.keyVaultid]"
                             },
-                            "secretName": "[parameters('SqlObjectArray')[copyIndex('SqlObjectArrayCopy')].administratorLoginPassword.secretName]"
+                            "secretName": "[parameters('Servers')[copyIndex('ServerCopy')].adminLoginPassword.secretName]"
                         }
                     }
                 },

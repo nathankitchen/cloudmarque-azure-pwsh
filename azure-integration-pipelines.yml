@@ -1,0 +1,203 @@
+variables: 
+  moduleName: Cloudmarque.Azure
+  environment: Integration
+
+pool:
+  vm-image: windows-latest
+
+stages:
+
+- stage: Core
+  jobs:
+  - job:
+    steps:
+    - task: AzurePowerShell@5
+      inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+          
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)"
+
+          New-CmazCore -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/core.yml" -Verbose
+
+# - stage: Paas
+#   dependsOn: Core
+#   jobs:
+#   - job:
+#     steps:
+#     - task: AzurePowerShell@5
+#       inputs:
+#         azureSubscription: $(ServiceConnection)
+#         workingDirectory: $(Build.SourcesDirectory)
+#         pwsh: true
+#         errorActionPreference: Stop
+#         ScriptType: InlineScript
+#         FailOnStandardError: true
+#         azurePowerShellVersion: 'LatestVersion'
+#         Inline: |
+
+#           ./Initialise-Cloudmarque.ps1 `
+#             -ProjectDirectory "$(Build.SourcesDirectory)" `
+#             -Environment "development" `
+#             -BuildNumber "$(Build.BuildNumber)" `
+#             -RepositoryName "$(Build.Repository.Name)" `
+#             -DefinitionName "$(Build.DefinitionName)" `
+#             -DefinitionVersion "$(Build.DefinitionVersion)"
+
+#           New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/web.yml" -Verbose
+#           New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/webstatic.yml" -Verbose
+#           New-CmazPaasSql -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/sql.yml" -Verbose
+
+- stage: Iaas
+  dependsOn: Core
+  jobs:
+  - job: IaasNetworkVmPatch
+    displayName: Iaas - Networking, Vms, Recovery Vaults and Patching
+    steps:
+    - task: AzurePowerShell@5
+      inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)"
+
+          New-CmAzIaasNetworking `
+              -VnetsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/vnet.csv" `
+              -RouteTablesCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/udr.csv" `
+              -NsgsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/nsg.csv" `
+              -Verbose `
+              -Confirm:$false
+          
+          New-CmAzIaasVm `
+            -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/virtualmachines.yml" `
+            -LocalAdminUsername (ConvertTo-SecureString $(AdminUsername) -AsPlainText -Force) `
+            -LocalAdminPassword (ConvertTo-SecureString $(AdminPassword) -AsPlainText -Force) `
+            -Verbose
+          
+          New-CmAzIaasRecoveryServicesVault `
+            -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/recoveryvault.yml" `
+            -PolicySettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/recoverypolicy.yml" `
+            -Verbose
+
+          Set-CmAzIaasUpdateManagement -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/updateManagement.yml" -Verbose
+
+  # - job: IaasBastionVPN
+  #   dependsOn: IaasNetworkVmPatch
+  #   displayName: Iaas - Bastion Host and VPN Gateway
+  #   steps:
+  #   - task: AzurePowerShell@5
+  #     inputs:
+  #       azureSubscription: $(ServiceConnection)
+  #       workingDirectory: $(Build.SourcesDirectory)
+  #       pwsh: true
+  #       errorActionPreference: Stop
+  #       ScriptType: InlineScript
+  #       FailOnStandardError: true
+  #       azurePowerShellVersion: 'LatestVersion'
+  #       Inline: |
+        
+  #         ./Initialise-Cloudmarque.ps1 `
+  #           -ProjectDirectory "$(Build.SourcesDirectory)" `
+  #           -Environment "$(environment)" `
+  #           -BuildNumber "$(Build.BuildNumber)" `
+  #           -RepositoryName "$(Build.Repository.Name)" `
+  #           -DefinitionName "$(Build.DefinitionName)" `
+  #           -DefinitionVersion "$(Build.DefinitionVersion)"
+        
+  #         New-CmAzIaasBastionHost -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/bastionHost.yml" -Verbose
+  #         New-CmAzIaasVpnGw -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/vpngw.yml" -Verbose
+
+# - stage: Security
+#   dependsOn: Core
+#   jobs:
+#   - job:
+#     steps:
+#     - task: AzurePowerShell@5
+#       inputs:
+#         azureSubscription: $(ServiceConnection)
+#         workingDirectory: $(Build.SourcesDirectory)
+#         pwsh: true
+#         errorActionPreference: Stop
+#         ScriptType: InlineScript
+#         FailOnStandardError: true
+#         azurePowerShellVersion: 'LatestVersion'
+#         Inline: |
+
+#           ./Initialise-Cloudmarque.ps1 `
+#             -ProjectDirectory "$(Build.SourcesDirectory)" `
+#             -Environment "$(environment)" `
+#             -BuildNumber "$(Build.BuildNumber)" `
+#             -RepositoryName "$(Build.Repository.Name)" `
+#             -DefinitionName "$(Build.DefinitionName)" `
+#             -DefinitionVersion "$(Build.DefinitionVersion)"
+        
+#           Set-CmAzSecurityCentre -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/security.yml" -Verbose
+
+# - stage: TearDown
+#   displayName: Tear Down
+#   dependsOn: 
+#   - Iaas
+#   - Paas
+#   - Security
+#   jobs:
+#   - job:
+#     steps:
+#      - task: AzurePowerShell@5
+#        inputs:
+#         azureSubscription: $(ServiceConnection)
+#         workingDirectory: $(Build.SourcesDirectory)
+#         pwsh: true
+#         errorActionPreference: Stop
+#         ScriptType: InlineScript
+#         FailOnStandardError: true
+#         azurePowerShellVersion: 'LatestVersion'
+#         Inline: |
+
+#           ./Initialise-Cloudmarque.ps1 `
+#             -ProjectDirectory "$(Build.SourcesDirectory)" `
+#             -Environment "$(environment)" `
+#             -BuildNumber "$(Build.BuildNumber)" `
+#             -RepositoryName "$(Build.Repository.Name)" `
+#             -DefinitionName "$(Build.DefinitionName)" `
+#             -DefinitionVersion "$(Build.DefinitionVersion)"
+
+#           Get-CmAzService -ServiceKey "cm-core-test-int-tag" -Service "true" -IsResourceGroup | Remove-AzureAzResourceGroup -Verbose -Force
+
+#           Write-Verbose "Resetting Security Centre..."
+#           $securityResources = @("VirtualMachines", "AppServices", "SqlServers", "SqlServerVirtualMachines", "StorageAccounts", "KubernetesService", "ContainerRegistry", "KeyVaults")
+
+#           foreach ($securityResource in $securityResources) {
+#             Set-AzSecurityPricing -Name $securityResource -PricingTier "Free"
+#           }
+
+#           $securityObject = Get-CmAzSettingsFile -Path $SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/security.yml"
+#           $contacts = @($securityObject.securityContacts.primary.email)
+#           $contacts += $securityObject.securityContacts.additionalEmails
+
+#           foreach ($contact in $contacts) {
+#             Remove-AzSecurityContact -Name $contact
+#           }

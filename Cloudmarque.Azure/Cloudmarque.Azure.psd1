@@ -66,6 +66,7 @@ RequiredModules = @(
     @{ ModuleName = 'Az.Resources'; RequiredVersion = '2.5.0'; },
     @{ ModuleName = 'Az.Storage'; RequiredVersion = '2.5.0'; },
     @{ ModuleName = 'Az.Websites'; RequiredVersion = '1.11.0'; },
+    @{ ModuleName = 'GetPassword'; RequiredVersion = '1.0.0.0'; }
     @{ ModuleName = 'Powershell-Yaml'; RequiredVersion = '0.4.2'; })
 
 # Assemblies that must be loaded prior to importing this module

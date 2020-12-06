@@ -51,11 +51,14 @@
                 Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
             }
 
-			$SettingsObject.ResourceGroupName = (Get-CmAzService -Service $SettingsObject.service.dependencies.resourcegroup -isResourceGroup -ThrowIfUnavailable -ThrowIfMultiple).ResourceGroupName
+			$SettingsObject.resourceGroupName = (Get-CmAzService -Service $SettingsObject.service.dependencies.resourcegroup -IsResourceGroup -ThrowIfUnavailable -ThrowIfMultiple).ResourceGroupName
+
+			[System.Collections.ArrayList]$resourcesToBeSet = @()
 
 			foreach ($vpnGw in $SettingsObject.VpnGw) {
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $vpnGw -IsDependency
+				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "resourceGroup" -ResourceServiceContainer $vpnGw -IsDependency
 
 				$vpnGw.VirtualNetworkName = (Get-CmAzService -Service $vpnGw.service.dependencies.vnet -ThrowIfUnavailable -ThrowIfMultiple).name
 
@@ -94,7 +97,7 @@
 					-Name $vpnGw.GatewayName
 
 
-				if ($vpnGw.P2s -or $vpnGw.S2s){
+				if ($vpnGw.P2s -or $vpnGw.S2s) {
 					Write-Verbose "P2s or S2s configuration found. Checking dependencies.."
 					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $vpnGw -IsDependency
 				}
@@ -102,6 +105,7 @@
 				if (!$vpnGw.P2s.VpnAddressPool -or !$vpnGw.service.dependencies.keyvault -or !$vpnGw.P2s.RootCertificateName) {
 
 					Write-Verbose "P2s configuration not found."
+					$vpnGw.P2s = @{}
 					$vpnGw.P2s.VpnAddressPool = ""
 					$vpnGw.P2s.ClientRootCertData = ""
 					$vpnGw.P2s.RootCertificateName = ""
@@ -116,6 +120,7 @@
 					if (!$vpnGw.P2s.ClientRootCertData) {
 
 						Write-Verbose "Certificate Not Found! P2s will not be configured."
+						$vpnGw.P2s = @{}
 						$vpnGw.P2s.VpnAddressPool = ""
 						$vpnGw.P2s.RootCertificateName = ""
 						$vpnGw.P2s.ClientRootCertData = ""
@@ -128,9 +133,11 @@
 				if (!$vpnGw.S2s.ClientSitePublicIP -or !$vpnGw.S2s.CidrBlocks -or !$vpnGw.service.dependencies.keyvault ) {
 
 					Write-Verbose "S2s configuration not found."
+					$vpnGw.S2s = @{}
 					$vpnGw.S2s.CidrBlocks = @()
 					$vpnGw.S2s.ClientSitePublicIP = ""
 					$vpnGw.S2s.SharedKey = ""
+					$vpnGw.S2s.localGatewayName = "none"
 				}
 				else {
 					# This apporach is because Key vault reference cannot be used directly in Arm template because of conflict with copy
@@ -138,14 +145,15 @@
 					$keyVaultService = Get-CmAzService -Service $vpnGw.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 					$vpnGw.S2s.SharedKey = [System.Collections.ArrayList]@()
 					$vpnGw.S2s.SharedKeyObject = (Get-AzKeyVaultSecret -Name $vpnGw.S2s.KeyVaultSecret -VaultName ($keyVaultService.name)).SecretValueText
-					$vpnGw.S2s.SharedKey.add($vpnGw.S2s.SharedKeyObject.ToString()) > $null
-
+					$vpnGw.S2s.SharedKey = $vpnGw.S2s.SharedKeyObject.ToString()
 					if (!$vpnGw.S2s.SharedKey) {
 
 						Write-Verbose "Secret could not be retrieved! S2s configuration will be skipped."
+						$vpnGw.S2s = @{}
 						$vpnGw.S2s.CidrBlocks = @()
 						$vpnGw.S2s.ClientSitePublicIP = ""
 						$vpnGw.S2s.SharedKey = ""
+						$vpnGw.S2s.localGatewayName = "none"
 					}
 					else {
 						Write-Verbose "Secret '$($vpnGw.S2s.KeyVaultSecret)' was found, s2s will be configured."
@@ -154,6 +162,8 @@
 							-Architecture "IaaS" `
 							-Region $SettingsObject.location `
 							-Name $vpnGw.GatewayName
+
+						$resourcesToBeSet += $vpnGw.S2s.localGatewayName
 					}
 				}
 
@@ -169,11 +179,9 @@
 				-VpnGwObject $SettingsObject `
 				-Location $SettingsObject.location `
 				-Force
-
-			[System.Collections.Array]$resourceIds = @()
-			$resourceIds += $SettingsObject.vpnGw.gatewayPublicIpName
-			$resourceIds += $SettingsObject.vpnGw.gatewayName
-			$resourceIds += $SettingsObject.vpnGw.localGatewayName
+			
+			$resourcesToBeSet += $SettingsObject.vpnGw.gatewayPublicIpName
+			$resourcesToBeSet += $SettingsObject.vpnGw.gatewayName
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourceIds
 

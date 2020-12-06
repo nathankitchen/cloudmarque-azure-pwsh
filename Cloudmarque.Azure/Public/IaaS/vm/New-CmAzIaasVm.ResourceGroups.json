@@ -4,9 +4,6 @@
     "parameters": {
         "ResourceGroups": {
             "type": "Array"
-        },
-        "Location": {
-            "type": "String"
         }
     },
     "resources": [
@@ -17,7 +14,7 @@
         "tags": {
             "cm-service": "[parameters('ResourceGroups')[copyIndex('ResourceGroupsCopy')].service.publish.resourceGroup]"
         },
-        "location": "[parameters('Location')]",
+        "location": "[parameters('ResourceGroups')[copyIndex('ResourceGroupsCopy')].location]",
         "copy": {
             "name": "ResourceGroupsCopy",
             "count": "[Length(parameters('ResourceGroups'))]"

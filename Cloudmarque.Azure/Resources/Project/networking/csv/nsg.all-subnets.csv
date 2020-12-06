@@ -1,0 +1,17 @@
+resourceGroupName,nsgName,servicePublish,resourceGroupservicePublish
+Iaas-Test-Hub1-Rg,Iaas-Test-Hub1-Vnet1-Snet-Nsg-dc1,Iaas-Test-Hub1-Vnet1-Snet-Nsg-dc1,Iaas-Test-Hub1-Rg
+Iaas-Test-Hub1-Rg,Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwha1,Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwha1,
+Iaas-Test-Hub1-Rg,Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwman1,Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwman1,
+Iaas-Test-Hub1-Rg,Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwpriv1,Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwpriv1,
+Iaas-Test-Hub1-Rg,Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwpub1,Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwpub1,
+Iaas-Test-Hub1-Rg,Iaas-Test-Hub1-Vnet1-Snet-Nsg-management1,Iaas-Test-Hub1-Vnet1-Snet-Nsg-management1,
+Iaas-Test-Hub2-Rg,Iaas-Test-Hub2-Vnet1-Snet-Nsg-dc1,Iaas-Test-Hub2-Vnet1-Snet-Nsg-dc1,Iaas-Test-Hub2-Rg
+Iaas-Test-Hub2-Rg,Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwha1,Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwha1,
+Iaas-Test-Hub2-Rg,Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwman1,Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwman1,
+Iaas-Test-Hub2-Rg,Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwpriv1,Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwpriv1,
+Iaas-Test-Hub2-Rg,Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwpub1,Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwpub1,
+Iaas-Test-Hub2-Rg,Iaas-Test-Hub2-Vnet1-Snet-Nsg-management1,Iaas-Test-Hub2-Vnet1-Snet-Nsg-management1,
+Iaas-Test-Spoke1-Rg,Iaas-Test-Spoke1-Vnet1-Snet-Nsg-hpcman,Iaas-Test-Spoke1-Vnet1-Snet-Nsg-hpcman,Iaas-Test-Spoke1-Rg
+Iaas-Test-Spoke1-Rg,Iaas-Test-Spoke1-Vnet1-Snet-Nsg-hpcworker,Iaas-Test-Spoke1-Vnet1-Snet-Nsg-hpcworker,
+Iaas-Test-Spoke1-Rg2,Iaas-Test-Spoke1-Vnet2-Snet-Nsg-hpcman,Iaas-Test-Spoke1-Vnet2-Snet-Nsg-hpcman,Iaas-Test-Spoke1-Rg2
+Iaas-Test-Spoke1-Rg2,Iaas-Test-Spoke1-Vnet2-Snet-Nsg-hpcworker,Iaas-Test-Spoke1-Vnet2-Snet-Nsg-hpcworker,

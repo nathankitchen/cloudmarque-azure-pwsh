@@ -12,7 +12,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat('Cm_AppService_', copyIndex('appServiceDetailsCopy'))]",
+            "name": "[parameters('AppServiceDetails')[copyIndex('appServiceDetailsCopy')].name]",
             "resourceGroup": "[parameters('AppServiceDetails')[copyIndex('appServiceDetailsCopy')].resourceGroupName]",
             "copy": {
                 "name": "appServiceDetailsCopy",
@@ -58,7 +58,7 @@
                         {
                             "type": "Microsoft.Resources/Deployments",
                             "apiVersion": "2019-10-01",
-                            "name": "[concat('Cm_webapp_', copyIndex('webAppCopy'))]",
+                            "name": "[parameters('appServiceObject').webapps[copyIndex('webAppCopy')].name]",
                             "resourceGroup": "[resourceGroup().name]",
                             "copy": {
                                 "name": "webAppCopy",
@@ -108,15 +108,15 @@
                                                     "appSettings": [
                                                         {
                                                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                                                            "value": "[if(equals(parameters('webAppObject').applicationInstrumentationKey, 'none'), json('null'), parameters('webAppObject').applicationInstrumentationKey)]"
+                                                            "value": "[parameters('webAppObject').applicationInstrumentationKey]"
                                                         },
                                                         {
                                                             "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
-                                                            "value": "[if(equals(parameters('webAppObject').applicationInstrumentationKey, 'none'), json('null'), concat('InstrumentationKey=', parameters('webAppObject').applicationInstrumentationKey))]"
+                                                            "value": "[parameters('webAppObject').applicationInstrumentationKey]"
                                                         },
                                                         {
                                                             "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
-                                                            "value": "[if(equals(parameters('webAppObject').applicationInstrumentationKey, 'none'), json('null'), '~2')]"
+                                                            "value": "[if(empty(parameters('webAppObject').applicationInstrumentationKey), json('null'), '~2')]"
                                                         }
                                                     ]
                                                 }

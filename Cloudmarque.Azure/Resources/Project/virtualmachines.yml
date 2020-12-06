@@ -1,47 +1,257 @@
 location: UK South
-desiredConfigName:
+dscConfigNode:                                                    # Optional, represents compiled node of a DSC runbook.
 service:
   dependencies:
-    automation:
-    keyvault:
-    vnet:                                               # Optional, providing a keyvault will encrypt all vm disks
+    automation: Core-Test-Auto
+    keyvault: Core-Test-Kv
+    vnet:                                                         # Optional, providing a keyvault will encrypt all vm disks
+    workspace: Core-Test-Ws   
   publish:
-    resourceGroup:
-    vm:
-    nic:
+    resourceGroup: Iaas-Test-Vm-Rg
+    vm: Iaas-Test-Vm
+    nic: Iaas-Test-Nic
 
-diskEncryptionKey:                                                                      
+diskEncryptionKey: Iaas-Test-Key-Enc-Key1
+
 groups:
-  - name:                                               # Leave blank to have the vm collection provision its own resource group
+  - name: Iaas-Test-Vm-Rg1                                        # Leave blank to have the vm collection provision its own resource group
+    location: UK South
     service:
       publish:
-        resourceGroup:
+        resourceGroup: Iaas-Test-Vm-Rg1
     virtualMachines:
-      - name:
-        size: Standard_B2ms
-        updateGroup: critical
-        updateFrequency: tuesday                     
+
+      - name: Iaas-Test-Vm1
+        size: Standard_B1s
+        updateGroup: Critical
+        updateFrequency: Daily
         imageReference:
           publisher: MicrosoftWindowsDesktop
           offer: Windows-10
           sku: rs5-pro
           version: latest
-          location: East US
+          location: UK South
         service:
           publish:
-            vm:
-            nic:
+            vm: Iaas-Test-Vm1
+            nic: Iaas-Test-Nic1
         osDisk:
           osType: Windows
-          diskSizeGB: 127  
-        dataDiskSizes: [10]                             # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+          expandableDiskSizeGB: 127 
+        dataDiskSizes: [32]       			                          # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
         networking:
           service:
             dependencies:
-              vnet:
-          ipAddress:                                    # Leave blank for dynamic ip allocations
-          subnetName: default                           # Subnet belonging to the virtual network
-          
+              vnet: Iaas-Test-Spoke1-Vnet1
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Spoke1-Vnet1-Snet-hpcman          # Subnet belonging to the virtual network
+
+      - name: Iaas-Test-Vm2
+        size: Standard_B1s
+        updateGroup: Recommended
+        updateFrequency: Friday
+        imageReference:
+          publisher: MicrosoftWindowsDesktop
+          offer: Windows-10
+          sku: rs5-pro
+          version: latest
+        service:
+          publish:
+            vm: Iaas-Test-Vm2
+            nic: Iaas-Test-Nic2
+        osDisk:
+          osType: Windows
+          expandableDiskSizeGB: 127  
+        dataDiskSizes: [32, 64]       		                        # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          service:
+            dependencies: 
+              vnet: Iaas-Test-Spoke1-Vnet1
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Spoke1-Vnet1-Snet-hpcman          # Subnet belonging to the virtual network
+
+      - name: Iaas-Test-Vm3
+        size: Standard_B1s
+        updateGroup: Critical
+        updateFrequency: Daily
+        imageReference:
+          publisher: MicrosoftWindowsDesktop
+          offer: Windows-10
+          sku: rs5-pro
+          version: latest
+          location: UK South
+        service:
+          publish:
+            vm: Iaas-Test-Vm3
+            nic: Iaas-Test-Nic3
+        osDisk:
+          osType: Windows
+          expandableDiskSizeGB: 127  
+        dataDiskSizes: [32, 64]                                   # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          service:
+            dependencies: 
+              vnet: Iaas-Test-Spoke1-Vnet1
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Spoke1-Vnet1-Snet-hpcman          # Subnet belonging to the virtual network
+
+      - name: Iaas-Test-Vm4
+        size: Standard_B1s
+        updateGroup: Recommended
+        updateFrequency: Friday
+        imageReference:
+          publisher: MicrosoftWindowsDesktop
+          offer: Windows-10
+          sku: rs5-pro
+          version: latest
+          location: UK South
+        service:
+          publish:
+            vm: Iaas-Test-Vm4
+            nic: Iaas-Test-Nic4
+        osDisk:
+          osType: Windows
+          expandableDiskSizeGB: 127  
+        dataDiskSizes: [64, 64]                                   # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          service:
+            dependencies: 
+              vnet: Iaas-Test-Spoke1-Vnet1
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Spoke1-Vnet1-Snet-hpcman          # Subnet belonging to the virtual network
+
+      - name: Iaas-Test-Vm5
+        size: Standard_B1s
+        updateGroup: Recommended
+        updateFrequency: Friday
+        imageReference:
+          publisher: MicrosoftWindowsDesktop
+          offer: Windows-10
+          sku: rs5-pro
+          version: latest
+          location: UK South
+        service:
+          publish:
+            vm: Iaas-Test-Vm5
+            nic: Iaas-Test-Nic5
+        osDisk:
+          osType: Windows
+          expandableDiskSizeGB: 127  
+        dataDiskSizes: [128]                                      # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          service:
+            dependencies: 
+              vnet: Iaas-Test-Spoke1-Vnet1
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Spoke1-Vnet1-Snet-hpcman          # Subnet belonging to the virtual network
+
+  - name: Iaas-Test-Vm-Rg2                                        # Leave blank to have the vm collection provision its own resource group
+    location: UK West
+    service:
+      publish:
+        resourceGroup: Iaas-Test-Vm-Rg2
+    virtualMachines:
+
+      - name: Iaas-Test-Vm6
+        size: Standard_B1s
+        updateGroup: All
+        updateFrequency: Daily
+        imageReference:
+          publisher: MicrosoftWindowsDesktop
+          offer: Windows-10
+          sku: rs5-pro
+          version: latest
+          location: UK West
+        service:
+          publish:
+            vm: Iaas-Test-Vm6
+            nic: Iaas-Test-Nic6
+        osDisk:
+          osType: Windows
+          expandableDiskSizeGB: 127  
+        dataDiskSizes: [128, 128]                                 # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          service:
+            dependencies: 
+              vnet: Iaas-Test-Spoke1-Vnet2
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Spoke1-Vnet2-Snet-hpcman          # Subnet belonging to the virtual network
+
+      - name: Iaas-Test-Vm7
+        size: Standard_B1s
+        updateGroup: All
+        updateFrequency: Daily
+        imageReference:
+          publisher: MicrosoftWindowsDesktop
+          offer: Windows-10
+          sku: rs5-pro
+          version: latest
+          location: UK West
+        service:
+          publish:
+            vm: Iaas-Test-Vm7
+            nic: Iaas-Test-Nic7
+        osDisk:
+          osType: Windows
+          expandableDiskSizeGB: 127  
+        dataDiskSizes: []                                         # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          service:
+            dependencies: 
+              vnet: Iaas-Test-Spoke1-Vnet2
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Spoke1-Vnet2-Snet-hpcman          # Subnet belonging to the virtual network
+
+      - name: Iaas-Test-Vm8
+        size: Standard_B1s
+        updateGroup: All
+        updateFrequency: Daily
+        imageReference:
+          publisher: MicrosoftWindowsDesktop
+          offer: Windows-10
+          sku: rs5-pro
+          version: latest
+          location: UK West
+        service:
+          publish:
+            vm: Iaas-Test-Vm8
+            nic: Iaas-Test-Nic8
+        osDisk:
+          osType: Windows
+          expandableDiskSizeGB: 127  
+        dataDiskSizes: []                                         # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          service:
+            dependencies: 
+              vnet: Iaas-Test-Spoke1-Vnet2
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Spoke1-Vnet2-Snet-hpcman          # Subnet belonging to the virtual network
+
+      - name: Iaas-Test-Vm9
+        size: Standard_B1s
+        updateGroup: All
+        updateFrequency: Daily
+        imageReference:
+          publisher: MicrosoftWindowsDesktop
+          offer: Windows-10
+          sku: rs5-pro
+          version: latest
+          location: UK West
+        service:
+          publish:
+            vm: Iaas-Test-Vm9
+            nic: Iaas-Test-Nic9
+        osDisk:
+          osType: Windows
+          expandableDiskSizeGB: 127  
+        dataDiskSizes: []                                         # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          service:
+            dependencies: 
+              vnet: Iaas-Test-Spoke1-Vnet2
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Spoke1-Vnet2-Snet-hpcman          # Subnet belonging to the virtual network
+
   #NOTE: To allow disk encryption for Linux, you need to have at least 8gb of ram available and the vm needs to be generation 1.
   #NOTE: Supported Linux distros for disk encryption are listed here https://docs.microsoft.com/en-us/azure/virtual-machines/linux/disk-encryption-overview#supported-vms-and-operating-systems        
   #NOTE: Supported Linux Distros for DSC are listed here https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/dsc-linux

@@ -56,7 +56,7 @@
 			$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable -ThrowIfMultiple
 
 			if (!$SettingsObject.service.dependencies.workspace) {
-				$workspace = @{"Name" = ""; "ResourceId" = ""; "Location" = "" }
+				$workspace = @{ name = $null; resourceId = $null; location = $null }
 			}
 			else {
 				Write-Verbose "Fetching workspace.."
@@ -70,9 +70,7 @@
 				$logRetentionPeriodInDays = $SettingsObject.logRetentionPeriodInDays
 			}
 
-			[system.Collections.ArrayList]$sqlObjectArray = @()
-			[system.Collections.ArrayList]$sqlObjectArraySharedServer = @()
-			[system.Collections.ArrayList]$resourcesToSet = @()
+			[system.Collections.ArrayList]$servers = @()
 			[system.Collections.ArrayList]$UniqueSqlServerNames = @()
 
 			Write-Verbose "Starting to build object for deployment.."
@@ -87,14 +85,17 @@
 					foreach ($database in $_.databases) {
 
 						if ($database -is [string]) {
+							
 							$databaseObject = @{
 								"name" = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Region $SettingsObject.Location -Name $database
 							}
+
 							Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "database" -ResourceServiceContainer $databaseObject
 							$databaseCollection.Add($databaseObject) > $Null
 						}
 
 						if ($database -is [Hashtable]) {
+
 							$database.name = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Region $SettingsObject.Location -Name $database.name
 							Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "database" -ResourceServiceContainer $database
 							$databaseCollection.Add($database) > $Null
@@ -105,6 +106,7 @@
 					$databaseObject = @{
 						"name" = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.serverName;
 					}
+
 					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "database" -ResourceServiceContainer $databaseObject
 					$databaseCollection.Add($databaseObject) > $Null
 				}
@@ -136,7 +138,9 @@
 					mysql {
 						"Microsoft.DBforMySQL"
 					}
-					default { Write-Error "Please provide correct database family name. Choose from azuresql|postgressql|mariadb|mysql" }
+					default { 
+						Write-Error "Please provide correct database family name. Choose from azuresql|postgressql|mariadb|mysql" 
+					}
 				}
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "server" -ResourceServiceContainer $_
@@ -151,17 +155,15 @@
 
 				$elasticPool = "none"
 
-				if (!$_.type) {
-					$_.type = "none"
-				}elseif ($_.type -eq "elasticPool") {
+				if ($_.type -eq "elasticPool") {
 					$elasticPool = 	Get-CmAzResourceName -Resource "AzureSQLElasticPool" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.elasticPoolName
 				}
 
-				$sqlObject = @{
-					"data"                       = @{
+				$server = @{
+					"resourceDetails"                       = @{
 						"family"                = $dbFamily
 						"sharedServer"          = $sharedServer
-						"type"                  = ($_.type).Tolower()
+						"type"                  = ($_.type ?? "").Tolower()
 						"serverName"            = $serverName;
 						"service"				= $_.service;
 						"databases"             = $databaseCollection;
@@ -178,49 +180,29 @@
 						"firewallRules"         = $_.firewallRules
 					};
 
-					"administratorLoginPassword" = @{
+					"adminLoginPassword" = @{
 						"keyVaultid" = $keyVault.resourceId;
 						"secretName" = $_.passwordSecretName
 					}
 				}
 
-				if ($sqlObject.data.sharedServer) {
-					($sqlObjectArraySharedServer).Add($sqlObject) > $Null
-				}
-				else {
-					($sqlObjectArray).Add($sqlObject) > $Null
-				}
+				$servers.Add($server) > $Null
+			}
+			$servers | ForEach-Object {
 
+				New-AzResourceGroupDeployment `
+					-ResourceGroupName $resourceGroup.ResourceGroupName `
+					-TemplateFile "$PSScriptRoot\New-CmAzPaasSql.json" `
+					-Servers $_ `
+					-Location $SettingsObject.Location `
+					-Force
 			}
 
-			$allsqlObjectArray = @($sqlObjectArray, $sqlObjectArraySharedServer)
+			[system.Collections.ArrayList]$resourcesToSet = @()
 
-			$allsqlObjectArray | ForEach-Object {
-
-				if ($_) {
-
-					switch ($_.data.sharedServer[0]) {
-						"true" {
-							$templateType = "Shared"
-						}
-						default {
-							$templateType = "Parent"
-						}
-					}
-
-					New-AzResourceGroupDeployment `
-						-Name "Cm_SQL_$templateType" `
-						-ResourceGroupName $resourceGroup.ResourceGroupName `
-						-TemplateFile "$PSScriptRoot\New-CmAzPaasSql.json" `
-						-SqlObjectArray $_ `
-						-Location $SettingsObject.Location `
-						-Force
-				}
-			}
-
-			$resourcesToSet += ($allsqlObjectArray.data | where-object -Property family -eq 'Microsoft.Sql').databases.name
-			$resourcesToSet += ($allsqlObjectArray.data | where-object -Property type -eq 'elasticPool').elasticPoolProperties.elasticPoolName
-			$resourcesToSet += $allsqlObjectArray.data.serverName
+			$resourcesToSet += ($servers.resourceDetails | where-object -Property family -eq 'Microsoft.Sql').databases.name
+			$resourcesToSet += ($servers.resourceDetails | where-object -Property type -eq 'elasticPool').elasticPoolProperties.elasticPoolName
+			$resourcesToSet += $servers.resourceDetails.serverName
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
 

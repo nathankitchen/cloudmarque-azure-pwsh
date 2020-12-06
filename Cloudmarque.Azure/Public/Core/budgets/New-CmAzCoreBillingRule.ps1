@@ -77,11 +77,15 @@ function New-CmAzCoreBillingRule {
 				elseif (!$budget.thresholds) {
 					Write-Error "Please provide budget thresholds that are greater than 0." -Category InvalidArgument -CategoryTargetName "Budgets.Thresholds"
 				}
-				elseif (!($budget.startDate -Is [DateTime])) {
-					Write-Error "Please ensure the budget start date is a valid date." -Category InvalidArgument -CategoryTargetName "Budgets.StartDate"
+
+				$currentMonth = (Get-Date -Day 1).date
+
+				if (!($budget.startDate -Is [DateTime]) -or $budget.startDate -lt $currentMonth) {
+					$budget.startDate = $currentMonth
 				}
-				elseif (!($budget.endDate -Is [DateTime])) {
-					Write-Error "Please ensure the budget end date is a valid date." -Category InvalidArgument -CategoryTargetName "Budgets.EndDate"
+
+				if (!($budget.endDate -Is [DateTime]) -or $budget.endDate -le $currentMonth) {
+					$budget.endDate = $currentMonth.AddYears(1)
 				}
 
 				Write-Verbose "Generating budget name..."
@@ -119,7 +123,6 @@ function New-CmAzCoreBillingRule {
 			New-AzDeployment `
 				-Location $SettingsObject.location `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreBillingRule.json" `
-				-AccountFlagName "cm-charge" `
 				-Budgets $SettingsObject.budgets
 
 			Write-Verbose "Finished!"

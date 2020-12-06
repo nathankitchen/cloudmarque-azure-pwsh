@@ -18,7 +18,6 @@
             "apiVersion": "2015-10-31",
             "name": "[parameters('AccountName')]",
             "location": "[parameters('Location')]",
-            "dependsOn": [],
             "tags": {
                 "cm-service": "[parameters('AutomationService')]"
             },

@@ -1,29 +1,30 @@
-location: East US
+location: UK South
 service:
   dependencies:
-    resourceGroup:
-    keyvault:
+    resourceGroup: Iaas-Test-Hub1-Rg
+    keyvault: Core-Test-Kv
     vnet:
   publish:
-    publicIp:
-    virtualNetworkGateway:
-    localNetworkGateway:
+    publicIp: Iaas-Test-Pb-Ip 
+    virtualNetworkGateway: Iaas-Test-Vng
+    localNetworkGateway: Iaas-Test-Lng
+
 vpnGw:
-  - gatewayName:
+  - gatewayName: Iaas-Test-Vpn-Gw1
     service:
       dependencies:
-        keyVault:             # Key Vault service tag
-        vnet:
+        keyVault:                                   
+        vnet: Iaas-Test-Hub1-Vnet1
       publish:
         publicIp:
         virtualNetworkGateway:
         localNetworkGateway:
-    sku:
-    gatewaySubnetPrefix:      # Optional: Required only if you dont have GatewaySubnet already in the Vnet.
+    sku: Standard
+    gatewaySubnetPrefix:                                        # Optional: Required only if you dont have GatewaySubnet already in the Vnet.
     p2s:
-      vpnAddressPool:         # VPN IP address pool ex: 172.0.0.0/16
-      rootCertificateName:    # Name of uploaded certificate in Key Vault
+      vpnAddressPool: 172.0.0.0/16                              # VPN IP address pool ex: 172.0.0.0/16
+      rootCertificateName: Automation-Core-Test-Auto1999313     # Name of uploaded certificate in Key Vault
     s2s:
-      keyVaultSecret:         # Name of secret in Key Vault
-      clientSitePublicIP:     # On site VPN Gateway public IP
+      keyVaultSecret: Iaas-Test-Vpn-Scrt                        # Name of secret in Key Vault
+      clientSitePublicIP: 172.0.0.13                            # On site VPN Gateway public IP
       cidrBlocks: []

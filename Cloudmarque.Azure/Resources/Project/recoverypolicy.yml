@@ -1,5 +1,5 @@
 policies:
-- policyName: 7Days # 7 Daily
+- policyName: 7Days                                       # 7 Daily
   timeZone: UTC
   instantRpRetentionRangeInDays: 2
   schedule:
@@ -14,7 +14,7 @@ policies:
         durationType: Days
     retentionPolicyType: LongTermRetentionPolicy
 
-- policyName: 31Days # 31 Daily
+- policyName: 31Days                                        # 31 Daily
   timeZone: UTC
   instantRpRetentionRangeInDays: 2
   schedule:
@@ -29,7 +29,7 @@ policies:
         durationType: Days
     retentionPolicyType: LongTermRetentionPolicy
 
-- policyName: 1Year # 31 Daily, 12 Monthly
+- policyName: 1Year                                         # 31 Daily, 12 Monthly
   timeZone: UTC
   instantRpRetentionRangeInDays: 2
   schedule:
@@ -53,7 +53,7 @@ policies:
         durationType: Months
     retentionPolicyType: LongTermRetentionPolicy
 
-- policyName: 7Years # 31 Daily, 12 Monthly, 7 Yearly
+- policyName: 7Years                                        # 31 Daily, 12 Monthly, 7 Yearly
   timeZone: UTC
   instantRpRetentionRangeInDays: 2
   schedule:

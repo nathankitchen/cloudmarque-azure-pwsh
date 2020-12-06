@@ -109,7 +109,7 @@
 			$global:CMAZ_CTX = @{
 				Environment = $Environment;
 				ProjectRoot = $ProjectRoot;
-				PakageName = $packageName
+				PackageName = $packageName
 				PackageVersion = $packageVersion;
 				BuildId = $BuildId
 				BuildRepoName = $BuildRepoName

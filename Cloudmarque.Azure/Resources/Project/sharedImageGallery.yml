@@ -9,14 +9,13 @@ imageDefinitions:
     publisher:
     offer:
     sku:
-    location:                        #optional
-    osType:                          #optional
-    osState:                         #optional
-    endOfLifeDate:                   #optional
+    location:                        # Optional
+    osType:                          # Optional
+    osState:                         # Optional
+    endOfLifeDate:                   # Optional
     versions:
       - version:
         imageServiceTag:
-        endOfLifeDate:               #optional
-        replicaCount:                #optional
+        endOfLifeDate:               # Optional
+        replicaCount:                # Optional
         targetRegions:
-          - []

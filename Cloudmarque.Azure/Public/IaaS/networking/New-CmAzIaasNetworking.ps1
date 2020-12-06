@@ -130,12 +130,14 @@
 				[System.Collections.ArrayList]$mergedFile = $vnetFile + $nsgFile + $routeTablesFile
 
 				if ($nsgFile) {
+					
 					$nsgCsv = $mergedFile | Group-Object nsgName
 
 					foreach ($nsg in ($nsgCsv | Where-Object { $_.name -like "*.csv" } )) {
 						Write-Verbose "NSG: external CSV detected"
 
 						foreach ($externalNsg in $nsg.Group) {
+							
 							$interimNsgCsvPath = "$(Split-Path $NsgsCsvFile)/$($nsg.Name)"
 							$interimNsgCsvPath | Write-Verbose
 							$interimNsgFile = Import-Csv -Path $interimNsgCsvPath

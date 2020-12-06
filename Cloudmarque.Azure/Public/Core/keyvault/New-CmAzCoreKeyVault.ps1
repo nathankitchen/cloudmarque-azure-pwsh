@@ -76,11 +76,24 @@ function New-CmAzCoreKeyVault {
 				if($null -eq $keyVault.enableSoftDelete) {
 					$keyVault.enableSoftDelete = $true;
 				}
+
+				if($null -eq $keyVault.enablePurgeProtection) {
+					$keyVault.enablePurgeProtection = $true;
+				}
 	
 				if (!$keyVault.softDeleteRetentionInDays) {
 					$keyVault.softDeleteRetentionInDays = 90;
 				}
-	
+
+				Write-Verbose "Generating keyvault passwords.."
+				$keyvault.secrets = [System.Collections.ArrayList]@()
+
+				$secretValues = New-Secret -Count $keyvault.secretNames.count
+
+				For ($i = 0; $i -lt $keyvault.secretNames.count; $i++) {
+					$keyvault.secrets.add(@{ name = $keyvault.secretNames[$i]; value = $secretValues[$i]; }) > $null
+				}
+
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $keyVault
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "activityLogAlert" -ResourceServiceContainer $keyVault
 			}
@@ -112,10 +125,28 @@ function New-CmAzCoreKeyVault {
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreKeyVault.json" `
 				-ResourceGroupName $keyVaultResourceGroup `
 				-ActionGroup $actionGroup `
-				-Keyvaults $SettingsObject.KeyVaults `
-				-ObjectId $objectid `
+				-KeyvaultDetails $SettingsObject `
+				-ObjectId $objectId `
 				-Workspace $workspace `
 				-Force
+
+			Write-Verbose "Generating key encryption keys..."
+			$SettingsObject.keyvaults | ForEach-Object -Parallel {
+
+				$keyvault = $_
+
+				if(!$keyvault.encryptionKeyNames) {
+					$keyvault.encryptionKeyNames = @()
+				}
+
+				$keyvault.encryptionKeyNames | ForEach-Object -Parallel {
+					
+					$keyvault = $using:keyvault
+
+					Add-AzKeyVaultKey -Name $_ -VaultName $keyvault.name -Destination "Software" > $null
+				}
+
+			}
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $keyVaultResourceGroup
 

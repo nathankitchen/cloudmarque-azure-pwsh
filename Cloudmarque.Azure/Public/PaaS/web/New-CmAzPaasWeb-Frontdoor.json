@@ -4,6 +4,9 @@
     "parameters": {
         "Frontdoor": {
             "type": "Object"
+        },
+        "FrontdoorService": {
+            "type": "String"
         }
     },
     "variables": {
@@ -12,8 +15,11 @@
         {
             "apiVersion": "2020-01-01",
             "type": "Microsoft.Network/frontDoors",
-            "name": "[parameters('Frontdoor').Name]",
-            "location": "global",
+            "name": "[parameters('Frontdoor').name]",
+            "location": "Global",
+            "tags": {
+                "cm-service": "[parameters('FrontdoorService')]"
+            },
             "properties": {
                 "loadBalancingSettings": [
                     {
@@ -32,8 +38,8 @@
                             "name": "[parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].frontEndName]",
                             "properties": {
                                 "hostName": "[parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].domainName]",
-                                "sessionAffinityEnabledState": "[if(equals(parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].sessionAffinity,''), 'Disabled', parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].sessionAffinity)]",
-                                "webApplicationFirewallPolicyLink": "[if(equals(parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].webApplicationFirewallPolicyResourceId,'none'), json('null'), parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].webApplicationFirewallPolicyResourceId)]",
+                                "sessionAffinityEnabledState": "[parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].sessionAffinity]",
+                                "webApplicationFirewallPolicyLink": "[parameters('Frontdoor').frontendEndpoints[copyIndex('frontendEndpoints')].webApplicationFirewallPolicyResourceId]",
                                 "resourceState": "Enabled"
                             }
                         }
@@ -65,7 +71,7 @@
                                     "backendPool": {
                                         "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', parameters('Frontdoor').Name, parameters('Frontdoor').rules[copyIndex('routingRules')].backEndPoolname)]"
                                     },
-                                    "cacheConfiguration": "[if(equals(parameters('Frontdoor').rules[copyIndex('routingRules')].cacheConfiguration, 'none'), json('null'), parameters('Frontdoor').rules[copyIndex('routingRules')].cacheConfiguration)]"
+                                    "cacheConfiguration": "[parameters('Frontdoor').rules[copyIndex('routingRules')].cacheConfiguration]"
                                 },
                                 "enabledState": "Enabled"
                             }

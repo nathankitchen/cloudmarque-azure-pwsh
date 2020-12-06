@@ -46,7 +46,6 @@
 
 				if ($PSCmdlet.ShouldProcess($SubscriptionId, "Allow $($partner.name) access to current subscription")) {
 					New-AzDeployment `
-						-Name "Cloudmarque.Azure.Partner" `
 						-TemplateParameterFile "./_templates/azuredeploy.parameters.json" `
 						-TemplateFile "./_templates/azuredeploy.json" `
 						-customerGroupId $CustomerGroupId

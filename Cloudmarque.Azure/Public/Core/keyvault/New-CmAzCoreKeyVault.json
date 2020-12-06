@@ -5,20 +5,14 @@
         "ActionGroup": {
             "type": "Object"
         },
-        "KeyVaults": {
-            "type": "Array"
+        "KeyvaultDetails": {
+            "type": "SecureObject"
         },
         "ObjectID": {
             "type": "String"
         },
         "Workspace": {
             "type": "Object"
-        }
-    },
-    "variables": {
-        "workspaceRetentionPolicy": {
-            "enabled": true,
-            "days": 30
         }
     },
     "resources": [
@@ -29,21 +23,53 @@
             "properties": {
                 "mode": "Incremental",
                 "expressionEvaluationOptions": {
-                    "scope": "outer"
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "ActionGroupInner": {
+                        "value": "[parameters('ActionGroup')]"
+                    },
+                    "KeyvaultInner": {
+                        "Value": "[parameters('KeyvaultDetails').keyVaults[copyIndex('KeyVaultCopy')]]"
+                    },
+                    "ObjectIdInner": {
+                        "Value": "[parameters('ObjectId')]"
+                    },
+                    "WorkspaceInner": {
+                        "value": "[parameters('Workspace')]"
+                    }
                 },
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
+                        "ActionGroupInner": {
+                            "type": "Object"
+                        },
+                        "KeyvaultInner": {
+                            "type": "SecureObject"
+                        },
+                        "ObjectIdInner": {
+                            "type": "String"
+                        },
+                        "WorkspaceInner": {
+                            "type": "Object"
+                        }
+                    },
+                    "variables": {
+                        "workspaceRetentionPolicy": {
+                            "enabled": true,
+                            "days": 30
+                        }
                     },
                     "resources": [
                         {
-                            "name": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].name]",
+                            "name": "[parameters('KeyvaultInner').name]",
                             "type": "Microsoft.KeyVault/Vaults",
                             "apiVersion": "2016-10-01",
-                            "location": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].location]",
+                            "location": "[parameters('KeyvaultInner').location]",
                             "tags": {
-                                "cm-service": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].service.publish.keyvault]"
+                                "cm-service": "[parameters('KeyvaultInner').service.publish.keyvault]"
                             },
                             "properties": {
                                 "enabledForDeployment": true,
@@ -53,7 +79,7 @@
                                 "accessPolicies": [
                                     {
                                         "tenantId": "[subscription().tenantId]",
-                                        "objectId": "[parameters('ObjectID')]",
+                                        "objectId": "[parameters('ObjectIDInner')]",
                                         "permissions": {
                                             "keys": [
                                                 "encrypt",
@@ -113,9 +139,9 @@
                                         }
                                     }
                                 ],
-                                "enableSoftDelete": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].enableSoftDelete]",
-                                "softDeleteRetentionInDays": "[parameters('KeyVaults')[copyIndex('KeyVaultCopy')].softDeleteRetentionInDays]",
-                                "enablePurgeProtection": true,
+                                "enableSoftDelete": "[parameters('KeyvaultInner').enableSoftDelete]",
+                                "softDeleteRetentionInDays": "[parameters('KeyvaultInner').softDeleteRetentionInDays]",
+                                "enablePurgeProtection": "[parameters('KeyvaultInner').enablePurgeProtection]",
                                 "sku": {
                                     "name": "standard",
                                     "family": "A"
@@ -123,15 +149,31 @@
                             }
                         },
                         {
-                            "type": "Microsoft.KeyVault/Vaults/Providers/DiagnosticSettings",
-                            "name": "[concat(parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name, '/Microsoft.Insights/Service')]",
-                            "apiVersion": "2016-09-01",
-                            "location": "[parameters('Keyvaults')[copyIndex('KeyVaultCopy')].location]",
+                            "type": "Microsoft.KeyVault/vaults/secrets",
+                            "apiVersion": "2019-09-01",
+                            "name": "[concat(parameters('KeyvaultInner').name, '/', parameters('KeyvaultInner').secrets[copyIndex('SecretCopy')].name)]",
+                            "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.KeyVault/Vaults/', parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name)]"
+                                "[parameters('KeyvaultInner').name]"
                             ],
                             "properties": {
-                                "workspaceId": "[resourceId(parameters('Workspace').resourceGroupName, 'Microsoft.OperationalInsights/Workspaces', parameters('Workspace').name)]",
+                                "value": "[parameters('KeyvaultInner').secrets[copyIndex('SecretCopy')].value]"
+                            },
+                            "copy": {
+                                "name": "SecretCopy",
+                                "count": "[length(parameters('KeyvaultInner').secrets)]"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.KeyVault/Vaults/Providers/DiagnosticSettings",
+                            "name": "[concat(parameters('KeyvaultInner').name, '/Microsoft.Insights/Service')]",
+                            "apiVersion": "2016-09-01",
+                            "location": "[parameters('KeyvaultInner').location]",
+                            "dependsOn": [
+                                "[parameters('KeyvaultInner').name]"
+                            ],
+                            "properties": {
+                                "workspaceId": "[resourceId(parameters('WorkspaceInner').resourceGroupName, 'Microsoft.OperationalInsights/Workspaces', parameters('WorkspaceInner').name)]",
                                 "logs": [
                                     {
                                         "category": "AuditEvent",
@@ -144,13 +186,13 @@
                         {
                             "type": "Microsoft.Insights/ActivityLogAlerts",
                             "apiVersion": "2017-04-01",
-                            "name": "[concat(parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name, 'Admin')]",
+                            "name": "[concat(parameters('KeyvaultInner').name, 'Admin')]",
                             "location": "Global",
                             "dependsOn": [
-                                "[resourceId('Microsoft.KeyVault/Vaults', parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name)]"
+                                "[parameters('KeyvaultInner').name]"
                             ],
                             "tags": {
-                                "cm-service": "[parameters('Keyvaults')[copyIndex('KeyVaultCopy')].service.publish.activityLogAlert]"
+                                "cm-service": "[parameters('KeyvaultInner').service.publish.activityLogAlert]"
                             },
                             "properties": {
                                 "scopes": [
@@ -164,14 +206,14 @@
                                         },
                                         {
                                             "field": "resourceId",
-                                            "equals": "[resourceId('Microsoft.KeyVault/Vaults', parameters('Keyvaults')[copyIndex('KeyVaultCopy')].name)]"
+                                            "equals": "[resourceId('Microsoft.KeyVault/Vaults', parameters('KeyvaultInner').name)]"
                                         }
                                     ]
                                 },
                                 "actions": {
                                     "actionGroups": [
                                         {
-                                            "actionGroupId": "[resourceId(parameters('ActionGroup').resourceGroupName, 'Microsoft.Insights/ActionGroups', parameters('ActionGroup').name)]",
+                                            "actionGroupId": "[resourceId(parameters('ActionGroupInner').resourceGroupName, 'Microsoft.Insights/ActionGroups', parameters('ActionGroupInner').name)]",
                                             "webhookProperties": {}
                                         }
                                     ]
@@ -184,7 +226,7 @@
             },
             "copy": {
                 "name": "KeyVaultCopy",
-                "count": "[length(parameters('Keyvaults'))]"
+                "count": "[length(parameters('KeyvaultDetails').keyVaults)]"
             }
         }
     ]

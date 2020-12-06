@@ -1,21 +1,36 @@
-resourceGroupName: coreAccount
+resourceGroupName: Core-Test-Kv
 location: UK South
 
 service:
   dependencies:
-    workspace:
-    actiongroup:
+    workspace: Core-Test-Ws
+    actiongroup: Core-Test-Ag2
   publish:
-    resourceGroup:
-    keyvault:
-    activityLogAlert:
+    resourceGroup: Core-Test-Kv-Rg
+    keyvault: Core-Test-Kv
+    activityLogAlert: Core-Test-Kv-Ala
 
 keyVaults:
-- name: coreVault
+- name: Core-Test-Kv
   type: Core
   location: UK South
-  enableSoftDelete: true                           
-  softDeleteRetentionInDays: 10
+  enableSoftDelete: false
+  enablePurgeProtection: true                           
+  softDeleteRetentionInDays: 30
+  secretNames: [
+    "Core-Test-Auto-Pass1",                 # Names of secrets to store in keyvault
+    "Iaas-Test-Vpn-Scrt",
+    "Paas-Test-Sv-Pass1",                     
+    "Paas-Test-Sv-Pass2", 
+    "Paas-Test-Sv-Pass3",
+    "Paas-Test-Sv-Pass4",
+    "Paas-Test-Sv-Pass5"
+  ]
+  encryptionKeyNames: [
+    "Iaas-Test-Key-Enc-Key1",
+    "Iaas-Test-Key-Enc-Key2",
+    "Iaas-Test-Key-Enc-Key3"
+  ]                                             
   service:
     publish:
       keyvault:

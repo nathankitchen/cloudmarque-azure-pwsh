@@ -45,18 +45,6 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Insights/components",
-            "apiVersion": "2014-04-01",
-            "name": "[parameters('AppInsightsName')]",
-            "location": "[resourceGroup().location]",
-            "tags": {
-                "cm-service": "[parameters('ServiceContainer').appInsights]"
-            },
-            "properties": {
-                "ApplicationId": "[parameters('AppInsightsName')]"
-            }
-        },
-        {
             "type": "Microsoft.OperationalInsights/workspaces",
             "apiVersion": "2015-11-01-preview",
             "name": "[parameters('workspaceName')]",
@@ -75,6 +63,21 @@
                     "enableLogAccessUsingOnlyResourcePermissions": true
                 }
             }
+        },
+        {
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2014-04-01",
+            "name": "[parameters('AppInsightsName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "cm-service": "[parameters('ServiceContainer').appInsights]"
+            },
+            "properties": {
+                "ApplicationId": "[parameters('AppInsightsName')]"
+            },
+            "dependsOn": [
+                "[parameters('workspaceName')]"
+            ]
         },
         {
             "name": "[concat(parameters('workspaceName'), '/', subscription().subscriptionId)]",

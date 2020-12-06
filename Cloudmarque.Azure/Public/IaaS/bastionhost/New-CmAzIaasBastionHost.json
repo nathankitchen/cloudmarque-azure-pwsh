@@ -2,85 +2,96 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "BastionHosts": {
+            "type": "Array"
+        },
         "Location": {
             "defaultValue": "[resourceGroup().location]",
-            "type": "String",
-            "metadata": {
-                "description": "location"
-            }
-        },
-        "BastionHostObject": {
-            "type": "Object",
-            "metadata": {
-                "description": "Bastion Host object with all required parameters"
-            }
+            "type": "String"
         },
         "Workspace": {
-            "type": "object",
-            "metadata": {
-                "description": "Hashtable containing workspace name and resourceID"
-            }
+            "type": "Object"
         }
     },
     "resources": [
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName, copyIndex('BastionHostCopy'))]",
+            "name": "[concat(parameters('BastionHosts')[copyIndex('BastionHostCopy')].bastionHostName, copyIndex('BastionHostCopy'))]",
             "copy": {
                 "name": "BastionHostCopy",
-                "count": "[length(parameters('BastionHostObject').bastionHosts)]"
+                "count": "[length(parameters('BastionHosts'))]"
             },
             "properties": {
+                "parameters": {
+                    "BastionHost": {
+                        "Value": "[parameters('BastionHosts')[copyIndex('BastionHostCopy')]]"
+                    },
+                    "Location": {
+                        "Value": "[parameters('Location')]"
+                    },
+                    "Workspace": {
+                        "Value": "[parameters('Workspace')]"
+                    }
+                },
                 "mode": "Incremental",
                 "expressionEvaluationOptions": {
-                    "scope": "outer"
+                    "scope": "inner"
                 },
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
+                        "BastionHost": {
+                            "Type": "SecureObject"
+                        },
+                        "Location": {
+                            "Type": "String"
+                        },
+                        "Workspace": {
+                            "Type": "Object"
+                        }
                     },
                     "resources": [
                         {
-                            "condition": "[not(empty(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostSubnetPrefix))]",
+                            "condition": "[not(empty(parameters('BastionHost').bastionHostSubnetPrefix))]",
                             "type": "Microsoft.Network/virtualNetworks/subnets",
                             "apiVersion": "2019-04-01",
-                            "name": "[concat(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].vnetName, '/', 'AzureBastionSubnet')]",
+                            "name": "[concat(parameters('BastionHost').vnetName, '/', 'AzureBastionSubnet')]",
                             "location": "[parameters('Location')]",
                             "properties": {
-                                "addressPrefix": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostSubnetPrefix]"
+                                "addressPrefix": "[parameters('BastionHost').bastionHostSubnetPrefix]"
                             }
                         },
                         {
                             "apiVersion": "2019-02-01",
                             "type": "Microsoft.Network/publicIpAddresses",
-                            "name": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName]",
+                            "name": "[parameters('BastionHost').bastionPublicIPName]",
                             "location": "[parameters('Location')]",
                             "sku": {
                                 "name": "Standard"
                             },
                             "tags": {
-                                "cm-service": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].service.publish.bastionPublicIP]"
+                                "cm-service": "[parameters('BastionHost').service.publish.bastionPublicIP]"
                             },
                             "properties": {
                                 "publicIPAllocationMethod": "static",
                                 "dnsSettings": {
-                                    "domainNameLabel": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName]",
-                                    "fqdn": "[concat(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName, '.eastus.cloudapp.azure.com')]"
+                                    "domainNameLabel": "[parameters('BastionHost').bastionPublicIPName]",
+                                    "fqdn": "[concat(parameters('BastionHost').bastionPublicIPName, '.eastus.cloudapp.azure.com')]"
                                 }
                             }
                         },
                         {
                             "apiVersion": "2019-12-01",
                             "type": "Microsoft.Network/bastionHosts",
-                            "name": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName]",
+                            "name": "[parameters('BastionHost').bastionHostName]",
                             "location": "[parameters('Location')]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Network/publicIpAddresses', parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName)]"
+                                "[resourceId('Microsoft.Network/publicIpAddresses', parameters('BastionHost').bastionPublicIPName)]"
                             ],
                             "tags": {
-                                "cm-service": "[parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].service.publish.bastion]"
+                                "cm-service": "[parameters('BastionHost').service.publish.bastion]"
                             },
                             "properties": {
                                 "ipConfigurations": [
@@ -88,10 +99,10 @@
                                         "name": "IpConf",
                                         "properties": {
                                             "subnet": {
-                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].vnetName, 'AzureBastionSubnet')]"
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('BastionHost').vnetName, 'AzureBastionSubnet')]"
                                             },
                                             "publicIPAddress": {
-                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionPublicIPName)]"
+                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('BastionHost').bastionPublicIPName)]"
                                             }
                                         }
                                     }
@@ -101,11 +112,11 @@
                         {
                             "condition": "[not(empty(parameters('Workspace').Name))]",
                             "type": "Microsoft.Network/bastionHosts/Providers/DiagnosticSettings",
-                            "name": "[concat(parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName, '/Microsoft.Insights/Service')]",
+                            "name": "[concat(parameters('BastionHost').bastionHostName, '/Microsoft.Insights/Service')]",
                             "apiVersion": "2016-09-01",
                             "location": "[parameters('Workspace').Location]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Network/bastionHosts', parameters('BastionHostObject').bastionHosts[copyIndex('BastionHostCopy')].bastionHostName)]"
+                                "[resourceId('Microsoft.Network/bastionHosts', parameters('BastionHost').bastionHostName)]"
                             ],
                             "properties": {
                                 "WorkspaceId": "[parameters('Workspace').ResourceId]",

@@ -57,7 +57,7 @@
 
 			$azContext = Get-AzContext
 
-			$applicationInstrumentationKey = "none"
+			$applicationInstrumentationKey = ""
 
 			if ($SettingsObject.service.dependencies.appInsights) {
 
@@ -76,12 +76,13 @@
 					$resourceGroupName,
 					$ResourceServiceContainer,
 					$GlobalServiceContainer,
-					$Region
+					$Region,
+					$ServiceKey
 				)
 
 				$generatedResourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $Region -Name $resourceGroupName
 
-				Set-GlobalServiceValues -GlobalServiceContainer $GlobalServiceContainer -ServiceKey "resourceGroup" -ResourceServiceContainer $ResourceServiceContainer > $null
+				Set-GlobalServiceValues -GlobalServiceContainer $GlobalServiceContainer -ServiceKey $serviceKey -ResourceServiceContainer $ResourceServiceContainer > $null
 				New-AzResourceGroup -ResourceGroupName $generatedResourceGroupName -Location $Region -Tag @{ "cm-service" = $ResourceServiceContainer.service.publish.resourceGroup } -Force > $null
 
 				$resourceGroupsToSet.Add($generatedResourceGroupName) > $Null
@@ -113,7 +114,8 @@
 					-ResourceGroupName $webSolution.Name `
 					-GlobalServiceContainer $SettingsObject `
 					-ResourceServiceContainer $webSolution `
-					-Region $region
+					-Region $region `
+					-ServiceKey "resourceGroup"
 
 				if ($webSolution.AppServicePlans) {
 
@@ -145,7 +147,7 @@
 							Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "webapp" -ResourceServiceContainer $webapp
 
 							if (!$webapp.Slots) {
-								$webapp.slotsObject = @(@{ name = "none"; service = @{ publish = @{ slot = 'none' } } })
+								$webapp.slotsObject = @(@{ name = "none"; service = @{ publish = @{ slot = $null } } })
 							}
 							else {
 								$webapp.slotsObject = [System.Collections.ArrayList]@()
@@ -168,20 +170,20 @@
 
 							if ($webapp.contentDeliveryNetwork.Name) {
 
-								$webapp.contentDeliveryNetwork.Name = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Region $webapp.region -Name $webapp.contentDeliveryNetwork.Name
+								$webapp.contentDeliveryNetwork.Name = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Region $webapp.contentDeliveryNetwork.region -Name $webapp.contentDeliveryNetwork.Name
 
 								Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "cdn" -ResourceServiceContainer $webapp.contentDeliveryNetwork
 								Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "endpoint" -ResourceServiceContainer $webapp.contentDeliveryNetwork
 							}
 							else {
 								$webapp.contentDeliveryNetwork = @{
-									Name    = "none";
+									name    = "none";
 									sku     = "standard_microsoft";
-									region  = "Global"
+									region  = "global";
 									service = @{
 										publish = @{
-											cdn      = 'none';
-											endpoint = 'none'
+											cdn      = $null;
+											endpoint = $null
 										}
 									}
 								}
@@ -191,9 +193,8 @@
 								$webapp.applicationInstrumentationKey = $applicationInstrumentationKey
 							}
 							else {
-								$webapp.applicationInstrumentationKey = 'none'
+								$webapp.applicationInstrumentationKey = ""
 							}
-
 						}
 					}
 				}
@@ -273,10 +274,12 @@
 				# Frontdoor configuration:
 				$frontendEndpointObjectArray = [System.Collections.ArrayList]@()
 
-				$frontdoorRG = New-ResourceGroup -resourceGroupName $SettingsObject.frontdoor.name `
+				$frontdoorRG = New-ResourceGroup `
+					-ResourceGroupName $SettingsObject.frontdoor.name `
 					-GlobalServiceContainer $SettingsObject `
 					-ResourceServiceContainer $SettingsObject.frontdoor `
-					-Region $SettingsObject.frontdoor.region
+					-Region $SettingsObject.frontdoor.region `
+					-ServiceKey "frontDoorResourceGroup"
 
 				Write-Verbose "Initiating compilation of Frontends..."
 
@@ -290,9 +293,6 @@
 					$webApplicationFirewallPolicyService = @{
 						id = (Get-CmAzService -Service $SettingsObject.frontdoor.service.dependencies.webApplicationFirewallPolicy -ThrowIfUnavailable -ThrowIfMultiple).ResourceId
 					}
-				}
-				else {
-					$webApplicationFirewallPolicyService = "none"
 				}
 
 				$frontendEndpointObjectMain = @{
@@ -317,9 +317,6 @@
 								id = (Get-CmAzService -Service $_.service.dependencies.webApplicationFirewallPolicy -ThrowIfUnavailable -ThrowIfMultiple).ResourceId
 							}
 						}
-						else {
-							$CustomWebApplicationFirewallPolicyService = 'none'
-						}
 
 						$frontendEndpointObjectCustom = @{
 							frontEndName                           = $_.domainName.replace('.', '-');
@@ -334,7 +331,7 @@
 
 				$SettingsObject.FrontDoor.frontendEndpoints = $frontendEndpointObjectArray
 
-				# Frondoor backendpools configuration
+				# Frontdoor backendpools configuration
 
 				Write-Verbose "Initiating compilation of Backend Pools..."
 
@@ -461,8 +458,8 @@
 							queryParameterStripDirective = "StripNone";
 							dynamicCompression           = "Enabled"
 						}
-					}else {
-						$routingRule.cacheConfiguration = 'none'
+					} else {
+						$routingRule.cacheConfiguration = $null
 					}
 				}
 
@@ -471,6 +468,7 @@
 					-ResourceGroupName $frontdoorRG `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-Frontdoor.json" `
 					-Frontdoor $SettingsObject.frontdoor `
+					-FrontdoorService $SettingsObject.service.publish.frontDoor `
 					-Verbose
 
 				if ($SettingsObject.frontDoor.customDomains.domainName) {

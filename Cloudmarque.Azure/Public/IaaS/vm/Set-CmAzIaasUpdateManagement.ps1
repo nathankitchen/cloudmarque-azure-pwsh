@@ -42,8 +42,10 @@ function Set-CmAzIaasUpdateManagement {
 			Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 		}
 
+		$automationAccount = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -ThrowIfUnavailable -ThrowIfMultiple
+
 		Write-Verbose "Fetching schedule settings.."
-		$scheduleTypeSettingsObject = Get-CmAzSettingsFile -Path "$PSScriptRoot/scheduletypes.yml"
+		$scheduleTypeSettingsObject = Get-CmAzSettingsFile -Path "$PSScriptRoot/scheduleTypes.yml"
 
 		if (!$scheduleTypeSettingsObject) {
 			Write-Error "No valid schedule settings." -Category ObjectNotFound -CategoryTargetName "scheduleTypeSettingsObject"
@@ -65,22 +67,36 @@ function Set-CmAzIaasUpdateManagement {
 				Write-Error "Frequency not recognised." -Category InvalidArgument -CategoryTargetName "frequency"
 			}
 
+			$currentDate = (Get-Date).date.addDays(1)
+
+			if (!($scheduleSetting.startTime -Is [DateTime]) -or $scheduleSetting.startTime -lt $currentDate) {
+				$scheduleSetting.startTime = $currentDate
+			}
+
+			if (!($scheduleSetting.expiryTime -Is [DateTime]) -or $scheduleSetting.expiryTime -le $currentDate) {
+				$scheduleSetting.expiryTime = $currentDate.AddYears(1)
+			}
+
+			if(!$scheduleSetting.location) {
+				$scheduleSetting.location = $SettingsObject.location
+			}
+
 			$schedule = @{
 				"updateTypes" = $updateTypes;
 				"tagValue"    = "";
-
+				"location"    =  $scheduleSetting.location;
 				# Create schedule details in a schema that matches the arm template
 				"details"     = @{
-					"expiryTime" = $scheduleSetting.ExpiryTime;
+					"expiryTime" = $scheduleSetting.expiryTime;
 					"frequency"  = $frequency;
 					"interval"   = 1;
-					"name"       = Get-CmAzResourceName -Resource "AutomationSchedule" -Architecture "Core" -Region $SettingsObject.Location -Name $scheduleSetting.Name;
+					"name"       = Get-CmAzResourceName -Resource "AutomationSchedule" -Architecture "Core" -Region $scheduleSetting.Location -Name $scheduleSetting.Name;
 					"startTime"  = $scheduleSetting.StartTime;
 					"timeZone"   = "Europe/London";
 					"advancedSchedule" = @{
 						"weekDays" 	= @();
 						"monthDays" = @();
-						"monthlyOccurrences" = @()
+						"monthlyOccurrences" = @();
 					};
 				}
 			}
@@ -91,37 +107,26 @@ function Set-CmAzIaasUpdateManagement {
 			Write-Verbose "Update schedule set to $($frequency).."
 			if ($frequency -eq $scheduleTypeSettingsObject.updateFrequencies.weekly) {
 
-				$dayOfWeek = (get-date $scheduleSetting.StartTime).DayOfWeek
+				$dayOfWeek = (Get-Date $scheduleSetting.StartTime).DayOfWeek
 				$frequencyTag = $dayOfWeek
 				$schedule.details.advancedSchedule.weekDays += $dayOfWeek
 			}
 			elseif ($frequency -eq $scheduleTypeSettingsObject.updateFrequencies.monthly) {
 
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 				$schedule.details.advancedSchedule.monthDays += (get-date $scheduleSetting.StartTime).Day
 			}
 
-			$schedule.tagValue = "$($updateGroupTag)-$($frequencyTag)"
+			$schedule.tagValue = "$($updateGroupTag)-$($frequencyTag)".ToLower()
 
-			$schedules.Add($schedule)
+			$schedules.Add($schedule) > $null
 		}
 
-		$automationAccount = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -ThrowIfUnavailable -ThrowIfMultiple
-		$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
-
-		Write-Verbose "Deploying Core Logging Automation..."
+		Write-Verbose "Deploying Schedule Management..."
 		New-AzResourceGroupDeployment `
 			-ResourceGroupName $automationAccount.resourceGroupName `
 			-TemplateFile "$PSScriptRoot/Set-CmAzIaasUpdateManagement.json" `
 			-AutomationAccountName $automationAccount.name `
 			-UpdateSchedules $schedules `
-			-Force
-
-		New-AzResourceGroupDeployment `
-			-ResourceGroupName $workspace.resourceGroupName `
-			-TemplateFile "$PSScriptRoot/Set-CmAzIaasUpdateManagement.LinkedServices.json" `
-			-AutomationAccount $automationAccount `
-			-WorkspaceName $workspace.name `
 			-Force
 	}
 }

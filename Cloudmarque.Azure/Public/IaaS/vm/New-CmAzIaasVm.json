@@ -6,7 +6,7 @@
             "type": "Array"
         },
         "KeyVault": {
-            "type": "Object"
+            "type": "SecureObject"
         },
         "Credentials": {
             "type": "SecureObject"
@@ -54,7 +54,7 @@
                             "type": "Object"
                         },
                         "KeyVault": {
-                            "type": "Object"
+                            "type": "SecureObject"
                         },
                         "Credentials": {
                             "type": "SecureObject"
@@ -76,7 +76,7 @@
                         "windowsDeploymentDetails": {
                             "monitoringAgentExtentionType": "MicrosoftMonitoringAgent",
                             "monitoringAgentExtensionTypeHandlerVersion": "1.0",
-                            "monitoringAgentExtensionName": "MMAExtension",
+                            "monitoringAgentExtensionName": "MicrosoftMonitoringAgent",
                             "dependencyAgentExtensionType": "DependencyAgentWindows",
                             "diskEncryptionExtensionType": "AzureDiskEncryption",
                             "diskEncryptionExtensionTypeHandler": "2.2",
@@ -222,7 +222,7 @@
                                         "osType": "[parameters('VM').osDisk.osType]",
                                         "name": "[parameters('VM').osDisk.name]",
                                         "createOption": "FromImage",
-                                        "diskSizeGB": "[parameters('VM').osDisk.diskSizeGB]"
+                                        "diskSizeGB": "[parameters('VM').osDisk.expandableDiskSizeGB]"
                                     },
                                     "dataDisks": "[parameters('VM').dataDisks]"
                                 },
@@ -292,7 +292,7 @@
                             }
                         },
                         {
-                            "condition": "[variables('isWindows')]",
+                            "condition": "[and(variables('isWindows'), not(empty(parameters('AutomationAccount').nodeConfigurationName)))]",
                             "type": "Microsoft.Compute/virtualMachines/extensions",
                             "name": "[concat(parameters('VM').fullName, '/', variables('deploymentDetails').dscExtensionName)]",
                             "apiVersion": "2018-06-01",

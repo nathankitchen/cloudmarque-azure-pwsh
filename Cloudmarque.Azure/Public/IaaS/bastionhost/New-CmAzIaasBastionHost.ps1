@@ -90,12 +90,14 @@
 				$bastionHostSubnet = Get-AzVirtualNetworkSubnetConfig -Name "AzureBastionSubnet" -VirtualNetwork $vnetObject -ErrorAction SilentlyContinue
 
 				if (!$bastionHostSubnet) {
+					
 					Write-Verbose "AzureBastionSubnet not found!"
 					if (!$bastionHost.bastionHostSubnetPrefix) {
-						Write-Error "Subnet prefix for AzureBastionSubnet subnet not found. Please provide cidr"  -targetobject $bastionHost.bastionHostSubnetPrefix
+						Write-Error "Subnet prefix for AzureBastionSubnet subnet not found, please provide cidr." -targetobject $bastionHost.bastionHostSubnetPrefix
 					}
 				}
 				else {
+					
 					Write-Verbose "AzureBastionSubnet subnet Found!"
 					$bastionHost.bastionHostSubnetPrefix = ""
 				}
@@ -106,12 +108,13 @@
 
 			New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
 				-TemplateFile "$PSScriptRoot\New-CmAzIaasBastionHost.json" `
-				-BastionHostObject $SettingsObject `
+				-BastionHosts $SettingsObject.bastionHosts `
 				-Location $SettingsObject.location `
 				-Workspace $bastionWorkspace `
 				-Force
 
-			$resourcesToSet = $SettingsObject.bastionHosts.bastionPublicIPName
+			$resourcesToSet = @()
+			$resourcesToSet += $SettingsObject.bastionHosts.bastionPublicIPName
 			$resourcesToSet += $SettingsObject.bastionHosts.bastionHostName
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet

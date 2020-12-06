@@ -21,70 +21,85 @@
             "properties": {
                 "mode": "Incremental",
                 "expressionEvaluationOptions": {
-                    "scope": "outer"
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "AutomationAccountName": {
+                        "value": "[parameters('AutomationAccountName')]"
+                    },
+                    "UpdateSchedule": {
+                        "value": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')]]"
+                    }
                 },
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "AutomationAccountName": {
+                            "type": "String"
+                        },
+                        "UpdateSchedule": {
+                            "type": "Object"
+                        }
+                    },
                     "resources": [
                         {
                             "type": "Microsoft.Automation/automationAccounts/schedules",
                             "apiVersion": "2015-10-31",
-                            "name": "[concat(parameters('AutomationAccountName'), '/', parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name)]",
-                            "properties": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details]"
+                            "name": "[concat(parameters('AutomationAccountName'), '/', parameters('UpdateSchedule').details.name)]",
+                            "properties": "[parameters('UpdateSchedule').details]"
                         },
                         {
                             "type": "Microsoft.Automation/automationAccounts/jobSchedules",
                             "apiVersion": "2015-10-31",
-                            "name": "[concat(parameters('AutomationAccountName'), '/', Guid(concat(parameters('AutomationAccountName'), parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name)))]",
+                            "name": "[concat(parameters('AutomationAccountName'), '/', Guid(concat(parameters('AutomationAccountName'), parameters('UpdateSchedule').details.name)))]",
                             "dependsOn": [
-                                "[concat('Microsoft.Automation/automationAccounts/', parameters('AutomationAccountName'), '/schedules/', parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name)]"
+                                "[concat('Microsoft.Automation/automationAccounts/', parameters('AutomationAccountName'), '/schedules/', parameters('UpdateSchedule').details.name)]"
                             ],
                             "properties": {
                                 "runbook": {
                                     "name": "Patch-MicrosoftOMSComputers"
                                 },
                                 "schedule": {
-                                    "name": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details.name]"
+                                    "name": "[parameters('UpdateSchedule').details.name]"
                                 }
                             }
                         },
                         {
                             "type": "Microsoft.Automation/automationAccounts/softwareUpdateConfigurations",
                             "apiVersion": "2017-05-15-preview",
-                            "name": "[concat(parameters('AutomationAccountName'), '/Windows Updates')]",
+                            "name": "[concat(parameters('AutomationAccountName'), '/', parameters('UpdateSchedule').details.name)]",
                             "properties": {
                                 "updateConfiguration": {
                                     "operatingSystem": "Windows",
                                     "windows": {
-                                        "includedUpdateClassifications": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].updateTypes]",
+                                        "includedUpdateClassifications": "[parameters('UpdateSchedule').updateTypes]",
                                         "rebootSetting": "IfRequired"
                                     },
                                     "targets": {
                                         "azureQueries": [
                                             {
                                                 "scope": [
-                                                    "[concat(subscription().Id)]"
+                                                    "[subscription().Id]"
                                                 ],
                                                 "tagSettings": {
                                                     "tags": {
                                                         "cm-update": [
-                                                            "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].tagValue]"
+                                                            "[parameters('UpdateSchedule').tagValue]"
                                                         ]
                                                     },
                                                     "filterOperator": "Any"
                                                 },
                                                 "locations": [
-                                                    "[resourceGroup().location]"
+                                                    "[parameters('UpdateSchedule').location]"
                                                 ]
                                             }
                                         ]
                                     },
-                                    "duration": "PT2H"
+                                    "duration": "PT6H"
                                 },
-                                "tasks": {
-                                },
-                                "scheduleInfo": "[parameters('UpdateSchedules')[copyIndex('ScheduleCopy')].details]"
+                                "tasks": {},
+                                "scheduleInfo": "[parameters('UpdateSchedule').details]"
                             }
                         }
                     ]

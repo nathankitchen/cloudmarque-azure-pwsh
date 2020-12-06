@@ -1,0 +1,39 @@
+resourceGroupName: Iaas-Test-Rec-Rg
+location: UK South
+service:
+  dependencies:
+    workspace: Core-Test-Ws
+  publish:
+    resourceGroup: Iaas-Test-Rec-Rg
+    recoveryVault: Iaas-Test-Rec-Vault1
+recoveryServicesVaults:
+- name: Iaas-Test-Rec-Vault1
+  backupLevel: Standard
+  location: UK South
+  service:
+    publish:
+      recoveryVault: Iaas-Test-Rec-Vault2
+- name: Iaas-Test-Rec-Vault2
+  backupLevel: Standard
+  location: UK South
+  service:
+    publish:
+      recoveryVault: Iaas-Test-Rec-Vault3
+- name: Iaas-Test-Rec-Vault3
+  backupLevel: Standard
+  location: UK West
+  service:
+    publish:
+      recoveryVault:
+- name: Iaas-Test-Rec-Vault4
+  backupLevel: Standard
+  location: UK South
+  service:
+    publish:
+      recoveryVault: Iaas-Test-Rec-Vault4
+- name: Iaas-Test-Rec-Vault5
+  backupLevel: Standard
+  location: UK West
+  service:
+    publish:
+      recoveryVault: Iaas-Test-Rec-Vault5

@@ -1,21 +1,102 @@
-name: testKeyvaultDeploy15
-location: UK west
+name: coretestmonitor
+location: UK South
 advisorLowCPUThresholdPercentage: 5     # Can be set to 0, 5, 10, 15 or 20
 service:
   publish:
-    activityLogAlert:
-    appInsights:
-    solution:
-    storage:
-    workspace:
-    monitoringResourceGroup:
-    actionGroup:
+    activityLogAlert: Core-Test-Monitor-Ala
+    appInsights: Core-Test-Ai
+    solution: Core-Test-Sol
+    storage: Core-Test-Monitor-St
+    workspace: Core-Test-Ws
+    monitoringResourceGroup: Core-Test-Monitor-Rg
+    actionGroup: Core-Test-Ag1
 actionGroups:
-- name: DefaultActionGroup
-  shortname: DAG
+- name: Core-Test-Ag1
+  shortname: CTA1
   service:
     publish:
-      actionGroup:
+      actionGroup: Core-Test-Ag1
+  armRoles:
+  emails: 
+  - emailAddress: testActionGroup1@Cloudmarque.com
+  functions:
+  itsm:
+  logicApps:
+  notifications:
+  runbooks:
+  sms:
+  voice:
+- name: Core-Test-Ag2
+  shortname: CTA2
+  service:
+    publish:
+      actionGroup: Core-Test-Ag2
+  armRoles:
+  emails:
+  functions:
+  - functionAppResourceId: Core-Test-Func-Res-Id
+    httpTriggerUrl: https://cloudmarqueTest.com
+    functionName: Core-Test-Func-Name
+  itsm:
+  logicApps:
+  notifications:
+  runbooks:
+  sms:
+  voice:
+  webhooks:
+- name: Core-Test-Ag3
+  shortname: CTA3
+  service:
+    publish:
+      actionGroup: Core-Test-Ag3
+  armRoles:
+  emails:
+  functions:
+  itsm:                      
+  logicApps:
+  notifications:
+  runbooks:
+  sms:
+  voice:
+  webhooks:
+- name: Core-Test-Ag4
+  shortname: CTA4
+  service:
+    publish:
+      actionGroup: Core-Test-Ag4
+  armRoles:
+  emails:
+  functions:
+  itsm:
+  logicApps:
+  - resourceId: Core-Test-Logic-ResId
+    callbackUrl: https://CoreTestLogicCbUrl
+  notifications:
+  runbooks:
+  sms:
+  voice:
+  webhooks:
+- name: Core-Test-Ag5
+  shortname: CTA5
+  service:
+    publish:
+      actionGroup: Core-Test-Ag5
+  armRoles:
+  emails:
+  functions:
+  itsm:
+  logicApps:
+  notifications:
+  - emailAddress: testActionGroup2@Cloudmarque.com
+  runbooks:
+  sms:
+  voice:
+  webhooks:
+- name: Core-Test-Ag6
+  shortname: CTA6
+  service:
+    publish:
+      actionGroup: Core-Test-Ag6
   armRoles:
   emails:
   functions:
@@ -26,6 +107,7 @@ actionGroups:
   sms:
   voice:
   webhooks:
+  - serviceUri: https://CoreTestWbSvUri
 
 # ** EXAMPLE ACTION GROUP **
 # - name: namevalue

@@ -41,7 +41,7 @@
         {
             "type": "Microsoft.Security/securityContacts",
             "apiVersion": "2017-08-01-preview",
-            "name": "default1",
+            "name": "[parameters('SecurityContacts').primary.email]",
             "properties": {
                 "email": "[parameters('SecurityContacts').primary.email]",
                 "phone": "[parameters('SecurityContacts').primary.phone]",
@@ -52,7 +52,7 @@
         {
             "type": "Microsoft.Security/securityContacts",
             "apiVersion": "2017-08-01-preview",
-            "name": "[concat('default', add(copyIndex('SecurityContactsCopy'), 2))]",
+            "name": "[parameters('SecurityContacts').additionalEmails[copyIndex('SecurityContactsCopy')]]",
             "properties": {
                 "email": "[parameters('SecurityContacts').additionalEmails[copyIndex('SecurityContactsCopy')]]",
                 "alertNotifications": "On",

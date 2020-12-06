@@ -31,18 +31,8 @@
 		.Example
 		 New-CmAzPaaSWebStatic -SettingsObject $settings
 
-		 Creates a new static website using settings from the specified configuration data, which
-		 must match the format of the documented YML file.
-
 		.Example
 		 /mysite/paas.web.static.mysite.yml
-
-		 # The input file below sets up the static web properties
-		 name: mywebsite
-		 location: UK South
-		 redirectUrl: https://www.mywebsite.com
-		 customDomains:
-		 - www.mywebsite.com
 	#>
 
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]

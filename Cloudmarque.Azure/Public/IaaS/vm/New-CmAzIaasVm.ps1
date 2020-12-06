@@ -76,7 +76,7 @@
 				Write-Error "Please provide a valid keyvault tag." -Category InvalidArgument -CategoryTargetName "KeyVault.Tag"
 			}
 
-			$keyVaultService = Get-CmAzService -Service $SettingsObject.service.dependencies.keyvault -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
+			$keyVaultService = Get-CmAzService -Service $SettingsObject.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 
 			$keyVault = Get-AzKeyVault -Name $keyVaultService.name
 
@@ -96,7 +96,7 @@
 				VaultUri            = $keyVault.vaultUri
 			}
 
-			$automationAccount = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
+			$automationAccount = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -ThrowIfUnavailable -ThrowIfMultiple
 
 			$automationAccountRegistration = Get-AzAutomationRegistrationInfo `
 				-ResourceGroupName $automationAccount.resourceGroupName `
@@ -111,7 +111,7 @@
 			$automationAccount.primaryKey = $automationAccountRegistration.primaryKey
 			$automationAccount.nodeConfigurationName = $SettingsObject.desiredConfigName
 
-			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
+			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
 
 			$allResourceGroups = @()
 			$allVirtualMachines = @()
@@ -124,23 +124,31 @@
 					Write-Error "Please provide a valid resource group name." -Category InvalidArgument -CategoryTargetName "Groups.VirtualMachines.VirtualNetworkTag"
 				}
 
-				$resourceGroup.name = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Region $SettingsObject.location -Name $resourceGroup.name
+				if(!$resourceGroup.location) {
+					$resourceGroup.location = $SettingsObject.location
+				}
+
+				$resourceGroup.name = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Region $resourceGroup.location -Name $resourceGroup.name
 
 				foreach ($virtualMachine in $resourceGroup.virtualMachines) {
+
+					if(!$virtualMachine.location) {
+						$virtualMachine.location = $SettingsObject.location
+					}
 
 					$virtualMachine.resourceGroupName = $resourceGroup.name
 
 					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $virtualMachine.networking -IsDependency
 
-					$virtualNetwork = Get-CmAzService -Service $virtualMachine.networking.service.dependencies.vnet -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple 
+					$virtualNetwork = Get-CmAzService -Service $virtualMachine.networking.service.dependencies.vnet -Region $virtualMachine.location -ThrowIfUnavailable -ThrowIfMultiple 
 
 					$virtualMachine.networking.virtualNetworkId = $virtualNetwork.resourceId
 
 					Write-Verbose "Generating standardised resource names..."
-					$virtualMachine.computerName = Get-CmAzResourceName -Resource "ComputerName" -Architecture "Core" -Region $SettingsObject.location -Name $virtualMachine.name -MaxLength 15
-					$virtualMachine.nicName = Get-CmAzResourceName -Resource "NetworkInterfaceCard" -Architecture "IaaS" -Region $SettingsObject.location -Name $virtualMachine.name
-					$virtualMachine.osDisk.Name = Get-CmAzResourceName -Resource "OSDisk" -Architecture "IaaS" -Region $SettingsObject.location -Name $virtualMachine.name
-					$virtualMachine.fullName = Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "IaaS" -Region $SettingsObject.location -Name $virtualMachine.name
+					$virtualMachine.computerName = Get-CmAzResourceName -Resource "ComputerName" -Architecture "Core" -Region $virtualMachine.location -Name $virtualMachine.name -MaxLength 15
+					$virtualMachine.nicName = Get-CmAzResourceName -Resource "NetworkInterfaceCard" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.name
+					$virtualMachine.osDisk.Name = Get-CmAzResourceName -Resource "OSDisk" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.name
+					$virtualMachine.fullName = Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.name
 
 					Write-Verbose "Building data disks..."
 					$virtualMachine.DataDisks = @()
@@ -148,7 +156,7 @@
 					for ($i = 0; $i -lt $virtualMachine.dataDiskSizes.count; $i++) {
 
 						$virtualMachine.dataDisks += @{
-							"Name"         = Get-CmAzResourceName -Resource "DataDisk" -Architecture "IaaS" -Region $SettingsObject.location -Name "$($virtualMachine.name)$($i + 1)";
+							"Name"         = Get-CmAzResourceName -Resource "DataDisk" -Architecture "IaaS" -Region $virtualMachine.location -Name "$($virtualMachine.name)$($i + 1)";
 							"Lun"          = $i + 1;
 							"CreateOption" = "Empty";
 							"DiskSizeGB"   = $virtualMachine.dataDiskSizes[$i]
@@ -158,7 +166,7 @@
 					Write-Verbose "Building update tag.."
 					if ($virtualMachine.updateGroup -and $virtualMachine.updateFrequency) {
 
-						$scheduleSettings = Get-CmAzSettingsFile -Path "$PSScriptRoot/scheduletypes.yml"
+						$scheduleSettings = Get-CmAzSettingsFile -Path "$PSScriptRoot/scheduleTypes.yml"
 
 						$inValidScheduleSettings =
 							!$scheduleSettings -or
@@ -169,7 +177,10 @@
 							Write-Error "No valid schedule settings." -Category ObjectNotFound -CategoryTargetName "scheduleTypeSettingsObject"
 						}
 
-						$virtualMachine.updateTag = "$($virtualMachine.updateGroup)-$($virtualMachine.updateFrequency)"
+						$virtualMachine.updateTag = "$($virtualMachine.updateGroup)-$($virtualMachine.updateFrequency)".ToLower()
+					}
+					else {
+						$virtualMachine.updateTag = ""
 					}
 
 					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vm" -ResourceServiceContainer $virtualMachine
@@ -190,9 +201,8 @@
 			else {
 				New-AzDeployment `
 					-TemplateFile "$PSScriptRoot\New-CmAzIaasVm.ResourceGroups.json" `
-					-LocationFromTemplate $SettingsObject.location `
-					-Location $SettingsObject.location `
-					-ResourceGroups $allResourceGroups
+					-ResourceGroups $allResourceGroups `
+					-Location $SettingsObject.location
 
 				# Cross resource group deployments for VMs appear to still to require the use of New-AzResourceGroupDeployment, instead of subscription level deployment
 				# through New-AzDeployment, which doesn't seem right.

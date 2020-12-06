@@ -2,8 +2,8 @@ resourceIds: []                         # Leave blank to apply tags to all resou
 resourceGroupIds: []                    # Leave blank if specific resource ids are provided
 tags:
   mandatory:
-    cm-owner: s                         # Required - Owner name and email
-    cm-charge: s                        # Required - Cost code
-    cm-apps:  s                         # Required - App name
+    cm-owner: Tag-Test-Owner            # Required - Owner name and email
+    cm-charge: Core-Test-An3            # Required - Cost code
+    cm-apps:  Tag-Test-Apps             # Required - App name
   custom:
-    test: s                             # Optional - Set your own custom tag keys and values here
+    cm-core-test-int-tag: "true"        # Optional

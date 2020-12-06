@@ -1,19 +1,19 @@
-location:
+location: UK West
 service:
   dependencies:
-    resourceGroup:
-    workspace:
+    resourceGroup: Iaas-Test-Hub2-Rg
+    workspace: Core-Test-Ws
     vnet:
   publish:
-    bastion:
-    bastionPublicIP:
+    bastion: Iaas-Test-Bast
+    bastionPublicIP: Iaas-Test-Bast
 
 bastionHosts:
-- bastionHostName:
-  bastionHostSubnetPrefix:      # Optional if bastion host subnet 'AzureBastionHost' doesnt exist already.
+- bastionHostName: Iaas-Test-Bast1
+  bastionHostSubnetPrefix:                        # Optional if bastion host subnet 'AzureBastionSubnet' doesnt exist already.
   service:
     dependencies:
-      vnet:
+      vnet: Iaas-Test-Hub2-Vnet1
     publish:
       bastion:
       bastionPublicIP:

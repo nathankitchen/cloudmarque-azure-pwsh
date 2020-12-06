@@ -1,18 +1,19 @@
 regions:
+- name: Global
+  shortname: gbl
 - name: EU North
-  aliases: ["test"]
+  shortname: eun
+- name: NorthEurope
   shortname: eun
 - name: EU West
   shortname: euw
+- name: WestEurope
+  shortname: euw 
 - name: UK South
   shortname: uks
-- name: uksouth
+- name: UKSouth
   shortname: uks
 - name: UK West
   shortname: ukw
-- name: East US
-  shortname: eus
-- name: SouthCentral US
-  shortname: sus
-- name: West US
-  shortname: wus
+- name: UKWest
+  shortname: ukw
