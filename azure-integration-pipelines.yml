@@ -194,7 +194,7 @@ stages:
 #             Set-AzSecurityPricing -Name $securityResource -PricingTier "Free"
 #           }
 
-#           $securityObject = Get-CmAzSettingsFile -Path $SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/security.yml"
+#           $securityObject = Get-CmAzSettingsFile -Path "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/security.yml"
 #           $contacts = @($securityObject.securityContacts.primary.email)
 #           $contacts += $securityObject.securityContacts.additionalEmails
 
