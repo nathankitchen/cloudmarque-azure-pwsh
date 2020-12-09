@@ -42,7 +42,25 @@ function Set-CmAzIaasUpdateManagement {
 			Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 		}
 
+		Write-Verbose "Removing pre-existing Automation JobSchedules..."
 		$automationAccount = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -ThrowIfUnavailable -ThrowIfMultiple
+
+		$existingJobSchedules = Get-AzAutomationScheduledRunbook `
+			-ResourceGroupName $automationAccount.resourceGroupName `
+			–AutomationAccountName $automationAccount.name `
+			-RunbookName "Patch-MicrosoftOMSComputers"
+		
+		if ($existingJobSchedules) {
+			
+			ForEach ($existingJobSchedule in $existingJobSchedules) {
+			  
+			  Unregister-AzAutomationScheduledRunbook `
+				  -JobScheduleId $existingJobSchedule.JobScheduleId `
+				  -ResourceGroupName $automationAccount.resourceGroupName `
+				  –AutomationAccountName $automationAccount.name `
+				  -Force
+			}
+		}
 
 		Write-Verbose "Fetching schedule settings.."
 		$scheduleTypeSettingsObject = Get-CmAzSettingsFile -Path "$PSScriptRoot/scheduleTypes.yml"
