@@ -91,7 +91,7 @@ FunctionsToExport = 'Clear-CmAzContext', 'Get-CmAzContext', 'Get-CmAzResourceNam
                 'New-CmAzCore', 'New-CmAzCoreAutomation',
                 'Set-CmAzCoreAutomationDeleteResource', 'New-CmAzCoreBillingRule',
                 'New-CmAzCoreKeyVault', 'New-CmAzCoreMonitor',
-                'New-CmAzRecoveryServicesVault', 'Set-CmAzCoreTag',
+                'New-CmAzRecoveryServicesVault', 'Set-CmAzTag',
                 'New-CmAzIaasBastionHost', 'New-CmAzIaasNetworking', 'New-CmAzIaasVm',
                 'Set-CmAzIaasUpdateManagement', 'New-CmAzIaasVpnGw',
                 'New-CmAzIaaSWVD', 'New-CmAzPaasSql', 'New-CmAzPaasWeb',

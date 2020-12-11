@@ -1,4 +1,4 @@
-﻿function Set-CmAzCoreTag {
+﻿function Set-CmAzTag {
 
 	<#
 		.Synopsis
@@ -17,10 +17,10 @@
 		 Core
 
 		.Example
-		 Set-CmAzCoreTag -SettingsFile "c:/directory/settingsFile.yml"
+		 Set-CmAzTag -SettingsFile "c:/directory/settingsFile.yml"
 
 		.Example
-		 Set-CmAzCoreTag -SettingsObject $settings
+		 Set-CmAzTag -SettingsObject $settings
 	#>
 
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
@@ -87,6 +87,9 @@
 
 				$allTags += $SettingsObject.Tags.Custom
 			}
+
+			$SettingsObject.ResourceIds = $SettingsObject.ResourceIds | Where-Object { $_ }
+			$SettingsObject.ResourceGroupIds = $SettingsObject.ResourceGroupIds | Where-Object { $_ }
 
 			$resources = @()
 
@@ -157,7 +160,7 @@
 
 				$resource = $_
 
-				. "$using:PSScriptRoot/../../../Private/Utility/Merge-Hashtables.ps1"
+				. "$using:PSScriptRoot/../../Private/Utility/Merge-Hashtables.ps1"
 
 				if($resource.tags) {
 					$tagsToSet = Merge-HashTables -HashtableToFilter $resource.tags -HashtableToAdd $tagsToSet

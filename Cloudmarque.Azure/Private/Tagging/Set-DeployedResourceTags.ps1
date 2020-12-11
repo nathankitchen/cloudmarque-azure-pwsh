@@ -31,5 +31,5 @@ function Set-DeployedResourceTags() {
     }
 
     Write-Verbose "Setting tagging details for deployed resources..."
-    Set-CmAzCoreTag -SettingsObject $SettingsObject > $null
+    Set-CmAzTag -SettingsObject $SettingsObject > $null
 }
