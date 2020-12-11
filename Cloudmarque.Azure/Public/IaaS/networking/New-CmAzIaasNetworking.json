@@ -96,6 +96,7 @@
                                 "addressSpace": {
                                     "addressPrefixes": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].addressSpace]"
                                 },
+                                "dhcpOptions": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].dnsServers)), json(concat('{\"dnsServers\": [', replace(replace(string(parameters('VnetArmObject')[copyIndex('vnetCopy')].dnsServers), '[', ''), ']', ''), ']}')), json('null'))]",
                                 "copy": [
                                     {
                                         "name": "subnets",

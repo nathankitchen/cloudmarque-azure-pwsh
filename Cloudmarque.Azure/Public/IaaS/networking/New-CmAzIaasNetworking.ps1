@@ -130,14 +130,14 @@
 				[System.Collections.ArrayList]$mergedFile = $vnetFile + $nsgFile + $routeTablesFile
 
 				if ($nsgFile) {
-					
+
 					$nsgCsv = $mergedFile | Group-Object nsgName
 
 					foreach ($nsg in ($nsgCsv | Where-Object { $_.name -like "*.csv" } )) {
 						Write-Verbose "NSG: external CSV detected"
 
 						foreach ($externalNsg in $nsg.Group) {
-							
+
 							$interimNsgCsvPath = "$(Split-Path $NsgsCsvFile)/$($nsg.Name)"
 							$interimNsgCsvPath | Write-Verbose
 							$interimNsgFile = Import-Csv -Path $interimNsgCsvPath
@@ -205,28 +205,41 @@
 						$subnetObjectList.Add($subnetObject) > $Null
 					}
 
-					if ($vnetGroup.addressSpace.count -gt 1) {
-						$addressSpace = $vnetGroup.addressSpace[0].ToString().split(',')
+					if ($vnetGroup.addressSpace -is [array]) {
+						$addressSpace = $vnetGroup.addressSpace[0].ToString().split('|')
 					}
 					else {
-						$addressSpace = $vnetGroup.addressSpace.ToString().split(',')
+						$addressSpace = $vnetGroup.addressSpace.ToString().split('|')
 					}
 
-					if ($vnetGroup.location.count -gt 1) {
+					if ($vnetGroup.dnsServers -and $vnetGroup.dnsServers -ne '') {
+
+						if ($vnetGroup.dnsServers -is [array]) {
+							$dnsServers = $vnetGroup.dnsServers[0].ToString().split('|')
+						}
+						else {
+							$dnsServers = $vnetGroup.dnsServers.ToString().split('|')
+						}
+					}
+					else {
+						$dnsServers = ""
+					}
+
+					if ($vnetGroup.location -is [array]) {
 						$location = $vnetGroup.location[0]
 					}
 					else {
 						$location = $vnetGroup.location
 					}
 
-					if ($vnetGroup.servicePublish.count -gt 1) {
+					if ($vnetGroup.servicePublish -is [array]) {
 						$servicePublish = $vnetGroup.servicePublish[0]
 					}
 					else {
 						$servicePublish = $vnetGroup.servicePublish
 					}
 
-					if ($vnetGroup.resourceGroupServicePublish.count -gt 1) {
+					if ($vnetGroup.resourceGroupServicePublish -is [array]) {
 						$resourceGroupServicePublish = $vnetGroup.resourceGroupServicePublish[0]
 					}
 					else {
@@ -236,6 +249,7 @@
 					$vnetObject = @{
 						vnetName     = $vnetName;
 						addressSpace = $addressSpace;
+						dnsServers   = $dnsServers;
 						subnets      = $subnetObjectList;
 						location     = $location;
 						service      = @{
@@ -279,21 +293,21 @@
 						$routeObjectList.Add($routeObject) > $Null
 					}
 
-					if ($routeTableGroup.location.count -gt 1) {
+					if ($routeTableGroup.location -is [array]) {
 						$location = $routeTableGroup.location[0]
 					}
 					else {
 						$location = $routeTableGroup.location
 					}
 
-					if ($routeTableGroup.servicePublish.count -gt 1) {
+					if ($routeTableGroup.servicePublish -is [array]) {
 						$servicePublish = $routeTableGroup.servicePublish[0]
 					}
 					else {
 						$servicePublish = $routeTableGroup.servicePublish
 					}
 
-					if ($routeTableGroup.resourceGroupServicePublish.count -gt 1) {
+					if ($routeTableGroup.resourceGroupServicePublish -is [array]) {
 						$resourceGroupServicePublish = $routeTableGroup.resourceGroupServicePublish[0]
 					}
 					else {
@@ -348,28 +362,28 @@
 
 					foreach ($nsg in $nsgGroupObject) {
 
-						if ($nsg.count -gt 1) {
+						if ($nsg -is [array]) {
 							Write-Error "Rule name not unique : '$($nsg.Name) in '$($nsg.Group.nsgName[0])' for Resource Group: '$($nsg.Group.resourceGroupName[0])'" -CategoryTargetName $nsg.Name -ErrorAction Stop
 						}
 						$nsgruleObject = nsgruleObject -nsgGroupObject $nsg.Group
 						$nsgruleObjectList.Add($nsgruleObject) > $Null
 					}
 
-					if ($nsgGroup.location.count -gt 1) {
+					if ($nsgGroup.location -is [array]) {
 						$location = $nsgGroup.location[0]
 					}
 					else {
 						$location = $nsgGroup.location
 					}
 
-					if ($nsgGroup.servicePublish.count -gt 1) {
+					if ($nsgGroup.servicePublish -is [array]) {
 						$servicePublish = $nsgGroup.servicePublish[0]
 					}
 					else {
 						$servicePublish = $nsgGroup.servicePublish
 					}
 
-					if ($nsgGroup.resourceGroupServicePublish.count -gt 1) {
+					if ($nsgGroup.resourceGroupServicePublish -is [array]) {
 						$resourceGroupServicePublish = $nsgGroup.resourceGroupServicePublish[0]
 					}
 					else {
@@ -420,7 +434,6 @@
 							}
 						}
 
-
 						# Adding UDR
 						if ($RouteTablesCsvFile) {
 
@@ -442,7 +455,6 @@
 								}
 							}
 						}
-
 
 						# Adding NSG
 						if ($NsgsCsvFile) {
@@ -468,7 +480,7 @@
 
 						# Default values if required for ARM template sanity checks
 						if (!$vnetObjectArray) {
-							$vnetObjectArray = @(@{vnetName = "none"; location = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
+							$vnetObjectArray = @(@{vnetName = "none"; location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
 						}
 
 						if (!$routeTableObjectArray) {
@@ -509,7 +521,7 @@
 								Write-Error "Resource Group $($ResourceGroup.Name) doesn't exist and need to be created. Please provide Resource Group Service to Publish."
 							}
 
-							if ($resourceGroupServicePublish.count -gt 1) {
+							if ($resourceGroupServicePublish -is [array]) {
 								[String]$resourceGroupServicePublishString = $resourceGroupServicePublish[0]
 							}
 							else {
@@ -653,16 +665,20 @@
 								Write-Error "$($vnetObjectYml.vnetName) is missing subnet configuration."
 							}
 
-							$vnetObjectYml.subnets | Where-Object { $_.networkSecurityGroup -like '' } | ForEach-Object {
+							$vnetObjectYml.subnets | Where-Object { !$_.networkSecurityGroup } | ForEach-Object {
 								$_.networkSecurityGroup = ""
 							}
 
-							$vnetObjectYml.subnets | Where-Object { $_.routeTable -like '' } | ForEach-Object {
+							$vnetObjectYml.subnets | Where-Object { !$_.routeTable } | ForEach-Object {
 								$_.routeTable = ""
 							}
 
-							$vnetObjectYml | Where-Object { $_.location -like '' } | ForEach-Object {
+							$vnetObjectYml | Where-Object { !$_.location } | ForEach-Object {
 								$_.location = ""
+							}
+
+							$vnetObjectYml | Where-Object { !$_.dnsServers } | ForEach-Object {
+								$_.dnsServers = ""
 							}
 
 							$vnetObjectYml | ForEach-Object {
@@ -681,7 +697,7 @@
 
 							$routeTableObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "routeTables" -hasGroups $true
 
-							$routeTableObjectYml | Where-Object { $_.location -like '' } | ForEach-Object {
+							$routeTableObjectYml | Where-Object { !$_.location } | ForEach-Object {
 								$_.location = ""
 							}
 
@@ -701,7 +717,7 @@
 
 							$nsgObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "networkSecurityGroups" -hasGroups $true
 
-							$nsgObjectYml | Where-Object { $_.location -like '' } | ForEach-Object {
+							$nsgObjectYml | Where-Object { !$_.location } | ForEach-Object {
 								$_.location = ""
 							}
 
@@ -716,7 +732,7 @@
 
 					# Default values if required for ARM template sanity checks
 					if (!$vnetObjectArray) {
-						$vnetObjectArray = @(@{vnetName = "none"; location = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
+						$vnetObjectArray = @(@{vnetName = "none"; location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
 					}
 
 					if (!$routeTableObjectArray) {

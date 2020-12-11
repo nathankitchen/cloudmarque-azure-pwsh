@@ -2,12 +2,12 @@ vnetName: vnet-1
 
 location: UK South
 
+dnsServers: []
 service:
   publish:
     vnet:
 
-addressSpace:                  # Array of vnet cidr blocks
-  -
+addressSpace: []                  # Array of vnet cidr blocks
 
 subnets:
   - cidr:
