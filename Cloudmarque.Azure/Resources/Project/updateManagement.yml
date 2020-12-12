@@ -9,14 +9,15 @@ windowsUpdateSchedules:
     updateGroup: Critical                 # Critical, CriticalSecurity, Recommended, All
     location: UK South                    # Optional: defaults to root location is empty
   - name: WindowsVMUpdateRecommended
-    startTime: "2020-12-04T00:00:00"
-    expiryTime: "9999-12-31T23:59:00"     # Optional set to a year from today if empty
+    expiryTime: "2030-12-31T23:59:00"     # Optional set to never expire if empty or invalid
     frequency: Weekly                     # Monthly, Weekly, Daily
+    dayOfWeek: Monday                  # Monday, Tuesday, Wednesday etc..
     updateGroup: Recommended              # Critical, CriticalSecurity, Recommended, All
     location: UK South                    # Optional: defaults to root location is empty
-  - name: WindowsVMUpdateaLL
-    startTime: "2040-10-01T00:00:00"
-    expiryTime: "3000-12-31T23:59:00"     # Optional set to a year from today if empty
-    frequency: Daily                      # Monthly, Weekly, Daily
+  - name: WindowsVMUpdateAll
+    startTime : "2030-12-01T23:59:00"     # Optional set to midnight tomorrow if empty
+    expiryTime: "2040-12-31T23:59:00"     # Optional set to never expire if empty or invalid
+    dateOfMonth: 1                        # Range of numeric dates available for the month.
+    frequency: Monthly                    # Monthly, Weekly, Daily
     updateGroup: All                      # Critical, CriticalSecurity, Recommended, All
-    location: UK West                    # Optional: defaults to root location is empty
+    location: UK West                     # Optional: defaults to root location is empty

@@ -92,10 +92,10 @@ function Set-CmAzIaasUpdateManagement {
 			}
 
 			if (!($scheduleSetting.expiryTime -Is [DateTime]) -or $scheduleSetting.expiryTime -le $currentDate) {
-				$scheduleSetting.expiryTime = $currentDate.AddYears(1)
+				$scheduleSetting.expiryTime = $null
 			}
 
-			if(!$scheduleSetting.location) {
+			if (!$scheduleSetting.location) {
 				$scheduleSetting.location = $SettingsObject.location
 			}
 
@@ -103,18 +103,16 @@ function Set-CmAzIaasUpdateManagement {
 				"updateTypes" = $updateTypes;
 				"tagValue"    = "";
 				"location"    =  $scheduleSetting.location;
+				
 				# Create schedule details in a schema that matches the arm template
 				"details"     = @{
 					"expiryTime" = $scheduleSetting.expiryTime;
 					"frequency"  = $frequency;
 					"interval"   = 1;
 					"name"       = Get-CmAzResourceName -Resource "AutomationSchedule" -Architecture "Core" -Region $scheduleSetting.Location -Name $scheduleSetting.Name;
-					"startTime"  = $scheduleSetting.StartTime;
+					"startTime"  = $scheduleSetting.startTime;
 					"timeZone"   = "Europe/London";
 					"advancedSchedule" = @{
-						"weekDays" 	= @();
-						"monthDays" = @();
-						"monthlyOccurrences" = @();
 					};
 				}
 			}
@@ -125,13 +123,12 @@ function Set-CmAzIaasUpdateManagement {
 			Write-Verbose "Update schedule set to $($frequency).."
 			if ($frequency -eq $scheduleTypeSettingsObject.updateFrequencies.weekly) {
 
-				$dayOfWeek = (Get-Date $scheduleSetting.StartTime).DayOfWeek
-				$frequencyTag = $dayOfWeek
-				$schedule.details.advancedSchedule.weekDays += $dayOfWeek
+				$frequencyTag = $scheduleSetting.dayOfWeek
+				$schedule.details.advancedSchedule.weekDays = @($scheduleSetting.dayOfWeek)
 			}
 			elseif ($frequency -eq $scheduleTypeSettingsObject.updateFrequencies.monthly) {
 
-				$schedule.details.advancedSchedule.monthDays += (get-date $scheduleSetting.StartTime).Day
+				$schedule.details.advancedSchedule.monthDays = @($scheduleSetting.dateOfMonth)	
 			}
 
 			$schedule.tagValue = "$($updateGroupTag)-$($frequencyTag)".ToLower()

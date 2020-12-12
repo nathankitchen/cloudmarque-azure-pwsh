@@ -6,4 +6,4 @@ tags:
     cm-charge: Core-Test-An3            # Required - Cost code
     cm-apps:  Tag-Test-Apps             # Required - App name
   custom:
-    cm-core-test-int-tag: "true"        # Optional
+    cm-integration-test-delete: "true"        # Optional

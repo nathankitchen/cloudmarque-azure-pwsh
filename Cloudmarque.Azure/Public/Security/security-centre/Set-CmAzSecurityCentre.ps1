@@ -64,6 +64,9 @@ function Set-CmAzSecurityCentre {
 
 			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
 
+            Write-Verbose "Resetting previous contact settings..."
+            Get-AzSecurityContact | Remove-AzSecurityContact
+
             Write-Verbose "Deploying security centre settings..."
             New-AzDeployment `
                 -AssignUkNhs $SettingsObject.EnableUkNhs `

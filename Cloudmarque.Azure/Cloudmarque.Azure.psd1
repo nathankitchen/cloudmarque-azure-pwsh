@@ -65,6 +65,7 @@ RequiredModules = @(
     @{ ModuleName = 'Az.OperationalInsights'; RequiredVersion = '2.3.0'; },
     @{ ModuleName = 'Az.Resources'; RequiredVersion = '2.5.0'; },
     @{ ModuleName = 'Az.Storage'; RequiredVersion = '2.5.0'; },
+    @{ ModuleName = 'Az.Security'; RequiredVersion = '0.8.0'; },
     @{ ModuleName = 'Az.Websites'; RequiredVersion = '1.11.0'; },
     @{ ModuleName = 'GetPassword'; RequiredVersion = '1.0.0.0'; }
     @{ ModuleName = 'Powershell-Yaml'; RequiredVersion = '0.4.2'; })

@@ -24,17 +24,17 @@
             "MCAS",
             "WDATP"
         ],
-        "securityResources": [
-            "VirtualMachines",
-            "AppServices",
-            "SqlServers",
-            "SqlServerVirtualMachines",
-            "StorageAccounts",
-            "KubernetesService",
-            "ContainerRegistry",
+        "ukNHS": "UK and NHS",
+        "resourceTypes": [
+            "VirtualMachines", 
+            "AppServices", 
+            "SqlServers", 
+            "SqlServerVirtualMachines", 
+            "StorageAccounts", 
+            "KubernetesService", 
+            "ContainerRegistry", 
             "KeyVaults"
         ],
-        "ukNHS": "UK and NHS",
         "assignedBy": "Cloudmarque"
     },
     "resources": [
@@ -66,13 +66,13 @@
         {
             "type": "Microsoft.Security/pricings",
             "apiVersion": "2018-06-01",
-            "name": "[variables('securityResources')[copyIndex('SecurityResourcesCopy')]]",
+            "name": "[variables('resourceTypes')[copyIndex('SecurityResourcesCopy')]]",
             "properties": {
                 "pricingTier": "Standard"
             },
             "copy": {
                 "name": "SecurityResourcesCopy",
-                "count": "[length(variables('securityResources'))]",
+                "count": "[length(variables('resourceTypes'))]",
                 "mode": "serial"
             }
         },
