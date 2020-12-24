@@ -595,18 +595,22 @@
 				function createNetworkObjectFromYml {
 					param (
 						[string]
-						$ymlObject,
+						$YmlFilePath,
 						[string]
 						$ObjectType,
 						[Boolean]
 						$hasGroups
 					)
 
-					if ($_.StartsWith('./')) {
-						$interimPath = "$(Split-Path $SettingsFile)/$ymlObject.yml"
+					if ($_.contains('/') -or $_.contains('\')) {
+						$interimPath = Resolve-FilePath -NestedFile $YmlFilePath
 					}
 					else {
-						$interimPath = "$(Split-Path $SettingsFile)/$ObjectType/$ymlObject.yml"
+						$interimPath = "$(Split-Path $SettingsFile)/$ObjectType/$YmlFilePath"
+					}
+
+					if (!$interimPath.contains('.yml')){
+						$interimPath = "$interimPath.yml"
 					}
 
 					try {
@@ -619,7 +623,7 @@
 							$returnObject = Get-CmAzSettingsFile -Path $interimPath
 						}
 						catch {
-							throw "Not able to find file $ymlObject"
+							throw "Not able to find file $YmlFilePath"
 						}
 
 					}
@@ -642,7 +646,12 @@
 								$object.$groupName | ForEach-Object {
 
 									try {
-										$interimGroupPath = "$(Split-Path $interimPath)/groups/$_.yml"
+										$interimGroupPath = "$(Split-Path $interimPath)/groups/$_"
+
+										if (!$interimGroupPath.contains('.yml')){
+											$interimGroupPath = "$interimGroupPath.yml"
+										}
+
 										$returnObjectGroup = Get-CmAzSettingsFile -Path $interimGroupPath
 									}
 									catch [System.Management.Automation.RuntimeException] {
@@ -680,9 +689,11 @@
 					# Set Vnet object
 					if ($_.vnets) {
 
+						Write-Verbose "Importing virtual networks ..."
+
 						$_.vnets | ForEach-Object {
 
-							$vnetObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "vnets" -hasGroups $false
+							$vnetObjectYml = createNetworkObjectFromYml -YmlFilePath $_ -ObjectType "vnets" -hasGroups $false
 
 							if (!$vnetObjectYml.subnets) {
 								Write-Error "$($vnetObjectYml.vnetName) is missing subnet configuration."
@@ -716,9 +727,11 @@
 					# Set Route Table Object
 					if ($_.routeTables) {
 
+						Write-Verbose "Importing route tables..."
+
 						$_.routeTables | ForEach-Object {
 
-							$routeTableObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "routeTables" -hasGroups $true
+							$routeTableObjectYml = createNetworkObjectFromYml -YmlFilePath $_ -ObjectType "routeTables" -hasGroups $true
 
 							$routeTableObjectYml | Where-Object { !$_.location } | ForEach-Object {
 								$_.location = ""
@@ -736,9 +749,11 @@
 					# Set network Security group Object
 					if ($_.networkSecurityGroups) {
 
+						Write-Verbose "Importing network security groups..."
+
 						$_.networkSecurityGroups | ForEach-Object {
 
-							$nsgObjectYml = createNetworkObjectFromYml -ymlObject $_ -ObjectType "networkSecurityGroups" -hasGroups $true
+							$nsgObjectYml = createNetworkObjectFromYml -YmlFilePath $_ -ObjectType "networkSecurityGroups" -hasGroups $true
 
 							$nsgObjectYml | Where-Object { !$_.location } | ForEach-Object {
 								$_.location = ""

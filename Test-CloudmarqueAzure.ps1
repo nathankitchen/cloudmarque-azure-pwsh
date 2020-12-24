@@ -3,12 +3,12 @@
     <#
         .Synopsis
          Runs Pester tests over the Cloudmarque.Azure module, publishing test results.
-        
+
         .Description
          Supports the development lifecycle by running defined tests to check whether
          commands are behaving as expected. Checks that all modules are in place before
          running them.
-        
+
         .Example
          Test-CloudmarqueAzure
     #>
@@ -33,11 +33,11 @@
         $testDirectory = "tests"
         $testPath = "$publishPath\$testDirectory"
 
-        New-Item -Path $publishPath -Name $Project -ItemType Directory -Force | Out-Null
-        New-Item -Path $testPath -Name $Project -ItemType Directory -Force | Out-Null
+        New-Item -Path $publishPath -Name $Project -ItemType Directory -Force > $Null
+        New-Item -Path $testPath -Name $Project -ItemType Directory -Force > $Null
 
         $configuration = [PesterConfiguration]@{
-            
+
             Output = @{
                 Verbosity = "Detailed"
             }

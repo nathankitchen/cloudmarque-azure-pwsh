@@ -4,7 +4,7 @@ Describe "*-CmAzContext Lifecycle Tests" {
 
 	BeforeAll {
 		$projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project";
-		$azureContextFilePath = "./tests/context.json"
+		$azureContextFilePath = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\context.json"
 
 		Save-AzContext -Path $azureContextFilePath -Force
 
@@ -80,7 +80,7 @@ Describe "*-CmAzContext Lifecycle Tests" {
 			Clear-CmAzContext
 		}
 
-		It "Should remove the current context" {		
+		It "Should remove the current context" {
 			Get-CmAzContext | Should -Be $Null
 		}
 

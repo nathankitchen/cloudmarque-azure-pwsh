@@ -52,8 +52,8 @@
 			$cmDeleteRunbook = "Delete-TaggedResource.Runbook"
 
 			# Check Modules and install them if not available
-			$dataFile = (Import-PowerShellDataFile "./Cloudmarque.Azure/Cloudmarque.Azure.psd1") 
-			
+			$dataFile = (Import-PowerShellDataFile "$PSScriptRoot/../../../../Cloudmarque.Azure.psd1")
+
 			$modules = $dataFile.requiredModules
 
 			$modules += @{

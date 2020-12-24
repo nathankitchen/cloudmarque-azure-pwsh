@@ -1,4 +1,3 @@
-
 function New-CmAzCore {
 
     <#
@@ -57,42 +56,41 @@ function New-CmAzCore {
 
             $missingSettingsErrorMessage = "Please provide file path for "
 
-            # Core Monitoring
-            if (!$SettingsObject.monitorSettings) {
-                Write-Error "$missingSettingsErrorMessage monitorSettings" -Category InvalidArgument -CategoryTargetName "monitorSettings"
-            }
+            $SettingsFiles = @(
+                "monitorSettings",
+                "budgetSettings",
+                "keyvaultSettings",
+                "automationSettings"
+            )
 
-            if (!$SettingsObject.budgetSettings) {
-                Write-Error "$missingSettingsErrorMessage budgetSettings" -Category InvalidArgument -CategoryTargetName "budgetSettings"
-            }
-            
-            if (!$SettingsObject.keyvaultSettings) {
-                Write-Error "$missingSettingsErrorMessage keyvaultSettings" -Category InvalidArgument -CategoryTargetName "keyvaultSettings"
-            }
+            foreach ($SettingsFile in $SettingsFiles) {
 
-            if (!$SettingsObject.automationSettings) {
-                Write-Error "$missingSettingsErrorMessage automationSettings" -Category InvalidArgument -CategoryTargetName "automationSettings"
+                if (!$SettingsObject.$SettingsFile) {
+                    Write-Error "$missingSettingsErrorMessage $SettingsFile" -Category InvalidArgument -CategoryTargetName $SettingsFile
+                }
+
+                Write-Verbose "$SettingsFile found.. "
+
+                $SettingsObject.$SettingsFile = Resolve-FilePath -NestedFile $SettingsObject.$SettingsFile
+
+                if(!$SettingsObject.$SettingsFile.contains('.yml')){
+                    $SettingsObject.$SettingsFile = "$($SettingsObject.$SettingsFile).yml"
+                }
+
+                $SettingsObject.($SettingsFile.Replace('Settings', 'Object')) = Get-CmAzSettingsFile -Path $SettingsObject.$SettingsFile
             }
 
             Write-Verbose "Deploying core monitoring solution.."
-            $SettingsObject.monitorSettings = Resolve-FilePath -NestedFile $SettingsObject.monitorSettings
-            $monitorObject = Get-CmAzSettingsFile -Path $SettingsObject.monitorSettings
-            New-CmAzCoreMonitor -SettingsObject $monitorObject -TagSettingsFile $TagSettingsFile
+            New-CmAzCoreMonitor -SettingsObject $SettingsObject.MonitorObject -TagSettingsFile $TagSettingsFile
 
             Write-Verbose "Setting budgets.."
-            $SettingsObject.budgetSettings = Resolve-FilePath -NestedFile $SettingsObject.budgetSettings
-            $budgetsObject = Get-CmAzSettingsFile -Path $SettingsObject.budgetSettings
-            New-CmAzCoreBillingRule -SettingsObject $budgetsObject
+            New-CmAzCoreBillingRule -SettingsObject $SettingsObject.budgetObject
 
             Write-Verbose "Deploying Core Keyvault.."
-            $SettingsObject.keyvaultSettings = Resolve-FilePath -NestedFile $SettingsObject.keyvaultSettings
-            $keyVaultObject = Get-CmAzSettingsFile -Path $SettingsObject.keyvaultSettings
-            New-CmAzCoreKeyVault -SettingsObject $keyVaultObject -TagSettingsFile $TagSettingsFile
+            New-CmAzCoreKeyVault -SettingsObject $SettingsObject.keyVaultObject -TagSettingsFile $TagSettingsFile
 
             Write-Verbose "Deploying Core Automation Account.."
-            $SettingsObject.automationSettings = Resolve-FilePath -NestedFile $SettingsObject.automationSettings
-            $automationObject = Get-CmAzSettingsFile -Path $SettingsObject.automationSettings
-            New-CmAzCoreAutomation -SettingsObject $automationObject -TagSettingsFile $TagSettingsFile
+            New-CmAzCoreAutomation -SettingsObject $SettingsObject.automationObject -TagSettingsFile $TagSettingsFile
         }
     }
     catch {

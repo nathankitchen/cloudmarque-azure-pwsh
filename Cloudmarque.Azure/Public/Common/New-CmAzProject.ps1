@@ -12,7 +12,7 @@
 
 		.Parameter Project
 		 The filepath where the user's Cloudmarque project will be set.
-		 
+
 
 		.Example
 		 New-CmAzProject -Project "MyProject"
@@ -26,13 +26,13 @@
 
 	if ($PSCmdlet.ShouldProcess($Project, "Create new directory")) {
 
-		Write-Output $((Get-PsCallStack)[0])
-
 		$Source = "$PSScriptRoot/../../Resources/Project"
 		$Files = "*"
 
-		New-Item -Path $Project -ItemType Directory -Force | Out-Null
+		New-Item -Path $Project -ItemType Directory -Force > $Null
 
 		Get-ChildItem $Source | Copy-Item -Destination $Project -Recurse -filter $Files
+
+		Write-Verbose "Initialized new Project Directory."
 	}
 }

@@ -1,5 +1,6 @@
 # vnets, networkSecurityGroups, routeTables are default folder locations for yaml files, but you can also provide relative path to files in different directories as well.
 # Do not add .yml extension to filenames
+# All the relative paths are resolved to project root directory
 
 service:
   dependencies:

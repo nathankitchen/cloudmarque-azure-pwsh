@@ -27,12 +27,14 @@
 		$Path
 	)
 
-	if (!(Test-Path -Path $Path -IsValid) -or !(Test-Path -Path $Path)) {
-		throw "Please provide a path that is valid and exists."
+	$ResolvedPath = Resolve-FilePath -NestedFile $Path
+
+	if (!(Test-Path -Path $ResolvedPath -IsValid) -or !(Test-Path -Path $ResolvedPath)) {
+		throw "Invalid Path. `nNot able to access '$ResolvedPath'. Please provide a path that is valid and exists."
 	}
 
-	$file = Get-Item -Path $Path
-	$content = Get-Content -Path $Path -Raw
+	$file = Get-Item -Path $ResolvedPath
+	$content = Get-Content -Path $ResolvedPath -Raw
 	$dataObject = $Null
 
 	switch -Regex ($file.Extension) {
