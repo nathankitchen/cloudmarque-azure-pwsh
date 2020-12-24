@@ -71,7 +71,7 @@
 
 			Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $SettingsObject.automation -IsDependency
 
-			$keyVault = Get-CmAzService -Service $SettingsObject.automation.service.dependencies.keyvault -Region $SettingsObject.location -ThrowIfUnavailable
+			$keyVault = Get-CmAzService -Service $SettingsObject.automation.service.dependencies.keyvault -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
 			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
 
 			$certificateName = $SettingsObject.automation.CertificateName

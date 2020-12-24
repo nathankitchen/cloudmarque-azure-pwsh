@@ -66,7 +66,7 @@
 
 				$tagValue = $SettingsObject.Tags.Mandatory[$key]
 
-				if(!$tagValue) {
+				if (!$tagValue) {
 					Write-Error "Mandatory Tag - $key is null. Please set the appropriate Value in settings." -Category InvalidArgument -CategoryTargetName $mandatoryTagsVariableName
 				}
 				else {
@@ -99,14 +99,14 @@
 				foreach ($resourceId in $SettingsObject.ResourceIds) {
 
 					Write-Verbose "Fetching $resourceId..."
-					if($resourceId.startsWith("/subscriptions/") -Or $resourceId -Contains "/") {
+					if ($resourceId.startsWith("/subscriptions/") -Or $resourceId -Contains "/") {
 						$existingResources = Get-AzResource -ResourceID $resourceId -ErrorAction Continue
 					}
 					else {
 						$existingResources = Get-AzResource -Name $resourceId -ErrorAction Continue
 					}
 
-					if(!$existingResources) {
+					if (!$existingResources) {
 						Write-Error "Issue locating resource: $resourceId." -Category ObjectNotFound -CategoryTargetName $resourceId
 					}
 
@@ -130,7 +130,7 @@
 					$tagsToSet = @{}
 					$tagsToSet += $allTags
 
-					if($resourceGroup.tags) {
+					if ($resourceGroup.tags) {
 						$tagsToSet = Merge-HashTables -HashtableToFilter $resourceGroup.tags -HashtableToAdd $tagsToSet
 					}
 
@@ -160,9 +160,9 @@
 
 				$resource = $_
 
-				. "$using:PSScriptRoot/../../Private/Utility/Merge-Hashtables.ps1"
-
-				if($resource.tags) {
+				if ($resource.tags) {
+					
+					. "$using:PSScriptRoot/../../Private/Utility/Merge-Hashtables.ps1"
 					$tagsToSet = Merge-HashTables -HashtableToFilter $resource.tags -HashtableToAdd $tagsToSet
 				}
 

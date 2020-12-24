@@ -6,7 +6,7 @@ service:
     activityLogAlert: Core-Test-Monitor-Ala
     appInsights: Core-Test-Ai
     solution: Core-Test-Sol
-    storage: Core-Test-Monitor-St
+    storage: Core-Test-St
     workspace: Core-Test-Ws
     monitoringResourceGroup: Core-Test-Monitor-Rg
     actionGroup: Core-Test-Ag1

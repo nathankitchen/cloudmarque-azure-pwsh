@@ -2,7 +2,7 @@
 # group files must exist in ./groups folder relative to file they are called from.
 
 - nsgName:
-  location: # Optional - defaults to resource group location
+  location:                                     # Optional - defaults to resource group location
   service:
     publish:
       networkSecurityGroup:

@@ -1,0 +1,245 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Locations": {
+            "type": "Array"
+        },
+        "NetworkWatcherResourceGroupName": {
+            "type": "String"
+        },
+        "Nsgs": {
+            "type": "Array"
+        },
+        "Workspace": {
+            "type": "Object"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "Cm_networkWatcher_deployment",
+            "resourceGroup": "[parameters('NetworkWatcherResourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "Locations": {
+                        "value": "[parameters('Locations')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "Locations": {
+                            "type": "Array"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "name": "[concat('NetworkWatcher_', parameters('Locations')[copyIndex('NetworkWatcherCopy')])]",
+                            "type": "Microsoft.Network/networkWatchers",
+                            "apiVersion": "2019-04-01",
+                            "copy": {
+                                "Name": "NetworkWatcherCopy",
+                                "Count": "[length(parameters('Locations'))]"
+                            },
+                            "location": "[parameters('Locations')[copyIndex('NetworkWatcherCopy')]]",
+                            "properties": {},
+                            "resources": []
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('Cm_network_nsg_deployment', '_', copyIndex('Nsgs'))]",
+            "resourceGroup": "[parameters('Nsgs')[copyIndex('Nsgs')].resourceGroup.name]",
+            "copy": {
+                "name": "Nsgs",
+                "count": "[length(parameters('Nsgs'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "NetworkWatcherResourceGroupName": {
+                        "value": "[parameters('NetworkWatcherResourceGroupName')]"
+                    },
+                    "Nsg": {
+                        "value": "[parameters('Nsgs')[copyIndex('Nsgs')]]"
+                    },
+                    "NsgIndex": {
+                        "value": "[copyIndex('Nsgs')]"
+                    },
+                    "Workspace": {
+                        "value": "[parameters('Workspace')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "NetworkWatcherResourceGroupName": {
+                            "type": "String"
+                        },
+                        "Nsg": {
+                            "type": "Object"
+                        },
+                        "NsgIndex": {
+                            "type": "Int"
+                        },
+                        "Workspace": {
+                            "type": "Object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "condition": "[not(equals(parameters('Nsg').nsgName, 'none'))]",
+                            "apiVersion": "2019-12-01",
+                            "type": "Microsoft.Network/NetworkSecurityGroups",
+                            "name": "[parameters('Nsg').nsgName]",
+                            "location": "[parameters('Nsg').location]",
+                            "tags": {
+                                "cm-service": "[parameters('Nsg').service.publish.networkSecurityGroup]"
+                            },
+                            "properties": {
+                                "copy": [
+                                    {
+                                        "name": "securityRules",
+                                        "count": "[length(parameters('Nsg').rules)]",
+                                        "input": {
+                                            "name": "[parameters('Nsg').rules[copyIndex('securityRules')].ruleName]",
+                                            "properties": {
+                                                "description": "[parameters('Nsg').rules[copyIndex('securityRules')].description]",
+                                                "priority": "[parameters('Nsg').rules[copyIndex('securityRules')].priority]",
+                                                "direction": "[parameters('Nsg').rules[copyIndex('securityRules')].direction]",
+                                                "sourceAddressPrefix": "[if(not(greater(length(parameters('Nsg').rules[copyIndex('securityRules')].sourceIp), 1)), parameters('Nsg').rules[copyIndex('securityRules')].sourceIp[0], json('null'))]",
+                                                "sourcePortRange": "[if(not(greater(length(parameters('Nsg').rules[copyIndex('securityRules')].sourcePort), 1)),  parameters('Nsg').rules[copyIndex('securityRules')].sourcePort[0], json('null'))]",
+                                                "destinationAddressPrefix": "[if(not(greater(length(parameters('Nsg').rules[copyIndex('securityRules')].destinationIp), 1)), parameters('Nsg').rules[copyIndex('securityRules')].destinationIp[0], json('null'))]",
+                                                "destinationPortRange": "[if(not(greater(length(parameters('Nsg').rules[copyIndex('securityRules')].destinationPort), 1)), parameters('Nsg').rules[copyIndex('securityRules')].destinationPort[0], json('null'))]",
+                                                "SourceAddressPrefixes": "[if(not(greater(length(parameters('Nsg').rules[copyIndex('securityRules')].sourceIp), 1)), json('null'), parameters('Nsg').rules[copyIndex('securityRules')].sourceIp)]",
+                                                "sourcePortRanges": "[if(not(greater(length(parameters('Nsg').rules[copyIndex('securityRules')].sourcePort), 1)), json('null'), parameters('Nsg').rules[copyIndex('securityRules')].sourcePort)]",
+                                                "destinationAddressPrefixes": "[if(not(greater(length(parameters('Nsg').rules[copyIndex('securityRules')].destinationIp), 1)), json('null'), parameters('Nsg').rules[copyIndex('securityRules')].destinationIp)]",
+                                                "destinationPortRanges": "[if(not(greater(length(parameters('Nsg').rules[copyIndex('securityRules')].destinationPort),1)), json('null'), parameters('Nsg').rules[copyIndex('securityRules')].destinationPort)]",
+                                                "protocol": "[parameters('Nsg').rules[copyIndex('securityRules')].protocol]",
+                                                "Access": "[parameters('Nsg').rules[copyIndex('securityRules')].Access]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/NetworkSecurityGroups/Providers/DiagnosticSettings",
+                            "apiVersion": "2017-05-01-preview",
+                            "name": "[concat(parameters('Nsg').nsgName, '/Microsoft.Insights/DiagSettings')]",
+                            "dependsOn": [
+                                "[parameters('Nsg').nsgName]"
+                            ],
+                            "properties": {
+                                "workspaceId": "[parameters('Workspace').id]",
+                                "logs": [
+                                    {
+                                        "category": "NetworkSecurityGroupEvent",
+                                        "enabled": true,
+                                        "retentionPolicy": {
+                                            "enabled": true,
+                                            "days": 30
+                                        }
+                                    },
+                                    {
+                                        "category": "NetworkSecurityGroupRuleCounter",
+                                        "enabled": true,
+                                        "retentionPolicy": {
+                                            "enabled": true,
+                                            "days": 30
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Resources/Deployments",
+                            "apiVersion": "2019-10-01",
+                            "name": "[concat('Cm_network_flowLog_deployment_', parameters('NsgIndex'))]",
+                            "dependsOn": [
+                                "[parameters('Nsg').nsgName]"
+                            ],
+                            "resourceGroup": "[parameters('NetworkWatcherResourceGroupName')]",
+                            "properties": {
+                                "mode": "Incremental",
+                                "expressionEvaluationOptions": {
+                                    "scope": "Inner"
+                                },
+                                "parameters": {
+                                    "Nsg": {
+                                        "value": "[parameters('Nsg')]"
+                                    },
+                                    "NsgRg": {
+                                        "value": "[resourceGroup()]"
+                                    },
+                                    "Workspace": {
+                                        "value": "[parameters('Workspace')]"
+                                    }
+                                },
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "parameters": {
+                                        "Nsg": {
+                                            "type": "Object"
+                                        },
+                                        "NsgRg": {
+                                            "type": "Object"
+                                        },
+                                        "Workspace": {
+                                            "type": "Object"
+                                        }
+                                    },
+                                    "resources": [
+                                        {
+                                            "name": "[concat('NetworkWatcher_', parameters('Nsg').location, '/', parameters('Nsg').nsgName, '-FlowLogs')]",
+                                            "apiVersion": "2019-04-01",
+                                            "type": "Microsoft.Network/NetworkWatchers/FlowLogs",
+                                            "location": "[parameters('Nsg').location]",
+                                            "properties": {
+                                                "targetResourceId": "[ResourceId(parameters('NsgRg').name, 'Microsoft.Network/NetworkSecurityGroups',  parameters('Nsg').nsgName)]",
+                                                "StorageId": "[parameters('Nsg').storageAccountId]",
+                                                "enabled": true,
+                                                "retentionPolicy": {
+                                                    "days": 90,
+                                                    "enabled": true
+                                                },
+                                                "format": {
+                                                    "type": "JSON",
+                                                    "version": 2
+                                                },
+                                                "flowAnalyticsConfiguration": {
+                                                    "networkWatcherFlowAnalyticsConfiguration": {
+                                                        "enabled": true,
+                                                        "workspaceRegion": "[parameters('Workspace').location]",
+                                                        "workspaceResourceId": "[parameters('Workspace').resourceId]",
+                                                        "trafficAnalyticsInterval": 60
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

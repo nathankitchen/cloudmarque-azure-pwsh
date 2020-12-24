@@ -85,6 +85,8 @@ stages:
             -DefinitionName "$(Build.DefinitionName)" `
             -DefinitionVersion "$(Build.DefinitionVersion)"
 
+          New-CmAzIaasStorage -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/storage.yml" -Verbose
+
           New-CmAzIaasNetworking `
               -VnetsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/vnet.csv" `
               -RouteTablesCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/udr.csv" `
@@ -217,19 +219,23 @@ stages:
               Set-AzSecurityPricing -Name $resourceType -PricingTier "Free"
           }
 
-          Write-Verbose "Removing tagged resources..."
+          do {
 
-          Do {
-            
+            Write-Verbose "Removing tagged resources..."
             $errorThrown = $false
 
-            foreach($resource in (Get-CmAzService -ServiceKey "cm-integration-test-delete" -Service "true" -IsResourceGroup)) {
+            Write-Verbose "Fetching resource groups.."
+            $resources = Get-CmAzService -ServiceKey "cm-integration-test-delete" -Service "true" -IsResourceGroup -Verbose
+
+            foreach ($resource in $resources) {
               
               try {
-                Remove-AzResourceGroup -Name $_.resourceGroupName -Verbose -Force > $null
+                Remove-AzResourceGroup -Name $resource.resourceGroupName -Verbose -Force
               }
               catch {
                 $errorThrown = $true
               }
             }
-          }  While ($errorThrown)
+
+          }
+          while ($errorThrown)

@@ -33,7 +33,7 @@
 		 Required headers: resourceGroupName|location
 
 		.Parameter TagSettingsFile
-         File path for the tags settings file containing tags defination.
+		 File path for the tags settings file containing tags defination.
 
 		.Component
 		 IaaS
@@ -73,11 +73,11 @@
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create networking solution")) {
 
-			if ($SettingsFile -and -not $SettingsObject -and -not $VnetsCsvFile -and -not $RouteTablesCsvFile -and -not $NsgsCsvFile ) {
+			if ($SettingsFile -and !$SettingsObject -and !$VnetsCsvFile -and !$RouteTablesCsvFile -and !$NsgsCsvFile ) {
 				Write-Verbose "Importing setting from Yml file"
 				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
 			}
-			elseif (-not $SettingsFile -and -not $SettingsObject -and -not $VnetsCsvFile -and -not $RouteTablesCsvFile -and -not $NsgsCsvFile ) {
+			elseif (!$SettingsFile -and !$SettingsObject -and !$VnetsCsvFile -and !$RouteTablesCsvFile -and !$NsgsCsvFile ) {
 				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 			}
 
@@ -147,20 +147,23 @@
 							foreach ($internalNsg in $interimNsg.Group) {
 
 								$interimNsgObject = New-Object -TypeName psobject -Property @{
-									"resourceGroupName" = $internalNsg.resourceGroupName;
-									"nsgName"           = $internalNsg.nsgName;
-									"location"          = $internalNsg.location;
-									"servicePublish"    = $internalNsg.servicePublish;
-									"ruleName"          = $externalNsg.ruleName;
-									"priority"          = $externalNsg.priority;
-									"direction"         = $externalNsg.direction;
-									"sourceIp"          = $externalNsg.sourceIp;
-									"sourcePort"        = $externalNsg.sourcePort;
-									"destinationIp"     = $externalNsg.destinationIp;
-									"destinationPort"   = $externalNsg.destinationPort;
-									"protocol"          = $externalNsg.protocol;
-									"Access"            = $externalNsg.Access;
-									"Description"       = $externalNsg.Description
+									"resourceGroupName"				= $internalNsg.resourceGroupName;
+									"nsgName"           			= $internalNsg.nsgName;
+									"location"          			= $internalNsg.location;
+									"servicePublish"    			= $internalNsg.servicePublish;
+									"resourceGroupServicePublish" 	= $internalNsg.resourceGroupServicePublish;
+									"storageServiceDependency"		= $internalNsg.storageServiceDependency;
+									"workspaceServiceDependency"	= $internalNsg.workspaceServiceDependency;
+									"ruleName"          			= $externalNsg.ruleName;
+									"priority"          			= $externalNsg.priority;
+									"direction"         			= $externalNsg.direction;
+									"sourceIp"          			= $externalNsg.sourceIp;
+									"sourcePort"        			= $externalNsg.sourcePort;
+									"destinationIp"     			= $externalNsg.destinationIp;
+									"destinationPort"   			= $externalNsg.destinationPort;
+									"protocol"          			= $externalNsg.protocol;
+									"Access"            			= $externalNsg.Access;
+									"Description"       			= $externalNsg.Description
 								}
 
 								$interimNsgObjectArray.add($interimNsgObject) > $Null
@@ -390,6 +393,20 @@
 						$resourceGroupServicePublish = $nsgGroup.resourceGroupServicePublish
 					}
 
+					if ($nsgGroup.storageServiceDependency -is [array]) {
+						$storageServiceDependency = $nsgGroup.storageServiceDependency[0]
+					}
+					else {
+						$storageServiceDependency = $nsgGroup.storageServiceDependency
+					}
+
+					if ($nsgGroup.workspaceServiceDependency -is [array]) {
+						$workspaceServiceDependency = $nsgGroup.workspaceServiceDependency[0]
+					}
+					else {
+						$workspaceServiceDependency = $nsgGroup.workspaceServiceDependency
+					}
+
 					$nsgObject = @{
 						nsgName  = $nsgName;
 						rules    = $nsgruleObjectList;
@@ -398,6 +415,10 @@
 							publish = @{
 								networkSecurityGroup = $servicePublish;
 								resourceGroup        = $resourceGroupServicePublish
+							};
+							dependencies = @{
+								storage 	= $storageServiceDependency;
+								workspace 	= $workspaceServiceDependency;
 							}
 						}
 					}
@@ -549,12 +570,14 @@
 						# Adding Objects to resourceGroup Object
 						Write-Verbose "Adding '$($ResourceGroup.Name)' to Resource Group Object List"
 						$ResourceGroupObject = @{
+							
 							resourceGroup         = @{
 								name     = $ResourceGroup.Name;
 								location = $RGlocation;
 								service  = $service;
 								createRG = $createRG;
 							};
+
 							vnets                 = $vnetObjectArray;
 							routeTables           = $routeTableObjectArray;
 							networkSecurityGroups = $nsgObjectArray
@@ -645,7 +668,7 @@
 					return $returnObject
 				}
 
-				$SettingsObject | ForEach-Object {
+				$SettingsObject.networking | ForEach-Object {
 					$vnetObjectArray = [System.Collections.ArrayList]@()
 					$routeTableObjectArray = [System.Collections.ArrayList]@()
 					$nsgObjectArray = [System.Collections.ArrayList]@()
@@ -782,12 +805,14 @@
 					# Adding Objects to resourceGroup Object
 					Write-Verbose "Adding '$ResourceGroup' to Resource Group Object List"
 					$ResourceGroupObject = @{
+						
 						resourceGroup         = @{
 							name     = $ResourceGroup;
 							location = $RGlocation;
 							createRG = $createRG;
 							service  = $service
 						};
+
 						vnets                 = $vnetObjectArray;
 						routeTables           = $routeTableObjectArray;
 						networkSecurityGroups = $nsgObjectArray
@@ -799,15 +824,94 @@
 			}
 
 			# Arm Deployment
-			Write-Verbose "Initiating deployment"
+			Write-Verbose "Deploying resource groups..."
 
 			New-AzDeployment `
-				-Name "CmAz-Network-Deploy" `
+				-Name 'Cm_network_resource_group_deployment' `
+				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.ResourceGroups.json `
+				-Location $resourceGroupObjectArray[0].resourceGroup.location `
+				-NetworkingArrayObject $resourceGroupObjectArray
+
+			if ($resourceGroupObjectArray.networkSecurityGroups.nsgName[0] -ne 'none' -and $resourceGroupObjectArray.networkSecurityGroups.nsgName -ne 'none') {
+
+				Write-Verbose "Nsgs found..."
+				$storageServiceDependency = $SettingsObject.service.dependencies.storage
+				$workspaceServiceDependency = $SettingsObject.service.dependencies.workspace
+
+				if(!$storageServiceDependency) {
+
+					if($resourceGroupObjectArray.networkSecurityGroups.service.dependencies.storage -is [array]) {
+						$storageServiceDependency = $resourceGroupObjectArray.networkSecurityGroups.service.dependencies.storage[0]
+					}
+					else {
+						$storageServiceDependency = $resourceGroupObjectArray.networkSecurityGroups.service.dependencies.storage
+					}
+				}
+
+				if(!$workspaceServiceDependency) {
+
+					if($resourceGroupObjectArray.networkSecurityGroups.service.dependencies.workspace -is [array]) {
+						$workspaceServiceDependency = $resourceGroupObjectArray.networkSecurityGroups.service.dependencies.workspace[0]
+					}
+					else {
+						$workspaceServiceDependency = $resourceGroupObjectArray.networkSecurityGroups.service.dependencies.workspace
+					}
+				}
+
+				if (!$storageServiceDependency) {
+					Write-Error "Please provide a storage service value." -Category InvalidArgument
+				}
+
+				if (!$workspaceServiceDependency) {
+					Write-Error "Please provide a workspace service value." -Category InvalidArgument
+				}
+
+				$storageAccounts = Get-CmAzService -Service $storageServiceDependency -ThrowIfUnavailable
+				$workspace = Get-CmAzService -Service $workspaceServiceDependency -ThrowIfUnavailable -ThrowIfMultiple
+
+				foreach ($resourceGroupObject in $resourceGroupObjectArray) {
+					
+					foreach ($nsg in $resourceGroupObject.networkSecurityGroups) {
+					
+						$nsg.resourceGroup = $resourceGroupObject.resourceGroup
+
+						if (!$nsg.location) {
+							$nsg.location = $resourceGroupObject.resourceGroup.location
+						}
+
+						$filteredStorageAccounts = $storageAccounts | Where-Object { $_.location -eq $nsg.location }
+
+						if ($filteredStorageAccounts -Is [array]) {
+							$filteredStorageAccounts = $filteredStorageAccounts[0]
+						}
+
+						$nsg.storageAccountId = $filteredStorageAccounts.id
+					}
+				}
+
+				$networkWatcherResourceGroupName = "NetworkWatcherRG"
+
+				New-AzResourceGroup -Location $workspace.location -Name $networkWatcherResourceGroupName -Force
+
+				Write-Verbose "Deploying nsgs..."
+				New-AzDeployment `
+					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.Nsgs.json `
+					-Location $workspace.location `
+					-Locations ($resourceGroupObjectArray.networkSecurityGroups.location | Sort-Object | Get-Unique) `
+					-NetworkWatcherResourceGroupName $networkWatcherResourceGroupName `
+					-Nsgs $resourceGroupObjectArray.networkSecurityGroups `
+					-Workspace $workspace
+			}
+
+			Write-Verbose "Deploying vnets and udrs..."
+
+			New-AzDeployment `
 				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.json `
-				-location $resourceGroupObjectArray[0].resourceGroup.location`
-				-networkingArrayObject $resourceGroupObjectArray > $null
+				-Location $resourceGroupObjectArray[0].resourceGroup.location `
+				-NetworkingArrayObject $resourceGroupObjectArray
 
 			$resourceGroupsToSet = ($resourceGroupObjectArray.resourceGroup | where-object -Property createRG -eq $true).name
+			$resourceGroupsToSet += $networkWatcherResourceGroupName
 
 			if ($resourceGroupsToSet) {
 				Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet

@@ -134,7 +134,7 @@
                             }
                         },
                         {
-                            "condition": "[not(equals(parameters('StorageSettings').tier, 'Premium'))]",
+                            "condition": "[not(equals(parameters('StorageSettings').tier, 'premium'))]",
                             "type": "Microsoft.Storage/storageAccounts/queueServices",
                             "apiVersion": "2019-06-01",
                             "name": "[concat(parameters('StorageSettings').storageAccountName, '/default')]",
@@ -163,7 +163,7 @@
                             }
                         },
                         {
-                            "condition": "[not(equals(parameters('StorageSettings').tier, 'Premium'))]",
+                            "condition": "[not(equals(parameters('StorageSettings').tier, 'premium'))]",
                             "type": "Microsoft.Storage/storageAccounts/tableServices",
                             "apiVersion": "2019-06-01",
                             "name": "[concat(parameters('StorageSettings').storageAccountName, '/default')]",

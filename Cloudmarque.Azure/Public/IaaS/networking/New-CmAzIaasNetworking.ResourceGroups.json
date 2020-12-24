@@ -1,0 +1,25 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "NetworkingArrayObject": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+        {
+            "condition": "[parameters('NetworkingArrayObject')[copyIndex('resourceGroupCopy')].resourceGroup.createRG]",
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2019-10-01",
+            "name": "[parameters('NetworkingArrayObject')[copyIndex('resourceGroupCopy')].resourceGroup.Name]",
+            "location": "[parameters('NetworkingArrayObject')[copyIndex('resourceGroupCopy')].resourceGroup.location]",
+            "copy": {
+                "name": "resourceGroupCopy",
+                "count": "[length(parameters('NetworkingArrayObject'))]"
+            },
+            "tags": {
+                "cm-service": "[parameters('NetworkingArrayObject')[copyIndex('resourceGroupCopy')].resourceGroup.service.publish.resourceGroup]"
+            }
+        }
+    ]
+}

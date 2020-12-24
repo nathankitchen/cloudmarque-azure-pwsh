@@ -1,6 +1,12 @@
 # vnets, networkSecurityGroups, routeTables are default folder locations for yaml files, but you can also provide relative path to files in different directories as well.
 # Do not add .yml extension to filenames
 
+service:
+  dependencies:
+    storage:
+    workspace:
+
+networking:
 - ResourceGroupName: rg-1
   location:                     # Resource group location. optional - Not required if resource group already exists. Defaults to vnet location for new resourcegroup
   service:
@@ -25,6 +31,9 @@
       networkSecurityGroup:
       routeTable:
       resourceGroup:
+    dependency:
+      storage:
+      workspace:
   location:                     # optional
   vnets:
     - ./customfolder/vnet-2
