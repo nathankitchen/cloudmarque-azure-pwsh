@@ -79,29 +79,23 @@
 			$packageVersion = $dataFile.moduleVersion
 			$date = Get-Date -UFormat "+%Y-%m-%dT%H:%M:%S.000Z"
 
-			try {
-				$fullProjectRootPath = (Get-Item $ProjectRoot).FullName
-			}
-			catch {
-				$fullProjectRootPath = $ProjectRoot
-			}
-
-			$isValid = Test-Path -LiteralPath $fullProjectRootPath -IsValid
+			$isValid = Test-Path -LiteralPath $ProjectRoot -IsValid
 
 			if (!$isValid) {
-				throw "Project root $fullProjectRootPath is not valid"
+				throw "Project root $ProjectRoot is not valid"
 			}
 
-			$exists = Test-Path -LiteralPath $fullProjectRootPath
+			$exists = Test-Path -LiteralPath $ProjectRoot
 
 			if (!$exists -and $ProjectConfirmation -eq "n") {
 				$ProjectConfirmation = Read-Host -Prompt "Create new project root? [y/n] (Default: n)"
 			}
 
 			if ($ProjectConfirmation -eq "y") {
-				New-CmAzProject -Project $fullProjectRootPath
-				$fullProjectRootPath = (Get-Item $ProjectRoot).FullName
+				New-CmAzProject -Project $ProjectRoot
 			}
+
+			$fullProjectRootPath = (Get-Item $ProjectRoot).FullName
 
 			$namingFile = "$fullProjectRootPath/_names/tokens.yml"
 			$namingConventions = Get-CmAzSettingsFile -Path $namingFile

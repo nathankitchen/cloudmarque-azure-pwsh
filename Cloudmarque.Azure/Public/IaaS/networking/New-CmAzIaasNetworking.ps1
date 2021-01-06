@@ -89,6 +89,7 @@
 
 				if ($VnetsCsvFile) {
 					Write-Verbose "Vnet CSV Found."
+					$VnetsCsvFile = Resolve-FilePath -NestedFile $VnetsCsvFile
 					$vnetObjectFile = Import-Csv -Path $VnetsCsvFile
 
 					if ($vnetObjectFile.count -eq 1) {
@@ -105,6 +106,7 @@
 
 				if ($RouteTablesCsvFile) {
 					Write-Verbose "Route Table CSV Found."
+					$RouteTablesCsvFile = Resolve-FilePath -NestedFile $RouteTablesCsvFile
 					$routeTablesFile = Import-Csv -Path $RouteTablesCsvFile
 				}
 				else {
@@ -114,6 +116,7 @@
 
 				if ($NsgsCsvFile) {
 					Write-Verbose "Nsg CSV Found."
+					$NsgsCsvFile = Resolve-FilePath -NestedFile $NsgsCsvFile
 					$nsgFile = Import-Csv -Path $NsgsCsvFile
 				}
 				else {
@@ -123,6 +126,7 @@
 
 				if ($ResourceGroupsCsvFile) {
 					Write-Verbose "Resource Group CSV Found."
+					$ResourceGroupsCsvFile = Resolve-FilePath -NestedFile $ResourceGroupsCsvFile
 					$resourceGroupslocation = Import-Csv -Path $ResourceGroupsCsvFile
 				}
 
@@ -147,23 +151,23 @@
 							foreach ($internalNsg in $interimNsg.Group) {
 
 								$interimNsgObject = New-Object -TypeName psobject -Property @{
-									"resourceGroupName"				= $internalNsg.resourceGroupName;
-									"nsgName"           			= $internalNsg.nsgName;
-									"location"          			= $internalNsg.location;
-									"servicePublish"    			= $internalNsg.servicePublish;
-									"resourceGroupServicePublish" 	= $internalNsg.resourceGroupServicePublish;
-									"storageServiceDependency"		= $internalNsg.storageServiceDependency;
-									"workspaceServiceDependency"	= $internalNsg.workspaceServiceDependency;
-									"ruleName"          			= $externalNsg.ruleName;
-									"priority"          			= $externalNsg.priority;
-									"direction"         			= $externalNsg.direction;
-									"sourceIp"          			= $externalNsg.sourceIp;
-									"sourcePort"        			= $externalNsg.sourcePort;
-									"destinationIp"     			= $externalNsg.destinationIp;
-									"destinationPort"   			= $externalNsg.destinationPort;
-									"protocol"          			= $externalNsg.protocol;
-									"Access"            			= $externalNsg.Access;
-									"Description"       			= $externalNsg.Description
+									"resourceGroupName"           = $internalNsg.resourceGroupName;
+									"nsgName"                     = $internalNsg.nsgName;
+									"location"                    = $internalNsg.location;
+									"servicePublish"              = $internalNsg.servicePublish;
+									"resourceGroupServicePublish" = $internalNsg.resourceGroupServicePublish;
+									"storageServiceDependency"    = $internalNsg.storageServiceDependency;
+									"workspaceServiceDependency"  = $internalNsg.workspaceServiceDependency;
+									"ruleName"                    = $externalNsg.ruleName;
+									"priority"                    = $externalNsg.priority;
+									"direction"                   = $externalNsg.direction;
+									"sourceIp"                    = $externalNsg.sourceIp;
+									"sourcePort"                  = $externalNsg.sourcePort;
+									"destinationIp"               = $externalNsg.destinationIp;
+									"destinationPort"             = $externalNsg.destinationPort;
+									"protocol"                    = $externalNsg.protocol;
+									"Access"                      = $externalNsg.Access;
+									"Description"                 = $externalNsg.Description
 								}
 
 								$interimNsgObjectArray.add($interimNsgObject) > $Null
@@ -228,6 +232,19 @@
 						$dnsServers = ""
 					}
 
+					if ($vnetGroup.virtualnetworkpeers -and $vnetGroup.virtualnetworkpeers -ne '') {
+
+						if ($vnetGroup.virtualnetworkpeers -is [array]) {
+							$virtualnetworkpeers = $vnetGroup.virtualnetworkpeers[0].ToString().split('|')
+						}
+						else {
+							$virtualnetworkpeers = $vnetGroup.virtualnetworkpeers.ToString().split('|')
+						}
+					}
+					else {
+						$virtualnetworkpeers = @()
+					}
+
 					if ($vnetGroup.location -is [array]) {
 						$location = $vnetGroup.location[0]
 					}
@@ -250,12 +267,13 @@
 					}
 
 					$vnetObject = @{
-						vnetName     = $vnetName;
-						addressSpace = $addressSpace;
-						dnsServers   = $dnsServers;
-						subnets      = $subnetObjectList;
-						location     = $location;
-						service      = @{
+						vnetName            = $vnetName;
+						addressSpace        = $addressSpace;
+						dnsServers          = $dnsServers;
+						subnets             = $subnetObjectList;
+						location            = $location;
+						virtualnetworkpeers = $virtualnetworkpeers
+						service             = @{
 							publish = @{
 								vnet          = $servicePublish;
 								resourceGroup = $resourceGroupServicePublish
@@ -412,13 +430,13 @@
 						rules    = $nsgruleObjectList;
 						location = $location;
 						service  = @{
-							publish = @{
+							publish      = @{
 								networkSecurityGroup = $servicePublish;
 								resourceGroup        = $resourceGroupServicePublish
 							};
 							dependencies = @{
-								storage 	= $storageServiceDependency;
-								workspace 	= $workspaceServiceDependency;
+								storage   = $storageServiceDependency;
+								workspace = $workspaceServiceDependency;
 							}
 						}
 					}
@@ -501,7 +519,7 @@
 
 						# Default values if required for ARM template sanity checks
 						if (!$vnetObjectArray) {
-							$vnetObjectArray = @(@{vnetName = "none"; location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
+							$vnetObjectArray = @(@{vnetName = "none"; vnetPeerings = @(); location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
 						}
 
 						if (!$routeTableObjectArray) {
@@ -570,7 +588,7 @@
 						# Adding Objects to resourceGroup Object
 						Write-Verbose "Adding '$($ResourceGroup.Name)' to Resource Group Object List"
 						$ResourceGroupObject = @{
-							
+
 							resourceGroup         = @{
 								name     = $ResourceGroup.Name;
 								location = $RGlocation;
@@ -715,6 +733,10 @@
 								$_.dnsServers = ""
 							}
 
+							$vnetObjectYml | Where-Object { !$_.virtualNetworkPeers } | ForEach-Object {
+								$_.virtualNetworkPeers = @()
+							}
+
 							$vnetObjectYml | ForEach-Object {
 								Set-GlobalServiceValues -GlobalServiceContainer $GlobalServiceContainer  -ServiceKey "vnet" -ResourceServiceContainer $_
 							}
@@ -770,7 +792,7 @@
 
 					# Default values if required for ARM template sanity checks
 					if (!$vnetObjectArray) {
-						$vnetObjectArray = @(@{vnetName = "none"; location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
+						$vnetObjectArray = @(@{vnetName = "none"; vnetPeerings = @(); location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
 					}
 
 					if (!$routeTableObjectArray) {
@@ -820,7 +842,7 @@
 					# Adding Objects to resourceGroup Object
 					Write-Verbose "Adding '$ResourceGroup' to Resource Group Object List"
 					$ResourceGroupObject = @{
-						
+
 						resourceGroup         = @{
 							name     = $ResourceGroup;
 							location = $RGlocation;
@@ -840,7 +862,6 @@
 
 			# Arm Deployment
 			Write-Verbose "Deploying resource groups..."
-
 			New-AzDeployment `
 				-Name 'Cm_network_resource_group_deployment' `
 				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.ResourceGroups.json `
@@ -850,12 +871,13 @@
 			if ($resourceGroupObjectArray.networkSecurityGroups.nsgName[0] -ne 'none' -and $resourceGroupObjectArray.networkSecurityGroups.nsgName -ne 'none') {
 
 				Write-Verbose "Nsgs found..."
+
 				$storageServiceDependency = $SettingsObject.service.dependencies.storage
 				$workspaceServiceDependency = $SettingsObject.service.dependencies.workspace
 
-				if(!$storageServiceDependency) {
+				if (!$storageServiceDependency) {
 
-					if($resourceGroupObjectArray.networkSecurityGroups.service.dependencies.storage -is [array]) {
+					if ($resourceGroupObjectArray.networkSecurityGroups.service.dependencies.storage -is [array]) {
 						$storageServiceDependency = $resourceGroupObjectArray.networkSecurityGroups.service.dependencies.storage[0]
 					}
 					else {
@@ -863,9 +885,9 @@
 					}
 				}
 
-				if(!$workspaceServiceDependency) {
+				if (!$workspaceServiceDependency) {
 
-					if($resourceGroupObjectArray.networkSecurityGroups.service.dependencies.workspace -is [array]) {
+					if ($resourceGroupObjectArray.networkSecurityGroups.service.dependencies.workspace -is [array]) {
 						$workspaceServiceDependency = $resourceGroupObjectArray.networkSecurityGroups.service.dependencies.workspace[0]
 					}
 					else {
@@ -885,9 +907,9 @@
 				$workspace = Get-CmAzService -Service $workspaceServiceDependency -ThrowIfUnavailable -ThrowIfMultiple
 
 				foreach ($resourceGroupObject in $resourceGroupObjectArray) {
-					
+
 					foreach ($nsg in $resourceGroupObject.networkSecurityGroups) {
-					
+
 						$nsg.resourceGroup = $resourceGroupObject.resourceGroup
 
 						if (!$nsg.location) {
@@ -919,13 +941,43 @@
 			}
 
 			Write-Verbose "Deploying vnets and udrs..."
-
 			New-AzDeployment `
 				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.json `
 				-Location $resourceGroupObjectArray[0].resourceGroup.location `
 				-NetworkingArrayObject $resourceGroupObjectArray
 
-			$resourceGroupsToSet = ($resourceGroupObjectArray.resourceGroup | where-object -Property createRG -eq $true).name
+			if ($resourceGroupObjectArray.vnets.virtualnetworkpeers) {
+				$filteredVnetObject = $resourceGroupObjectArray.vnets | Where-Object { $_.virtualnetworkpeers }
+				$vnetPeeringsObjectArray = [System.Collections.ArrayList]@()
+
+				foreach ($Vnet in $filteredVnetObject) {
+
+					foreach ($peeringVnet in $Vnet.virtualnetworkpeers) {
+
+						$currentVnetObject = $resourceGroupObjectArray | Where-Object { $_.vnets.vnetname -eq $Vnet.vnetname }
+						$peeringVnetObject = $resourceGroupObjectArray | Where-Object { $_.vnets.vnetname -eq $peeringVnet }
+
+						$vnetPeeringsObject = @{
+
+							sourceVnetRg           = $currentVnetObject.resourceGroup.name
+							sourceVnetName         = $Vnet.vnetname
+							TargetVnetName         = $peeringVnet
+							TargetVnetRg           = $peeringVnetObject.resourceGroup.name
+							TargetVnetAddressSpace = $peeringVnetObject.vnets.addressSpace
+						}
+
+						$vnetPeeringsObjectArray.Add($vnetPeeringsObject) > $Null
+					}
+				}
+
+				Write-Verbose "Configuring vnet peerings..."
+				New-AzDeployment `
+					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.vnetPeerings.json `
+					-Location $resourceGroupObjectArray[0].resourceGroup.location `
+					-VnetPeeringsObjectArray $vnetPeeringsObjectArray
+			}
+
+			$resourceGroupsToSet = ($resourceGroupObjectArray.resourceGroup | Where-object -Property createRG -eq $true).name
 			$resourceGroupsToSet += $networkWatcherResourceGroupName
 
 			if ($resourceGroupsToSet) {

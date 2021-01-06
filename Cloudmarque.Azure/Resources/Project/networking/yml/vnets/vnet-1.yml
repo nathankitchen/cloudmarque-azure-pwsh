@@ -2,12 +2,15 @@ vnetName: vnet-1
 
 location: UK South
 
-dnsServers: []
+dnsServers: []                  # (Optional) Array of dns servers
+
+vnetpeerings: []                # (Optional) Array of vnet names to peer with.
+
+addressSpace: []                # (Optional) Array of vnet cidr blocks
+
 service:
   publish:
     vnet:
-
-addressSpace: []                  # Array of vnet cidr blocks
 
 subnets:
   - cidr:

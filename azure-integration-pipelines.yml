@@ -91,6 +91,8 @@ stages:
               -VnetsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/vnet.csv" `
               -RouteTablesCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/udr.csv" `
               -NsgsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/nsg.csv" `
+              -StorageServiceDependency "Core-Test-St" `
+              -WorkspaceServiceDependency "Core-Test-Ws" `
               -Verbose `
               -Confirm:$false
 

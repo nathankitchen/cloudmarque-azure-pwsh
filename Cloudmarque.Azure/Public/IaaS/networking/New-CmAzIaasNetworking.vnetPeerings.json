@@ -1,0 +1,64 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VnetPeeringsObjectArray": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('Cm_vnet_peerings_',copyIndex('VnetPeeringsObjectArrayCopy'))]",
+            "resourceGroup": "[parameters('VnetPeeringsObjectArray')[copyIndex('VnetPeeringsObjectArrayCopy')].sourceVnetRg]",
+            "copy": {
+                "name": "VnetPeeringsObjectArrayCopy",
+                "count": "[length(parameters('VnetPeeringsObjectArray'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "VnetPeeringsObject": {
+                        "value": "[parameters('VnetPeeringsObjectArray')[copyIndex('VnetPeeringsObjectArrayCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "VnetPeeringsObject": {
+                            "type": "Object",
+                            "metadata": {
+                                "description": "vnet peering object with all required parameters"
+                            }
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                            "apiVersion": "2019-12-01",
+                            "name": "[concat(parameters('VnetPeeringsObject').sourceVnetName, '/', parameters('VnetPeeringsObject').sourceVnetName, '-', parameters('VnetPeeringsObject').TargetVnetName)]",
+                            "properties": {
+                                "peeringState": "Connected",
+                                "remoteVirtualNetwork": {
+                                    "id": "[resourceId(parameters('VnetPeeringsObject').TargetVnetRg, 'Microsoft.Network/virtualNetworks', parameters('VnetPeeringsObject').TargetVnetName)]"
+                                },
+                                "allowVirtualNetworkAccess": true,
+                                "allowForwardedTraffic": true,
+                                "allowGatewayTransit": false,
+                                "useRemoteGateways": false,
+                                "remoteAddressSpace": {
+                                    "addressPrefixes": "[parameters('VnetPeeringsObject').TargetVnetAddressSpace]"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
