@@ -41,6 +41,25 @@ sqlConfig:
   - startIpAddress: 0.0.0.2
     endIpAddress: 0.0.0.3
 
+- family: azureSql                        # azureSql, postgres, mariaDb, mysql
+  type: elasticPool                       # single, elasticPool, managed (only required if azureSql is used)
+  serverName: Paas-Test-Sv1
+  elasticPoolName: Paas-Test-Epshr1       # Required if type is elasticPool
+  service:                                # (Overwrites global service settings)
+    publish:
+      server:
+      elasticPool:
+    dependencies:
+      keyvault:                           # Key Vault cm-service tag value
+  version:                                # (Optional)
+  databases:
+  administratorLogin: PaasTestSvUser6
+  passwordsecretName: Paas-Test-Sv-Pass6
+  sku:                                    # Database / Elastic Pool SKU
+    name: BasicPool                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
+    capacity: 50                          # In Vcores for GP, BC, HS. In DTU for others.
+  firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
+
 - family: postgressql                     # azureSql, postgressql, mariaDb, mysql
   type:                                   # single, elasticPool, managed (only required if azureSql is used)
   serverName: Paas-Test-Sv2

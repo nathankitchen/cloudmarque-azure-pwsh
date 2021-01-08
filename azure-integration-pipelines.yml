@@ -1,4 +1,4 @@
-variables: 
+variables:
   moduleName: Cloudmarque.Azure
   environment: Integration
 
@@ -21,7 +21,7 @@ stages:
         FailOnStandardError: true
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
-          
+
           ./Initialise-Cloudmarque.ps1 `
             -ProjectDirectory "$(Build.SourcesDirectory)" `
             -Environment "$(environment)" `
@@ -56,8 +56,10 @@ stages:
             -DefinitionName "$(Build.DefinitionName)" `
             -DefinitionVersion "$(Build.DefinitionVersion)"
 
-          New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/web.yml" -Verbose
-          New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/webstatic.yml" -Verbose
+          # Below resources are not being deployed because of known cdn api issue with Set-AzResource in Set-CmAzTag
+          # New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/web.yml" -Verbose
+          # New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/webstatic.yml" -Verbose
+          New-AzResourceGroup -Name "Web-Test-Rg" -location uksouth -tag @{'cm-service' = "Web-Test-Rg" }
           New-CmazPaasSql -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/sql.yml" -Verbose
 
 - stage: Iaas
@@ -91,8 +93,6 @@ stages:
               -VnetsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/vnet.csv" `
               -RouteTablesCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/udr.csv" `
               -NsgsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/nsg.csv" `
-              -StorageServiceDependency "Core-Test-St" `
-              -WorkspaceServiceDependency "Core-Test-Ws" `
               -Verbose `
               -Confirm:$false
 
@@ -118,13 +118,13 @@ stages:
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
             -DefinitionVersion "$(Build.DefinitionVersion)"
-          
+
           New-CmAzIaasVm `
             -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/virtualmachines.yml" `
             -LocalAdminUsername (ConvertTo-SecureString $(AdminUsername) -AsPlainText -Force) `
             -LocalAdminPassword (ConvertTo-SecureString $(AdminPassword) -AsPlainText -Force) `
             -Verbose
-          
+
           New-CmAzIaasRecoveryServicesVault `
             -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/recoveryvault.yml" `
             -PolicySettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/recoverypolicy.yml" `
@@ -146,7 +146,7 @@ stages:
         FailOnStandardError: true
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
-        
+
           ./Initialise-Cloudmarque.ps1 `
             -ProjectDirectory "$(Build.SourcesDirectory)" `
             -Environment "$(environment)" `
@@ -154,7 +154,7 @@ stages:
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
             -DefinitionVersion "$(Build.DefinitionVersion)"
-        
+
           New-CmAzIaasBastionHost -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/bastionHost.yml" -Verbose
           New-CmAzIaasVpnGw -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/vpngw.yml" -Verbose
 
@@ -181,7 +181,7 @@ stages:
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
             -DefinitionVersion "$(Build.DefinitionVersion)"
-        
+
           Set-CmAzSecurityCentre -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/security.yml" -Verbose
 
 - stage: TearDown
@@ -230,7 +230,7 @@ stages:
             $resources = Get-CmAzService -ServiceKey "cm-integration-test-delete" -Service "true" -IsResourceGroup -Verbose
 
             foreach ($resource in $resources) {
-              
+
               try {
                 Remove-AzResourceGroup -Name $resource.resourceGroupName -Verbose -Force
               }

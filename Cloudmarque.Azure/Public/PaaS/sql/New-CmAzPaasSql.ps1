@@ -71,6 +71,7 @@
 			}
 
 			[system.Collections.ArrayList]$servers = @()
+			[system.Collections.ArrayList]$sharedServers = @()
 			[system.Collections.ArrayList]$UniqueSqlServerNames = @()
 
 			Write-Verbose "Starting to build object for deployment.."
@@ -85,7 +86,7 @@
 					foreach ($database in $_.databases) {
 
 						if ($database -is [string]) {
-							
+
 							$databaseObject = @{
 								"name" = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Region $SettingsObject.Location -Name $database
 							}
@@ -138,8 +139,8 @@
 					mysql {
 						"Microsoft.DBforMySQL"
 					}
-					default { 
-						Write-Error "Please provide correct database family name. Choose from azuresql|postgressql|mariadb|mysql" 
+					default {
+						Write-Error "Please provide correct database family name. Choose from azuresql|postgressql|mariadb|mysql"
 					}
 				}
 
@@ -186,23 +187,34 @@
 					}
 				}
 
-				$servers.Add($server) > $Null
+				if ($sharedServer) {
+					$sharedServers.Add($server) > $Null
+				}
+				else {
+					$servers.Add($server) > $Null
+				}
 			}
-			$servers | ForEach-Object {
 
-				New-AzResourceGroupDeployment `
-					-ResourceGroupName $resourceGroup.ResourceGroupName `
-					-TemplateFile "$PSScriptRoot\New-CmAzPaasSql.json" `
-					-Servers $_ `
-					-Location $SettingsObject.Location `
-					-Force
+			$joinedSqlServers = @($servers, $sharedServers)
+
+			$joinedSqlServers | ForEach-Object {
+
+				if ($_) {
+
+					New-AzResourceGroupDeployment `
+						-ResourceGroupName $resourceGroup.ResourceGroupName `
+						-TemplateFile "$PSScriptRoot\New-CmAzPaasSql.json" `
+						-Servers $_ `
+						-Location $SettingsObject.Location `
+						-Force
+				}
 			}
 
 			[system.Collections.ArrayList]$resourcesToSet = @()
 
-			$resourcesToSet += ($servers.resourceDetails | where-object -Property family -eq 'Microsoft.Sql').databases.name
-			$resourcesToSet += ($servers.resourceDetails | where-object -Property type -eq 'elasticPool').elasticPoolProperties.elasticPoolName
-			$resourcesToSet += $servers.resourceDetails.serverName
+			$resourcesToSet += ($joinedSqlServers.resourceDetails | where-object -Property family -eq 'Microsoft.Sql').databases.name
+			$resourcesToSet += ($joinedSqlServers.resourceDetails | where-object -Property type -eq 'elasticPool').elasticPoolProperties.elasticPoolName
+			$resourcesToSet += $joinedSqlServers.resourceDetails.serverName
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
 
