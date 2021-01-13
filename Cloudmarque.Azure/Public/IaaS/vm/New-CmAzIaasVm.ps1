@@ -83,11 +83,17 @@
 			if (!$keyVault) {
 				Write-Error "Cannot find key vault resource, ensure the provided tag is set on a keyvault." -Category InvalidArgument -CategoryTargetName "KeyVault.Tag"
 			}
+			else {
+				Write-Verbose "Keyvault found.."
+			}
 
 			$keyEncryptionKey = Get-AzKeyVaultKey -VaultName $keyVault.vaultName -Name $SettingsObject.diskEncryptionKey
 
 			if (!$keyEncryptionKey) {
 				Write-Error "Cannot find key encryption key in keyvault." -Category InvalidArgument -CategoryTargetName "KeyVault.DiskEncryptionKey"
+			}
+			else {
+				Write-Verbose "Encryption key found.."
 			}
 
 			$keyVaultDetails = @{
@@ -106,6 +112,9 @@
 			if (!$automationAccountRegistration) {
 				Write-Error "Cannot find automation registration details." -Category InvalidArgument -CategoryTargetName "AutomationAccountTag"
 			}
+			else {
+				Write-Verbose "Automation Registration details found.."
+			}
 
 			$automationAccount.registrationUrl = $automationAccountRegistration.endpoint
 			$automationAccount.primaryKey = $automationAccountRegistration.primaryKey
@@ -123,8 +132,11 @@
 				if (!$resourceGroup.name) {
 					Write-Error "Please provide a valid resource group name." -Category InvalidArgument -CategoryTargetName "Groups.VirtualMachines.VirtualNetworkTag"
 				}
+				else {
+					Write-Verbose "ResourceGroup found.."
+				}
 
-				if(!$resourceGroup.location) {
+				if (!$resourceGroup.location) {
 					$resourceGroup.location = $SettingsObject.location
 				}
 
@@ -132,15 +144,19 @@
 
 				foreach ($virtualMachine in $resourceGroup.virtualMachines) {
 
-					if(!$virtualMachine.location) {
-						$virtualMachine.location = $SettingsObject.location
+					if (!$virtualMachine.location) {
+						$virtualMachine.location = $resourceGroup.location
+					}
+
+					if (!$virtualMachine.plan) {
+						$virtualMachine.plan = ''
 					}
 
 					$virtualMachine.resourceGroupName = $resourceGroup.name
 
 					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $virtualMachine.networking -IsDependency
 
-					$virtualNetwork = Get-CmAzService -Service $virtualMachine.networking.service.dependencies.vnet -Region $virtualMachine.location -ThrowIfUnavailable -ThrowIfMultiple 
+					$virtualNetwork = Get-CmAzService -Service $virtualMachine.networking.service.dependencies.vnet -Region $virtualMachine.location -ThrowIfUnavailable -ThrowIfMultiple
 
 					$virtualMachine.networking.virtualNetworkId = $virtualNetwork.resourceId
 
@@ -168,10 +184,7 @@
 
 						$scheduleSettings = Get-CmAzSettingsFile -Path "$PSScriptRoot/scheduleTypes.yml"
 
-						$inValidScheduleSettings =
-							!$scheduleSettings -or
-							!$scheduleSettings.updateGroups[$virtualMachine.updateGroup] -or
-							(!$scheduleSettings.updateFrequencies[$virtualMachine.updateFrequency] -and $daysOfWeek -notcontains $virtualMachine.updateFrequency)
+						$inValidScheduleSettings = 	!$scheduleSettings -or !$scheduleSettings.updateGroups[$virtualMachine.updateGroup] -or	(!$scheduleSettings.updateFrequencies[$virtualMachine.updateFrequency] -and $daysOfWeek -notcontains $virtualMachine.updateFrequency)
 
 						if ($inValidScheduleSettings) {
 							Write-Error "No valid schedule settings." -Category ObjectNotFound -CategoryTargetName "scheduleTypeSettingsObject"

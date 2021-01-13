@@ -127,10 +127,10 @@
                                     "registrationKeyPrivate": "[parameters('AutomationAccount').primaryKey]"
                                 }
                             },
-                            "driveMountCommand": "powershell.exe -ExecutionPolicy Bypass -NoLogo -Command \"Get-Disk 
-                                | Where-Object PartitionStyle -eq 'RAW' 
-                                | Initialize-Disk -PartitionStyle MBR -PassThru 
-                                | New-Partition -AssignDriveLetter -UseMaximumSize 
+                            "driveMountCommand": "powershell.exe -ExecutionPolicy Bypass -NoLogo -Command \"Get-Disk
+                                | Where-Object PartitionStyle -eq 'RAW'
+                                | Initialize-Disk -PartitionStyle MBR -PassThru
+                                | New-Partition -AssignDriveLetter -UseMaximumSize
                                 | Format-Volume -FileSystem NTFS -Confirm:$false\""
                         },
                         "linuxDeploymentDetails": {
@@ -176,7 +176,7 @@
                             "type": "Microsoft.Network/networkInterfaces",
                             "apiVersion": "2019-12-01",
                             "name": "[parameters('VM').nicName]",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('VM').location]",
                             "tags": {
                                 "cm-service": "[parameters('VM').service.publish.nic]"
                             },
@@ -199,7 +199,7 @@
                             "type": "Microsoft.Compute/virtualMachines",
                             "apiVersion": "2019-12-01",
                             "name": "[parameters('VM').fullName]",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('VM').location]",
                             "tags": {
                                 "cm-update": "[parameters('VM').updateTag]",
                                 "cm-service": "[parameters('VM').service.publish.vm]"
@@ -207,6 +207,7 @@
                             "dependsOn": [
                                 "[parameters('VM').nicName]"
                             ],
+                            "plan": "[if(empty(parameters('VM').plan), json('null'), parameters('VM').plan)]",
                             "properties": {
                                 "hardwareProfile": {
                                     "VMSize": "[parameters('VM').size]"
@@ -240,7 +241,7 @@
                             "type": "Microsoft.Compute/virtualMachines/extensions",
                             "apiVersion": "2019-12-01",
                             "name": "[concat(parameters('VM').fullName, '/', variables('initDataDisks'))]",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('VM').location]",
                             "dependsOn": [
                                 "[parameters('VM').fullName]"
                             ],
@@ -258,7 +259,7 @@
                             "type": "Microsoft.Compute/virtualMachines/extensions",
                             "apiVersion": "2017-12-01",
                             "name": "[concat(parameters('VM').fullName, '/', variables('deploymentDetails').dependencyAgentExtensionType)]",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('VM').location]",
                             "dependsOn": [
                                 "[variables('initDataDisksExtensionResourceId')]"
                             ],
@@ -273,7 +274,7 @@
                             "type": "Microsoft.Compute/virtualMachines/extensions",
                             "apiVersion": "2017-12-01",
                             "name": "[concat(parameters('VM').fullName, '/', variables('deploymentDetails').monitoringAgentExtensionName)]",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('VM').location]",
                             "dependsOn": [
                                 "[variables('initDataDisksExtensionResourceId')]"
                             ],
@@ -296,7 +297,7 @@
                             "type": "Microsoft.Compute/virtualMachines/extensions",
                             "name": "[concat(parameters('VM').fullName, '/', variables('deploymentDetails').dscExtensionName)]",
                             "apiVersion": "2018-06-01",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('VM').location]",
                             "dependsOn": [
                                 "[variables('initDataDisksExtensionResourceId')]"
                             ],
@@ -313,7 +314,7 @@
                             "type": "Microsoft.Compute/virtualMachines/extensions",
                             "name": "[concat(parameters('VM').fullName, '/DiskEncryption')]",
                             "apiVersion": "2019-03-01",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('VM').location]",
                             "dependsOn": [
                                 "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dependencyAgentExtensionType)]",
                                 "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').monitoringAgentExtensionName)]",
