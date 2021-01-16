@@ -500,9 +500,9 @@ Describe "Get-CmAzResourceName" {
             $name | Should -Be "fd-myfrontdoor-dev-uks-27fe25ca"
         }
 
-        It "Should get a ServiceHealthAlert name" {
-            $name = Get-CmAzResourceName -Resource "ServiceHealthAlert" -Architecture $architecture -Region $region -Name "MyServiceHealthAlert"
-            $name | Should -Be "svceha-myservicehealthalert-dev-uks-277d1c78"
+        It "Should get a Alert name" {
+            $name = Get-CmAzResourceName -Resource "Alert" -Architecture $architecture -Region $region -Name "MyServiceHealthAlert"
+            $name | Should -Be "alt-myservicehealthalert-dev-uks-a87811a2"
         }
 
         It "Should get a BastionHost name" {

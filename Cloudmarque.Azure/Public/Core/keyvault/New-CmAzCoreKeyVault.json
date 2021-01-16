@@ -2,9 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "ActionGroup": {
-            "type": "Object"
-        },
         "KeyvaultDetails": {
             "type": "SecureObject"
         },
@@ -26,14 +23,11 @@
                     "scope": "inner"
                 },
                 "parameters": {
-                    "ActionGroupInner": {
-                        "value": "[parameters('ActionGroup')]"
+                    "Keyvault": {
+                        "value": "[parameters('KeyvaultDetails').keyVaults[copyIndex('KeyVaultCopy')]]"
                     },
-                    "KeyvaultInner": {
-                        "Value": "[parameters('KeyvaultDetails').keyVaults[copyIndex('KeyVaultCopy')]]"
-                    },
-                    "ObjectIdInner": {
-                        "Value": "[parameters('ObjectId')]"
+                    "ObjectId": {
+                        "value": "[parameters('ObjectId')]"
                     },
                     "WorkspaceInner": {
                         "value": "[parameters('Workspace')]"
@@ -43,13 +37,10 @@
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
-                        "ActionGroupInner": {
-                            "type": "Object"
-                        },
-                        "KeyvaultInner": {
+                        "Keyvault": {
                             "type": "SecureObject"
                         },
-                        "ObjectIdInner": {
+                        "ObjectId": {
                             "type": "String"
                         },
                         "WorkspaceInner": {
@@ -64,12 +55,12 @@
                     },
                     "resources": [
                         {
-                            "name": "[parameters('KeyvaultInner').name]",
+                            "name": "[parameters('Keyvault').name]",
                             "type": "Microsoft.KeyVault/Vaults",
                             "apiVersion": "2016-10-01",
-                            "location": "[parameters('KeyvaultInner').location]",
+                            "location": "[parameters('Keyvault').location]",
                             "tags": {
-                                "cm-service": "[parameters('KeyvaultInner').service.publish.keyvault]"
+                                "cm-service": "[parameters('Keyvault').service.publish.keyvault]"
                             },
                             "properties": {
                                 "enabledForDeployment": true,
@@ -79,7 +70,7 @@
                                 "accessPolicies": [
                                     {
                                         "tenantId": "[subscription().tenantId]",
-                                        "objectId": "[parameters('ObjectIDInner')]",
+                                        "objectId": "[parameters('ObjectId')]",
                                         "permissions": {
                                             "keys": [
                                                 "encrypt",
@@ -139,9 +130,9 @@
                                         }
                                     }
                                 ],
-                                "enableSoftDelete": "[parameters('KeyvaultInner').enableSoftDelete]",
-                                "softDeleteRetentionInDays": "[parameters('KeyvaultInner').softDeleteRetentionInDays]",
-                                "enablePurgeProtection": "[parameters('KeyvaultInner').enablePurgeProtection]",
+                                "enableSoftDelete": "[parameters('Keyvault').enableSoftDelete]",
+                                "softDeleteRetentionInDays": "[parameters('Keyvault').softDeleteRetentionInDays]",
+                                "enablePurgeProtection": "[parameters('Keyvault').enablePurgeProtection]",
                                 "sku": {
                                     "name": "standard",
                                     "family": "A"
@@ -151,26 +142,26 @@
                         {
                             "type": "Microsoft.KeyVault/vaults/secrets",
                             "apiVersion": "2019-09-01",
-                            "name": "[concat(parameters('KeyvaultInner').name, '/', parameters('KeyvaultInner').secrets[copyIndex('SecretCopy')].name)]",
+                            "name": "[concat(parameters('Keyvault').name, '/', parameters('Keyvault').secrets[copyIndex('SecretCopy')].name)]",
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                "[parameters('KeyvaultInner').name]"
+                                "[parameters('Keyvault').name]"
                             ],
                             "properties": {
-                                "value": "[parameters('KeyvaultInner').secrets[copyIndex('SecretCopy')].value]"
+                                "value": "[parameters('Keyvault').secrets[copyIndex('SecretCopy')].value]"
                             },
                             "copy": {
                                 "name": "SecretCopy",
-                                "count": "[length(parameters('KeyvaultInner').secrets)]"
+                                "count": "[length(parameters('Keyvault').secrets)]"
                             }
                         },
                         {
                             "type": "Microsoft.KeyVault/Vaults/Providers/DiagnosticSettings",
-                            "name": "[concat(parameters('KeyvaultInner').name, '/Microsoft.Insights/Service')]",
+                            "name": "[concat(parameters('Keyvault').name, '/Microsoft.Insights/Service')]",
                             "apiVersion": "2016-09-01",
-                            "location": "[parameters('KeyvaultInner').location]",
+                            "location": "[parameters('Keyvault').location]",
                             "dependsOn": [
-                                "[parameters('KeyvaultInner').name]"
+                                "[parameters('Keyvault').name]"
                             ],
                             "properties": {
                                 "workspaceId": "[resourceId(parameters('WorkspaceInner').resourceGroupName, 'Microsoft.OperationalInsights/Workspaces', parameters('WorkspaceInner').name)]",
@@ -181,44 +172,6 @@
                                         "retentionPolicy": "[variables('workspaceRetentionPolicy')]"
                                     }
                                 ]
-                            }
-                        },
-                        {
-                            "type": "Microsoft.Insights/ActivityLogAlerts",
-                            "apiVersion": "2017-04-01",
-                            "name": "[concat(parameters('KeyvaultInner').name, 'Admin')]",
-                            "location": "Global",
-                            "dependsOn": [
-                                "[parameters('KeyvaultInner').name]"
-                            ],
-                            "tags": {
-                                "cm-service": "[parameters('KeyvaultInner').service.publish.activityLogAlert]"
-                            },
-                            "properties": {
-                                "scopes": [
-                                    "[subscription().Id]"
-                                ],
-                                "condition": {
-                                    "allOf": [
-                                        {
-                                            "field": "category",
-                                            "equals": "Administrative"
-                                        },
-                                        {
-                                            "field": "resourceId",
-                                            "equals": "[resourceId('Microsoft.KeyVault/Vaults', parameters('KeyvaultInner').name)]"
-                                        }
-                                    ]
-                                },
-                                "actions": {
-                                    "actionGroups": [
-                                        {
-                                            "actionGroupId": "[resourceId(parameters('ActionGroupInner').resourceGroupName, 'Microsoft.Insights/ActionGroups', parameters('ActionGroupInner').name)]",
-                                            "webhookProperties": {}
-                                        }
-                                    ]
-                                },
-                                "enabled": true
                             }
                         }
                     ]

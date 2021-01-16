@@ -432,8 +432,8 @@ resources:
   minLength: 1
   maxLength: 64
   generator: standard
-- name: ServiceHealthAlert
-  shortname: svceha
+- name: Alert
+  shortname: alt
   minLength: 1
   maxLength: 64
   generator: standard

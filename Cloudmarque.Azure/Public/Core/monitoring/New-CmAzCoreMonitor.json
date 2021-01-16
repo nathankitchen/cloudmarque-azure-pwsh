@@ -2,11 +2,20 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "ActionGroups": {
+            "type": "Array"
+        },
+        "Alerts": {
+            "type": "Array"
+        },
         "AppInsightsName": {
-            "type": "string"
+            "type": "String"
+        },
+        "ServiceContainer": {
+            "type": "Object"
         },
         "Solutions": {
-            "type": "array",
+            "type": "Array",
             "defaultValue": [
                 {
                     "planName": "KeyVaultAnalytics",
@@ -35,17 +44,12 @@
             ]
         },
         "WorkspaceName": {
-            "type": "string"
-        },
-        "ServiceContainer": {
-            "type": "object"
+            "type": "String"
         }
-    },
-    "variables": {
     },
     "resources": [
         {
-            "type": "Microsoft.OperationalInsights/workspaces",
+            "type": "Microsoft.OperationalInsights/Workspaces",
             "apiVersion": "2015-11-01-preview",
             "name": "[parameters('workspaceName')]",
             "location": "[resourceGroup().location]",
@@ -65,7 +69,7 @@
             }
         },
         {
-            "type": "Microsoft.Insights/components",
+            "type": "Microsoft.Insights/Components",
             "apiVersion": "2014-04-01",
             "name": "[parameters('AppInsightsName')]",
             "location": "[resourceGroup().location]",
@@ -81,7 +85,7 @@
         },
         {
             "name": "[concat(parameters('workspaceName'), '/', subscription().subscriptionId)]",
-            "type": "Microsoft.OperationalInsights/workspaces/dataSources",
+            "type": "Microsoft.OperationalInsights/Workspaces/DataSources",
             "apiVersion": "2015-11-01-preview",
             "properties": {
                 "linkedResourceId": "[concat(subscription().Id, '/providers/Microsoft.Insights/eventTypes/management')]"
@@ -115,6 +119,63 @@
             "copy": {
                 "name": "SolutionsCopy",
                 "count": "[length(parameters('Solutions'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Insights/ActionGroups",
+            "apiVersion": "2019-03-01",
+            "name": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].name]",
+            "location": "Global",
+            "tags": {
+                "cm-service": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].service.publish.actionGroup]"
+            },
+            "properties": {
+                "groupShortName": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].shortName]",
+                "enabled": true,
+                "armRoleReceivers": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].armRoles]",
+                "automationRunbookReceivers": "[parameters('actionGroups')[copyIndex('ActionGroupCopy')].runbooks]",
+                "azureAppPushReceivers": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].notifications]",
+                "azureFunctionReceivers": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].functions]",
+                "emailReceivers": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].emails]",
+                "itsmReceivers": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].itsm]",
+                "logicAppReceivers": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].logicApps]",
+                "smsReceivers": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].sms]",
+                "voiceReceivers": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].voice]",
+                "webhookReceivers": "[parameters('ActionGroups')[copyIndex('ActionGroupCopy')].webhooks]"
+            },
+            "copy": {
+                "name": "ActionGroupCopy",
+                "count": "[length(parameters('ActionGroups'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Insights/ActivityLogAlerts",
+            "apiVersion": "2020-10-01",
+            "name": "[parameters('Alerts')[copyIndex('AlertsCopy')].name]",
+            "location": "Global",
+            "tags": {
+                "cm-service": "[parameters('Alerts')[copyIndex('AlertsCopy')].servicePublish]"
+            },
+            "properties": {
+                "enabled": "[parameters('Alerts')[copyIndex('AlertsCopy')].enabled]",
+                "scopes": [
+                    "[subscription().Id]"
+                ],
+                "condition": {
+                    "allOf": "[parameters('Alerts')[copyIndex('AlertsCopy')].conditions]"
+                },
+                "actions": {
+                    "actionGroups": [
+                        {
+                            "actionGroupId": "[resourceId('Microsoft.Insights/ActionGroups', parameters('Alerts')[copyIndex('AlertsCopy')].actionGroupName)]",
+                            "webhookProperties": {}
+                        }
+                    ]
+                }
+            },
+            "copy": {
+                "name": "AlertsCopy",
+                "count": "[length(parameters('Alerts'))]"
             }
         }
     ]

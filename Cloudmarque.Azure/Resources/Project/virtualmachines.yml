@@ -161,7 +161,7 @@ groups:
           offer: Windows-10
           sku: rs5-pro
           version: latest
-        location: UK West
+        location: UK South
         service:
           publish:
             vm: Iaas-Test-Vm6
@@ -186,7 +186,7 @@ groups:
           offer: Windows-10
           sku: rs5-pro
           version: latest
-        location: UK West
+        location: UK South
         service:
           publish:
             vm: Iaas-Test-Vm7
@@ -211,7 +211,7 @@ groups:
           offer: Windows-10
           sku: rs5-pro
           version: latest
-        location: UK West
+        location: UK South
         service:
           publish:
             vm: Iaas-Test-Vm8
@@ -236,7 +236,7 @@ groups:
           offer: Windows-10
           sku: rs5-pro
           version: latest
-        location: UK West
+        location: UK South
         service:
           publish:
             vm: Iaas-Test-Vm9
@@ -265,7 +265,7 @@ groups:
           offer: centos-8-3-free
           sku: centos-8-3-free
           version: latest
-        location: UK West
+        location: UK South
         service:
           publish:
             vm: Iaas-Test-Vm10

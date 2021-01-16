@@ -8,7 +8,6 @@ service:
   publish:
     resourceGroup: Core-Test-Kv-Rg
     keyvault: Core-Test-Kv
-    activityLogAlert: Core-Test-Kv-Ala
 
 keyVaults:
 - name: Core-Test-Kv
@@ -32,7 +31,3 @@ keyVaults:
     "Iaas-Test-Key-Enc-Key2",
     "Iaas-Test-Key-Enc-Key3"
   ]
-  service:
-    publish:
-      keyvault:
-      activityLogAlert:

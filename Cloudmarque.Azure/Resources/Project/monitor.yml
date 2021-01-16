@@ -1,15 +1,33 @@
-name: coretestmonitor
+name: coretestmonitor001
 location: UK South
-advisorLowCPUThresholdPercentage: 5     # Can be set to 0, 5, 10, 15 or 20
+advisorLowCPUThresholdPercentage: 5									   # Can be set to 0, 5, 10, 15 or 20
+
 service:
   publish:
-    activityLogAlert: Core-Test-Monitor-Ala
+    actionGroup: Core-Test-Ag1
+    keyvaultAdminAlert: Core-Test-Kv-Ala
+    resourceHealthAlert: Core-Test-Rsc-Ala
+    serviceHealthAlert: Core-Test-Svc-Ala
     appInsights: Core-Test-Ai
+    resourceGroup: Core-Test-Monitor-Rg
     solution: Core-Test-Sol
     storage: Core-Test-St
     workspace: Core-Test-Ws
-    monitoringResourceGroup: Core-Test-Monitor-Rg
-    actionGroup: Core-Test-Ag1
+  dependencies: 
+    keyvault: Core-Test-Kv
+
+alerts:
+  keyvaultAdmin:                                                      # Activity log alerts for core keyvaults
+    actionGroupName: Core-Test-Ag4
+    enabled: true
+  resourceHealth:                                                     # Resource health alerts for core storage, keyvaults and log analytics.
+    actionGroupName: Core-Test-Ag5
+    enabled: true
+  serviceHealth:
+    actionGroupName: Core-Test-Ag6                                    # Service health alerts for all services in specified regions
+    impactedLocations: [UK South, UK West, West Europe, Global]
+    enabled: true
+
 actionGroups:
 - name: Core-Test-Ag1
   shortname: CTA1

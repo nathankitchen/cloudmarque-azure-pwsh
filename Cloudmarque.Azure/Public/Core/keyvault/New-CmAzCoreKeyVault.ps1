@@ -8,7 +8,6 @@ function New-CmAzCoreKeyVault {
 		 Completes the following:
 			* Deploys multiple keyvaults in multiple locations to a specified resource group.
 			* Adds diagnostic settings linking the keyvaults to the core workspace.
-			* Adds activity log alert rules for whenever an auditevent is raised in any of the keyvaults.
 
 		.Parameter SettingsFile
 		 File path for the settings file to be converted into a settings object.
@@ -17,7 +16,7 @@ function New-CmAzCoreKeyVault {
 		 Object containing the configuration values required to run this cmdlet.
 
 		.Parameter TagSettingsFile
-         File path for the tags settings file containing tags defination.
+         File path for settings containing tags definition.
 
 		.Component
 		 Core
@@ -64,6 +63,8 @@ function New-CmAzCoreKeyVault {
                 Write-Error "Please provide at least one keyvault." -Category InvalidArgument -CategoryTargetName "Keyvaults"
 			}
 
+			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
+
 			Write-Verbose "Generating standardised Key Vault names..."
 			ForEach ($keyVault in $SettingsObject.keyVaults) {
 
@@ -95,15 +96,13 @@ function New-CmAzCoreKeyVault {
 				}
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $keyVault
-				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "activityLogAlert" -ResourceServiceContainer $keyVault
 			}
 
 			Write-Verbose "Generating keyvault resource group name..."
 			$keyVaultResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName
 
 			Write-Verbose "Deploying keyvault resource group..."
-			$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.resourceGroup }
-			New-AzResourceGroup -Location $SettingsObject.location -Name $keyVaultResourceGroup -Tag $resourceGroupServiceTag -Force
+			New-AzResourceGroup -Location $SettingsObject.location -Name $keyVaultResourceGroup -Tag @{ "cm-service" = $SettingsObject.service.publish.resourceGroup } -Force
 
 			$azCtx = (Get-AzContext).account
 
@@ -117,14 +116,10 @@ function New-CmAzCoreKeyVault {
 				}
 			}
 
-			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
-			$actionGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.actiongroup -ThrowIfUnavailable -ThrowIfMultiple
-
-			Write-Verbose "Deploying keyvaults..."
+			Write-Verbose "Deploying Keyvaults..."
 			New-AzResourceGroupDeployment `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreKeyVault.json" `
 				-ResourceGroupName $keyVaultResourceGroup `
-				-ActionGroup $actionGroup `
 				-KeyvaultDetails $SettingsObject `
 				-ObjectId $objectId `
 				-Workspace $workspace `
@@ -140,12 +135,8 @@ function New-CmAzCoreKeyVault {
 				}
 
 				$keyvault.encryptionKeyNames | ForEach-Object -Parallel {
-					
-					$keyvault = $using:keyvault
-
-					Add-AzKeyVaultKey -Name $_ -VaultName $keyvault.name -Destination "Software" > $null
+					Add-AzKeyVaultKey -Name $_ -VaultName $using:keyvault.name -Destination "Software" > $null
 				}
-
 			}
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $keyVaultResourceGroup

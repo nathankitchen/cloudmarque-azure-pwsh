@@ -33,7 +33,7 @@
 		 Required headers: resourceGroupName|location
 
 		.Parameter TagSettingsFile
-		 File path for the tags settings file containing tags defination.
+     File path for settings containing tags definition.
 
 		.Component
 		 IaaS

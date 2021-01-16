@@ -19,7 +19,7 @@ function New-CmAzCore {
          Object containing the configuration values required to run this cmdlet.
 
         .Parameter TagSettingsFile
-         File path for the tags settings file containing tags defination.
+         File path for the settings containing tags definition.
 
         .Component
          Core
