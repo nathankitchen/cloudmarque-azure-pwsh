@@ -321,6 +321,15 @@
 						$location = $routeTableGroup.location
 					}
 
+					if ($routeTableGroup.routePropagation -is [array]) {
+						$routePropagation = $routeTableGroup.routePropagation[0]
+					}
+					else {
+						$routePropagation = $routeTableGroup.routePropagation
+					}
+
+					[bool]::TryParse($routePropagation, [ref]$routePropagation)  > $Null
+
 					if ($routeTableGroup.servicePublish -is [array]) {
 						$servicePublish = $routeTableGroup.servicePublish[0]
 					}
@@ -337,6 +346,7 @@
 
 					$routeTableObject = @{
 						tableName = $tableName;
+						routePropagation = $routePropagation;
 						routes    = $routeObjectList;
 						location  = $location;
 						service   = @{
@@ -757,6 +767,10 @@
 
 							$routeTableObjectYml | Where-Object { !$_.location } | ForEach-Object {
 								$_.location = ""
+							}
+
+							$routeTableObjectYml | Where-Object { !$_.routePropagation } | ForEach-Object {
+								$_.routePropagation = $false
 							}
 
 							$routeTableObjectYml | ForEach-Object {

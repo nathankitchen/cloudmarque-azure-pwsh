@@ -98,6 +98,7 @@
                                 "count": "[length( parameters('RouteTableArmObject'))]"
                             },
                             "properties": {
+                                "disableBgpRoutePropagation": "[not(parameters('RouteTableArmObject')[copyIndex('routeTableCopy')].routePropagation)]",
                                 "copy": [
                                     {
                                         "name": "routes",
