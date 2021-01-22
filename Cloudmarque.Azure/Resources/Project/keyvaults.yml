@@ -4,14 +4,13 @@ location: UK South
 service:
   dependencies:
     workspace: Core-Test-Ws
-    actiongroup: Core-Test-Ag2
   publish:
     resourceGroup: Core-Test-Kv-Rg
     keyvault: Core-Test-Kv
 
 keyVaults:
 - name: Core-Test-Kv
-  type: Core
+  type: ServicePrincipal
   location: UK South
   enableSoftDelete: false
   enablePurgeProtection: true
