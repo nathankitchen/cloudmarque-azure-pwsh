@@ -1,5 +1,8 @@
+component: automation                                           # Required to use settings with New-CmAzDeployment
+
 location: UK South
 name: Core-Test-Auto1919122
+
 service:
   dependencies:
     keyvault: Core-Test-Kv

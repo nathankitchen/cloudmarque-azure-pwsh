@@ -1,3 +1,5 @@
+component: keyvaults                      # Required to use settings with New-CmAzDeployment
+
 resourceGroupName: Core-Test-Kv
 location: UK South
 

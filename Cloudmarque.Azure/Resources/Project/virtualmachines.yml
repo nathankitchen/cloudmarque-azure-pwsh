@@ -1,5 +1,8 @@
+component: virtualmachines                                        # Required to use settings with New-CmAzDeployment
+
 location: UK South
 dscConfigNode:                                                    # Optional, represents compiled node of a DSC runbook.
+
 service:
   dependencies:
     automation: Core-Test-Auto

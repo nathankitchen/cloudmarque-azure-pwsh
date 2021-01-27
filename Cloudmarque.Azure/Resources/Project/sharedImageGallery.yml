@@ -1,4 +1,6 @@
-﻿resourceGroupServiceTag:             # For deployment to existing resource group | cm-service tag value for new resource group
+﻿component: sharedImageGallery         # Required to use settings with New-CmAzDeployment
+
+resourceGroupServiceTag:             # For deployment to existing resource group | cm-service tag value for new resource group
 resourceGroupName:                   # For creating new resource groups
 location:                            # Shared Image gallery region
 

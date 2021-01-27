@@ -1,6 +1,8 @@
+component: monitor                                                    # Required to use settings with New-CmAzDeployment
+
 name: coretestmonitor001
 location: UK South
-advisorLowCPUThresholdPercentage: 5									   # Can be set to 0, 5, 10, 15 or 20
+advisorLowCPUThresholdPercentage: 5									                  # Can be set to 0, 5, 10, 15 or 20
 
 service:
   publish:
@@ -13,7 +15,7 @@ service:
     solution: Core-Test-Sol
     storage: Core-Test-St
     workspace: Core-Test-Ws
-  dependencies: 
+  dependencies:
     keyvault: Core-Test-Kv
 
 alerts:
@@ -35,7 +37,7 @@ actionGroups:
     publish:
       actionGroup: Core-Test-Ag1
   armRoles:
-  emails: 
+  emails:
   - emailAddress: testActionGroup1@Cloudmarque.com
   functions:
   itsm:
@@ -70,7 +72,7 @@ actionGroups:
   armRoles:
   emails:
   functions:
-  itsm:                      
+  itsm:
   logicApps:
   notifications:
   runbooks:

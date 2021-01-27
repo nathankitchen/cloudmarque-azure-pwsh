@@ -1,8 +1,11 @@
+component: webstatic                                              # Required to use settings with New-CmAzDeployment
+
 name: WebStaticTest
 location: UK South
 customDomain: int01.cloudmarque.com
 redirectPublicIpAddress: 0.0.0.1                                  # Optional - Restrict access to this IP address
 redirectUrl: web.static@cloudmarque.test.com                      # Optional - Any other IP address redirects to this url.
+
 service:
   publish:
     resourceGroup: Web-Static-Test-Rg

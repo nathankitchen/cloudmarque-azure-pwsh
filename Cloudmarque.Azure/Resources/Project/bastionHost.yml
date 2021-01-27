@@ -1,3 +1,5 @@
+component: bastionHosts                           # Required to use settings with New-CmAzDeployment
+
 location: UK West
 service:
   dependencies:

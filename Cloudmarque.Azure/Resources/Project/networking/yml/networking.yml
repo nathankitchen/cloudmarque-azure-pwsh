@@ -2,6 +2,8 @@
 # Do not add .yml extension to filenames
 # All the relative paths are resolved to the project root directory
 
+component: networking
+
 service:
   dependencies:
     storage:

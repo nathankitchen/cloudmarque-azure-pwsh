@@ -26,13 +26,12 @@ trigger:
 pool:
   vmImage: windows-latest
 
-variables: 
+variables:
   moduleName: Cloudmarque.Azure
   version: ${{ parameters.MajorRelease }}.${{ parameters.MinorRelease }}.${{ parameters.PatchRelease }}
   createArtifacts: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'Manual')))]
   isRelease: $[and(eq(variables.createArtifacts, true), ne('${{ parameters.ReleaseNotes }}', 'null'))]
   isPreRelease: $[ne('${{ parameters.PreRelease }}', 'null')]
-  
 
 stages:
 - stage: Build
@@ -49,7 +48,7 @@ stages:
         targetType: Inline
         script: |
           . .\$(moduleName)\install-dependencies.ps1
-          . .\init.ps1      
+          . .\init.ps1
           Sync-CloudmarqueAzure
 - stage: Test
   displayName: Test Cloudmarque.Azure
@@ -58,22 +57,23 @@ stages:
   jobs:
   - job:
     steps:
-    - task: PowerShell@2
-      displayName: Run Tests
+    - task: AzurePowerShell@5
       inputs:
+        azureSubscription: $(ServiceConnection)
         workingDirectory: $(Build.SourcesDirectory)
         pwsh: true
-        failOnStderr: true
-        errorActionPreference: Stop
-        targetType: Inline
-        script: |
+        errorActionPreference: stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
           . .\init.ps1
           Test-CloudmarqueAzure
     - task: PublishTestResults@2
       displayName: Publish Tests
       inputs:
         testResultsFormat: NUnit
-        testResultsFiles: $(moduleName)/publish/tests/*.xml
+        testResultsFiles: $(moduleName)/publish/Tests/*.xml
         failTaskOnFailedTests: true
 
 - stage: CreateDocumentationArtifact
@@ -120,15 +120,12 @@ stages:
         script: |
           . .\init.ps1
           . .\$(moduleName)\install-dependencies.ps1
-          
           Write-Host "Null suffix"
           $suffix = $null
-          
           if([System.Convert]::ToBoolean('$(isPreRelease)')) {
             Write-Host "Populate suffix"
             $suffix = '${{ parameters.PreRelease }}'
           }
-
           Write-Host "Build"
           Build-CloudmarqueAzure -Version $(version) -Suffix $suffix -ReleaseNotes '${{ parameters.ReleaseNotes }}'
     - task: PublishPipelineArtifact@1
@@ -162,7 +159,7 @@ stages:
               tagSource: userSpecifiedTag
               tag: v$(version)
               releaseNotesSource: inline
-              releaseNotesInline: '${{ parameters.ReleaseNotes }}'
+              releaseNotesInline: "${{ parameters.ReleaseNotes }}"
           - task: PowerShell@2
             inputs:
               workingDirectory: $(Pipeline.Workspace)
@@ -172,7 +169,6 @@ stages:
               targetType: Inline
               script: |
                 . .\$(moduleName)\install-dependencies.ps1
-                
                 Publish-Module `
                   -Path $(moduleName) `
                   -NuGetApiKey $(NugetApiKey) `

@@ -1,5 +1,8 @@
+component: storage                              # Required to use settings with New-CmAzDeployment
+
 resourceGroupName: Iaas-Test-St-Rg              # For creating new resource groups
 location: UK West
+
 service:
   dependencies:
     resourceGroup:                              # For deployment to exisiting resource Group

@@ -1,3 +1,5 @@
+component: web                                                # Required to use settings with New-CmAzDeployment
+
 service:
   publish:
     resourceGroup: Web-Test-Rg

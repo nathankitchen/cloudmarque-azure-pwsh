@@ -1,3 +1,5 @@
+component: sql                            # Required to use settings with New-CmAzDeployment
+
 location: UK South
 
 service:
@@ -9,6 +11,7 @@ service:
     server: Paas-Test-Sv
     database: Paas-Test-Db
     elasticPool: Paas-Test-Ep
+
 logRetentionPeriodInDays: 30
 
 sqlConfig:

@@ -1,3 +1,5 @@
+component: budgets                      # Required to use settings with New-CmAzDeployment
+
 location: UK South
 name: Core-Test-Budget
 
@@ -10,7 +12,7 @@ budgets:
     category: cost                      # Can be cost or usage.
     accountNumber: Core-Test-An1
     timeGrain: Monthly                  # Can be either Monthly, Quarterly or Annually.
-    amount: 2500 
+    amount: 2500
     thresholds: [70]                    # % of amount when warning is fired, must be greater than 0 and less than 1000, cannot have more than five thresholds per budget.
     service:
       dependencies:
@@ -20,8 +22,8 @@ budgets:
     category: cost                      # Can be cost or usage.
     accountNumber: Core-Test-An2
     timeGrain: Monthly                  # Can be either Monthly, Quarterly or Annually.
-    amount: 5000 
-    endDate: "2023-07-20"               # Optional, set to a year from today if empty, must be YYYY-MM-01 format. 
+    amount: 5000
+    endDate: "2023-07-20"               # Optional, set to a year from today if empty, must be YYYY-MM-01 format.
     thresholds: [70, 80]                # % of amount when warning is fired, must be greater than 0 and less than 1000, cannot have more than five thresholds per budget.
     service:
       dependencies:
@@ -32,8 +34,8 @@ budgets:
     accountNumber: Core-Test-An3
     timeGrain: Monthly                  # Can be either Monthly, Quarterly or Annually.
     amount: 10000
-    startDate: "1990-06-01"             # Optional set to today if empty, must be YYYY-MM-01 format. 
-    endDate: "2030-11-10"               # Optional, set to a year from today, must be YYYY-MM-DD format. 
+    startDate: "1990-06-01"             # Optional set to today if empty, must be YYYY-MM-01 format.
+    endDate: "2030-11-10"               # Optional, set to a year from today, must be YYYY-MM-DD format.
     thresholds: [70, 80, 90, 100]       # % of amount when warning is fired, must be greater than 0 and less than 1000, cannot have more than five thresholds per budget.
     service:
       dependencies:
@@ -44,8 +46,8 @@ budgets:
     accountNumber: Core-Test-An4
     timeGrain: Monthly                  # Can be either Monthly, Quarterly or Annually.
     amount: 15000
-    startDate: "2021-06-01"             # Optional set to today if empty, must be YYYY-MM-01 format. 
-    endDate: "2030-11-10"               # Optional, set to a year from today, must be YYYY-MM-DD format. 
+    startDate: "2021-06-01"             # Optional set to today if empty, must be YYYY-MM-01 format.
+    endDate: "2030-11-10"               # Optional, set to a year from today, must be YYYY-MM-DD format.
     thresholds: [100, 120, 140, 160]    # % of amount when warning is fired, must be greater than 0 and less than 1000, cannot have more than five thresholds per budget.
     service:
       dependencies:

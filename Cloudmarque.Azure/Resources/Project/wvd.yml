@@ -1,3 +1,5 @@
+component: wvd                                                        # Required to use settings with New-CmAzDeployment
+
 logAnalyticsTag: log.analyticsnew                                     # (Optional) Uses Cloudmarque service locator.
 azureDeploymentLocation: UK South                                     # (Optional, default: UK South) The location where the deployment logs are stored.
 
