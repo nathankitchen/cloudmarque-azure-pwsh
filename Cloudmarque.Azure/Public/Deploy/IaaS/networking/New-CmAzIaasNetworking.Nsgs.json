@@ -61,6 +61,7 @@
             "apiVersion": "2019-10-01",
             "name": "[concat('Cm_network_nsg_deployment', '_', copyIndex('Nsgs'))]",
             "resourceGroup": "[parameters('Nsgs')[copyIndex('Nsgs')].resourceGroup.name]",
+            "dependsOn": ["Cm_networkWatcher_deployment"],
             "copy": {
                 "name": "Nsgs",
                 "count": "[length(parameters('Nsgs'))]"
@@ -207,7 +208,7 @@
                                     },
                                     "resources": [
                                         {
-                                            "name": "[concat('NetworkWatcher_', parameters('Nsg').location, '/', parameters('Nsg').nsgName, '-FlowLogs')]",
+                                            "name": "[concat('NetworkWatcher_', replace(parameters('Nsg').location, ' ', ''), '/', parameters('Nsg').nsgName, '-FlowLogs')]",
                                             "apiVersion": "2019-04-01",
                                             "type": "Microsoft.Network/NetworkWatchers/FlowLogs",
                                             "location": "[parameters('Nsg').location]",

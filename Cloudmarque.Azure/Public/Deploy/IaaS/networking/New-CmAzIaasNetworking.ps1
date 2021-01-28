@@ -879,7 +879,7 @@
 			# Arm Deployment
 			Write-Verbose "Deploying resource groups..."
 			New-AzDeployment `
-				-Name 'Cm_network_resource_group_deployment' `
+				-Name "Cm_network_resource_group_deployment_$(Get-Date -Format 'ddMMyyyyHHmmsssss')" `
 				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.ResourceGroups.json `
 				-Location $resourceGroupObjectArray[0].resourceGroup.location `
 				-NetworkingArrayObject $resourceGroupObjectArray
@@ -993,7 +993,8 @@
 					-VnetPeeringsObjectArray $vnetPeeringsObjectArray
 			}
 
-			$resourceGroupsToSet = ($resourceGroupObjectArray.resourceGroup | Where-object -Property createRG -eq $true).name
+			$resourceGroupsToSet = @()
+			$resourceGroupsToSet += ($resourceGroupObjectArray.resourceGroup | Where-object -Property createRG -eq $true).name
 			$resourceGroupsToSet += $networkWatcherResourceGroupName
 
 			if ($resourceGroupsToSet) {
