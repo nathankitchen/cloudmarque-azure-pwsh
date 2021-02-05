@@ -32,7 +32,10 @@ pool:
 
 variables:
   moduleName: Cloudmarque.Azure
-  version: ${{ parameters.MajorRelease }}.${{ parameters.MinorRelease }}.${{ parameters.PatchRelease }}.${{ parameters.Hotfix }}
+  ${{ if ne(parameters.Hotfix, 0) }}:
+    version: ${{ parameters.MajorRelease }}.${{ parameters.MinorRelease }}.${{ parameters.PatchRelease }}.${{ parameters.Hotfix }}
+  ${{ if eq(parameters.Hotfix, 0) }}:
+    version: ${{ parameters.MajorRelease }}.${{ parameters.MinorRelease }}.${{ parameters.PatchRelease }}
   createArtifacts: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'Manual')))]
   isRelease: $[and(eq(variables.createArtifacts, true), ne('${{ parameters.ReleaseNotes }}', 'null'))]
   isPreRelease: $[ne('${{ parameters.PreRelease }}', 'null')]
