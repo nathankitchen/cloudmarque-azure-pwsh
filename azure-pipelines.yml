@@ -108,8 +108,13 @@ stages:
         targetPath: publish/docs
         artifactName: docs
         publishLocation: Pipeline
-    - publish: $(System.SourcesDirectory)/Cloudmarque.Azure/Resources/Schema
-      artifact: Schema
+
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Artifact
+      inputs:
+        targetPath: cloudmarque.azure/resources/schema
+        artifactName: schema
+        publishLocation: Pipeline
 
 - stage: CreateCloudmarqueAzureArtifact
   displayName: Create Cloudmarque.Azure Artifact
