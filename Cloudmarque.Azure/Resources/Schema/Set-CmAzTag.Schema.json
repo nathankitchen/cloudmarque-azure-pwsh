@@ -1,0 +1,110 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "Set-CmAzSecurityCentre",
+    "type": "object",
+    "title": "Set-CmAzSecurityCentre",
+    "description": "Settings Root.",
+    "required": [
+        "tags"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "resourceIds": {
+            "$id": "#/resourceIds",
+            "type": ["array", "null"],
+            "title": "ResourceIds",
+            "description": "List of ids for existing resources for which to apply tagging.",
+            "items": {
+                "$id": "#/resourceIds/items",
+                "allOf": [
+                    {
+                        "$id": "#/resourceIds/items/allOf",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "resourceGroupIds": {
+            "$id": "#/resourceGroupIds",
+            "type": ["array", "null"],
+            "title": "ResourceGroupIds",
+            "description": "List of ids for existing resource groups for which to apply tagging.",
+            "items": {
+                "$id": "#/resourceGroupIds/items",
+                "allOf": [
+                    {
+                        "$id": "#/resourceGroupIds/items/allOf",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "tags": {
+            "$id": "#/tags",
+            "type": "object",
+            "title": "Tags",
+            "description": "Contains details required to deploy tagging.",
+            "required": [
+                "mandatory"
+            ],
+            "properties": {
+                "mandatory": {
+                    "$id": "#/tags/mandatory",
+                    "type": "object",
+                    "title": "Mandatory",
+                    "description": "Contains details required to deploy mandatory tagging.",
+                    "required": [
+                        "cm-owner",
+                        "cm-charge",
+                        "cm-apps"
+                    ],
+                    "properties": {
+                        "cm-owner": {
+                            "$id": "#/tags/mandatory/cm-owner",
+                            "type": "string",
+                            "title": "Cm-Owner",
+                            "description": "The contact details of an individual or group who is responsible for management of the resource, including escalating issues to the relevant department."
+                        },
+                        "cm-charge": {
+                            "$id": "#/tags/mandatory/cm-charge",
+                            "type": "string",
+                            "title": "Cm-Charge",
+                            "description": "Tags a resource with a cost center for billing management."
+                        },
+                        "cm-apps": {
+                            "$id": "#/tags/mandatory/cm-apps",
+                            "type": "string",
+                            "title": "Cm-Apps",
+                            "description": "Tags a resource with names of the application(s) that it supports."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "custom": {
+                    "$id": "#/tags/custom",
+                    "type": ["object", "null"],
+                    "title": "Custom",
+                    "description": "Contains details required to deploy custom optional tagging.",
+                    "patternProperties": {
+                        "^.*$": {
+                            "allOf": [
+                                {
+                                    "$id": "#/tags/custom/allOf",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

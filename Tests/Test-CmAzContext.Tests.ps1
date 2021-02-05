@@ -1,6 +1,4 @@
-﻿. $PSScriptRoot\Initialise-CmAzModule.ps1
-
-Describe "*-CmAzContext Lifecycle Tests" {
+﻿Describe "*-CmAzContext Lifecycle Tests" {
 
 	BeforeAll {
 		$projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project";

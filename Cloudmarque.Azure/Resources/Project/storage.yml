@@ -12,10 +12,10 @@ service:
 
 storageAccounts:
 - storageAccountName: IaasTestSt1               # Example Static website on blob
-  accountType: standard
+  accountType: Standard
   blobContainer:
   - name: $web
-    publicAccess: blob                          # Optional
+    publicAccess: Blob                          # Optional
   minimumTlsVersion: TLS1_2
   supportsHttpsTrafficOnly: True
   allowBlobPublicAccess: True
@@ -27,7 +27,7 @@ storageAccounts:
 
 - storageAccountName: IaasTestSt2
   location: UK South                            # Optional (Defaults to resource group location)
-  accountType: standard                         # Standard | Premium
+  accountType: Standard                         # Standard | Premium
   replication: ZRS                              # Optional - LRS (default)| ZRS | GRS | RAGRS. Applicable for standard account only
   minimumTlsVersion: TLS1_2                     # Optional
   supportsHttpsTrafficOnly: True                # Optional
@@ -39,14 +39,14 @@ storageAccounts:
       storage:
 
 - storageAccountName: IaasTestSt3
-  accountType: standard
+  accountType: Standard
   replication: GRS
   service:                                      # Optional
     publish:
       storage:
 
 - storageAccountName: IaasTestSt4
-  accountType: standard
+  accountType: Standard
   blobContainer:
     - name: blob1
     - name: blob2
@@ -61,7 +61,7 @@ storageAccounts:
       storage:
 
 - storageAccountName: IaasTestSt5
-  accountType: standard
+  accountType: Standard
   replication: GRS
   fileShare:
     - name: fileshare1
@@ -77,7 +77,7 @@ storageAccounts:
       storage:
 
 - storageAccountName: IaasTestSt6
-  accountType: standard
+  accountType: Standard
   queue:
     - queue1
     - queue2
@@ -87,7 +87,7 @@ storageAccounts:
       storage:
 
 - storageAccountName: IaasTestSt7
-  accountType: standard
+  accountType: Standard
   table:
     - table1
     - table2
@@ -97,7 +97,7 @@ storageAccounts:
       storage:
 
 - storageAccountName: IaasTestSt8
-  accountType: standard
+  accountType: Standard
   blobContainer:
     - name: blob1
     - name: blob2
@@ -125,7 +125,7 @@ storageAccounts:
 
 - storageAccountName: IaasTestSt9
   location: UK South
-  accountType: premium
+  accountType: Premium
   kind: StorageV2
   blobContainer:
     - name: blob1
@@ -162,7 +162,7 @@ storageAccounts:
       storage:
 
 - storageAccountName: IaasTestSt11
-  accountType: premium
+  accountType: Premium
   kind: BlockBlobStorage
   blobContainer:
     - name: blob1

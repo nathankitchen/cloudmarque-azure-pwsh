@@ -467,3 +467,8 @@ resources:
   minLength: 1
   maxLength: 64
   generator: standard
+- name: SharedImageGallery
+  shortname: sig
+  minLength: 1
+  maxLength: 64
+  generator: standard

@@ -47,33 +47,16 @@
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
-		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Cloudmarque Core Automation Stack")) {
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
-			# Initializing settings file values
+		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Cloudmarque Core Automation Stack")) {
 
 			$azSubscription = Get-AzContext
 			$projectContext = Get-CmAzContext -RequireAzure -ThrowIfUnavailable
 
-			if ($SettingsFile -and !$SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (!$SettingsFile -and !$SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
-
 			$randomValue = Get-Random -Minimum 1001 -Maximum 9999
 
-			if (!$SettingsObject.location) {
-				Write-Error "Location not found."
-			}
-
-			if (!$SettingsObject.automation.certificateSecretName) {
-				Write-Error "No keyVault path or Password provided for Certificate..."
-			}
-
-			Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $SettingsObject.automation -IsDependency
-
-			$keyVault = Get-CmAzService -Service $SettingsObject.automation.service.dependencies.keyvault -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
+			$keyVault = Get-CmAzService -Service $SettingsObject.service.dependencies.keyvault -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
 			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
 
 			$certificateName = $SettingsObject.automation.CertificateName
@@ -91,10 +74,6 @@
 				$keyVaultPersonalAccessToken = $SettingsObject.automation.sourceControl.keyVaultPersonalAccessToken
 				$branch = $SettingsObject.automation.sourceControl.branch
 
-				if (!$keyVaultPersonalAccessToken) {
-					Write-Error "No keyVault path or Password provided for Personal Access Token."
-				}
-
 				if (!$branch) {
 					$branch = "master"
 				}
@@ -109,6 +88,7 @@
 				}
 
 				$personalAccessToken = (Get-AzKeyVaultSecret -VaultName $keyVault.name -Name $keyVaultPersonalAccessToken).SecretValue
+				
 				if (!$personalAccessToken) {
 					Write-Error "No PAT found on key vault."
 				}

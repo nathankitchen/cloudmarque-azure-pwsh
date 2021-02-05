@@ -1,0 +1,311 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzIaasStorage",
+    "type": "object",
+    "title": "New-CmAzIaasStorage",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "storageAccounts"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "resourceGroupName": {
+            "$id": "#/resourceGroupName",
+            "type": "string",
+            "title": "ResourceGroupName",
+            "description": "Becomes part of the generated resource group's name."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Resource group deployment location (default value for all other locations)."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": ["object", "null"],
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/dependencies/resourceGroup",
+                            "type": ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": ["object", "null"],
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "properties": {
+                        "storage": {
+                            "$id": "#/service/publish/storage",
+                            "type": ["string", "null"],
+                            "title": "Storage",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type": ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Value to publish on existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "storageAccounts": {
+            "$id": "#/storageAccounts",
+            "type": "array",
+            "title": "StorageAccounts",
+            "description": "List of details required to deploy all storage accounts.",
+            "items": {
+                "$id": "#/storageAccounts/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/storageAccounts/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "storageAccountName",
+                            "accountType"
+                        ],
+                        "properties": {
+                            "storageAccountName": {
+                                "$id": "#/storageAccounts/items/allOf/storageAccountName",
+                                "type": "string",
+                                "title": "StorageAccountName",
+                                "description": "Becomes part of the generated storage account's name."
+                            },
+                            "location": {
+                                "$id": "#/storageAccounts/items/allOf/location",
+                                "type": ["string", "null"],
+                                "title": "Location",
+                                "description": "Storage account deployment location"
+                            },
+                            "accountType": {
+                                "$id": "#/storageAccounts/items/allOf/accountType",
+                                "type": "string",
+                                "title": "AccountType",
+                                "description": "The storage account's sku name.",
+                                "enum": ["Standard", "Premium"]
+                            },
+                            "kind": {
+                                "$id": "#/storageAccounts/items/allOf/kind",
+                                "type": ["string", "null"],
+                                "title": "Kind",
+                                "description": "The storage account's type.",
+                                "default": "StorageV2",
+                                "enum": ["Storage", "StorageV2", "BlobStorage", "FileStorage", "BlockBlobStorage", null]
+                            },
+                            "replication": {
+                                "$id": "#/storageAccounts/items/allOf/replication",
+                                "type": ["string", "null"],
+                                "title": "Replication",
+                                "description": "Data storage redundancy.",
+                                "enum": ["LRS", "ZRS", "GRS", "RAGRS", null],
+                                "default": "LRS"
+                            },
+                            "blobContainer": {
+                                "$id": "#/storageAccounts/items/allOf/blobContainer",
+                                "type": ["array", "null"],
+                                "title": "BlobContainer",
+                                "description": "Contains details required to deploy a blob container in a storage account.",
+                                "default": [{
+                                    "name": "none",
+                                    "publicAccess": "none"
+                                }],
+                                "items": {
+                                    "$id": "#/storageAccounts/items/allOf/blobContainer/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/storageAccounts/items/allOf/blobContainer/items/allOf",
+                                            "type": "object",
+                                            "required": ["name"],
+                                            "default": {
+                                                "name": "none",
+                                                "publicAccess": "None"
+                                            },
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/storageAccounts/items/allOf/blobContainer/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated blob container's name.",
+                                                    "default": "none"
+                                                },
+                                                "publicAccess": {
+                                                    "$id": "#/storageAccounts/items/allOf/blobContainer/items/allOf/publicAccess",
+                                                    "type": ["string", "null"],
+                                                    "title": "PublicAccess",
+                                                    "description": "Sets access level of the items in the container.",
+                                                    "default": "None",
+                                                    "enum": ["Container", "Blob", "None", null]
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "fileShare": {
+                                "$id": "#/storageAccounts/items/allOf/fileShare",
+                                "type": ["array", "null"],
+                                "title": "FileShare",
+                                "description": "Contains details required to deploy a file share in a storage account.",
+                                "default": [{
+                                    "name": "none",
+                                    "size": 100
+                                }],
+                                "items": {
+                                    "$id": "#/storageAccounts/items/allOf/fileShare/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/storageAccounts/items/allOf/fileShare/items/allOf",
+                                            "type": "object",
+                                            "required": ["name"],
+                                            "default": {
+                                                "name": "none",
+                                                "size": 100
+                                            },
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/storageAccounts/items/allOf/fileShare/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated file share's name.",
+                                                    "default": "none"
+                                                },
+                                                "size": {
+                                                    "$id": "#/storageAccounts/items/allOf/fileShare/items/allOf/size",
+                                                    "type": "integer",
+                                                    "title": "Size",
+                                                    "description": "Maximum size of the share.",
+                                                    "default": 100
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "table": {
+                                "$id": "#/storageAccounts/items/allOf/table",
+                                "type": ["array", "null"],
+                                "title": "Table",
+                                "description": "Contains details required to deploy a table in a storage account.",
+                                "default": ["none"],
+                                "items": {
+                                    "$id": "#/storageAccounts/items/allOf/table/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/storageAccounts/items/allOf/table/items/allOf",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            },
+                            "queue": {
+                                "$id": "#/storageAccounts/items/allOf/queue",
+                                "type": ["array", "null"],
+                                "title": "Queue",
+                                "description": "Contains details required to deploy a queue in a storage account.",
+                                "default": ["none"],
+                                "items": {
+                                    "$id": "#/storageAccounts/items/allOf/queue/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/storageAccounts/items/allOf/queue/items/allOf",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            },
+                            "minimumTlsVersion": {
+                                "$id": "#/storageAccounts/items/allOf/minimumTlsVersion",
+                                "type": ["string", "null"],
+                                "title": "MinimumTlsVersion",
+                                "description": "Miniumum tls versions required for storage requests.",
+                                "default": "TLS1_2"
+                            },
+                            "supportsHttpsTrafficOnly": {
+                                "$id": "#/storageAccounts/items/allOf/supportsHttpsTrafficOnly",
+                                "type": ["boolean", "null"],
+                                "title": "SupportsHttpsTrafficOnly",
+                                "description": "Only allows https for storage communication.",
+                                "default": true
+                            },
+                            "allowBlobPublicAccess": {
+                                "$id": "#/storageAccounts/items/allOf/allowBlobPublicAccess",
+                                "type": ["boolean", "null"],
+                                "title": "AllowBlobPublicAccess",
+                                "description": "Allow public access to all blobs and containers.",
+                                "default": true
+                            },
+                            "networkAclsBypass": {
+                                "$id": "#/storageAccounts/items/allOf/networkAclsBypass",
+                                "type": ["string", "null"],
+                                "title": "NetworkAclsBypass",
+                                "description": "Specifies if traffic will be bypassed for logging, metrics, azureServices or none.",
+                                "default": "AzureServices",
+                                "enum": ["None", "Logging", "Metrics", "AzureServices", null]
+                            },
+                            "networkAclsDefaultAction": {
+                                "$id": "#/storageAccounts/items/allOf/networkAclsDefaultAction",
+                                "type": ["string", "null"],
+                                "title": "NetworkAclsDefaultAction",
+                                "description": "Default action when no other rules match.",
+                                "default": "Allow",
+                                "enum": ["Allow", "Deny", null]
+                            },
+                            "service": {
+                                "$id": "#/storageAccounts/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "publish": {
+                                        "$id": "#/storageAccounts/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "storage": {
+                                                "$id": "#/storageAccounts/items/allOf/service/publish/storage",
+                                                "type": ["string", "null"],
+                                                "title": "Storage",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

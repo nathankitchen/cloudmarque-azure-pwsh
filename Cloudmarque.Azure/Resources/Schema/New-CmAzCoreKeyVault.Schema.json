@@ -1,0 +1,214 @@
+﻿{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzCoreKeyvault",
+    "type": "object",
+    "title": "New-CmAzCoreKeyvault",
+    "description": "Settings Root.",
+    "required": [
+        "resourceGroupName",
+        "location",
+        "service",
+        "keyVaults"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "resourceGroupName": {
+            "$id": "#/resourceGroupName",
+            "type": "string",
+            "title": "ResourceGroupName",
+            "description": "Part of key vault's resource group name."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Resource group deployment location."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "dependencies",
+                "publish"
+            ],
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "workspace"
+                    ],
+                    "properties": {
+                        "workspace": {
+                            "$id": "#/service/dependencies/workspace",
+                            "type": "string",
+                            "title": "Workspace",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "actiongroup": {
+                            "$id": "#/service/dependencies/actiongroup",
+                            "type": ["string", "null"],
+                            "title": "Actiongroup",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": "object",
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "required": [
+                        "resourceGroup"
+                    ],
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type": "string",
+                            "title": "ResourceGroup",
+                            "description": "Value to publish on deployed resource type."
+                        },
+                        "keyvault": {
+                            "$id": "#/service/publish/keyvault",
+                            "type": ["string", "null"],
+                            "title": "Keyvault",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "keyVaults": {
+            "$id": "#/keyVaults",
+            "type": "array",
+            "title": "KeyVaults",
+            "description": "All details required to deploy multiple key vaults.",
+            "items": {
+                "$id": "#/keyVaults/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/keyVaults/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "type",
+                            "location"
+                        ],
+                        "description": "Contains details required to deploy a key vault.",
+                        "properties": {
+                            "name": {
+                                "$id": "#/keyVaults/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of the generated key vault's name."
+                            },
+                            "type": {
+                                "$id": "#/keyVaults/items/allOf/type",
+                                "type": "string",
+                                "title": "Type",
+                                "description": "Specifies if a user or service principal will be linked to the key vault's access policy.",
+                                "enum": ["ServicePrincipal", "User"]
+                            },
+                            "location": {
+                                "$id": "#/keyVaults/items/allOf/location",
+                                "type": "string",
+                                "title": "Location",
+                                "description": "key vault deployment location"
+                            },
+                            "service": {
+                                "$id": "#/keyVaults/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "publish": {
+                                        "$id": "#/keyVaults/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "keyvault": {
+                                                "$id": "#/keyVaults/items/allOf/service/publish/keyvault",
+                                                "type": ["string", "null"],
+                                                "title": "Keyvault",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "enableSoftDelete": {
+                                "$id": "#/keyVaults/items/allOf/enableSoftDelete",
+                                "type": ["boolean", "null"],
+                                "title": "EnableSoftDelete",
+                                "description": "Enable recovery of deleted key vaults and their objects.",
+                                "default": true
+                            },
+                            "softDeleteRetentionInDays": {
+                                "$id": "#/keyVaults/items/allOf/softDeleteRetentionInDays",
+                                "type": ["integer", "null"],
+                                "title": "SoftDeleteRetentionInDays",
+                                "description": "Retention period for the deleted resources.",
+                                "default": 90
+                            },
+                            "enablePurgeProtection": {
+                                "$id": "#/keyVaults/items/allOf/enablePurgeProtection",
+                                "type": ["boolean", "null"],
+                                "title": "EnablePurgeProtection",
+                                "description": "Prevents key vaults and their objects from being purged until the soft delete retention period has elapsed (Can only be enabled once soft delete is enabled).",
+                                "default": true
+                            },
+                            "secretNames": {
+                                "$id": "#/keyVaults/items/allOf/secretNames",
+                                "type": ["array", "null"],
+                                "title": "SecretNames",
+                                "description": "List of secrets to provision for the deployed key vault.",
+                                "items": {
+                                    "$id": "#/keyVaults/items/allOf/secretNames/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/keyVaults/items/allOf/secretNames/items/allOf",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            },
+                            "encryptionKeyNames": {
+                                "$id": "#/keyVaults/items/allOf/encryptionKeyNames",
+                                "type": ["array", "null"],
+                                "title": "EncryptionKeyNames",
+                                "description": "List of key encryption keys for the deployed key vault.",
+                                "items": {
+                                    "$id": "#/keyVaults/items/allOf/encryptionKeyNames/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/keyVaults/items/allOf/encryptionKeyNames/items/allOf",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

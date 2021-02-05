@@ -1,6 +1,4 @@
-﻿. $PSScriptRoot\Initialise-CmAzModule.ps1
-
-Describe "Testing CmdLets are documented..." {
+﻿Describe "Testing CmdLets are documented..." {
 
     $commands = Get-Command -Module "Cloudmarque.Azure"
 

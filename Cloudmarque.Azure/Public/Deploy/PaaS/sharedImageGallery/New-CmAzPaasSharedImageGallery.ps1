@@ -2,25 +2,25 @@
 
     <#
 		.Synopsis
-		 Creates shared images gallery
+         Creates shared images gallery
 
 		.Description
 		 Completes following:
 			* Creates Shared Image Gallery
 			* Creates image definition inside shared image gallery
-			* Adds Images to image definition
+            * Adds Images to image definition
 
 		.Parameter SettingsFile
-		 File path for the settings file to be converted into a settings object.
+         File path for the settings file to be converted into a settings object.
 
 		.Parameter SettingsObject
-		 Object containing the configuration values required to run this cmdlet.
+         Object containing the configuration values required to run this cmdlet.
 
 		.Component
-		 PaaS
+         PaaS
 
 		.Example
-		 New-CmAzPaasSharedImageGallery -SettingsFile ./sharedImageGallery.yml
+         New-CmAzPaasSharedImageGallery -SettingsFile ./sharedImageGallery.yml
 
 		.Example
 		 New-CmAzPaasSharedImageGallery -SettingsObject $settings
@@ -29,9 +29,9 @@
     [OutputType([System.Collections.ArrayList])]
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
     param(
-        [parameter(Mandatory = $true, ParameterSetName = "Settings File")]
+        [parameter(Mandatory = $true, ParameterSetName = "Settings File")]
         [String]$SettingsFile,
-        [parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
+        [parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
         [Object]$SettingsObject
     )
 
@@ -41,18 +41,13 @@
 
         Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
-        if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy shared image gallery")) {
+        $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
-            if ($SettingsFile -and -not $SettingsObject) {
-                $SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-            }
-            elseif (-not $SettingsFile -and -not $SettingsObject) {
-                Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-            }
+        if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy shared image gallery")) {
 
             $resourceGroup = Get-CmAzService -Service $SettingsObject.resourceGroupServiceTag -IsResourceGroup
 
-            if (!$resourceGroup -and $SettingsObject.resourceGroupName ) {
+            if (!$resourceGroup -and $SettingsObject.resourceGroupName) {
                 $rgCheck = Get-AzResourceGroup -Name $SettingsObject.resourceGroupName -ErrorAction SilentlyContinue
 
                 if (!$rgCheck) {
@@ -66,6 +61,8 @@
             elseif (!$resourceGroup -and !$SettingsObject.resourceGroupName) {
                 Write-Error "Please provide appropriate service tag for existing resource group or provide unique name to create new."
             }
+
+            $SettingsObject.galleryName = Get-CmAzResourceName -Resource "SharedImageGallery" -Architecture "Paas" -Region $SettingsObject.location -Name $SettingsObject.galleryName 
 
             $SettingsObject.imageDefinitions | ForEach-Object {
 
@@ -104,7 +101,6 @@
                     $_.memory = ""
                 }
 
-
                 $_.versions | ForEach-Object {
 
                     if (!$_.version -or !$_.imageServiceTag -or !$_.targetRegions) {
@@ -133,16 +129,16 @@
 
                 }
 
-                New-AzResourceGroupDeployment `
-                    -Name "Cm_Gallery_$($SettingsObject.galleryName)" `
-                    -ResourceGroupName $resourceGroup.ResourceGroupName `
-                    -TemplateFile "$PSScriptRoot\New-CmAzPaasSharedImageGallery.json" `
-                    -Location $SettingsObject.location `
-                    -ImageDefinitions $SettingsObject.imageDefinitions `
-                    -GalleryName $SettingsObject.galleryName `
-                    -Force
             }
 
+            New-AzResourceGroupDeployment `
+                -Name "Cm_Gallery_$($SettingsObject.galleryName)" `
+                -ResourceGroupName $resourceGroup.ResourceGroupName `
+                -TemplateFile "$PSScriptRoot\New-CmAzPaasSharedImageGallery.json" `
+                -Location $SettingsObject.location `
+                -ImageDefinitions $SettingsObject.imageDefinitions `
+                -GalleryName $SettingsObject.galleryName `
+                -Force
         }
     }
     catch {

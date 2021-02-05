@@ -1,3 +1,5 @@
+component: securityCentre
+
 location: UK South
 enableUkNhs: True 
 service:

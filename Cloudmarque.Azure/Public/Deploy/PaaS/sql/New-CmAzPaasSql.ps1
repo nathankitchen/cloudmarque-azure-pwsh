@@ -44,16 +44,11 @@
 
 	try {
 
-		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+        Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy SQL database")) {
-
-			if ($SettingsFile -and -not $SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (-not $SettingsFile -and -not $SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
 
 			$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable -ThrowIfMultiple
 
@@ -71,7 +66,7 @@
 			else {
 				$logRetentionPeriodInDays = $SettingsObject.logRetentionPeriodInDays
 			}
-
+   
 			[system.Collections.ArrayList]$servers = @()
 			[system.Collections.ArrayList]$sharedServers = @()
 			[system.Collections.ArrayList]$UniqueSqlServerNames = @()
@@ -115,7 +110,7 @@
 				}
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $_ -IsDependency
-				$keyVault = Get-CmAzService -Service $SettingsObject.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
+				$keyVault = Get-CmAzService -Service $_.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 
 				$serverName = Get-CmAzResourceName -Resource "AzureSQLDatabaseserver" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.serverName
 
@@ -141,9 +136,6 @@
 					mysql {
 						"Microsoft.DBforMySQL"
 					}
-					default {
-						Write-Error "Please provide correct database family name. Choose from azuresql|postgressql|mariadb|mysql"
-					}
 				}
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "server" -ResourceServiceContainer $_
@@ -159,7 +151,13 @@
 				$elasticPool = "none"
 
 				if ($_.type -eq "elasticPool") {
-					$elasticPool = 	Get-CmAzResourceName -Resource "AzureSQLElasticPool" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.elasticPoolName
+					
+					if($_.elasticPoolName) {
+						$elasticPool = 	Get-CmAzResourceName -Resource "AzureSQLElasticPool" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.elasticPoolName
+					}
+					else {
+						Write-Error "Please provide an elastic pool name for the elastic pool type deployment."
+					}
 				}
 
 				$server = @{

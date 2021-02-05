@@ -35,27 +35,11 @@
 
 	try {
 
-		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+        Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Set tags for resources")) {
-
-			if ($SettingsFile -and !$SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (!$SettingsFile -and !$SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
-
-			Write-Verbose "Checking that the expected mandatory tags exist and are not empty..."
-			$expectedMandatoryTagKeys = @("cm-owner", "cm-charge", "cm-apps")
-
-			$mandatoryTagsVariableName = "Tags.Mandatory"
-
-			$missingMandatoryKeys = $expectedMandatoryTagKeys | Where-Object { $SettingsObject.Tags.Mandatory.Keys -NotContains $_ }
-
-			if ($missingMandatoryKeys) {
-				Write-Error "$([string]$missingMandatoryKeys) is missing from the mandatory tags section." -Category InvalidArgument -CategoryTargetName $mandatoryTagsVariableName
-			}
 
 			$cmazContext = Get-CmAzContext
 
@@ -64,29 +48,10 @@
 			$SettingsObject.Tags.Mandatory["cm-source"] = "$($sourceTypeInfo[0]) $($cmazContext.date)"
 			$SettingsObject.Tags.Mandatory["cm-type"] = $sourceTypeInfo[1]
 
-			foreach ($key in $SettingsObject.Tags.Mandatory.Keys) {
-
-				$tagValue = $SettingsObject.Tags.Mandatory[$key]
-
-				if (!$tagValue) {
-					Write-Error "Mandatory Tag - $key is null. Please set the appropriate Value in settings." -Category InvalidArgument -CategoryTargetName $mandatoryTagsVariableName
-				}
-				else {
-					Write-Verbose "Mandatory Tag - $key will be set as $tagValue..."
-				}
-			}
-
 			$allTags = $SettingsObject.Tags.Mandatory
 
 			Write-Verbose "Setting custom tags..."
 			if ($SettingsObject.Tags.Custom) {
-
-				foreach ($customTagKey in $SettingsObject.Tags.Custom.Keys) {
-
-					$Value = $SettingsObject.Tags.Custom[$customTagKey]
-					Write-verbose "Tag - $customTagKey will be set as $Value..."
-				}
-
 				$allTags += $SettingsObject.Tags.Custom
 			}
 

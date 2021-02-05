@@ -47,16 +47,9 @@ function New-CmAzCore {
 
         Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
-		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Core Monitoring and Logging")) {
+        $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
-            if ($SettingsFile -and -not $SettingsObject) {
-                $SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-            }
-            elseif (-not $SettingsFile -and -not $SettingsObject) {
-                Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-            }
-
-            $missingSettingsErrorMessage = "Please provide file path for "
+        if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Core Monitoring and Logging")) {
 
             $SettingsFiles = @(
                 "monitorSettings",
@@ -66,10 +59,6 @@ function New-CmAzCore {
             )
 
             foreach ($SettingsFile in $SettingsFiles) {
-
-                if (!$SettingsObject.$SettingsFile) {
-                    Write-Error "$missingSettingsErrorMessage $SettingsFile" -Category InvalidArgument -CategoryTargetName $SettingsFile
-                }
 
                 Write-Verbose "$SettingsFile found.. "
 

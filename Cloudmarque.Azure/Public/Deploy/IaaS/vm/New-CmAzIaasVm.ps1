@@ -59,24 +59,11 @@
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Virtual Machines")) {
 
-			if ($SettingsFile -and !$SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (!$SettingsFile -and !$SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
-
 			[Hashtable]$keyVaultDetails = $null
-
-			if (!$SettingsObject.location) {
-				Write-Error "Please provide a valid location." -Category InvalidArgument -CategoryTargetName "Location"
-			}
-
-			if (!$SettingsObject.service.dependencies.keyVault) {
-				Write-Error "Please provide a valid keyvault tag." -Category InvalidArgument -CategoryTargetName "KeyVault.Tag"
-			}
 
 			$keyVaultService = Get-CmAzService -Service $SettingsObject.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 
@@ -130,13 +117,6 @@
 			$daysOfWeek = [DayOfWeek].GetEnumNames()
 
 			foreach ($resourceGroup in $SettingsObject.groups) {
-
-				if (!$resourceGroup.name) {
-					Write-Error "Please provide a valid resource group name." -Category InvalidArgument -CategoryTargetName "Groups.VirtualMachines.VirtualNetworkTag"
-				}
-				else {
-					Write-Verbose "ResourceGroup found.."
-				}
 
 				if (!$resourceGroup.location) {
 					$resourceGroup.location = $SettingsObject.location

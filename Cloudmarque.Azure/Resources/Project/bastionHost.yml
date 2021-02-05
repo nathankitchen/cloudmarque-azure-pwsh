@@ -5,7 +5,7 @@ service:
   dependencies:
     resourceGroup: Iaas-Test-Hub2-Rg
     workspace: Core-Test-Ws
-    vnet:
+    vnet: Core-Test-Vnet
   publish:
     bastion: Iaas-Test-Bast
     bastionPublicIP: Iaas-Test-Bast
@@ -17,5 +17,5 @@ bastionHosts:
     dependencies:
       vnet: Iaas-Test-Hub2-Vnet1
     publish:
-      bastion:
-      bastionPublicIP:
+      bastion: Iaas-Test-Bast
+      bastionPublicIP: Iaas-Test-Bast

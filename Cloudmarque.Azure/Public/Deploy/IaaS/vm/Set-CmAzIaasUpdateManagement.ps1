@@ -33,16 +33,11 @@ function Set-CmAzIaasUpdateManagement {
 
 	$ErrorActionPreference = "Stop"
 
+	$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+
 	Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
 	if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Core Logging Automation")) {
-
-		if ($SettingsFile -and !$SettingsObject) {
-			$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-		}
-		elseif (!$SettingsFile -and !$SettingsObject) {
-			Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-		}
 
 		Write-Verbose "Removing pre-existing Automation JobSchedules..."
 		$automationAccount = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -ThrowIfUnavailable -ThrowIfMultiple
@@ -77,15 +72,7 @@ function Set-CmAzIaasUpdateManagement {
 
 			$updateTypes = $scheduleTypeSettingsObject.updateGroups[$scheduleSetting.UpdateGroup]
 
-			if (!$updateTypes) {
-				Write-Error "Update type not recognised." -Category InvalidArgument -CategoryTargetName "updateTypes"
-			}
-
 			$frequency = $scheduleTypeSettingsObject.updateFrequencies[$scheduleSetting.Frequency]
-
-			if (!$frequency) {
-				Write-Error "Frequency not recognised." -Category InvalidArgument -CategoryTargetName "frequency"
-			}
 
 			$currentDate = (Get-Date).date.addDays(1)
 

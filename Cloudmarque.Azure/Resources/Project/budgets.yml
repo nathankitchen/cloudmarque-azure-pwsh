@@ -1,7 +1,6 @@
 component: budgets                      # Required to use settings with New-CmAzDeployment
 
 location: UK South
-name: Core-Test-Budget
 
 service:
   dependencies:
@@ -9,7 +8,7 @@ service:
 
 budgets:
   - name: Core-Test-Bgt1                # No spaces allowed in name.
-    category: cost                      # Can be cost or usage.
+    category: Cost                      # Can be Cost or Usage.
     accountNumber: Core-Test-An1
     timeGrain: Monthly                  # Can be either Monthly, Quarterly or Annually.
     amount: 2500
@@ -19,7 +18,7 @@ budgets:
         actiongroup:
 
   - name: Core-Test-Bgt2                # No spaces allowed in name.
-    category: cost                      # Can be cost or usage.
+    category: Cost                      # Can be Cost or Usage.
     accountNumber: Core-Test-An2
     timeGrain: Monthly                  # Can be either Monthly, Quarterly or Annually.
     amount: 5000
@@ -30,7 +29,7 @@ budgets:
         actiongroup:
 
   - name: Core-Test-Bgt3                # No spaces allowed in name.
-    category: cost                      # Can be cost or usage.
+    category: Cost                      # Can be Cost or Usage.
     accountNumber: Core-Test-An3
     timeGrain: Monthly                  # Can be either Monthly, Quarterly or Annually.
     amount: 10000
@@ -42,7 +41,7 @@ budgets:
         actiongroup: Core-Test-Ag3
 
   - name: Core-Test-Bgt4                # No spaces allowed in name.
-    category: cost                      # Can be cost or usage.
+    category: Cost                      # Can be Cost or Usage.
     accountNumber: Core-Test-An4
     timeGrain: Monthly                  # Can be either Monthly, Quarterly or Annually.
     amount: 15000

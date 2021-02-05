@@ -1,0 +1,101 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "Set-CmAzCoreAutomationDeleteResource",
+    "type": "object",
+    "title": "Set-CmAzCoreAutomationDeleteResource",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "service"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Automation Account deployment location."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "dependencies"
+            ],
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "automation"
+                    ],
+                    "properties": {
+                        "automation": {
+                            "$id": "#/service/dependencies/automation",
+                            "type": "string",
+                            "title": "Automation",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "schedule": {
+            "$id": "#/schedule",
+            "type": ["object", "null"],
+            "title": "Schedule",
+            "description": "Schedule details of when to delete specific resources.",
+            "properties": {
+                "startDate": {
+                    "$id": "#/schedule/startDate",
+                    "type": ["string", "null"],
+                    "title": "StartDate",
+                    "description": "Start date of the schedule.",
+                    "format": "date"
+                },
+                "startTime": {
+                    "$id": "#/schedule/startTime",
+                    "type": ["string", "null"],
+                    "title": "StartTime",
+                    "description": "Start time of the schedule.",
+                    "format": "time"
+                },
+                "endDate": {
+                    "$id": "#/schedule/endDate",
+                    "type": ["string", "null"],
+                    "title": "EndDate",
+                    "description": "End date of the schedule.",
+                    "format": "date"
+                },
+                "endTime": {
+                    "$id": "#/schedule/endTime",
+                    "type": ["string", "null"],
+                    "title": "EndTime",
+                    "description": "End time of the schedule.",
+                    "format": "time"
+                },
+                "frequency": {
+                    "$id": "#/schedule/frequency",
+                    "type": ["string", "null"],
+                    "title": "Frequency",
+                    "description": "Schedule execution frequency.",
+                    "enum": ["Daily", "Weekly", "Monthly", null],
+                    "default": "Daily"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

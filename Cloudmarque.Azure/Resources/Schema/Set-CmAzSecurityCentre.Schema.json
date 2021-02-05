@@ -1,0 +1,117 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "Set-CmAzSecurityCentre",
+    "type": "object",
+    "title": "Set-CmAzSecurityCentre",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "service",
+        "securityContacts"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location"
+        },
+        "enableUkNhs": {
+            "$id": "#/enableUkNhs",
+            "type": ["boolean", "null"],
+            "title": "EnableUkNhs",
+            "description": "Weither to apply the UK NHS policy definition.",
+            "default": false
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "dependencies"
+            ],
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "workspace"
+                    ],
+                    "properties": {
+                        "workspace": {
+                            "$id": "#/service/dependencies/workspace",
+                            "type": "string",
+                            "title": "Workspace",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "securityContacts": {
+            "$id": "#/securityContacts",
+            "type": "object",
+            "title": "SecurityContacts",
+            "description": "List of security contact details for security alerts.",
+            "required": [
+                "primary"
+            ],
+            "properties": {
+                "primary": {
+                    "$id": "#/securityContacts/primary",
+                    "type": "object",
+                    "title": "Primary",
+                    "description": "Primary security contact for security alerts.",
+                    "required": [
+                        "email",
+                        "phone"
+                    ],
+                    "properties": {
+                        "email": {
+                            "$id": "#/securityContacts/primary/email",
+                            "type": "string",
+                            "title": "Email",
+                            "description": "Primary email contact for security alerts.",
+                            "format": "email"
+                        },
+                        "phone": {
+                            "$id": "#/securityContacts/primary/phone",
+                            "type": "integer",
+                            "title": "Phone",
+                            "description": "Primary telephone contact for security alerts."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "additionalEmails": {
+                    "$id": "#/securityContacts/additionalEmails",
+                    "type": ["array", "null"],
+                    "title": "AdditionalEmails",
+                    "description": "Additional email contacts for security alerts",
+                    "items": {
+                        "$id": "#/securityContacts/additionalEmails/items",
+                        "allOf": [
+                            {
+                                "$id": "#/securityContacts/additionalEmails/items/allOf",
+                                "type": "string",
+                                "format": "email"
+                            }
+                        ]
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

@@ -19,6 +19,15 @@ Describe "New-CmAzDeployment Tests" {
 
                     $deployments = New-CmAzDeployment -SettingsFile $_.Path -LocalAdminUsername $username -LocalAdminPassword $password -WhatIf -Verbose 4>&1 -Erroraction continue
                 }
+                elseif ($_.Filename -eq "recoveryvault.yml") {
+
+                    $deployments = New-CmAzDeployment `
+                        -SettingsFile $_.Path `
+                        -PolicySettingsFile "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\recoverypolicy.yml" `
+                        -LocalAdminUsername $username `
+                        -LocalAdminPassword $password `
+                        -WhatIf -Verbose 4>&1 -Erroraction continue
+                }
                 else {
                     $deployments = New-CmAzDeployment -SettingsFile $_.Path -WhatIf -Verbose 4>&1 -Erroraction continue
                 }
@@ -33,7 +42,10 @@ Describe "New-CmAzDeployment Tests" {
 
         It "should throw error message" {
             {
-                New-CmAzDeployment -SettingsFile "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\security.yml" -WhatIf
+                $SettingsObject = Get-CmAzSettingsFile -Path "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\security.yml"
+                $SettingsObject.component = ""
+
+                New-CmAzDeployment -SettingsFile $SettingsObject -WhatIf
             }  | Should -Throw $errorMessage
         }
     }

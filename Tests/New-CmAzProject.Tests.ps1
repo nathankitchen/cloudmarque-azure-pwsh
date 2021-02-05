@@ -1,16 +1,14 @@
-﻿. $PSScriptRoot\Initialise-CmAzModule.ps1
-
-Describe "New-CmAzProject Tests" {
+﻿Describe "New-CmAzProject Tests" {
 	
+	BeforeAll {
+		$source = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project"
+		$destination = "$PSScriptRoot\testFiles"
+	}
+
 	Context "New-CmAzProject" {
-		
-		BeforeAll {
-			$source = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project"
-			$destination = "$PSScriptRoot\testFiles"
-		}
-		
-		It "Should Copy files from $source to $destination" {
-			
+
+		It "Should Copy files from set source to expected destination." {
+
 			New-Item -Path $destination -ItemType "directory"
 
 			New-CmAzProject -Project $destination

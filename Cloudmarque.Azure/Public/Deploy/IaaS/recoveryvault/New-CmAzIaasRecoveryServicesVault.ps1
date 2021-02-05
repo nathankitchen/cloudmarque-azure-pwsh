@@ -60,21 +60,13 @@ function New-CmAzIaasRecoveryServicesVault {
 
     Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
+    $cmdletName = Get-CurrentCmdletName -ScriptRoot $PSCommandPath
+
+    $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $cmdletName
+    $PolicySettingsObject = Get-Settings -SettingsFile $PolicySettingsFile -SettingsObject $PolicySettingsObject -CmdletName "New-CmAzIaasRecoveryServicesPolicy"
+
     if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Backup Vaults")) {
 
-
-        if ($SettingsFile -and !$SettingsObject) {
-            Write-Verbose "Gathering details from settings file ($($SettingsFile))"
-            $SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-        }
-        elseif (!$SettingsFile -and !$SettingsObject) {
-            Throw "No valid input settings"
-        }
-
-        if ($PolicySettingsFile -and !$PolicySettingsObject) {
-            Write-Verbose "Gathering policy details from settings file ($($PolicySettingsFile))"
-            $PolicySettingsObject = Get-CmAzSettingsFile -Path $PolicySettingsFile
-        }
 
         Write-Verbose "Generating standardised Resource Group Name from input: $($SettingsObject.resourceGroupName)"
         $resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName

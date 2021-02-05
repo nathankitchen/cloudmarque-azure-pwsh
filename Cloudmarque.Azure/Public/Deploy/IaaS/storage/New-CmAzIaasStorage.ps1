@@ -48,14 +48,9 @@
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
-		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Storage Account/s.")) {
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
-			if ($SettingsFile -and !$SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (!$SettingsFile -and !$SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
+		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Storage Account/s.")) {
 
 			if ($SettingsObject.service.dependencies.resourceGroup) {
 				$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable -ThrowIfMultiple
@@ -87,43 +82,40 @@
 							"$($_)_$replication"
 						}
 					}
-					default {
-						Write-Error "Only premium or standard account type allowed."
-					}
 				}
 
 				if ($_.tier -eq "Standard") {
 					$_.kind = "StorageV2"
 				}
-
+	
 				if (!$_.kind) {
 					$_.kind = "StorageV2"
 				}
-
+	
 				if (!$_.minimumTlsVersion) {
 					$_.minimumTlsVersion = "TLS1_2"
 				}
-
+	
 				if (!$_.supportsHttpsTrafficOnly) {
 					$_.supportsHttpsTrafficOnly = $true
 				}
-
+	
 				if (!$_.allowBlobPublicAccess) {
 					$_.allowBlobPublicAccess = $true
 				}
-
+	
 				if (!$_.networkAclsBypass) {
 					$_.networkAclsBypass = "AzureServices"
 				}
-
+	
 				if (!$_.networkAclsDefaultAction) {
 					$_.networkAclsDefaultAction = "Allow"
 				}
-
+	
 				if (!$_.blobContainer) {
 					$_.blobContainer = @(@{
-							"name"         = "none"
-							"publicAccess" = "none"
+							"name" = "none"
+							"publicAccess" = "None"
 						}
 					)
 				}
@@ -131,7 +123,7 @@
 					Write-Verbose "$($_.storageAccountName): Blob configuration found."
 					$_.blobContainer | ForEach-Object {
 						if (!$_.publicAccess) {
-							$_.publicAccess = "none"
+							$_.publicAccess = "None"
 						}
 					}
 				}
@@ -173,33 +165,19 @@
 
 			if ($SettingsObject.service.dependencies.resourceGroup) {
 				$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable -ThrowIfMultiple
-				$SettingsObject.location = $resourceGroup.Location
+				$SettingsObject.location = $resourceGroup.location
 			}
+			elseif ($SettingsObject.resourceGroupName) {
 
-			if (!$resourceGroup -and $SettingsObject.resourceGroupName) {
-
-				Write-Verbose "ResourceGroup wasn't found with tag. New resource group will be created with provided name."
+				Write-Verbose "A new resource group will be created with the provided name."
 				$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Name $SettingsObject.resourceGroupName -Region $SettingsObject.Location
-				$resourceGroupExists = Get-AzResourceGroup -Name $SettingsObject.resourceGroupName -ErrorAction SilentlyContinue
 
-				if (!$resourceGroupExists) {
+				$resourceGroup = New-AzResourceGroup -ResourceGroupName $resourceGroupName -Tag @{"cm-service" = $SettingsObject.service.publish.resourceGroup } -Location $SettingsObject.Location -Force
+				Write-Verbose "Resource Group created: $($resourceGroup.ResourceGroupName)"
 
-					if ($SettingsObject.service.publish.resourceGroup) {
-						$resourceGroup = New-AzResourceGroup -ResourceGroupName $resourceGroupName -Tag @{"cm-service" = $SettingsObject.service.publish.resourceGroup } -Location $SettingsObject.Location -Force
-						Write-Verbose "Resource Group created: $($resourceGroup.ResourceGroupName)"
-
-						$resourceGroupsToSet = $resourceGroup.ResourceGroupName
-					}
-					else {
-						Write-Verbose "Resource group doesn't exists and is required to be created. Please provide resource Group service tag to publish"
-					}
-				}
-				else {
-					Write-Error "Resource Group with provided name already exists.`nPlease provfide appropriate service tag for existing resource group or provide unique name to create new."
-				}
-
+				$resourceGroupsToSet = $resourceGroup.ResourceGroupName
 			}
-			elseif (!$resourceGroup -and !$SettingsObject.resourceGroupName) {
+			else {
 				Write-Error "Please provide appropriate service tag for existing resource group or provide unique name to create new."
 			}
 

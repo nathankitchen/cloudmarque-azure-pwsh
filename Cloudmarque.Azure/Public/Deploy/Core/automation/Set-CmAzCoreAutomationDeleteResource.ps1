@@ -40,15 +40,9 @@
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
-		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Enable delete resource of tagged date feature using automation account")) {
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
-			# Initializing settings file values
-			if ($SettingsFile -and !$SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (!$SettingsFile -and !$SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
+		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Enable delete resource of tagged date feature using automation account")) {
 
 			$automationService = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
 			$cmDeleteRunbook = "Delete-TaggedResource.Runbook"

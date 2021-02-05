@@ -1,0 +1,137 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "Set-CmAzIaasUpdateManagement",
+    "type": "object",
+    "title": "Set-CmAzIaasUpdateManagement",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "service",
+        "windowsUpdateSchedules"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Default location for all update schedules."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "dependencies"
+            ],
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "automation"
+                    ],
+                    "properties": {
+                        "automation": {
+                            "$id": "#/service/dependencies/automation",
+                            "type": "string",
+                            "title": "Automation",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "windowsUpdateSchedules": {
+            "$id": "#/windowsUpdateSchedules",
+            "type": "array",
+            "title": "WindowsUpdateSchedules",
+            "description": "Contains details required to deploy all windows vm update schedules.",
+            "items": {
+                "$id": "#/windowsUpdateSchedules/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/windowsUpdateSchedules/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "frequency",
+                            "updateGroup",
+                            "location"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/windowsUpdateSchedules/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of the generated update schedule's name."
+                            },
+                            "frequency": {
+                                "$id": "#/windowsUpdateSchedules/items/allOf/frequency",
+                                "type": "string",
+                                "title": "Frequency",
+                                "description": "The update frequency.",
+                                "enum": ["Monthly", "Weekly", "Daily"]
+                            },
+                            "updateGroup": {
+                                "$id": "#/windowsUpdateSchedules/items/allOf/updateGroup",
+                                "type": "string",
+                                "title": "UpdateGroup",
+                                "description": "Pre-defined group of azure defined vm update bundles.",
+                                "enum": ["Critical", "CriticalSecurity", "Recommended", "All"]
+                            },
+                            "location": {
+                                "$id": "#/windowsUpdateSchedules/items/allOf/location",
+                                "type": "string",
+                                "title": "Location",
+                                "description": "Update schedule location."
+                            },
+                            "startTime": {
+                                "$id": "#/windowsUpdateSchedules/items/allOf/startTime",
+                                "type": ["string", "null"],
+                                "title": "StartTime",
+                                "description": "When the update schedule starts.",
+                                "format": "date-time"
+                            },
+                            "expiryTime": {
+                                "$id": "#/windowsUpdateSchedules/items/allOf/expiryTime",
+                                "type": ["string", "null"],
+                                "title": "ExpiryTime",
+                                "description": "When the update schedule ends.",
+                                "format": "date-time"
+                            },
+                            "dateOfMonth": {
+                                "$id": "#/windowsUpdateSchedules/items/allOf/dateOfMonth",
+                                "type": ["integer", "null"],
+                                "title": "DateOfMonth",
+                                "description": "Date of the month for the update schedule to execute (Monthly schedules only).",
+                                "minimum": 1,
+                                "maximum": 31
+                            },
+                            "dayOfWeek": {
+                                "$id": "#/windowsUpdateSchedules/items/allOf/dayOfWeek",
+                                "type": ["string", "null"],
+                                "title": "DayOfWeek",
+                                "description": "Days of the week for the update schedule to execute (Weekly schedules only).",
+                                "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", null]
+                            }
+                        },
+                        "additionalProperties": false
+                    }  
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

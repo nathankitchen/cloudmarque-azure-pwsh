@@ -41,10 +41,10 @@ sqlConfig:
     name: Basic                           # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
     capacity: 5                           # In Vcores for GP, BC, HS. In DTU for others.
   firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
-  - startIpAddress: 0.0.0.2
-    endIpAddress: 0.0.0.3
+  - startIpAddress: "0.0.0.2"
+    endIpAddress: "0.0.0.3"
 
-- family: azureSql                        # azureSql, postgres, mariaDb, mysql
+- family: azureSql                        # azureSql, postgressql, mariaDb, mysql
   type: elasticPool                       # single, elasticPool, managed (only required if azureSql is used)
   serverName: Paas-Test-Sv1
   elasticPoolName: Paas-Test-Epshr1       # Required if type is elasticPool
@@ -85,8 +85,8 @@ sqlConfig:
     name: GP_Gen5_2                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
     capacity: 2                           # In Vcores for GP, BC, HS. In DTU for others.
   firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
-  - startIpAddress: 0.0.0.3
-    endIpAddress: 0.0.0.4
+  - startIpAddress: "0.0.0.3"
+    endIpAddress: "0.0.0.4"
 
 - family: mariaDb                         # azureSql, postgres, mariaDb, mysql
   type:                                   # single, elasticPool, managed (only required if azureSql is used)
@@ -110,8 +110,8 @@ sqlConfig:
     name: B_Gen5_1                        # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
     capacity: 1                           # In Vcores for GP, BC, HS. In DTU for others.
   firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
-  - startIpAddress: 0.0.0.5
-    endIpAddress: 0.0.0.6
+  - startIpAddress: "0.0.0.5"
+    endIpAddress: "0.0.0.6"
 
 - family: mySql                           # azureSql, postgres, mariaDb, mysql
   type:                                   # single, elasticPool, managed (only required if azureSql is used)

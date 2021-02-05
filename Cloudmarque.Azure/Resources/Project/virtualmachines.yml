@@ -154,7 +154,6 @@ groups:
       publish:
         resourceGroup: Iaas-Test-Vm-Rg2
     virtualMachines:
-
       - name: Iaas-Test-Vm6
         size: Standard_B1s
         updateGroup: All

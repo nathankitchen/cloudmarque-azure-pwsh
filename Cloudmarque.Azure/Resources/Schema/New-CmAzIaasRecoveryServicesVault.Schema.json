@@ -1,0 +1,156 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzIaasRecoveryServicesVault",
+    "type": "object",
+    "title": "New-CmAzIaasRecoveryServicesVault",
+    "description": "Settings Root.",
+    "required": [
+        "resourceGroupName",
+        "location",
+        "service",
+        "recoveryServicesVaults"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "resourceGroupName": {
+            "$id": "#/resourceGroupName",
+            "type": "string",
+            "title": "ResourceGroupName",
+            "description": "Becomes part of the generated resource group's name."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Resource group deployment location."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "dependencies",
+                "publish"
+            ],
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "workspace"
+                    ],
+                    "properties": {
+                        "workspace": {
+                            "$id": "#/service/dependencies/workspace",
+                            "type": "string",
+                            "title": "Workspace",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": "object",
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "required": [
+                        "resourceGroup"
+                    ],
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type": "string",
+                            "title": "ResourceGroup",
+                            "description": "Value to publish on existing resource type."
+                        },
+                        "recoveryVault": {
+                            "$id": "#/recoveryServicesVaults/items/allOf/service/publish/recoveryVault",
+                            "type": ["string", "null"],
+                            "title": "RecoveryVault",
+                            "description": "Global default value to publish on deployed resource type."                                             
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "recoveryServicesVaults": {
+            "$id": "#/recoveryServicesVaults",
+            "type": "array",
+            "title": "RecoveryServicesVaults",
+            "description": "List of details required to deploy all recovery vaults.",
+            "additionalItems": false,
+            "items": {
+                "$id": "#/recoveryServicesVaults/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/recoveryServicesVaults/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "backupLevel",
+                            "location"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/recoveryServicesVaults/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of the generated recovery vault's name."
+                            },
+                            "backupLevel": {
+                                "$id": "#/recoveryServicesVaults/items/allOf/backupLevel",
+                                "type": "string",
+                                "title": "BackupLevel",
+                                "description": "The recovery vault sku level."
+                            },
+                            "location": {
+                                "$id": "#/recoveryServicesVaults/items/allOf/location",
+                                "type": "string",
+                                "title": "Location",
+                                "description": "Recovery vault deployment location"
+                            },
+                            "service": {
+                                "$id": "#/recoveryServicesVaults/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "publish": {
+                                        "$id": "#/recoveryServicesVaults/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "recoveryVault": {
+                                                "$id": "#/recoveryServicesVaults/items/allOf/service/publish/recoveryVault",
+                                                "type": ["string", "null"],
+                                                "title": "RecoveryVault",
+                                                "description": "Local overriding value to publish on deployed existing resource type."                                             
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

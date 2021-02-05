@@ -43,14 +43,9 @@ function New-CmAzIaaSWVD {
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
-		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Windows Virtual Desktop environment.")) {
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
-			if ($SettingsFile -and -not $SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (-not $SettingsFile -and -not $SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
+		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Windows Virtual Desktop environment.")) {
 
 			Write-Verbose "Beginning WVD infrastructure object creation."
 			foreach ($wvdEnvironment in $SettingsObject.wvdEnvironments) {
@@ -107,16 +102,18 @@ function New-CmAzIaaSWVD {
 					$wvdEnvironment.hostpool.hostpoolBalancing = $null
 				}
 				else {
+
 					$wvdEnvironment.hostpool.personalDesktopAssignmentType = $null
 				}
 
 				switch ($wvdEnvironment.hostVm.hostVmImageType) {
 
 					{ $_ -eq "gallery" } {
+
 						Write-Verbose "Locating latest gallery image for: $($wvdEnvironment.hostVm.hostVmImage)"
 						# Selecting the latest image is commented out and instead forcing '19h2-evd' due to issues with the WVD agent on later Windows 10 versions.
 						#$latestImage = Get-AzVMImageSku -Location $wvdEnvironment.hostVm.hostVmLocation -PublisherName "MicrosoftWindowsDesktop" -Offer $wvdEnvironment.hostVm.hostVmImage | Where-Object {$_.Skus -like "*-evd" -and $_.Skus -notlike "rs*"} | Select-Object -Last 1
-						$latestImage = (Get-AzVMImageSku -Location $wvdEnvironment.hostVm.hostVmLocation -PublisherName "MicrosoftWindowsDesktop" -Offer $wvdEnvironment.hostVm.hostVmImage | Where-Object { $_.Skus -eq "19h2-evd" })
+						$latestImage = (Get-AzVMImageSku -Location $wvdEnvironment.hostVm.hostVmLocation -PublisherName "MicrosoftWindowsDesktop" -Offer $wvdEnvironment.hostVm.hostVmImage | Where-Object {$_.Skus -eq "19h2-evd"})
 
 						if (!$latestImage) {
 							Write-Error "No valid images returned from Azure Gallery." -Category InvalidArgument -CategoryTargetName "Gallery image"
@@ -129,11 +126,13 @@ function New-CmAzIaaSWVD {
 					}
 
 					{ $_ -eq "customimage" } {
+
 						Write-Verbose "Locating custom image with name: $($wvdEnvironment.hostVm.hostVmImage)."
-						$wvdEnvironment.hostVm.customImageId = (Get-AzResource -Name $wvdEnvironment.hostVm.hostVmImage | Where-Object { $_.ResourceType -like "Microsoft.Compute/*images" }).ResourceId
+						$wvdEnvironment.hostVm.customImageId = (Get-AzResource -Name $wvdEnvironment.hostVm.hostVmImage | Where-Object {$_.ResourceType -like "Microsoft.Compute/*images"}).ResourceId
+						
 						if (!$wvdEnvironment.hostVm.customImageId) {
 							Write-Error "No custom images found with name: $($wvdEnvironment.hostVm.hostVmImage)." -Category InvalidArgument -CategoryTargetName "hostVmImage"
-						}
+						} 
 						elseif ($wvdEnvironment.hostVm.customImageId.count -gt 1) {
 							Write-Error "Multiple custom images found with name: $($wvdEnvironment.hostVm.hostVmImage)." -Category InvalidArgument -CategoryTargetName "hostVmImage"
 						}
@@ -142,34 +141,30 @@ function New-CmAzIaaSWVD {
 						$wvdEnvironment.hostVm.hostVmLatestImagePublisher = ""
 						$wvdEnvironment.hostVm.hostVmLatestImageOffer = ""
 					}
-
-					Default {
-						Write-Error "Invalid option selected for hostVmImageType." -Category InvalidArgument -CategoryTargetName "hostVmImageType"
-					}
 				}
 
-				$vmSize = Get-AzVMSize -Location $($wvdEnvironment.hostvm.hostVmLocation).Replace(" ", "")
+				$vmSize = Get-AzVMSize -Location $($wvdEnvironment.hostvm.hostVmLocation).Replace(" ","")
 
 				$vmTemplateString = @{
-					"domain"                = $wvdEnvironment.hostvm.hostVmDomain
-					"galleryImageOffer"     = $wvdEnvironment.hostvm.hostVmImage
-					"galleryImagePublisher" = $wvdEnvironment.hostvm.hostVmLatestImagePublisher
-					"galleryImageSKU"       = $wvdEnvironment.hostvm.hostVmLatestImageSku
-					"galleryItemId"         = "{0}.{1}{2}" -f $wvdEnvironment.hostvm.hostVmLatestImagePublisher, $wvdEnvironment.hostvm.hostVmImage, $wvdEnvironment.hostvm.hostVmLatestImageSku
-					"imageType"             = $wvdEnvironment.hostVm.hostVmImageType
-					"imageUri"              = $null
-					"customImageId"         = $wvdEnvironment.hostVm.customImageId
-					"namePrefix"            = $wvdEnvironment.hostvm.hostVmNamePrefix
-					"osDiskType"            = "StandardSSD_LRS"
-					"useManagedDisks"       = $true
-					"vmSize"                = @{
-						"id"    = $wvdEnvironment.hostvm.hostVmSize
-						"cores" = ($vmSize | Where-Object { $_.name -eq $wvdEnvironment.hostvm.hostVmSize }).NumberOfCores
-						"ram"   = ($vmSize | Where-Object { $_.name -eq $wvdEnvironment.hostvm.hostVmSize }).MemoryInMB / 1Gb
+					"domain" = $wvdEnvironment.hostvm.hostVmDomain
+					"galleryImageOffer" = $wvdEnvironment.hostvm.hostVmImage
+					"galleryImagePublisher"= $wvdEnvironment.hostvm.hostVmLatestImagePublisher
+					"galleryImageSKU" = $wvdEnvironment.hostvm.hostVmLatestImageSku
+					"galleryItemId" = "{0}.{1}{2}" -f $wvdEnvironment.hostvm.hostVmLatestImagePublisher, $wvdEnvironment.hostvm.hostVmImage, $wvdEnvironment.hostvm.hostVmLatestImageSku
+					"imageType" = $wvdEnvironment.hostVm.hostVmImageType
+					"imageUri" = $null
+					"customImageId" = $wvdEnvironment.hostVm.customImageId
+					"namePrefix" = $wvdEnvironment.hostvm.hostVmNamePrefix
+					"osDiskType" = "StandardSSD_LRS"
+					"useManagedDisks" = $true
+					"vmSize" = @{
+						"id" = $wvdEnvironment.hostvm.hostVmSize
+						"cores" = ($vmSize | Where-Object {$_.name -eq $wvdEnvironment.hostvm.hostVmSize}).NumberOfCores
+						"ram" = ($vmSize | Where-Object {$_.name -eq $wvdEnvironment.hostvm.hostVmSize}).MemoryInMB / 1Gb
 					}
 				}
 
-				$wvdEnvironment.hostVm.vmTemplateString = ($vmTemplateString | ConvertTo-Json).Replace("`r`n", "") -Replace (' +', "")
+				$wvdEnvironment.hostVm.vmTemplateString = ($vmTemplateString | ConvertTo-Json).Replace("`r`n","") -Replace (' +',"")
 			}
 
 			if (!$SettingsObject.azureDeploymentLocation) {
@@ -182,7 +177,7 @@ function New-CmAzIaaSWVD {
 			if ($SettingsObject.logAnalyticsTag) {
 				Write-Verbose "Locating log analytics using tag: $($SettingsObject.logAnalyticsTag)"
 				$logAnalyticsLinkName = "WVD Log Analytics Link"
-				$logAnalyticsID = (Get-CmAzService -Service $SettingsObject.logAnalyticsTag -Region $($wvdEnvironment.hostvm.hostVmLocation) -ThrowIfUnavailable).resourceId
+				$logAnalyticsID = (Get-CmAzService -Service $SettingsObject.logAnalyticsTag -ThrowIfUnavailable).resourceId
 			}
 
 			Write-Verbose "Deploying WVD infrastructure."
@@ -200,12 +195,9 @@ function New-CmAzIaaSWVD {
 				New-AzWvdRegistrationInfo -ResourceGroupName $wvdEnvironment.resourceGroupName -HostPoolName $wvdEnvironment.hostpool.hostpoolName -ExpirationTime ((Get-Date).AddDays('1')) > $null
 				$wvdEnvironment.hostpool.hostpoolToken = (Get-AzWvdRegistrationInfo -ResourceGroupName $wvdEnvironment.resourceGroupName -HostPoolName $wvdEnvironment.hostpool.hostpoolName).Token
 
-				if (!$wvdEnvironment.hostpool.hostpoolToken) {
-					Write-Error "No hostpool token returned/generated." -Category InvalidArgument -CategoryTargetName "Hostpool Token"
-				}
-
 				Write-Verbose "Locating Key Vault using service tag: $($wvdEnvironment.hostVm.hostVmKeyVaultTag)."
-				$keyVaultService = Get-CmAzService -Service $wvdEnvironment.hostVm.hostVmKeyVaultTag -Region $wvdEnvironment.hostVm.hostVmLocation -ThrowIfUnavailable
+				$keyVaultService = Get-CmAzService -Service $wvdEnvironment.hostVm.hostVmKeyVaultTag -ThrowIfUnavailable
+
 				$keyVault = Get-AzKeyVault -Name $keyVaultService.Name -ResourceGroupName $keyVaultService.resourceGroupName
 
 				Write-Verbose "Key Vault ($($keyVault.VaultName)) found, acquiring secret."
@@ -220,7 +212,8 @@ function New-CmAzIaaSWVD {
 				$wvdEnvironment.hostpool.keyVaultResourceId = $keyVault.ResourceId
 
 				Write-Verbose "Locating network details for: $($wvdEnvironment.hostVm.hostVmVnet)"
-				$networkDetails = Get-CmAzService -Service $wvdEnvironment.hostVm.hostVmVnet -Region $wvdEnvironment.hostVm.hostVmLocation -ThrowIfUnavailable
+				$networkDetails = Get-CmAzService -Service $wvdEnvironment.hostVm.hostVmVnet -ThrowIfUnavailable
+
 				$wvdEnvironment.hostVm.hostVmVnetrg = $networkDetails.ResourceGroupName
 				$wvdEnvironment.hostVm.hostVmVnetID = $networkDetails.ResourceId
 
@@ -249,7 +242,7 @@ function New-CmAzIaaSWVD {
 				-Environments $SettingsObject.wvdEnvironments `
 				-LogAnalyticsID $logAnalyticsID
 		}
-	}
+    }
 	catch {
 		$PSCmdlet.ThrowTerminatingError($PSItem);
 	}

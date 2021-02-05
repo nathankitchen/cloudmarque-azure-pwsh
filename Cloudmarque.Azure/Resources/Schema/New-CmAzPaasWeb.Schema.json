@@ -1,0 +1,817 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzPaasWeb",
+    "type": "object",
+    "title": "New-CmAzPaasWeb",
+    "description": "Settings Root.",
+    "required": [
+        "service"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "required": [
+                "publish"
+            ],
+            "description": "Contains dependency and publish details for service location.",
+            "properties": {
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": "object",
+                    "title": "Publish",
+                    "required": [
+                        "frontdoor",
+                        "frontdoorResourceGroup"
+                    ],
+                    "description": "Contains publish details for service location.",
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type": ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "appServicePlan": {
+                            "$id": "#/service/publish/appServicePlan",
+                            "type": ["string", "null"],
+                            "title": "AppServicePlan",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "webapp": {
+                            "$id": "#/service/publish/webapp",
+                            "type": ["string", "null"],
+                            "title": "Webapp",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "apiManagement": {
+                            "$id": "#/service/publish/apiManagement",
+                            "type": ["string", "null"],
+                            "title": "APIManagement",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "frontdoor": {
+                            "$id": "#/service/publish/frontdoor",
+                            "type": "string",
+                            "title": "FrontDoor",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "frontdoorResourceGroup": {
+                            "$id": "#/service/publish/frontdoorResourceGroup",
+                            "type": "string",
+                            "title": "FrontdoorResourceGroup",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "cdn": {
+                            "$id": "#/service/publish/cdn",
+                            "type": ["string", "null"],
+                            "title": "CDN",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "endpoint": {
+                            "$id": "#/service/publish/endpoint",
+                            "type": ["string", "null"],
+                            "title": "Endpoint",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "slot": {
+                            "$id": "#/service/publish/slot",
+                            "type": ["string", "null"],
+                            "title": "Slot",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": ["object", "null"],
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "properties": {
+                        "appInsights": {
+                            "$id": "#/service/dependencies/appInsights",
+                            "type": ["string", "null"],
+                            "title": "AppInsights",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "keyvault": {
+                            "$id": "#/service/dependencies/keyvault",
+                            "type": ["string", "null"],
+                            "title": "Keyvault",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "webApplicationFirewallPolicy": {
+                            "$id": "#/service/dependencies/webApplicationFirewallPolicy",
+                            "type": ["string", "null"],
+                            "title": "WebApplicationFirewallPolicy",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "webSolutions": {
+            "$id": "#/webSolutions",
+            "type": ["array", "null"],
+            "title": "WebSolutions",
+            "description": "List of details required to deploy all resource groups, app service plans, webapps, cdns, Azure front door and api management instances.",
+            "items": {
+                "$id": "#/webSolutions/items",
+                "allOf": [
+                    {
+                        "$id": "#/webSolutions/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/webSolutions/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of the generated resource group's name."
+                            },
+                            "service": {
+                                "$id": "#/webSolutions/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "publish": {
+                                        "$id": "#/webSolutions/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "resourceGroup": {
+                                                "$id": "#/webSolutions/items/allOf/service/publish/resourceGroup",
+                                                "type": ["string", "null"],
+                                                "title": "ResourceGroup",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "appServicePlans": {
+                                "$id": "#/webSolutions/items/allOf/appServicePlans",
+                                "type": ["array", "null"],
+                                "title": "AppServicePlans",
+                                "description": "List of details required to deploy all app service plans, webapps, cdns and api management instances.",
+                                "items": {
+                                    "$id": "#/webSolutions/items/allOf/appServicePlans/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/webSolutions/items/allOf/appServicePlans/items/allOf",
+                                            "type": "object",
+                                            "required": [
+                                                "name",
+                                                "sku",
+                                                "region"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated app service plan's name."
+                                                },
+                                                "service": {
+                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/service",
+                                                    "type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",
+                                                    "properties": {
+                                                        "publish": {
+                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+                                                                "appServicePlan": {
+                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/service/publish/appServicePlan",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "AppServicePlan",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                },
+                                                "sku": {
+                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/sku",
+                                                    "type": "string",
+                                                    "title": "Sku",
+                                                    "description": "Sku of the app service plan. This defines the capacity of the resources."
+                                                },
+                                                "region": {
+                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/region",
+                                                    "type": "string",
+                                                    "title": "Region",
+                                                    "description": "Location for app service plan, default location for webapps that share the plan."
+                                                },
+                                                "webapps": {
+                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps",
+                                                    "type": "array",
+                                                    "title": "Webapps",
+                                                    "description": "Contains details used to deploy webapps which share the same app service plan.",
+                                                    "items": {
+                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items",
+                                                        "allOf": [
+                                                            {
+                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf",
+                                                                "type": "object",
+                                                                "required": [
+                                                                    "name",
+                                                                    "runTime"
+                                                                ],
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/name",
+                                                                        "type": "string",
+                                                                        "title": "Name",
+                                                                        "description": "Becomes part of the generated web app's name."
+                                                                    },
+                                                                    "enableAppInsight": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/enableAppInsight",
+                                                                        "type": ["boolean", "null"],
+                                                                        "title": "EnableAppInsight",
+                                                                        "description": "Enables application insights for the web app.",
+                                                                        "default": false
+                                                                    },
+                                                                    "backendpool": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/backendpool",
+                                                                        "type": ["string", "null"],
+                                                                        "title": "Backendpool",
+                                                                        "description": "Name of front door backendpool which will route requests to this web app."
+                                                                    },
+                                                                    "backendHostHeader": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/backendHostHeader",
+                                                                        "type": ["boolean", "null"],
+                                                                        "title": "BackendHostHeader",
+                                                                        "description": "Enable or disable backend host header on backend pool for the webapp.",
+                                                                        "default": false
+                                                                    },
+                                                                    "weight": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/weight",
+                                                                        "type": ["integer", "null"],
+                                                                        "title": "Weight",
+                                                                        "description": " Weight is an integer from 1 to 1000. Allows you to distribute traffic evenly or to use a pre-defined settings.",
+                                                                        "default": 100,
+                                                                        "minimum": 1,
+                                                                        "maximum": 1000
+                                                                    },
+                                                                    "priority": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/priority",
+                                                                        "type": ["integer", "null"],
+                                                                        "title": "Priority",
+                                                                        "description": "Allows implementation of failover patterns.",
+                                                                        "default": 1
+                                                                    },
+                                                                    "runTime": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/runTime",
+                                                                        "type": "string",
+                                                                        "title": "RunTime",
+                                                                        "description": "Defines the technology stack used to run the app."
+                                                                    },
+                                                                    "service": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/service",
+                                                                        "type": ["object", "null"],
+                                                                        "title": "Service",
+                                                                        "description": "Contains dependency and publish details for service location.",
+                                                                        "properties": {
+                                                                            "publish": {
+                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/service/publish",
+                                                                                "type": ["object", "null"],
+                                                                                "title": "Publish",
+                                                                                "description": "Contains publish details for service location.",
+                                                                                "properties": {
+                                                                                    "webapp": {
+                                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/service/publish/webapp",
+                                                                                        "type": ["string", "null"],
+                                                                                        "title": "Webapp",
+                                                                                        "description": "Local overriding value to publish on deployed existing resource type."
+                                                                                    }
+                                                                                },
+                                                                                "additionalProperties": false
+                                                                            }
+                                                                        },
+                                                                        "additionalProperties": false
+                                                                    },
+                                                                    "slots": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "Slots",
+                                                                        "description": "Defines the names and service location details of the staging slots for the web app.",
+                                                                        "default": [{ "name": "none", "service": { "publish": { "slot": null } } }],
+                                                                        "items": {
+                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/object",
+                                                                            "anyOf": [
+                                                                                {
+                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/anyOf",
+                                                                                    "type": "object",
+                                                                                    "properties": {
+                                                                                        "name": {
+                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/anyOf/name",
+                                                                                            "type": ["string", "null"],
+                                                                                            "title": "Name",
+                                                                                            "description": "Becomes part of the generated web app slot's name."
+                                                                                        },
+                                                                                        "service": {
+                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/anyOf/service",
+                                                                                            "type": ["object", "null"],
+                                                                                            "title": "Service",
+                                                                                            "description": "Contains dependency and publish details for service location.",
+                                                                                            "properties": {
+                                                                                                "publish": {
+                                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/service/publish",
+                                                                                                    "type": ["object", "null"],
+                                                                                                    "title": "Publish",
+                                                                                                    "description": "Contains publish details for service location.",
+                                                                                                    "properties": {
+                                                                                                        "slot": {
+                                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/service/publish/slot",
+                                                                                                            "type": ["string", "null"],
+                                                                                                            "title": "Slot",
+                                                                                                            "description": "Local overriding value to publish on deployed existing resource type."
+                                                                                                        }
+                                                                                                    },
+                                                                                                    "additionalProperties": false
+                                                                                                }
+                                                                                            },
+                                                                                            "additionalProperties": false
+                                                                                        }
+                                                                                    },
+                                                                                    "additionalProperties": false
+                                                                                },
+                                                                                {
+                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/string",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "contentDeliveryNetwork": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOfcontentDeliveryNetwork",
+                                                                        "type": ["object", "null"],
+                                                                        "title": "ContentDeliveryNetwork",
+                                                                        "description": "Contains details required to deploy a Azure cdn service",
+                                                                        "default": {
+                                                                            "name": "none",
+                                                                            "sku": "standard_microsoft",
+                                                                            "region": "global",
+                                                                            "service": {
+                                                                                "publish": {
+                                                                                    "cdn": null,
+                                                                                    "endpoint": null
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "name",
+                                                                            "sku",
+                                                                            "region"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "name": {
+                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/contentDeliveryNetwork/name",
+                                                                                "type": "string",
+                                                                                "title": "Name",
+                                                                                "description": "Becomes part of the generated cdn's name."
+                                                                            },
+                                                                            "sku": {
+                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/contentDeliveryNetwork/sku",
+                                                                                "type": "string",
+                                                                                "title": "Sku",
+                                                                                "description": "Defines SKU which is loosely mapped to the cdn vendor."
+                                                                            },
+                                                                            "region": {
+                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/contentDeliveryNetwork/region",
+                                                                                "type": "string",
+                                                                                "title": "Region",
+                                                                                "description": "Location to deploy the Azure cdn. Cdns use a different location schema than other resources E.g. Instead of EU West its westeurope."
+                                                                            },
+                                                                            "service": {
+                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/contentDeliveryNetwork/service",
+                                                                                "type": ["object", "null"],
+                                                                                "title": "Service",
+                                                                                "description": "Contains dependency and publish details for service location.",
+                                                                                "properties": {
+                                                                                    "publish": {
+                                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/contentDeliveryNetwork/service/publish",
+                                                                                        "type": ["object", "null"],
+                                                                                        "title": "Publish",
+                                                                                        "description": "Contains publish details for service location.",
+                                                                                        "properties": {
+                                                                                            "cdn": {
+                                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/contentDeliveryNetwork/service/publish/cdn",
+                                                                                                "type": ["string", "null"],
+                                                                                                "title": "CDN",
+                                                                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                                                                            },
+                                                                                            "endpoint": {
+                                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/contentDeliveryNetwork/service/publish/endpoint",
+                                                                                                "type": ["string", "null"],
+                                                                                                "title": "Endpoint",
+                                                                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                                                                            }
+                                                                                        },
+                                                                                        "additionalProperties": false
+                                                                                    }
+                                                                                },
+                                                                                "additionalProperties": false
+                                                                            }
+                                                                        },
+                                                                        "additionalProperties": false
+                                                                    }
+                                                                },
+                                                                "additionalProperties": false
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "apiManagementServices": {
+                                "$id": "#/webSolutions/items/allOf/apiManagementServices",
+                                "type": ["array", "null"],
+                                "title": "ApiManagementServices",
+                                "description": "Deployes Api Gateway on Azure in provided resource group",
+                                "default": [{ "name": "none", "service": { "publish": { "slot": null } } }],
+                                "items": {
+                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/",
+                                            "type": "object",
+                                            "title": "APIManagementServices",
+                                            "description": "Contains details required to deploy Api Gateway in Azure.",
+                                            "required": [
+                                                "name",
+                                                "publisherName",
+                                                "publisherEmail",
+                                                "sku",
+                                                "region"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated api management service's name."
+                                                },
+                                                "region": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/region",
+                                                    "type": "string",
+                                                    "title": "region",
+                                                    "description": "Deployment location"
+                                                },
+                                                "publisherName": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/publisherName",
+                                                    "type": "string",
+                                                    "title": "PublisherName",
+                                                    "description": "Organization name."
+                                                },
+                                                "publisherEmail": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/publisherEmail",
+                                                    "type": "string",
+                                                    "title": "PublisherEmail",
+                                                    "description": "Admin email Id.",
+                                                    "format": "email"
+                                                },
+                                                "sku": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/sku",
+                                                    "type": "string",
+                                                    "title": "Sku",
+                                                    "description": "Defines capacity and pricing tier of resource."
+                                                },
+                                                "skuCount": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/skuCount",
+                                                    "type": ["integer", "null"],
+                                                    "title": "SkuCount",
+                                                    "description": "The instance size of this API Management instance.",
+                                                    "default": 1
+                                                },
+                                                "backendpool": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/backendpool",
+                                                    "type": ["string", "null"],
+                                                    "title": "Backendpool",
+                                                    "description": "Name of front door backendpool which will route requests to this webapp."
+                                                },
+                                                "backendHostHeader": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/backendHostHeader",
+                                                    "type": ["boolean", "null"],
+                                                    "title": "BackendHostHeader",
+                                                    "description": "Enable or disable backend host header on backend pool for the webapp.",
+                                                    "default": false
+                                                },
+                                                "weight": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/weight",
+                                                    "type": ["integer", "null"],
+                                                    "title": "Weight",
+                                                    "description": "Weight is an integer from 1 to 1000. Allows you to distribute traffic evenly or use pre-defined settings.",
+                                                    "default": 100,
+                                                    "minimum": 1,
+                                                    "maximum": 1000
+                                                },
+                                                "priority": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/priority",
+                                                    "type": ["integer", "null"],
+                                                    "title": "Priority",
+                                                    "description": "Allows implementation of failover patterns.",
+                                                    "default": 1
+                                                },
+                                                "service": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/service",
+                                                    "type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",
+                                                    "properties": {
+                                                        "publish": {
+                                                            "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+                                                                "apiManagement": {
+                                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/service/publish/apiManagement",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "APIManagement",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        },
+        "frontdoor": {
+            "$id": "#/frontdoor",
+            "type": ["object", "null"],
+            "title": "Frontdoor",
+            "description": "Contains details required to deploy Azure front door.",
+            "required": [
+                "name",
+                "sessionAffinity",
+                "region",
+                "rules",
+                "backEndPools"
+            ],
+            "properties": {
+                "name": {
+                    "$id": "#/frontdoor/name",
+                    "type": "string",
+                    "title": "Name",
+                    "description": "Becomes part of the generated Azure front door's name."
+                },
+                "sessionAffinity": {
+                    "$id": "#/frontdoor/sessionAffinity",
+                    "type": "string",
+                    "title": "SessionAffinity",
+                    "description": "Enable to send subsequent traffic from the same user session to the same backend."
+                },
+                "region": {
+                    "$id": "#/frontdoor/region",
+                    "type": "string",
+                    "title": "Region",
+                    "description": "Deployment region of front door."
+                },
+                "customDomains": {
+                    "$id": "#/frontdoor/customDomains",
+                    "type": ["array", "null"],
+                    "title": "CustomDomains",
+                    "description": "List of details required to configure custom domains on front door.",
+                    "items": {
+                        "$id": "#/frontdoor/customDomains/items",
+                        "allOf": [
+                            {
+                                "$id": "#/frontdoor/customDomains/items/allOf",
+                                "type": "object",
+                                "required": [
+                                    "domainName",
+                                    "sessionAffinity"
+                                ],
+                                "properties": {
+                                    "domainName": {
+                                        "$id": "#/frontdoor/customDomains/items/allOf/domainName",
+                                        "type": "string",
+                                        "title": "DomainName",
+                                        "description": "Name of the custom domain."
+                                    },
+                                    "enableHttps": {
+                                        "$id": "#/frontdoor/customDomains/items/allOf/enableHttps",
+                                        "type": ["boolean", "null"],
+                                        "title": "EnableHttps",
+                                        "description": "Enable Https protocol. Creates and assigns Azure managed certificate on custom domain of front door."
+                                    },
+                                    "sessionAffinity": {
+                                        "$id": "#/frontdoor/customDomains/items/allOf/sessionAffinity",
+                                        "type": "string",
+                                        "title": "SessionAffinity",
+                                        "description": "An explanation about the purpose of this instance."
+                                    },
+                                    "customCertificateSecretName": {
+                                        "$id": "#/frontdoor/customDomains/items/allOf/customCertificateSecretName",
+                                        "type": ["string", "null"],
+                                        "title": "CustomCertificateSecretName",
+                                        "description": "Custom domain is assigned the provided certificate from an existing key vault."
+                                    },
+                                    "service": {
+                                        "$id": "#/frontdoor/customDomains/items/allOf/service",
+                                        "type": ["object", "null"],
+                                        "title": "Service",
+                                        "description": "Contains dependency and publish details for service location.",
+                                        "properties": {
+                                            "dependencies": {
+                                                "$id": "#/frontdoor/customDomains/items/allOf/service/dependencies",
+                                                "type": ["object", "null"],
+                                                "title": "Dependencies",
+                                                "description": "Contains dependency details for service location.",
+                                                "properties": {
+                                                    "keyvault": {
+                                                        "$id": "#/frontdoor/customDomains/items/allOf/service/dependencies/keyvault",
+                                                        "type": ["string", "null"],
+                                                        "title": "Keyvault",
+                                                        "description": "Local overriding dependency value to fetch existing resource type."
+                                                    },
+                                                    "webApplicationFirewallPolicy": {
+                                                        "$id": "#/frontdoor/customDomains/items/allOf/service/dependencies/webApplicationFirewallPolicy",
+                                                        "type": ["string", "null"],
+                                                        "title": "WebApplicationFirewallPolicy",
+                                                        "description": "Local overriding dependency value to fetch existing resource type."
+                                                    }
+                                                },
+                                                "additionalProperties": false
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        ]
+                    }
+                },
+                "backEndPools": {
+                    "$id": "#/frontdoor/backEndPools",
+                    "type": ["array"],
+                    "title": "backEndPools",
+                    "description": "Contains list of front door backend pools with web apps and api gateways mappings.",
+                    "items": {
+                        "$id": "#/frontdoor/backEndPools/items",
+                        "allOf": [
+                            {
+                                "$id": "#/frontdoor/backEndPools/items/allOf",
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "$id": "#/frontdoor/backEndPools/items/allOf/name",
+                                        "type": "string",
+                                        "title": "Name",
+                                        "description": "Becomes part of the generated Azure front door backendPool's name."
+                                    },
+                                    "healthCheckPath": {
+                                        "$id": "#/frontdoor/items/allOfbackEndPools/items/allOf/healthCheckPath",
+                                        "type": ["string", "null"],
+                                        "title": "HealthCheckPath",
+                                        "description": "Path of application url for health checks.",
+                                        "default": "/index.html"
+                                    },
+                                    "protocol": {
+                                        "$id": "#/frontdoor/items/allOfbackEndPools/items/allOf/protocol",
+                                        "type": ["string", "null"],
+                                        "title": "Protocol",
+                                        "description": "Web access protocol.",
+                                        "enum": ["Http", "Https", null]
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        ]
+                    }
+                },
+                "rules": {
+                    "$id": "#/frontdoor/rules",
+                    "type": ["array"],
+                    "title": "Rules",
+                    "description": "Contains rule details to route traffic to appropriate backend pools.",
+                    "items": {
+                        "$id": "#/frontdoor/rules/items",
+                        "allOf": [
+                            {
+                                "$id": "#/frontdoor/rules/items/allOf",
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "pattern",
+                                    "backEndPoolname"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "$id": "#/frontdoor/rules/items/allOf/name",
+                                        "type": "string",
+                                        "title": "Name",
+                                        "description": "Becomes part of the generated Azure front door rule's name."
+                                    },
+                                    "pattern": {
+                                        "$id": "#/frontdoor/rules/items/allOf/pattern",
+                                        "type": "array",
+                                        "title": "Pattern",
+                                        "description": "Url pattern",
+                                        "items": {
+                                            "$id": "#/frontdoor/rules/items/allOf/pattern/items",
+                                            "minLength": 1,
+                                            "allOf": [
+                                                {
+                                                    "$id": "#/frontdoor/rules/items/allOf/pattern/items/allOf",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "backEndPoolname": {
+                                        "$id": "#/frontdoor/rules/items/allOf/backEndPoolname",
+                                        "type": "string",
+                                        "title": "BackEndPoolname",
+                                        "description": "Name of backend pool to route traffic to for the pattern."
+                                    },
+                                    "acceptedProtocols": {
+                                        "$id": "#/frontdoor/rules/items/allOf/acceptedProtocols",
+                                        "type": ["array", "null"],
+                                        "title": "AcceptedProtocols",
+                                        "description": "Allowed web access protocols.",
+                                        "default": ["Http", "Https"],
+                                        "items": {
+                                            "$id": "#/frontdoor/rules/items/allOf/acceptedProtocols/items",
+                                            "allOf": [
+                                                {
+                                                    "$id": "#/frontdoor/rules/items/allof/acceptedProtocols/items/allOf",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "endpoints": {
+                                        "$id": "#/frontdoor/rules/items/allOf/endpoints",
+                                        "type": ["array", "null"],
+                                        "title": "Endpoints",
+                                        "description": "Linked custom domains.",
+                                        "items": {
+                                            "$id": "#/frontdoor/rules/items/allof/endpoints/items",
+                                            "allOf": [
+                                                {
+                                                    "$id": "#/frontdoor/rules/items/allof/endpoints/items/allOf",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "enableCaching": {
+                                        "$id": "#/frontdoor/rules/items/allOf/enableCaching",
+                                        "type": ["boolean", "null"],
+                                        "title": "EnableCaching",
+                                        "description": "Enable static item caching to increase speed of content delivery.",
+                                        "default": true
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        ]
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

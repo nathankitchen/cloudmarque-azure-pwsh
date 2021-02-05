@@ -45,32 +45,15 @@ function New-CmAzCoreMonitor {
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Core Monitoring")) {
-
-			if ($SettingsFile -and -not $SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (-not $SettingsFile -and -not $SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
-
-			if (!$SettingsObject.name) {
-				Write-Error "Please provide a valid name." -Category InvalidArgument -CategoryTargetName "Name"
-			}
-
-            if (!$SettingsObject.location) {
-                Write-Error "Please provide a valid location." -Category InvalidArgument -CategoryTargetName "Location"
-            }
-
-            if (!$SettingsObject.actionGroups) {
-                Write-Error "Please provide at least one action group." -Category InvalidArgument -CategoryTargetName "ActionGroups"
-			}
 
 			foreach ($key in $SettingsObject.alerts.keys) {
 
 				$alert = $SettingsObject.alerts[$key]
 
-				if (($SettingsObject.actionGroups | Where-Object { $_.name -eq $alert.actionGroupName}).count -eq 0 ) {
+				if (($SettingsObject.actionGroups | Where-Object { $_.name -eq $alert.actionGroupName}).count -eq 0) {
 					Write-Error "Action group $($alert.actionGroupName) not found in settings." -Category InvalidArgument -CategoryTargetName "actionGroupName"
 				}
 			}
@@ -80,6 +63,8 @@ function New-CmAzCoreMonitor {
 
 			Write-Verbose "Formatting action group receivers..."
 			$receiverTypes = @("armRoles", "emails", "functions", "itsm", "logicApps", "notifications", "runbooks", "sms", "voice", "webhooks")
+			$receiverTypesWithCommonSchema = @("armRoles", "emails", "functions", "logicApps", "runbooks", "webhooks")
+
 			$nameKey = "name"
 
 			foreach ($actionGroup in $SettingsObject.actionGroups) {
@@ -98,7 +83,13 @@ function New-CmAzCoreMonitor {
 					}
 
 					for ($j = 0; $j -lt $receivers.count; $j++) {
-						$receivers[$j][$nameKey] = Get-CmAzResourceName -Resource "ActionGroupReceiver" -Architecture "Core" -Region $SettingsObject.Location -Name "$($actionGroup[$nameKey])$($receiverType)-$($j)"
+						
+						$receiver = $receivers[$j]
+						$receiver[$nameKey] = Get-CmAzResourceName -Resource "ActionGroupReceiver" -Architecture "Core" -Region $SettingsObject.Location -Name "$($actionGroup[$nameKey])$($receiverType)-$($j)"
+						
+						if ($receiverTypesWithCommonSchema -Contains $receiverType) {
+							$receiver.useCommonAlertSchema = $true
+						}
 					}
 				}
 
@@ -185,7 +176,7 @@ function New-CmAzCoreMonitor {
 				location = $SettingsObject.location;
 				service = @{
 					dependencies = @{
-						ResourceGroup = $SettingsObject.service.publish.resourceGroup
+						resourceGroup = $SettingsObject.service.publish.resourceGroup
 					};
 					publish = @{
 						storage = $SettingsObject.service.publish.storage
@@ -217,10 +208,6 @@ function New-CmAzCoreMonitor {
 				-Force
 
 			Write-Verbose "Setting advisor configuration cpu threshold..."
-			if(!$SettingsObject.AdvisorLowCPUThresholdPercentage -or @(0, 5, 10, 15, 20) -NotContains $SettingsObject.AdvisorLowCPUThresholdPercentage) {
-				Write-Error "Please provide a valid low cpu threshold percentage, valid percentages are 0, 5, 10, 15, 20." -Category InvalidArgument -CategoryTargetName "AdvisorLowCPUThresholdPercentage"
-			}
-
 			Set-AzAdvisorConfiguration -LowCpuThreshold $SettingsObject.AdvisorLowCPUThresholdPercentage
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds @($resourceGroupName)

@@ -40,45 +40,13 @@ function New-CmAzCoreBillingRule {
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploying billing rules")) {
-
-			if ($SettingsFile -and !$SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (!$SettingsFile -and !$SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
-
-			if (!$SettingsObject.location) {
-				Write-Error "Please provide a valid location." -Category InvalidArgument -CategoryTargetName "Location"
-			}
-
-			if (!$SettingsObject.budgets) {
-				Write-Error "Please provide at least one budget." -Category InvalidArgument -CategoryTargetName "Budgets"
-			}
 
 			foreach($budget in $SettingsObject.budgets) {
 
 				Write-Verbose "Validating budget: $($budget.name)..."
-
-				if (!$budget.name) {
-					Write-Error "Please provide a valid budget name." -Category InvalidArgument -CategoryTargetName "Budgets.Name"
-				}
-				elseif (!$budget.category) {
-					Write-Error "Please provide a valid category." -Category InvalidArgument -CategoryTargetName "Budgets.Category"
-				}
-				elseif (!$budget.accountNumber) {
-					Write-Error "Please provide a valid budget account number" -Category InvalidArgument -CategoryTargetName "Budgets.AccountNumber"
-				}
-				elseif (!$budget.timegrain) {
-					Write-Error "Please provide a valid timegrain." -Category InvalidArgument -CategoryTargetName "Budgets.Timegrain"
-				}
-				elseif (!$budget.amount) {
-					Write-Error "Please ensure the budget amount is greater than 0." -Category InvalidArgument -CategoryTargetName "Budgets.Amount"
-				}
-				elseif (!$budget.thresholds) {
-					Write-Error "Please provide budget thresholds that are greater than 0." -Category InvalidArgument -CategoryTargetName "Budgets.Thresholds"
-				}
 
 				$currentMonth = (Get-Date -Day 1).date
 

@@ -1,0 +1,46 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzCore",
+    "type": "object",
+    "title": "New-CmAzCore",
+    "description": "Settings Root.",
+    "required": [
+        "automationSettings",
+        "budgetSettings",
+        "keyvaultSettings",
+        "monitorSettings"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "automationSettings": {
+            "$id": "#/automationSettings",
+            "type": "string",
+            "title": "AutomationSettings",
+            "description": "Path to settings file for New-CmAzCoreAutomation."
+        },
+        "budgetSettings": {
+            "$id": "#/budgetSettings",
+            "type": "string",
+            "title": "BudgetSettings",
+            "description": "Path to settings file for New-CmAzCoreBillingRule."
+        },
+        "keyvaultSettings": {
+            "$id": "#/keyvaultSettings",
+            "type": "string",
+            "title": "KeyvaultSettings",
+            "description": "Path to settings file for New-CmAzCoreKeyvault."
+        },
+        "monitorSettings": {
+            "$id": "#/monitorSettings",
+            "type": "string",
+            "title": "MonitorSettings",
+            "description": "Path to settings file for New-CmAzCoreMonitor."
+        }
+    },
+    "additionalProperties": false
+}

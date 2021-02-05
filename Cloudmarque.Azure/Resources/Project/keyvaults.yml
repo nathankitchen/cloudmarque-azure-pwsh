@@ -12,8 +12,11 @@ service:
 
 keyVaults:
 - name: Core-Test-Kv
-  type: ServicePrincipal
+  type: ServicePrincipal                    # User or ServicePrincipal
   location: UK South
+  service:
+    publish:
+      keyvault: Core-Test-Kv
   enableSoftDelete: false
   enablePurgeProtection: true
   softDeleteRetentionInDays: 30

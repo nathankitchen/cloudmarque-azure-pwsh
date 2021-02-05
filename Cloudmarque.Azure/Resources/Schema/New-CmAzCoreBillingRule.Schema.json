@@ -1,0 +1,168 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzCoreBillingRule",
+    "type": "object",
+    "title": "New-CmAzCoreBillingRule",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "budgets"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Deployment history location"
+        },
+        "service": {
+            "$id": "#/service",
+            "type": ["object", "null"],
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": ["object", "null"],
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "properties": {
+                        "actiongroup": {
+                            "$id": "#/service/dependencies/actiongroup",
+                            "type": ["string", "null"],
+                            "title": "Actiongroup",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "budgets": {
+            "$id": "#/budgets",
+            "type": "array",
+            "title": "Budgets",
+            "description": "All details required to deploy multiple budgets.",
+            "items": {
+                "$id": "#/budgets/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/budgets/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "category",
+                            "accountNumber",
+                            "timeGrain",
+                            "amount",
+                            "thresholds"
+                        ],
+                        "description": "Contains details required to deploy a budget.",
+                        "properties": {
+                            "name": {
+                                "$id": "#/budgets/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of the generated budget's name."
+                            },
+                            "category": {
+                                "$id": "#/budgets/items/allOf/category",
+                                "type": "string",
+                                "title": "Category",
+                                "description": "Budget's category, highlights if the budget is marked as cost or usage",
+                                "enum": ["Cost", "Usage"]
+                            },
+                            "accountNumber": {
+                                "$id": "#/budgets/items/allOf/accountNumber",
+                                "type": "string",
+                                "title": "AccountNumber",
+                                "description": "Tag value (cm-charge) used for filtering resources in a budget."
+                            },
+                            "timeGrain": {
+                                "$id": "#/budgets/items/allOf/timeGrain",
+                                "type": "string",
+                                "title": "TimeGrain",
+                                "description": "The budget's tracking interval.",
+                                "enum": ["Monthly", "Quarterly", "Annually"]
+                            },
+                            "amount": {
+                                "$id": "#/budgets/items/allOf/amount",
+                                "type": "integer",
+                                "title": "Amount",
+                                "description": "Total cost to track within the budget.",
+                                "minimum": 1
+                            },
+                            "startDate": {
+                                "$id": "#/budgets/items/allOf/startDate",
+                                "type": ["string", "null"],
+                                "title": "The startDate schema",
+                                "description": "Budget's start date.",
+                                "format": "date"
+                            },
+                            "endDate": {
+                                "$id": "#/budgets/items/allOf/endDate",
+                                "type": ["string", "null"],
+                                "title": "The endDate schema",
+                                "description": "Budget's end date.",
+                                "format": "date"
+                            },
+                            "thresholds": {
+                                "$id": "#/budgets/items/allOf/thresholds",
+                                "type": "array",
+                                "title": "Thresholds",
+                                "description": "Alert thresholds for the budget.",
+                                "items": {
+                                    "$id": "#/budgets/items/allOf/thresholds/items",
+                                    "minLength": 1,
+                                    "maxLength": 5,
+                                    "allOf": [
+                                        {
+                                            "$id": "#/budgets/items/allOf/thresholds/items/allOf",
+                                            "type": "integer",
+                                            "minimum": 1,
+                                            "maximum": 1000
+                                        }
+                                    ]
+                                }
+                            },
+                            "service": {
+                                "$id": "#/budgets/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "dependencies": {
+                                        "$id": "#/budgets/items/allOf/service/dependencies",
+                                        "type": ["object", "null"],
+                                        "title": "Dependencies",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "actiongroup": {
+                                                "$id": "#/budgets/items/allOf/service/dependencies/actiongroup",
+                                                "type": ["string", "null"],
+                                                "title": "Actiongroup",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

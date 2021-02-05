@@ -1,7 +1,8 @@
-location:                           # Automation account location
+location: UKSouth                   # Automation account location
+
 service:
   dependencies:
-    automation:
+    automation: Core-Test-Auto
 
 schedule:                           # Optional (Below defaults are)
   startDate:                        # Date format: yyyy-mm-dd (Default: Tomorrow)

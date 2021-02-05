@@ -1,0 +1,331 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzIaasRecoveryServicesVault.Policy",
+    "type": "object",
+    "title": "New-CmAzIaasRecoveryServicesVault.Policy",
+    "description": "Settings Root.",
+    "definitions": {
+        "retentionTimes": {
+            "$id": "#/definitions/retentionTimes",
+            "type": ["array", "null"],
+            "title": "RetentionTimes",
+            "description": "List of times when the backup procedure should be triggered.",
+            "items": {
+                "$id": "#/retentionTimes/items",
+                "allOf": [
+                    {
+                        "$id": "#/retentionTimes/items/allOf",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "retentionDuration": {
+            "$id": "#/definitions/retentionDuration",
+            "type": ["object", "null"],
+            "title": "RetentionDuration",
+            "description": "Length of time the backup is retained.",
+            "properties": {
+                "count": {
+                    "$id": "#/definitions/retentionDuration/count",
+                    "type": ["integer", "null"],
+                    "title": "Count",
+                    "description": "Value used for the length of retaining the backup."
+                },
+                "durationType": {
+                    "$id": "#/definitions/retentionDuration/durationType",
+                    "type": ["string", "null"],
+                    "title": "DurationType",
+                    "description": "Metric used for the length of retaining the backup."
+                }
+            },
+            "additionalProperties": false
+        },
+        "daysOfTheWeek": {
+            "$id": "#/definitions/daysOfTheWeek",
+            "type": ["array", "null"],
+            "title": "DaysOfTheWeek",
+            "description": "Available days for weekly schedules.",
+            "items": {
+                "$id": "#/definitions/daysOfTheWeek/items",
+                "allOf": [
+                    {
+                        "$id": "#/definitions/daysOfTheWeek/items/allOf",
+                        "type": "string",
+                        "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+                    }
+                ]
+            }
+        },
+        "dailyRetentionFormat": {
+            "$id": "#/definitions/dailyRetentionFormat",
+            "type": ["object", "null"],
+            "title": "DailyRetentionFormat",
+            "description": "Format for what day of the month a backup schedule is set.",
+            "properties": {
+                "daysOfTheMonth": {
+                    "$id": "#/definitions/dailyRetentionFormat/daysOfTheMonth",
+                    "type": ["object", "null"],
+                    "title": "DaysOfTheMonth",
+                    "description": "Contains details for what day of the month a backup should be scheduled.",
+                    "properties": {
+                        "date": {
+                            "$id": "#/definitions/dailyRetentionFormat/daysOfTheMonth/date",
+                            "type": ["integer", "null"],
+                            "title": "Date",
+                            "description": "Day of the month a backup should be scheduled.",
+                            "minimum": 1,
+                            "maximum": 31
+                        },
+                        "isLast": {
+                            "$id": "#/definitions/dailyRetentionFormat/daysOfTheMonth/isLast",
+                            "type": ["boolean", "null"],
+                            "title": "IsLast",
+                            "description": "Weither to use the last day of the month instead of the date."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "weeklyRetentionFormat": {
+            "$id": "#/definitions/weeklyRetentionFormat",
+            "type": ["object", "null"],
+            "title": "WeeklyRetentionFormat",
+            "description": "Format for what week of the month a backup schedule is set.",
+            "properties": {
+                "daysOfTheWeek": { "$ref": "#/definitions/daysOfTheWeek" },
+                "weeksOfTheMonth": {
+                    "$id": "#/definitions/weeklyRetentionFormat/weeksOfTheMonth",
+                    "type": ["array", "null"],
+                    "title": "WeeksOfTheMonth",
+                    "description": "Contains details for what week of the month a backup should be scheduled.",
+                    "items": {
+                        "$id": "#/definitions/weeklyRetentionFormat/weeksOfTheMonth/items",
+                        "allOf": [
+                            {
+                                "$id": "#/definitions/weeklyRetentionFormat/weeksOfTheMonth/items/allOf",
+                                "type": "string",
+                                "enum": ["First", "Second", "Third", "Fourth", "Last", "Invalid"]
+                            }
+                        ]
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "retentionScheduleFormatType": {
+            "$id": "#/definitions/retentionScheduleFormatType",
+            "type": ["string", "null"],
+            "title": "RetentionScheduleFormatType",
+            "description": "What frequency format should be used for backups.",
+            "enum": ["Invalid", "Daily", "Weekly", null]
+        }
+    },
+    "required": [
+        "policies"
+    ],
+    "properties": {
+        "policies": {
+            "$id": "#/policies",
+            "type": "array",
+            "title": "Policies",
+            "description": "List of policies containing backup details, schedule times and the backup's retention periods.",
+            "items": {
+                "$id": "#/policies/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/policies/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "policyName",
+                            "timeZone",
+                            "instantRpRetentionRangeInDays",
+                            "retention"
+                        ],
+                        "properties": {
+                            "policyName": {
+                                "$id": "#/policies/items/allOf/policyName",
+                                "type": "string",
+                                "title": "PolicyName",
+                                "description": "Name of the backup policy."
+                            },
+                            "timeZone": {
+                                "$id": "#/policies/items/allOf/timeZone",
+                                "type": "string",
+                                "title": "TimeZone",
+                                "description": "Timezone for the policy's schedule."
+                            },
+                            "instantRpRetentionRangeInDays": {
+                                "$id": "#/policies/items/allOf/instantRpRetentionRangeInDays",
+                                "type": "integer",
+                                "title": "InstantRpRetentionRangeInDays",
+                                "description": "Number of days for instant rp retention policy.",
+                                "minimum": 1
+                            },
+                            "schedule": {
+                                "$id": "#/policies/items/allOf/schedule",
+                                "type": ["object", "null"],
+                                "title": "Schedule",
+                                "description": "Contains details required to deploy a backup schedule.",
+                                "properties": {
+                                    "scheduleRunFrequency": {
+                                        "$id": "#/policies/items/allOf/schedule/scheduleRunFrequency",
+                                        "type": ["string", "null"],
+                                        "title": "ScheduleRunFrequency",
+                                        "description": "Frequency metric for the backup schedule.",
+                                        "Enum": ["Daily", "Weekly", "Monthly"]
+                                    },
+                                    "scheduleRunTimes": {
+                                        "$id": "#/policies/items/allOf/schedule/scheduleRunTimes",
+                                        "type": ["array", "null"],
+                                        "title": "ScheduleRunTimes",
+                                        "description": "Datetimes of when the schedules will be ran.",
+                                        "items": {
+                                            "$id": "#/policies/items/allOf/schedule/scheduleRunTimes/items",
+                                            "allOf": [
+                                                {
+                                                    "$id": "#/policies/items/allOf/schedule/scheduleRunTimes/items/allOf",
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "schedulePolicyType": {
+                                        "$id": "#/policies/items/allOf/schedule/schedulePolicyType",
+                                        "type": ["string", "null"],
+                                        "title": "SchedulePolicyType",
+                                        "description": "Type of policy to be scheduled.",
+                                        "enum": ["LogSchedulePolicy", "LongTermSchedulePolicy", "SimpleSchedulePolicy", null]
+                                    },
+                                    "scheduleRunDays": {
+                                        "$id": "#/policies/items/allOf/schedule/scheduleRunDays",
+                                        "type": ["array", "null"],
+                                        "title": "ScheduleRunDays",
+                                        "description": "Days of the week of when schedule will be ran.",
+                                        "items": {
+                                            "$id": "#/policies/items/allOf/schedule/scheduleRunTimes/items",
+                                            "allOf": [
+                                                {
+                                                    "$id": "#/policies/items/allOf/schedule/scheduleRunTimes/items/allOf",
+                                                    "type": "string",
+                                                    "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "scheduleFrequencyInMins": {
+                                        "$id": "#/policies/items/allOf/schedule/scheduleFrequencyInMins",
+                                        "type": ["integer", "null"],
+                                        "title": "ScheduleFrequencyInMins",
+                                        "description": "Frequency in minutes for log schedule policies."
+                                    },
+                                    "scheduleWeeklyFrequency": {
+                                        "$id": "#/policies/items/allOf/schedule/scheduleWeeklyFrequency",
+                                        "type": ["string", "null"],
+                                        "title": "ScheduleWeeklyFrequency",
+                                        "description": "Intervals when the schedule will be run in number of weeks."
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "retention": {
+                                "$id": "#/policies/items/allOf/retention",
+                                "type": "object",
+                                "title": "Retention",
+                                "description": "Container of retention policy details to be deployed.",
+                                "required": [
+                                    "retentionPolicyType"
+                                ],
+                                "properties": {
+                                    "retentionPolicyType": {
+                                        "$id": "#/policies/items/allOf/retention/retentionPolicyType",
+                                        "type": "string",
+                                        "title": "RetentionPolicyType",
+                                        "description": "Type of retention policy to use.",
+                                        "enum": ["SimpleRetentionPolicy", "LongTermRetentionPolicy"]
+                                    },
+                                    "dailySchedule": {
+                                        "$id": "#/policies/items/allOf/retention/dailySchedule",
+                                        "type": ["string", "object"],
+                                        "title": "DailySchedule",
+                                        "description": "Contains daily backup schedule details.",
+                                        "properties": {
+                                            "retentionTimes": { "$ref": "#/definitions/retentionTimes" },
+                                            "retentionDuration": { "$ref": "#/definitions/retentionDuration" }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "weeklySchedule": {
+                                        "$id": "#/policies/items/allOf/retention/weeklySchedule",
+                                        "type": ["object", "null"],
+                                        "title": "WeeklySchedule",
+                                        "description": "Contains weekly backup schedule details.",
+                                        "properties": {
+                                            "retentionTimes": { "$ref": "#/definitions/retentionTimes" },
+                                            "retentionDuration": { "$ref": "#/definitions/retentionDuration" },
+                                            "daysOfTheWeek": { "$ref": "#/definitions/daysOfTheWeek" }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "monthlySchedule": {
+                                        "$id": "#/policies/items/allOf/retention/monthlySchedule",
+                                        "type": ["object", "null"],
+                                        "title": "MonthlySchedule",
+                                        "description": "Contains monthly backup schedule details.",
+                                        "properties": {
+                                            "retentionTimes": { "$ref": "#/definitions/retentionTimes" },
+                                            "retentionDuration": { "$ref": "#/definitions/retentionDuration" },
+                                            "retentionScheduleDaily": { "$ref": "#/definitions/dailyRetentionFormat" },
+                                            "retentionScheduleWeekly": { "$ref": "#/definitions/weeklyRetentionFormat" },
+                                            "retentionScheduleFormatType": { "$ref": "#/definitions/retentionScheduleFormatType"}
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "yearlySchedule": {
+                                        "$id": "#/policies/items/allOf/retention/yearlySchedule",
+                                        "type": ["object", "null"],
+                                        "title": "YearlySchedule",
+                                        "description": "Contains year backup schedule details.",
+                                        "properties": {
+                                            "retentionTimes": { "$ref": "#/definitions/retentionTimes" },
+                                            "retentionDuration": { "$ref": "#/definitions/retentionDuration" },
+                                            "retentionScheduleDaily": { "$ref": "#/definitions/dailyRetentionFormat" },
+                                            "retentionScheduleWeekly": { "$ref": "#/definitions/weeklyRetentionFormat" },
+                                            "retentionScheduleFormatType": { "$ref": "#/definitions/retentionScheduleFormatType" },
+                                            "monthsOfYear": {
+                                                "$id": "#/policies/items/allOf/retention/yearlySchedule/monthsOfYear",
+                                                "type": ["array", "null"],
+                                                "title": "MonthsOfYear",
+                                                "description": "Available months for yearly schedules.",
+                                                "items": {
+                                                    "$id": "#/policies/items/allOf/retention/yearlySchedule/monthsOfYear/items",
+                                                    "allOf": [
+                                                        {
+                                                            "$id": "#/policies/items/allOf/retention/yearlySchedule/monthsOfYear/items/allOf",
+                                                            "type": "string",
+                                                            "enum": [
+                                                                "Invalid", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

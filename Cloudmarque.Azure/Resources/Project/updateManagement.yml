@@ -1,3 +1,4 @@
+component: updateManagement
 location: UK South
 service:
   dependencies:
@@ -11,7 +12,7 @@ windowsUpdateSchedules:
   - name: WindowsVMUpdateRecommended
     expiryTime: "2030-12-31T23:59:00"     # Optional set to never expire if empty or invalid
     frequency: Weekly                     # Monthly, Weekly, Daily
-    dayOfWeek: Monday                  # Monday, Tuesday, Wednesday etc..
+    dayOfWeek: Monday                     # Monday, Tuesday, Wednesday etc..
     updateGroup: Recommended              # Critical, CriticalSecurity, Recommended, All
     location: UK South                    # Optional: defaults to root location is empty
   - name: WindowsVMUpdateAll

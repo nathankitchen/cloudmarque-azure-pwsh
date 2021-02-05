@@ -1,0 +1,104 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzPaasWebStatic",
+    "type": "object",
+    "title": "New-CmAzPaasWebStatic",
+    "description": "Settings Root.",
+    "required": [
+        "name",
+        "location",
+        "customDomain",
+        "service"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "name": {
+            "$id": "#/name",
+            "type": "string",
+            "title": "Name",
+            "description": "Becomes part of the generated names for all deployed resources."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Deployment location for all resources."
+        },
+        "customDomain": {
+            "$id": "#/customDomain",
+            "type": "string",
+            "title": "CustomDomain",
+            "description": "Custom domain url."
+        },
+        "redirectPublicIpAddress": {
+            "$id": "#/redirectPublicIpAddress",
+            "type": ["string", "null"],
+            "title": "RedirectPublicIpAddress",
+            "description": "Public ip where incoming connections are allowed, all other connections are redirected to the RedirectUrl.",
+            "format": "ipv4"
+        },
+        "redirectUrl": {
+            "$id": "#/redirectUrl",
+            "type": ["string", "null"],
+            "title": "RedirectUrl",
+            "description": "Url where incoming connections are redirected unless their ip matches redirectPublicIpAddress"
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "publish"
+            ],
+            "properties": {
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": "object",
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "required": [
+                        "resourceGroup",
+                        "cdn",
+                        "storage",
+                        "endpoint"
+                    ],
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type": "string",
+                            "title": "ResourceGroup",
+                            "description": "Value to publish on existing resource type."
+                        },
+                        "cdn": {
+                            "$id": "#/service/publish/cdn",
+                            "type": "string",
+                            "title": "CDN",
+                            "description": "Value to publish on existing resource type."
+                        },
+                        "storage": {
+                            "$id": "#/service/publish/storage",
+                            "type": "string",
+                            "title": "Storage",
+                            "description": "Value to publish on existing resource type."
+                        },
+                        "endpoint": {
+                            "$id": "#/service/publish/endpoint",
+                            "type": "string",
+                            "title": "Endpoint",
+                            "description": "Value to publish on existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

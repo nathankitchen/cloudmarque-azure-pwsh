@@ -1,0 +1,686 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzCoreMonitor",
+    "type": "object",
+    "title": "New-CmAzCoreMonitor",
+    "description": "Settings Root.",
+    "required": [
+        "name",
+        "location",
+        "advisorLowCPUThresholdPercentage",
+        "service",
+        "alerts"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "name": {
+            "$id": "#/name",
+            "type": "string",
+            "title": "Name",
+            "description": "Becomes part of the generated names for all deployed resources."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Location for all resource deployments."
+        },
+        "advisorLowCPUThresholdPercentage": {
+            "$id": "#/advisorLowCPUThresholdPercentage",
+            "type": "integer",
+            "title": "AdvisorLowCPUThresholdPercentage",
+            "description": "Set the cpu threshold for Azure Advisor.",
+            "Enum": [0, 5, 10, 15, 20]
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "publish",
+                "dependencies"
+            ],
+            "properties": {
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": "object",
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "required": [
+                        "keyvaultAdminAlert",
+                        "resourceHealthAlert",
+                        "serviceHealthAlert",
+                        "appInsights",
+                        "resourceGroup",
+                        "solution",
+                        "storage",
+                        "workspace"
+                    ],
+                    "properties": {
+                        "actionGroup": {
+                            "$id": "#/service/publish/actionGroup",
+                            "type": ["string", "null"],
+                            "title": "ActionGroup",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "keyvaultAdminAlert": {
+                            "$id": "#/service/publish/keyvaultAdminAlert",
+                            "type": "string",
+                            "title": "KeyvaultAdminAlert",
+                            "description": "Value to publish on deployed resource type."
+                        },
+                        "resourceHealthAlert": {
+                            "$id": "#/service/publish/resourceHealthAlert",
+                            "type": "string",
+                            "title": "ResourceHealthAlert",
+                            "description": "Value to publish on deployed resource type."
+                        },
+                        "serviceHealthAlert": {
+                            "$id": "#/service/publish/serviceHealthAlert",
+                            "type": "string",
+                            "title": "ServiceHealthAlert",
+                            "description": "Value to publish on deployed resource type."
+                        },
+                        "appInsights": {
+                            "$id": "#/service/publish/appInsights",
+                            "type": "string",
+                            "title": "AppInsights",
+                            "description": "Value to publish on deployed resource type."
+                        },
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type": "string",
+                            "title": "ResourceGroup",
+                            "description": "Value to publish on deployed resource type."
+                        },
+                        "solution": {
+                            "$id": "#/service/publish/solution",
+                            "type": "string",
+                            "title": "Solution",
+                            "description": "Value to publish on deployed resource type."
+                        },
+                        "storage": {
+                            "$id": "#/service/publish/storage",
+                            "type": "string",
+                            "title": "Storage",
+                            "description": "Value to publish on deployed resource type."
+                        },
+                        "workspace": {
+                            "$id": "#/service/publish/workspace",
+                            "type": "string",
+                            "title": "Workspace",
+                            "description": "Value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "keyvault"
+                    ],
+                    "properties": {
+                        "keyvault": {
+                            "$id": "#/service/dependencies/keyvault",
+                            "type": "string",
+                            "title": "Keyvault",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "alerts": {
+            "$id": "#/alerts",
+            "type": "object",
+            "title": "Alerts",
+            "description": "Details required to deploy all alerts.",
+            "required": [
+                "keyvaultAdmin",
+                "resourceHealth",
+                "serviceHealth"
+            ],
+            "properties": {
+                "keyvaultAdmin": {
+                    "$id": "#/alerts/keyvaultAdmin",
+                    "type": "object",
+                    "title": "KeyvaultAdmin",
+                    "description": "Contains details required to deploy a activity log alert for administration operations on a key vault.",
+                    "required": [
+                        "actionGroupName"
+                    ],
+                    "properties": {
+                        "actionGroupName": {
+                            "$id": "#/alerts/keyvaultAdmin/actionGroupName",
+                            "type": "string",
+                            "title": "ActionGroupName",
+                            "description": "Part of the name of the action group to link the alert to, needs to match the name of an action group below."
+                        },
+                        "enabled": {
+                            "$id": "#/alerts/keyvaultAdmin/enabled",
+                            "type": ["boolean", "null"],
+                            "title": "Enabled",
+                            "description": "If the alert is enabled ot not.",
+                            "default": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "resourceHealth": {
+                    "$id": "#/alerts/resourceHealth",
+                    "type": "object",
+                    "title": "ResourceHealth",
+                    "description": "Contains details required to deploy a resource health alert for all applicable core resources.",
+                    "required": [
+                        "actionGroupName"
+                    ],
+                    "properties": {
+                        "actionGroupName": {
+                            "$id": "#/alerts/resourceHealth/actionGroupName",
+                            "type": "string",
+                            "title": "ActionGroupName",
+                            "description": "Part of the name of the action group to link the alert to, needs to match the name of an action group below."
+                        },
+                        "enabled": {
+                            "$id": "#/alerts/resourceHealth/enabled",
+                            "type": ["boolean", "null"],
+                            "title": "Enabled",
+                            "description": "If the alert is enabled ot not.",
+                            "default": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "serviceHealth": {
+                    "$id": "#/alerts/serviceHealth",
+                    "type": "object",
+                    "title": "ServiceHealth",
+                    "description": "Contains details required to deploy a service health alert for all services and all chosen locations...",
+                    "required": [
+                        "actionGroupName"
+                    ],
+                    "properties": {
+                        "actionGroupName": {
+                            "$id": "#/alerts/serviceHealth/actionGroupName",
+                            "type": "string",
+                            "title": "ActionGroupName",
+                            "description": "Part of the name of the action group to link the alert to, needs to match the name of an action group below."
+                        },
+                        "impactedLocations": {
+                            "$id": "#/alerts/serviceHealth/impactedLocations",
+                            "type": ["array", "null"],
+                            "title": "ImpactedLocations",
+                            "description": "Locations the service health alerts are applicable for.",
+                            "items": {
+                                "$id": "#/alerts/serviceHealth/impactedLocations/items",
+                                "allOf": [
+                                    {
+                                        "$id": "#/alerts/serviceHealth/impactedLocations/items/allOf",
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        },
+                        "enabled": {
+                            "$id": "#/alerts/serviceHealth/enabled",
+                            "type": ["boolean", "null"],
+                            "title": "Enabled",
+                            "description": "If the alert is enabled ot not.",
+                            "default": false
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "actionGroups": {
+            "$id": "#/actionGroups",
+            "type": "array",
+            "title": "ActionGroups",
+            "description": "All details required to deploy multiple action groups.",
+            "items": {
+                "$id": "#/actionGroups/items",
+                "minLength" : 1,
+                "allOf": [
+                    {
+                        "$id": "#/actionGroups/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "shortname"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/actionGroups/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of the generated action group's name."
+                            },
+                            "shortname": {
+                                "$id": "#/actionGroups/items/allOf/shortname",
+                                "type": "string",
+                                "title": "Shortname",
+                                "description": "Friendly name for the action groups, used in emails/sms etc."
+                            },
+                            "service": {
+                                "$id": "#/actionGroups/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "publish": {
+                                        "$id": "#/actionGroups/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "actionGroup": {
+                                                "$id": "#/actionGroups/items/allOf/service/publish/actionGroup",
+                                                "type": ["string", "null"],
+                                                "title": "ActionGroup",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "armRoles": {
+                                "$id": "#/actionGroups/items/allOf/armRoles",
+                                "type": ["array", "null"],
+                                "title": "ArmRoles",
+                                "description": "All details required to deploy multiple arm role receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/armRoles/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/armRoles/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "roleId"
+                                            ],
+                                            "properties": {
+                                                "roleId": {
+                                                    "$id": "#/actionGroups/items/allOf/armRoles/items/allOf/roleId",
+                                                    "type": "string",
+                                                    "title": "RoleId",
+                                                    "description": "Arm role receiver id."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "emails": {
+                                "$id": "#/actionGroups/items/allOf/emails",
+                                "type": ["array", "null"],
+                                "title": "Emails",
+                                "description": "All details required to deploy multiple email receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/emails/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/emails/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "emailAddress"
+                                            ],
+                                            "properties": {
+                                                "emailAddress": {
+                                                    "$id": "#/actionGroups/items/allOf/emails/items/allOf/emailAddress",
+                                                    "type": "string",
+                                                    "title": "EmailAddress",
+                                                    "description": "The email address of this receiver."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "functions": {
+                                "$id": "#/actionGroups/items/allOf/functions",
+                                "type": ["array", "null"],
+                                "title": "Functions",
+                                "description": "All details required to deploy multiple azure function receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/functions/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/functions/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "functionAppResourceId",
+                                                "functionName",
+                                                "httpTriggerUrl"
+                                            ],
+                                            "properties": {
+                                                "functionAppResourceId": {
+                                                    "$id": "#/actionGroups/items/allOf/functions/items/allOf/functionAppResourceId",
+                                                    "type": "string",
+                                                    "title": "FunctionAppResourceId",
+                                                    "description": "Resource id of the azure function app."
+                                                },
+                                                "functionName": {
+                                                    "$id": "#/actionGroups/items/allOf/functions/items/allOf/functionName",
+                                                    "type": "string",
+                                                    "title": "FunctionName",
+                                                    "description": "Name of the azure function app."
+                                                },
+                                                "httpTriggerUrl": {
+                                                    "$id": "#/actionGroups/items/allOf/functions/items/allOf/httpTriggerUrl",
+                                                    "type": "string",
+                                                    "title": "HttpTriggerUrl",
+                                                    "description": "Url of the http trigger azure function."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "itsm": {
+                                "$id": "#/actionGroups/items/allOf/itsm",
+                                "type": ["array", "null"],
+                                "title": "ITSM",
+                                "description": "All details required to deploy multiple itsm receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/itsm/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/itsm/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "workspaceId",
+                                                "connectionId",
+                                                "ticketConfiguration",
+                                                "region"
+                                            ],
+                                            "properties": {
+                                                "workspaceId": {
+                                                    "$id": "#/actionGroups/items/allOf/itsm/items/allOf/workspaceId",
+                                                    "type": "string",
+                                                    "title": "WorkspaceId",
+                                                    "description": "Log analytics workspace id."
+                                                },
+                                                "connectionId": {
+                                                    "$id": "#/actionGroups/items/allOf/itsm/items/allOf/connectionId",
+                                                    "type": "string",
+                                                    "title": "ConnectionId",
+                                                    "description": "Unique id of the ITSM's connection defined in log analytics workpace."
+                                                },
+                                                "ticketConfiguration": {
+                                                    "$id": "#/actionGroups/items/allOf/itsm/items/allOf/ticketConfiguration",
+                                                    "type": "string",
+                                                    "title": "TicketConfiguration",
+                                                    "description": "JSON blob for configuring the action of the ITSM."
+                                                },
+                                                "region": {
+                                                    "$id": "#/actionGroups/items/allOf/itsm/items/allOf/region",
+                                                    "type": "string",
+                                                    "title": "Region",
+                                                    "description": "Log analytics workspace location."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "logicApps": {
+                                "$id": "#/actionGroups/items/allOf/logicApps",
+                                "type": ["array", "null"],
+                                "title": "LogicApps",
+                                "description": "All details required to deploy multiple logic apps receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/logicApps/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/logicApps/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "resourceId",
+                                                "callbackUrl"
+                                            ],
+                                            "properties": {
+                                                "resourceId": {
+                                                    "$id": "#/actionGroups/items/allOf/itsm/items/allOf/resourceId",
+                                                    "type": "string",
+                                                    "title": "ResourceId",
+                                                    "description": "Resource id of the existing logic app."
+                                                },
+                                                "callbackUrl": {
+                                                    "$id": "#/actionGroups/items/allOf/itsm/items/allOf/callbackUrl",
+                                                    "type": "string",
+                                                    "title": "CallbackUrl",
+                                                    "description": "The http trigger url of the existing logic app where the request is sent."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "notifications": {
+                                "$id": "#/actionGroups/items/allOf/notifications",
+                                "type": ["array", "null"],
+                                "title": "Notifications",
+                                "description": "All details required to deploy multiple notification receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/notifications/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/notifications/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "emailAddress"
+                                            ],
+                                            "properties": {
+                                                "emailAddress": {
+                                                    "$id": "#/actionGroups/items/allOf/notifications/items/allOf/emailAddress",
+                                                    "type": "string",
+                                                    "title": "EmailAddress",
+                                                    "description": "Address for the azure mobile app."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "runbooks": {
+                                "$id": "#/actionGroups/items/allOf/runbooks",
+                                "type": ["array", "null"],
+                                "title": "Runbooks",
+                                "description": "All details required to deploy multiple runbook receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/runbooks/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/runbooks/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "automationAccountId",
+                                                "runbookName",
+                                                "webhookResourceId",
+                                                "isGlobalRunbook"
+                                            ],
+                                            "properties": {
+                                                "automationAccountId": {
+                                                    "$id": "#/actionGroups/items/allOf/runbooks/items/allOf/automationAccountId",
+                                                    "type": "string",
+                                                    "title": "AutomationAccountId",
+                                                    "description": "AThe resource id of the existing automation account."
+                                                },
+                                                "runbookName": {
+                                                    "$id": "#/actionGroups/items/allOf/runbooks/items/allOf/runbookName",
+                                                    "type": "string",
+                                                    "title": "RunbookName",
+                                                    "description": "Name of the runbook in the above automation account."
+                                                },
+                                                "webhookResourceId": {
+                                                    "$id": "#/actionGroups/items/allOf/runbooks/items/allOf/webhookResourceId",
+                                                    "type": "string",
+                                                    "title": "WebhookResourceId",
+                                                    "description": "Resource id of the webhook defined in the existing runbook."
+                                                },
+                                                "isGlobalRunbook": {
+                                                    "$id": "#/actionGroups/items/allOf/runbooks/items/allOf/isGlobalRunbook",
+                                                    "type": "boolean",
+                                                    "title": "IsGlobalRunbook",
+                                                    "description": "If the runbook instance is global."
+                                                },
+                                                "serviceUri": {
+                                                    "$id": "#/actionGroups/items/allOf/runbooks/items/allOf/serviceUri",
+                                                    "type": ["string", "null"],
+                                                    "title": "ServiceUri",
+                                                    "description": "The uri where the webhooks are sent."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "sms": {
+                                "$id": "#/actionGroups/items/allOf/sms",
+                                "type": ["array", "null"],
+                                "title": "SMS",
+                                "description": "All details required to deploy multiple sms receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/sms/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/sms/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "countryCode",
+                                                "phoneNumber"
+                                            ],
+                                            "properties": {
+                                                "countryCode": {
+                                                    "$id": "#/actionGroups/items/allOf/sms/items/allOf/countryCode",
+                                                    "type": "string",
+                                                    "title": "CountryCode",
+                                                    "description": "Receiver's country code."
+                                                },
+                                                "phoneNumber": {
+                                                    "$id": "#/actionGroups/items/allOf/sms/items/allOf/phoneNumber",
+                                                    "type": "string",
+                                                    "title": "PhoneNumber",
+                                                    "description": "Receiver's phone number."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "voice": {
+                                "$id": "#/actionGroups/items/allOf/voice",
+                                "type": ["array", "null"],
+                                "title": "Voice",
+                                "description": "All details required to deploy multiple voice receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/voice/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/voice/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "countryCode",
+                                                "phoneNumber"
+                                            ],
+                                            "properties": {
+                                                "countryCode": {
+                                                    "$id": "#/actionGroups/items/allOf/voice/items/allOf/countryCode",
+                                                    "type": "string",
+                                                    "title": "CountryCode",
+                                                    "description": "Receiver's country code."
+                                                },
+                                                "phoneNumber": {
+                                                    "$id": "#/actionGroups/items/allOf/voice/items/allOf/phoneNumber",
+                                                    "type": "string",
+                                                    "title": "PhoneNumber",
+                                                    "description": "Receiver's phone number."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "webhooks": {
+                                "$id": "#/actionGroups/items/allOf/webhooks",
+                                "type": ["array", "null"],
+                                "title": "Webhook",
+                                "description": "All details required to deploy multiple webhook receivers.",
+                                "items": {
+                                    "$id": "#/actionGroups/items/allOf/webhooks/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/actionGroups/items/allOf/webhooks/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "serviceUri"
+                                            ],
+                                            "properties": {
+                                                "serviceUri": {
+                                                    "$id": "#/actionGroups/items/allOf/webhooks/items/allOf/serviceUri",
+                                                    "type": "string",
+                                                    "title": "ServiceUri",
+                                                    "description": "Where webhooks are dispatched to."
+                                                },
+                                                "useAadAuth": {
+                                                    "$id": "#/actionGroups/items/allOf/webhooks/items/allOf/useAadAuth",
+                                                    "type": ["boolean", "null"],
+                                                    "title": "UseAadAuth",
+                                                    "description": "Utilise aad authentication."
+                                                },
+                                                "objectId": {
+                                                    "$id": "#/actionGroups/items/allOf/webhooks/items/allOf/objectId",
+                                                    "type": ["string", "null"],
+                                                    "title": "ObjectId",
+                                                    "description": "Existing webhook app id."
+                                                },
+                                                "identifierUri": {
+                                                    "$id": "#/actionGroups/items/allOf/webhooks/items/allOf/identifierUri",
+                                                    "type": ["string", "null"],
+                                                    "title": "IdentifierUri",
+                                                    "description": "Uri for aad authentication."
+                                                },
+                                                "tenantId": {
+                                                    "$id": "#/actionGroups/items/allOf/webhooks/items/allOf/tenantId",
+                                                    "type": ["string", "null"],
+                                                    "title": "TenantId",
+                                                    "description": "Tenant id for aad authentication."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

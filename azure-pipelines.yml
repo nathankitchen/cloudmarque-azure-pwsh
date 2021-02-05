@@ -105,6 +105,8 @@ stages:
         targetPath: publish/docs
         artifactName: docs
         publishLocation: Pipeline
+    - publish: $(System.SourcesDirectory)/Cloudmarque.Azure/Resources/Schema
+      artifact: Schema
 
 - stage: CreateCloudmarqueAzureArtifact
   displayName: Create Cloudmarque.Azure Artifact
@@ -124,12 +126,15 @@ stages:
         script: |
           . .\init.ps1
           . .\$(moduleName)\install-dependencies.ps1
+
           Write-Host "Null suffix"
           $suffix = $null
+
           if([System.Convert]::ToBoolean('$(isPreRelease)')) {
             Write-Host "Populate suffix"
             $suffix = '${{ parameters.PreRelease }}'
           }
+          
           Write-Host "Build"
           Build-CloudmarqueAzure -Version $(version) -Suffix $suffix -ReleaseNotes '${{ parameters.ReleaseNotes }}'
     - task: PublishPipelineArtifact@1
@@ -173,6 +178,7 @@ stages:
               targetType: Inline
               script: |
                 . .\$(moduleName)\install-dependencies.ps1
+
                 Publish-Module `
                   -Path $(moduleName) `
                   -NuGetApiKey $(NugetApiKey) `

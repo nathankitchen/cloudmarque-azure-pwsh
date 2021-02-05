@@ -1,6 +1,4 @@
-﻿. $PSScriptRoot\Initialise-CmAzModule.ps1
-
-Describe "Get-CmAzResourceName" {
+﻿Describe "Get-CmAzResourceName" {
 
     BeforeAll {
         $projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project"

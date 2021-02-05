@@ -14,9 +14,6 @@ service:
 automation:
   certificateName:                                              # Optional: Name of Certificate in Key Vault.
   certificateSecretName: Core-Test-Auto-Pass1                   # Optional: Keyvault secret which contains password. This will be used for certificate. This can be overwritten by passing cmdline password
-  service:
-    dependencies:
-      keyvault:
   sourceControl:
     keyVaultPersonalAccessToken:                                # Optional: (only if repoURL): keyvault secret name for PAT to access Repo.
     url:                                                        # Optional: For repo intergration.

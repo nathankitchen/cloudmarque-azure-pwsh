@@ -46,16 +46,11 @@
 
 	try {
 
-		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+        Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Azure - Frontdoor | Backendpool | Webapps along with routing rules")) {
-
-			if ($SettingsFile -and -not $SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (-not $SettingsFile -and -not $SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
 
 			$azContext = Get-AzContext
 
@@ -130,10 +125,6 @@
 							$appServicePlan.kind = "linux"
 						}
 
-						if (!$appServicePlan.region) {
-							Write-Error "Please provide region for service plan."
-						}
-
 						$appServicePlan.resourceGroupName = $webSolution.generatedResourceGroupName
 
 						foreach ($webapp in $appServicePlan.webapps) {
@@ -201,17 +192,9 @@
 					}
 				}
 
-				if ($webSolution.ApiManagementServices ) {
+				if ($webSolution.ApiManagementServices) {
 
 					$webSolution.ApiManagementServices | forEach-Object {
-
-						if (!$_.Name -or !$_.publisherName -or !$_.publisherEmail -or !$_.Sku ) {
-							Write-Error "Api gateway is missing mandatory parameters. Please provide name, region, organization, admin email and sku."
-						}
-
-						if (!$_.region) {
-							Write-Error "Please provide region for api management service"
-						}
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "apiManagement" -ResourceServiceContainer $_
 
@@ -223,8 +206,6 @@
 
 						$_.generatedName = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Region $_.Region -Name $_.Name
 					}
-
-
 				}
 			}
 
@@ -404,16 +385,13 @@
 
 							$backEndPool.backends.Add($backEndObject) > $null
 						}
-
+						
 						if (!$backEndPool.healthCheckPath) {
 							$backEndPool.healthCheckPath = "/index.html"
 						}
 
 						if (!$backEndPool.protocol) {
 							$backEndPool.protocol = "Https"
-						}
-						elseif ($backEndPool.protocol -ne "Https" -and $backEndPool.protocol -ne "Http") {
-							Write-Error "Invalid backend pool protocol." -Category InvalidArgument -CategoryTargetName "SettingsObject.frontdoor.backendPools.protocol"
 						}
 					}
 					else {

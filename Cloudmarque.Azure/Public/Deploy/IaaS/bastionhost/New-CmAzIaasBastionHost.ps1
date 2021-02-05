@@ -43,32 +43,16 @@
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create Bastion Host in resource group")) {
 
-			if ($SettingsFile -and -not $SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (-not $SettingsFile -and -not $SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
-
 			$resourceGroupName = (Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable -ThrowIfMultiple).resourceGroupName
-
-			$bastionWorkspace = @{
-				"name" = "";
-				"resourceId" = "";
-				"location" = "";
-			}
 
 			if ($SettingsObject.service.dependencies.workspace) {
 
 				Write-Verbose "Fetching workspace.."
 				$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
-				$workspace = Get-AzOperationalInsightsWorkspace -Name $workspace.name -ResourceGroupName $workspace.resourceGroupName
-
-				$bastionWorkspace.name = $workspace.name
-				$bastionWorkspace.resourceId = $workspace.ResourceId
-				$bastionWorkspace.location = $workspace.location
 			}
 
 			foreach($bastionHost in $SettingsObject.bastionHosts) {
@@ -112,7 +96,7 @@
 				-TemplateFile "$PSScriptRoot\New-CmAzIaasBastionHost.json" `
 				-BastionHosts $SettingsObject.bastionHosts `
 				-Location $SettingsObject.location `
-				-Workspace $bastionWorkspace `
+				-Workspace $workspace `
 				-Force
 
 			$resourcesToSet = @()
@@ -120,9 +104,8 @@
 			$resourcesToSet += $SettingsObject.bastionHosts.bastionHostName
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
+			Write-Verbose "Finished!"
 		}
-
-		Write-Verbose "Finished!"
 	}
 	catch {
 		$PSCmdlet.ThrowTerminatingError($PSItem)

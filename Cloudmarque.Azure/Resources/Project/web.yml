@@ -6,7 +6,7 @@ service:
     appServicePlan: Web-Test-Asp
     webapp: Web-Test-Webapp
     apiManagement: Web-Test-Api
-    frontDoor: Web-Test-Fd
+    frontdoor: Web-Test-Fd
     frontdoorResourceGroup: Web-Test-Fd-Rg
     cdn: Web-test-Cdn
     endpoint: Web-test-Endpoint
@@ -71,7 +71,7 @@ webSolutions:
           webapp:
       slots:
         - Production
-    apiManagementServices:
+  apiManagementServices:
     - name: Web-Test-Api1
       region: UK South                                        # Optional - Defaults to global location
       publisherName: Cloudmarque
@@ -86,7 +86,7 @@ webSolutions:
         publish:
           apiManagement:
 
-frontDoor:
+frontdoor:
   name: Web-Test-Fd
   sessionAffinity: Enabled                                    # Optional - Enabled / Disabled - Disabled is Default
   region: WestEurope                                          # Sets the region of the containing resource group, frontdoors are always global.
@@ -125,7 +125,7 @@ frontDoor:
     backEndPoolname: Web-Test-Be1
     acceptedProtocols:                                        # Optional: Default is both Http and Https
       - Https
-    endpoints:                                                # Optional - For Domain based routing                                                  # Optional - For Domain based routing
+    endpoints:                                                # Optional - For Domain based routing
       - int02.cloudmarque.com
       - int03.cloudmarque.com
     enableCaching: true                                       # Optional - Default is false

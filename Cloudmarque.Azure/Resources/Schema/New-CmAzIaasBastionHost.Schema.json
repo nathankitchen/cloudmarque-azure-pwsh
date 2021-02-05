@@ -1,0 +1,170 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzIaasBastionHost",
+    "type": "object",
+    "title": "New-CmAzIaasBastionHost",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "service",
+        "bastionHosts"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Location for all resource deployments."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "dependencies"
+            ],
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "resourceGroup",
+                        "workspace"
+                    ],
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/dependencies/resourceGroup",
+                            "type": "string",
+                            "title": "ResourceGroup",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "workspace": {
+                            "$id": "#/service/dependencies/workspace",
+                            "type": "string",
+                            "title": "Workspace",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": ["object", "null"],
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "properties": {
+                        "bastion": {
+                            "$id": "#/service/publish/bastion",
+                            "type": ["string", "null"],
+                            "title": "Bastion",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "bastionPublicIP": {
+                            "$id": "#/service/publish/bastionPublicIP",
+                            "type": ["string", "null"],
+                            "title": "BastionPublicIP",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "bastionHosts": {
+            "$id": "#/bastionHosts",
+            "type": "array",
+            "title": "BastionHosts",
+            "description": "Container for Bastion Host details.",
+            "items": {
+                "$id": "#/bastionHosts/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/bastionHosts/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "bastionHostName"
+                        ],
+                        "properties": {
+                            "bastionHostName": {
+                                "$id": "#/bastionHosts/items/allOf/bastionHostName",
+                                "type": "string",
+                                "title": "BastionHostName",
+                                "description": "Name for Bastion Host"
+                            },
+                            "bastionHostSubnetPrefix": {
+                                "$id": "#/bastionHosts/items/allOf/bastionHostSubnetPrefix",
+                                "type": ["string", "null"],
+                                "title": "BastionHostSubnetPrefix",
+                                "description": "Subnet prefix for Bastion Host"
+                            },
+                            "service": {
+                                "$id": "#/bastionHosts/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "dependencies": {
+                                        "$id": "#/bastionHosts/items/allOf/service/dependencies",
+                                        "type": ["object", "null"],
+                                        "title": "Dependencies",
+                                        "description": "Contains dependency details for service location.",
+                                        "properties": {
+                                            "vnet": {
+                                                "$id": "#/bastionHosts/items/allOf/service/dependencies/vnet",
+                                                "type": ["string", "null"],
+                                                "title": "Vnet",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "publish": {
+                                        "$id": "#/bastionHosts/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "bastion": {
+                                                "$id": "#/bastionHosts/items/allOf/service/publish/bastion",
+                                                "type": ["string", "null"],
+                                                "title": "Bastion",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            },
+                                            "bastionPublicIP": {
+                                                "$id": "#/bastionHosts/items/allOf/service/publish/bastionPublicIP",
+                                                "type": ["string", "null"],
+                                                "title": "BastionPublicIP",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

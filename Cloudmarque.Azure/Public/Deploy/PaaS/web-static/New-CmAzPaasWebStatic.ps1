@@ -49,30 +49,9 @@
 
 	Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
+	$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+
 	if($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy infrastructure for a static website")) {
-
-	    if ($SettingsFile -and !$SettingsObject) {
-	    	$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-	    }
-		elseif (!$SettingsFile -and !$SettingsObject) {
-			Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-		}
-
-		if (!$SettingsObject.Name) {
-			Write-Error "Please provide a valid name." -Category InvalidArgument -CategoryTargetName "Name"
-		}
-
-		if (!$SettingsObject.Location) {
-			Write-Error "Please provide a valid location" -Category InvalidArgument -CategoryTargetName "Location"
-		}
-
-		if (!$SettingsObject.RedirectUrl) {
-			Write-Error "Please provide a valid redirectUrl" -Category InvalidArgument -CategoryTargetName "RedirectUrl"
-		}
-
-		if (!$SettingsObject.CustomDomain) {
-			Write-Error "Please provide a valid custom domain" -Category InvalidArgument -CategoryTargetName "CustomDomain"
-		}
 
 		Write-Verbose "Generating resource names..."
 		$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name

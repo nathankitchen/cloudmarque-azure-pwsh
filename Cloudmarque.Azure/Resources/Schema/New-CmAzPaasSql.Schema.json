@@ -1,0 +1,349 @@
+﻿{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzPaasSql",
+    "type": "object",
+    "title": "New-CmAzPaasSql",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "service",
+        "sqlConfig"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Deployment location for all resources."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "dependencies"
+            ],
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "resourceGroup"
+                    ],
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/dependencies/resourceGroup",
+                            "type": "string",
+                            "title": "ResourceGroup",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "workpace": {
+                            "$id": "#/service/dependencies/workpace",
+                            "type": ["string", "null"],
+                            "title": "Workpace",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "keyvault": {
+                            "$id": "#/service/dependencies/keyvault",
+                            "type": ["string", "null"],
+                            "title": "Keyvault",
+                            "description": "Global overriding dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": ["object", "null"],
+                    "title": "Publish",
+                    "description": "Global default value to publish on deployed resource type.",
+                    "properties": {
+                        "server": {
+                            "$id": "#/service/publish/server",
+                            "type": ["string", "null"],
+                            "title": "Server",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "database": {
+                            "$id": "#/service/publish/database",
+                            "type": ["string", "null"],
+                            "title": "Database",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "elasticPool": {
+                            "$id": "#/service/publish/elasticPool",
+                            "type": ["string", "null"],
+                            "title": "ElasticPool",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "logRetentionPeriodInDays": {
+            "$id": "#/logRetentionPeriodInDays",
+            "type": ["integer", "null"],
+            "title": "LogRetentionPeriodInDays",
+            "description": "Retention in days for SQLSecurityAuditEvents in an existing workspace.",
+            "default": 30,
+            "minimum": 1
+        },
+        "sqlConfig": {
+            "$id": "#/sqlConfig",
+            "type": "array",
+            "title": "SqlConfig",
+            "description": "Container of details required to deploy servers, databases and/or other associated resources.",
+            "items": {
+                "$id": "#/sqlConfig/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/sqlConfig/items",
+                        "type": "object",
+                        "required": [
+                            "family",
+                            "serverName",
+                            "administratorLogin",
+                            "passwordsecretName",
+                            "sku"
+                        ],
+                        "properties": {
+                            "family": {
+                                "$id": "#/sqlConfig/items/allOf/family",
+                                "type": "string",
+                                "title": "Family",
+                                "description": "The database product to use.",
+                                "enum": ["azureSql", "postgressql", "mariaDb", "mySql"]
+                            },
+                            "type": {
+                                "$id": "#/sqlConfig/items/allOf/type",
+                                "type": ["string", "null"],
+                                "title": "Type",
+                                "description": "The type of db instance to use.",
+                                "enum": ["single", "elasticPool", "managed", "", null],
+                                "default": ""
+                            },
+                            "serverName": {
+                                "$id": "#/sqlConfig/items/allOf/serverName",
+                                "type": "string",
+                                "title": "ServerName",
+                                "description": "Becomes part of the generated server's name, if no db is defined, one db is created with this value as part of the db's generated name."
+                            },
+                            "elasticPoolName": {
+                                "$id": "#/sqlConfig/items/allOf/elasticPoolName",
+                                "type": ["string", "null"],
+                                "title": "ElasticPoolName",
+                                "description": "Becomes part of the generated elastic pool's name"
+                            },
+                            "service": {
+                                "$id": "#/sqlConfig/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "publish": {
+                                        "$id": "#/sqlConfig/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "server": {
+                                                "$id": "#/sqlConfig/items/allOf/service/publish/server",
+                                                "type": ["string", "null"],
+                                                "title": "Server",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            },
+                                            "elasticPool": {
+                                                "$id": "#/sqlConfig/items/allOf/service/publish/elasticPool",
+                                                "type": ["string", "null"],
+                                                "title": "ElasticPool",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "dependencies": {
+                                        "$id": "#/sqlConfig/items/allOf/service/dependencies",
+                                        "type": ["object", "null"],
+                                        "title": "Dependencies",
+                                        "description": "Contains dependency details for service location.",
+                                        "properties": {
+                                            "keyvault": {
+                                                "$id": "#/sqlConfig/items/allOf/service/dependencies/keyvault",
+                                                "type": ["string", "null"],
+                                                "title": "Keyvault",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "version": {
+                                "$id": "#/sqlConfig/items/allOf/version",
+                                "type": ["string", "null"],
+                                "title": "Version",
+                                "description": "An explanation about purpose of this instance."
+                            },
+                            "databases": {
+                                "$id": "#/sqlConfig/items/allOf/databases",
+                                "type": ["array", "null"],
+                                "title": "Databases",
+                                "description": "List of details required to deploy all databases.",
+                                "items": {
+                                    "$id": "#/sqlConfig/items/allOf/databases/items",
+                                    "minLength": 1,
+                                    "anyOf": [
+                                        {
+                                            "$id": "#/sqlConfig/items/allOf/databases/items/anyOf/string",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "$id": "#/sqlConfig/items/allOf/databases/items/anyOf/object",
+                                            "type": "object",
+                                            "required": [
+                                                "name"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/sqlConfig/items/allOf/databases/items/anyOf/object/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated database's name,"
+                                                },
+                                                "service": {
+                                                    "$id": "#/sqlConfig/items/allOf/databases/items/anyOf/object/service",
+                                                    "type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",
+                                                    "properties": {
+                                                        "publish": {
+                                                            "$id": "#/sqlConfig/items/allOf/databases/items/anyOf/object/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+                                                                "database": {
+                                                                    "$id": "#/sqlConfig/items/allOf/databases/items/anyOf/object/service/publish/database",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "Database",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "administratorLogin": {
+                                "$id": "#/sqlConfig/items/allOf/administratorLogin",
+                                "type": "string",
+                                "title": "AdministratorLogin",
+                                "description": "Administrator username."
+                            },
+                            "passwordsecretName": {
+                                "$id": "#/sqlConfig/items/allOf/passwordsecretName",
+                                "type": "string",
+                                "title": "PasswordSecretName",
+                                "description": "Name of secret in an existing key vault which represents the administrator password."
+                            },
+                            "sku": {
+                                "$id": "#/sqlConfig/items/allOf/sku",
+                                "type": "object",
+                                "title": "Sku",
+                                "description": "Sku details container.",
+                                "required": [
+                                    "name",
+                                    "capacity"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "$id": "#/sqlConfig/items/allOf/sku/name",
+                                        "type": "string",
+                                        "title": "Name",
+                                        "description": "The sku name."
+                                    },
+                                    "capacity": {
+                                        "$id": "#/sqlConfig/items/allOf/sku/capacity",
+                                        "type": "integer",
+                                        "title": "Capacity",
+                                        "description": "The sku capacity.",
+                                        "minimum": 1
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "firewallRules": {
+                                "$id": "#/sqlConfig/items/allOf/firewallRules",
+                                "type": ["array", "null"],
+                                "title": "FirewallRules",
+                                "description": "List of ip ranges required to deploy all firewall rules.",
+                                "default": [{
+                                    "startIpAddress":"0.0.0.0",
+                                    "endIpAddress":"255.255.255.255"
+                                }],
+                                "items": {
+                                    "$id": "#/sqlConfig/items/allOf/firewallRules/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/sqlConfig/items/allOf/firewallRules/items",
+                                            "type": "object",
+                                            "description": "Firewall rule containing an ipaddress range.",
+                                            "required": [
+                                                "startIpAddress",
+                                                "endIpAddress"
+                                            ],
+                                            "default": {
+                                                "startIpAddress":"0.0.0.0",
+                                                "endIpAddress":"255.255.255.255"
+                                            },
+                                            "properties": {
+                                                "startIpAddress": {
+                                                    "$id": "#/sqlConfig/items/allOf/firewallRules/items/allOf/startIpAddress",
+                                                    "type": ["string", "null"],
+                                                    "title": "StartIpAddress",
+                                                    "description": "Minimum ip address value in range.",
+                                                    "format": "ipv4",
+                                                    "default": "0.0.0.0"
+                                                },
+                                                "endIpAddress": {
+                                                    "$id": "#/sqlConfig/items/allOf/firewallRules/items/allOf/endIpAddress",
+                                                    "type": ["string", "null"],
+                                                    "title": "EndIpAddress",
+                                                    "description": "Maximum ip address value in range.",
+                                                    "format": "ipv4",
+                                                    "default": "255.255.255.255"
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

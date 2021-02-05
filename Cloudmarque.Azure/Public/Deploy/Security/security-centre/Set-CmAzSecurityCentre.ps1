@@ -42,23 +42,9 @@ function Set-CmAzSecurityCentre {
 
         Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
+        $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+
         if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Security Centre")) {
-
-            if ($SettingsFile -and !$SettingsObject) {
-                $SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-            }
-            elseif (!$SettingsFile -and !$SettingsObject) {
-                Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-            }
-
-            if (!$SettingsObject.Location) {
-                Write-Error "Please provide a valid location." -Category InvalidArgument -CategoryTargetName "Location"
-            }
-
-            Write-Verbose "Checking security contacts are valid..."
-            if (!$SettingsObject.SecurityContacts -or !$SettingsObject.SecurityContacts.Primary.Email -or !$SettingsObject.SecurityContacts.Primary.Phone) {
-                Write-Error "Please provide at primary email address and phone number." -Category InvalidArgument -CategoryTargetName "SecurityContacts"
-            }
 
             if (!$SettingsObject.EnableUkNHS -eq $null) {
                 $SettingsObject.EnableUkNHS = $false

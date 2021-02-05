@@ -23,14 +23,16 @@
     Process {
 
         $modules =  @(
-            @{ ModuleName = "Pester"; ModuleVersion = "5.0.2" },
+            @{ ModuleName = "Pester"; ModuleVersion = "5.1.1" },
             @{ ModuleName = "PSScriptAnalyzer"; ModuleVersion = "1.19.1" }
         );
 
         .$PSScriptRoot/Cloudmarque.Azure/Install-Dependencies.ps1 -AdditionalModules $modules -Scope $Scope -ImportModules $true -Verbose
 
-        $publishPath = "$PSScriptRoot\publish"
-        $testDirectory = "tests"
+        Sync-CloudmarqueAzure
+
+        $publishPath = "$PSScriptRoot\Publish"
+        $testDirectory = "Tests"
         $testPath = "$publishPath\$testDirectory"
 
         New-Item -Path $publishPath -Name $Project -ItemType Directory -Force > $Null

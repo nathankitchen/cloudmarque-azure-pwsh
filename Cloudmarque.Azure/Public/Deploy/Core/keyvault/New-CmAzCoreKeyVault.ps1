@@ -44,35 +44,14 @@ function New-CmAzCoreKeyVault {
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+
 		if($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Keyvault")) {
-
-			if ($SettingsFile -and !$SettingsObject) {
-				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
-			}
-			elseif (!$SettingsFile -and !$SettingsObject) {
-				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
-			}
-
-			if (!$SettingsObject.resourceGroupName) {
-				Write-Error "Please provide a valid resource group name." -Category InvalidArgument -CategoryTargetName "ResourceGroupName"
-			}
-
-			if (!$SettingsObject.location) {
-				Write-Error "Please provide a valid location." -Category InvalidArgument -CategoryTargetName "Location"
-			}
-
-			if (!$SettingsObject.keyVaults) {
-                Write-Error "Please provide at least one keyvault." -Category InvalidArgument -CategoryTargetName "Keyvaults"
-			}
 
 			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
 
 			Write-Verbose "Generating standardised Key Vault names..."
 			ForEach ($keyVault in $SettingsObject.keyVaults) {
-
-				if(!$keyVault.name -or !$keyVault.type -or !$keyVault.location) {
-					Write-Error "Please ensure a keyvault has a name, a type and a location." -Category InvalidArgument -CategoryTargetName "Keyvaults"
-				}
 
 				$keyVault.name = Get-CmAzResourceName -Resource "KeyVault" -Architecture "Core" -Region $keyVault.location -Name $keyVault.name -MaxLength 24
 

@@ -110,7 +110,6 @@
                             }
                         },
                         {
-                            "condition": "[not(empty(parameters('Workspace').Name))]",
                             "type": "Microsoft.Network/bastionHosts/Providers/DiagnosticSettings",
                             "name": "[concat(parameters('BastionHost').bastionHostName, '/Microsoft.Insights/Service')]",
                             "apiVersion": "2016-09-01",

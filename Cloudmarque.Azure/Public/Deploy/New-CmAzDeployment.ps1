@@ -13,6 +13,12 @@ function New-CmAzDeployment {
         .Parameter SettingsObject
          Object containing the configuration values required to run this cmdlet.
 
+        .Parameter PolicySettingsFile
+		 Policy file path for the settings file to be converted into a settings object New-CmAzIaasRecoveryServicesVault.
+
+        .Parameter PolicySettingsObject
+         Policy object containing the configuration values required to run this New-CmAzIaasRecoveryServicesVault.
+
         .Parameter TagSettingsFile
          File path for settings containing tags definition.
 
@@ -45,6 +51,8 @@ function New-CmAzDeployment {
         [String]$SettingsFile,
         [parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
         [Object]$SettingsObject,
+        [String]$PolicySettingsFile,
+        [Object]$PolicySettingsObject,
         [String]$TagSettingsFile,
         [parameter(Mandatory = $false)]
         [SecureString]$LocalAdminUsername,
@@ -94,7 +102,15 @@ function New-CmAzDeployment {
             }
 
             recoveryvault {
-                New-CmAzIaasRecoveryServicesVault -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
+
+                if ($PolicySettingsFile -and !$PolicySettingsObject) {
+                    $PolicySettingsObject = Get-CmAzSettingsFile -Path $PolicySettingsFile
+                }
+                elseif (!$PolicySettingsFile -and !$PolicySettingsObject) {
+                    Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "PolicySettingsObject"
+                }
+
+                New-CmAzIaasRecoveryServicesVault -SettingsObject $SettingsObject -PolicySettingsObject $PolicySettingsObject -TagSettingsFile $TagSettingsFile
             }
 
             storage {
@@ -131,6 +147,10 @@ function New-CmAzDeployment {
 
             securityCentre {
                 Set-CmAzSecurityCentre -SettingsObject $SettingsObject
+            }
+
+            updateManagement {
+                Set-CmAzIaasUpdateManagement -SettingsObject $SettingsObject
             }
 
             Default {

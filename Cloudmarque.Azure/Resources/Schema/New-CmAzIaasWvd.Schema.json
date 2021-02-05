@@ -1,0 +1,221 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "New-CmAzIaasWvd",
+    "description": "Settings Root.",
+    "required": [
+        "wvdEnvironments"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "logAnalyticsTag": {
+            "$id": "#/logAnalyticsTag",
+            "type": ["string", "null"],
+            "title": "LogAnalyticsTag",
+            "description": "Dependency value to fetch existing resource type."
+        },
+        "azureDeploymentLocation": {
+            "$id": "#/azureDeploymentLocation",
+            "type": ["string", "null"],
+            "title": "AzureDeploymentLocation",
+            "description": "Deployment history location.",
+            "default": "UK South"
+        },
+        "wvdEnvironments": {
+            "$id": "#/wvdEnvironments",
+            "type": "array",
+            "title": "WVDEnvironments",
+            "description": "List of details required to deploy all wvd environments, vm's and any other associated resources.",
+            "items": {
+                "$id": "#/wvdEnvironments/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/wvdEnvironments/items",
+                        "type": "object",
+                        "required": [
+                            "wvdEnvironmentName",
+                            "wvdEnvironmentLocation",
+                            "workspaceFriendlyName",
+                            "hostpool",
+                            "hostVm"
+                        ],
+                        "properties": {
+                            "wvdEnvironmentName": {
+                                "$id": "#/wvdEnvironments/items/allOf/wvdEnvironmentName",
+                                "type": "string",
+                                "title": "WVDEnvironmentName",
+                                "description": "Becomes part of the generated resource group, workspace, host pool and desktop group names."
+                            },
+                            "wvdEnvironmentLocation": {
+                                "$id": "#/wvdEnvironments/items/allOf/wvdEnvironmentLocation",
+                                "type": "string",
+                                "title": "WVDEnvironmentLocation",
+                                "description": "Resource group, host pool, application group and workspace deployment locations, serves as the default host vm location as well."
+                            },
+                            "workspaceFriendlyName": {
+                                "$id": "#/wvdEnvironments/items/allOf/workspaceFriendlyName",
+                                "type": "string",
+                                "title": "WorkspaceFriendlyName",
+                                "description": "Workspace friendly name on the login portal."
+                            },
+                            "hostpool": {
+                                "$id": "#/wvdEnvironments/items/allOf/hostpool",
+                                "type": "object",
+                                "title": "Hostpool",
+                                "description": "Details required to deploy all the hostpool vm's.",
+                                "required": [
+                                    "hostpoolFriendlyName"
+                                ],
+                                "properties": {
+                                    "hostpoolFriendlyName": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostpool/hostpoolFriendlyName",
+                                        "type": "string",
+                                        "title": "HostpoolFriendlyName",
+                                        "description": "Hostpool friendly name on the login portal."
+                                    },
+                                    "hostpoolType": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostpool/hostpoolType",
+                                        "type": ["string", "null"],
+                                        "title": "HostpoolType",
+                                        "description": "The hostpool type.",
+                                        "enum": ["Personal", "Pooled", null],
+                                        "default": "Pooled"
+                                    },
+                                    "hostpoolBalancing": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostpool/hostpoolBalancing",
+                                        "type": ["string", "null"],
+                                        "title": "HostpoolBalancing",
+                                        "description": "Configures the wvd load balancer.",
+                                        "enum": ["Automatic", "Direct", "DepthFirst", "BreadthFirst", null],
+                                        "default": "DepthFirst"
+                                    },
+                                    "hostpoolMaxSessions": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostpool/hostpoolMaxSessions",
+                                        "type": ["integer", "null"],
+                                        "title": "HostpoolMaxSessions",
+                                        "description": "Max session limit of the host pool.",
+                                        "minimum": 1,
+                                        "default": 10
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "hostVm": {
+                                "$id": "#/wvdEnvironments/items/allOf/hostVm",
+                                "type": "object",
+                                "title": "HostVM",
+                                "description": "Details required to deploy a host vm.",
+                                "required": [
+                                    "hostVmNamePrefix",
+                                    "hostVmVnet",
+                                    "hostVmSubnet",
+                                    "hostVmDomain",
+                                    "hostVmDomainOU",
+                                    "hostVmAdmin",
+                                    "hostVmKeyVaultTag",
+                                    "hostVmKeyVaultAdminSecret",
+                                    "hostVmCount"
+                                ],
+                                "properties": {
+                                    "hostVmNamePrefix": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmNamePrefix",
+                                        "type": "string",
+                                        "title": "HostVmNamePrefix",
+                                        "description": "Windows computer name, Maximum length of 13, minus 1 for every power of 10 requested machines."
+                                    },
+                                    "hostVmLocation": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmLocation",
+                                        "type": ["string", "null"],
+                                        "title": "HostVmLocation",
+                                        "description": "Availability set and host vm deployment location, part of the availability set name, and vm image sku and size availability also depend on this value (defaults to wvd environment location)."
+                                    },
+                                    "hostVmSize": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmSize",
+                                        "type": ["string", "null"],
+                                        "title": "HostVmSize",
+                                        "description": "The size of the host virtual machine.",
+                                        "default": "Standard_DS4_v2"
+                                    },
+                                    "hostVmImageType": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmImageType",
+                                        "type": ["string", "null"],
+                                        "title": "HostVmImageType",
+                                        "description": "The vm image type.",
+                                        "enum": ["Gallery", "CustomImage", null],
+                                        "default": "Gallery"
+                                    },
+                                    "hostVmImage": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmImage",
+                                        "type": ["string", "null"],
+                                        "title": "HostVmImage",
+                                        "description": "The name of the image to use.",
+                                        "default": "Windows-10"
+                                    },
+                                    "hostVmVnet": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmVnet",
+                                        "type": "string",
+                                        "title": "HostVmVnet",
+                                        "description": "Dependency value to fetch existing resource type."
+                                    },
+                                    "hostVmSubnet": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmSubnet",
+                                        "type": "string",
+                                        "title": "HostVmSubnet",
+                                        "description": "The name of the subnet in an existing vnet."
+                                    },
+                                    "hostVmDomain": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmDomain",
+                                        "type": "string",
+                                        "title": "HostVmDomain",
+                                        "description": "The domain to join the hosts to."
+                                    },
+                                    "hostVmDomainOU": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmDomainOU",
+                                        "type": "string",
+                                        "title": "HostVmDomainOU",
+                                        "description": "The Organizational unit within Active Directory in which to store the hosts."
+                                    },
+                                    "hostVmAdmin": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmAdmin",
+                                        "type": "string",
+                                        "title": "HostVmAdmin",
+                                        "description": "The domain adminitrative username to join the hosts to the domain."
+                                    },
+                                    "hostVmKeyVaultTag": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmKeyVaultTag",
+                                        "type": "string",
+                                        "title": "HostVmKeyVaultTag",
+                                        "description": "Dependency value to fetch existing resource type."
+                                    },
+                                    "hostVmKeyVaultAdminSecret": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmKeyVaultAdminSecret",
+                                        "type": "string",
+                                        "title": "HostVmKeyVaultAdminSecret",
+                                        "description": "Name of the secret in an existing key vault that serves as the host vm admin password."
+                                    },
+                                    "hostVmCount": {
+                                        "$id": "#/wvdEnvironments/items/allOf/hostVm/hostVmCount",
+                                        "type": "integer",
+                                        "title": "HostVmCount",
+                                        "description": "Number of WVD hosts required.",
+                                        "minimum": 1
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

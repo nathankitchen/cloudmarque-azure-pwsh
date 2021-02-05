@@ -1,0 +1,428 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzIaasVm",
+    "type": "object",
+    "title": "New-CmAzIaasVm",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "service",
+        "diskEncryptionKey",
+        "groups"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Default location for all deployed resources."
+        },
+        "dscConfigNode": {
+            "$id": "#/dscConfigNode",
+            "type": ["string", "null"],
+            "title": "DSCConfigNode",
+            "description": "Name of the compiled configuration node in automation account."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "dependencies"
+            ],
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "automation",
+                        "keyvault",
+                        "workspace"
+                    ],
+                    "properties": {
+                        "automation": {
+                            "$id": "#/service/dependencies/automation",
+                            "type": "string",
+                            "title": "Automation",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "keyvault": {
+                            "$id": "#/service/dependencies/keyvault",
+                            "type": "string",
+                            "title": "Keyvault",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "VNet",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "workspace": {
+                            "$id": "#/service/dependencies/workspace",
+                            "type": "string",
+                            "title": "Workspace",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": ["object", "null"],
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type": ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "vm": {
+                            "$id": "#/service/publish/vm",
+                            "type": ["string", "null"],
+                            "title": "VM",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "nic": {
+                            "$id": "#/service/publish/nic",
+                            "type": ["string", "null"],
+                            "title": "NIC",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "diskEncryptionKey": {
+            "$id": "#/diskEncryptionKey",
+            "type": "string",
+            "title": "DiskEncryptionKey",
+            "description": "Name of key encryption key in the existing key vault."
+        },
+        "groups": {
+            "$id": "#/groups",
+            "type": "array",
+            "title": "Groups",
+            "description": "Contains list of details required to deploy resource groups, vm's and associated resources.",
+            "items": {
+                "$id": "#/groups/items",
+                "minLength": 1,
+                "allOf": [
+                    {
+                        "$id": "#/groups/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "virtualMachines"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/groups/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of the generated resource group's name."
+                            },
+                            "location": {
+                                "$id": "#/groups/items/allOf/location",
+                                "type": ["string", "null"],
+                                "title": "Location",
+                                "description": "Resource group deployment location"
+                            },
+                            "service": {
+                                "$id": "#/groups/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "publish": {
+                                        "$id": "#/groups/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "resourceGroup": {
+                                                "$id": "#/groups/items/allOf/service/publish/resourceGroup",
+                                                "type": ["string", "null"],
+                                                "title": "ResourceGroup",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "virtualMachines": {
+                                "$id": "#/groups/items/allOf/virtualMachines",
+                                "type": "array",
+                                "title": "VirtualMachines",
+                                "description": "Contains list of details required to deploy vm's and associated resources.",
+                                "items": {
+                                    "$id": "#/groups/items/allOf/virtualMachines/items",
+                                    "minLength" : 1,
+                                    "allOf": [
+                                        {
+                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf",
+                                            "type": "object",
+                                            "required": [
+                                                "name",
+                                                "size",
+                                                "imageReference",
+                                                "osDisk",
+                                                "networking"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated virtual machine's name."
+                                                },
+                                                "size": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/size",
+                                                    "type": "string",
+                                                    "title": "Size",
+                                                    "description": "Preset vm hardware configuration option (predefined in azure)."
+                                                },
+                                                "updateGroup": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/updateGroup",
+                                                    "type": ["string", "null"],
+                                                    "title": "UpdateGroup",
+                                                    "description": "Pre-defined group of azure defined vm update bundles.",
+                                                    "enum": ["Critical", "CriticalSecurity", "Recommended", "All", null]
+
+                                                },
+                                                "updateFrequency": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/updateFrequency",
+                                                    "type": ["string", "null"],
+                                                    "title": "UpdateFrequency",
+                                                    "description": "The frequency of the updates applied to the vm.",
+                                                    "enum": ["Monthly", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Daily", null]
+                                                },
+                                                "imageReference": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/imageReference",
+                                                    "type": "object",
+                                                    "title": "ImageReference",
+                                                    "description": "Container of details in regards to the vm image used.",
+                                                    "required": [
+                                                        "publisher",
+                                                        "offer",
+                                                        "sku",
+                                                        "version"
+                                                    ],
+                                                    "properties": {
+                                                        "publisher": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/imageReference/publisher",
+                                                            "type": "string",
+                                                            "title": "Publisher",
+                                                            "description": "Publisher source of the image."
+                                                        },
+                                                        "offer": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/imageReference/offer",
+                                                            "type": "string",
+                                                            "title": "Offer",
+                                                            "description": "Platform or marketplace image product."
+                                                        },
+                                                        "sku": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/imageReference/sku",
+                                                            "type": "string",
+                                                            "title": "Sku used",
+                                                            "description": "Image sku."
+                                                        },
+                                                        "version": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/imageReference/version",
+                                                            "type": "string",
+                                                            "title": "Version",
+                                                            "description": "Platform or marketplace image version, (Major.Minor.Build) or latest."
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                },
+                                                "location": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/location",
+                                                    "type": ["string", "null"],
+                                                    "title": "Location",
+                                                    "description": "Virtual machine deployment location"
+                                                },
+                                                "service": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/service",
+                                                    "type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",                                                  
+                                                    "properties": {
+                                                        "publish": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+                                                                "vm": {
+                                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/service/publish/vm",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "VM",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                },
+                                                                "nic": {
+                                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/service/publish/nic",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "NIC",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                },
+                                                "osDisk": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk",
+                                                    "type": "object",
+                                                    "title": "OSDisk",
+                                                    "description": "Container of details in regards to vm's operating system disk.",
+                                                    "required": [
+                                                        "osType",
+                                                        "expandableDiskSizeGB"
+                                                    ],
+                                                    "properties": {
+                                                        "osType": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/osType",
+                                                            "type": "string",
+                                                            "title": "OSType",
+                                                            "description": "The over arching type of OS to use.",
+                                                            "enum": ["Windows", "Linux"]
+                                                        },
+                                                        "expandableDiskSizeGB": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/expandableDiskSizeGB",
+                                                            "type": "integer",
+                                                            "title": "ExpandableDiskSizeGB",
+                                                            "description": "The size of the disk in gigabytes. (Overwrites disk size in vm image).",
+                                                            "minimum": 1
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                },
+                                                "dataDiskSizes": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDiskSizes",
+                                                    "type": ["array", "null"],
+                                                    "title": "DataDiskSizes",
+                                                    "description": "List of details specifiying the size of and how many data disks will be deployed with the vm.",
+                                                    "items": {
+                                                        "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDiskSizes/items",
+                                                        "allOf": [
+                                                            {
+                                                                "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDiskSizes/items/allOf",
+                                                                "type": "integer",
+                                                                "minimum": 1
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "plan": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/plan",
+                                                    "type": ["object", "null"],
+                                                    "title": "Plan",
+                                                    "description": "Container of details in regards to what vm marketplace image to use for the vm.",
+                                                    "required": [
+                                                        "name",
+                                                        "publisher",
+                                                        "product"
+                                                    ],
+                                                    "properties": {
+                                                        "name": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/osType",
+                                                            "type": "string",
+                                                            "title": "Name",
+                                                            "description": "Plan id."
+                                                        },
+                                                        "publisher": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/expandableDiskSizeGB",
+                                                            "type": "string",
+                                                            "title": "Publisher",
+                                                            "description": "Publisher id source of the image.."
+                                                        },
+                                                        "product": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/expandableDiskSizeGB",
+                                                            "type": "string",
+                                                            "title": "Product",
+                                                            "description": "Marketplace image product."
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                },
+                                                "networking": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/networking",
+                                                    "type": "object",
+                                                    "title": "Networking",
+                                                    "description": "Container of details in regards to network dependency values.",
+                                                    "required": [
+                                                        "subnetName"
+                                                    ],
+                                                    "properties": {
+                                                        "service": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/networking/service",
+                                                            "type": ["object", "null"],
+                                                            "title": "Service",
+                                                            "description": "Contains dependency and publish details for service location.",
+                                                            "properties": {
+                                                                "dependencies": {
+                                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/networking/service/dependencies",
+                                                                    "type": ["object", "null"],
+                                                                    "title": "Dependencies",
+                                                                    "description": "Contains dependency details for service location.",
+                                                                    "properties": {
+                                                                        "vnet": {
+                                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/networking/service/dependencies/vnet",
+                                                                            "type": ["string", "null"],
+                                                                            "title": "Vnet",
+                                                                            "description": "Local overriding dependency value to fetch existing resource type."
+                                                                        }
+                                                                    },
+                                                                    "additionalProperties": false
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        },
+                                                        "ipAddress": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/networking/ipAddress",
+                                                            "type": ["string", "null"],
+                                                            "title": "IPAddress",
+                                                            "description": "Private ip address for the network interface card.",
+                                                            "format": "ipv4"
+                                                        },
+                                                        "subnetName": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/networking/subnetName",
+                                                            "type": "string",
+                                                            "title": "SubnetName",
+                                                            "description": "Name of subnet to use in existing vnet."
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

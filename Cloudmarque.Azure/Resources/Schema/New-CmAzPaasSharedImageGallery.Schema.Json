@@ -1,0 +1,229 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzPaasSharedImageGallery",
+    "type": "object",
+    "title": "New-CmAzPaasSharedImageGallery",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "galleryName",
+        "imageDefinitions"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "resourceGroupServiceTag": {
+            "$id": "#/resourceGroupServiceTag",
+            "type": ["string", "null"],
+            "title": "ResourceGroupServiceTag",
+            "description": "Dependency value to fetch existing resource type."
+        },
+        "resourceGroupName": {
+            "$id": "#/resourceGroupName",
+            "type": ["string", "null"],
+            "title": "ResourceGroupName",
+            "description": "Become part of the generated resource group's name (used for when you want to deploy resources in their own resource group)."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Resource group and shared image gallery deployment location."
+        },
+        "galleryName": {
+            "$id": "#/galleryName",
+            "type": "string",
+            "title": "GalleryName",
+            "description": "Become part of the generated shared image gallery's name."
+        },
+        "imageDefinitions": {
+            "$id": "#/imageDefinitions",
+            "type": ["array", "null"],
+            "title": "ImageDefinitions",
+            "description": "List of details required to deploy all image definitions.",
+            "items": {
+                "$id": "#/imageDefinitions/items",
+                "allOf": [
+                    {
+                        "$id": "#/imageDefinitions/items",
+                        "type": "object",
+                        "required": [
+                            "definitionName",
+                            "publisher",
+                            "offer",
+                            "sku"
+                        ],
+                        "properties": {
+                            "definitionName": {
+                                "$id": "#/imageDefinitions/items/allOf/definitionName",
+                                "type": "string",
+                                "title": "DefinitionName",
+                                "description": "Becomes part of the generated image definition and image version names."
+                            },
+                            "publisher": {
+                                "$id": "#/imageDefinitions/items/allOf/publisher",
+                                "type": "string",
+                                "title": "Publisher",
+                                "description": "The gallery image definition publisher name."
+                            },
+                            "offer": {
+                                "$id": "#/imageDefinitions/items/allOf/offer",
+                                "type": "string",
+                                "title": "Offer",
+                                "description": "The gallery image definition offer name."
+                            },
+                            "sku": {
+                                "$id": "#/imageDefinitions/items/allOf/sku",
+                                "type": "string",
+                                "title": "Sku",
+                                "description": "The gallery image definition sku name."
+                            },
+                            "location": {
+                                "$id": "#/imageDefinitions/items/allOf/location",
+                                "type": ["string", "null"],
+                                "title": "Location",
+                                "description": "Image definition deployment location."
+                            },
+                            "osType": {
+                                "$id": "#/imageDefinitions/items/allOf/osType",
+                                "type": ["string", "null"],
+                                "title": "OSType",
+                                "description": "The over arching operating system type included in the disk when creating a vm from a managed image.",
+                                "default": "Linux",
+                                "enum": ["Windows", "Linux", null]
+                            },
+                            "osState": {
+                                "$id": "#/imageDefinitions/items/allOf/osState",
+                                "type": ["string", "null"],
+                                "title": "OSState",
+                                "description": "The operating system state.",
+                                "default": "Generalized",
+                                "enum": ["Generalized", "Specialized", null]
+                            },
+                            "endOfLifeDate": {
+                                "$id": "#/imageDefinitions/items/allOf/endOfLifeDate",
+                                "type": ["string", "null"],
+                                "title": "EndOfLifeDate",
+                                "description": "End of life date for the gallery image definition.",
+                                "format": "date-time"
+                            },
+                            "vCPUs": {
+                                "$id": "#/imageDefinitions/items/allOf/vCPUs",
+                                "type": ["object", "null"],
+                                "title": "VCPUs",
+                                "description": "Contains selected amount range of virtual cpu count recommmendations.",
+                                "required": ["min", "max"],
+                                "properties": {
+                                    "min": {
+                                        "$id": "#/imageDefinitions/items/allOf/vCPUs/min",
+                                        "type": "integer",
+                                        "title": "Min",
+                                        "description": "Recommended minimum number of vcpus."
+                                    },
+                                    "max": {
+                                        "$id": "#/imageDefinitions/items/allOf/vCPUs/max",
+                                        "type": "integer",
+                                        "title": "Max",
+                                        "description": "Recommended maximum number of vcpus."
+                                    }
+                                }
+                            },
+                            "memory": {
+                                "$id": "#/imageDefinitions/items/allOf/memory",
+                                "type": ["object", "null"],
+                                "title": "Memory",
+                                "description": "Contains selected range of memory size recommmendations.",
+                                "required": ["min", "max"],
+                                "properties": {
+                                    "min": {
+                                        "$id": "#/imageDefinitions/items/allOf/memory/min",
+                                        "type": "integer",
+                                        "title": "Min",
+                                        "description": "Recommended minimum memory size in gigabytes."
+                                    },
+                                    "max": {
+                                        "$id": "#/imageDefinitions/items/allOf/memory/max",
+                                        "type": "integer",
+                                        "title": "Max",
+                                        "description": "Recommended maximum memory size in gigabytes."
+                                    }
+                                }
+                            },
+                            "versions": {
+                                "$id": "#/imageDefinitions/items/allOf/versions",
+                                "type": ["array", "null"],
+                                "title": "Versions",
+                                "description": "List of details required to deploy all image versions in a definition.",
+                                "items": {
+                                    "$id": "#/imageDefinitions/items/allOf/versions/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/imageDefinitions/items/allOf/versions/items",
+                                            "type": "object",
+                                            "required": [
+                                                "version",
+                                                "imageServiceTag",
+                                                "targetRegions"
+                                            ],
+                                            "properties": {
+                                                "version": {
+                                                    "$id": "#/imageDefinitions/items/allOf/versions/items/allOf/version",
+                                                    "type": "string",
+                                                    "title": "Version",
+                                                    "description": "Becomes part of the image definition version's name."
+                                                },
+                                                "imageServiceTag": {
+                                                    "$id": "#/imageDefinitions/items/allOf/imageServiceTag",
+                                                    "type": "string",
+                                                    "title": "ImageServiceTag",
+                                                    "description": "Dependency value to fetch existing resource type."
+                                                },
+                                                "endOfLifeDate": {
+                                                    "$id": "#/imageDefinitions/items/allOf/versions/items/allOf/endOfLifeDate",
+                                                    "type": ["string", "null"],
+                                                    "title": "EndOfLifeDate",
+                                                    "description": "End of life date for the gallery image definition version.",
+                                                    "format": "date-time"
+                                                },
+                                                "replicaCount": {
+                                                    "$id": "#/imageDefinitions/items/allOf/versions/items/allOf/replicaCount",
+                                                    "type": ["integer", "null"],
+                                                    "title": "ReplicaCount",
+                                                    "description": "Copies of the image per location, when the regionalReplica count isn't specified.",
+                                                    "default": 1
+                                                },
+                                                "targetRegions": {
+                                                    "$id": "#/imageDefinitions/items/allOf/versions/items/allOf/targetRegions",
+                                                    "type": "array",
+                                                    "title": "TargetRegions",
+                                                    "description": "All locations that the image will be copied to.",
+                                                    "items": {
+                                                        "$id": "#/imageDefinitions/items/allOf/versions/items",
+                                                        "minLength": 1,
+                                                        "allOf": [
+                                                            {
+                                                                "$id": "#/imageDefinitions/items/allOf/versions/items",
+                                                                "type": "string"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

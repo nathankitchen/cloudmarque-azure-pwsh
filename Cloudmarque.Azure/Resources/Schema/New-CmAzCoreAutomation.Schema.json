@@ -1,0 +1,163 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzCoreAutomation",
+    "type": "object",
+    "title": "New-CmAzCoreAutomation",
+    "description": "Settings Root.",
+    "required": [
+        "location",
+        "name",
+        "service",
+        "automation"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Automation account deployment location."
+        },
+        "name": {
+            "$id": "#/name",
+            "type": "string",
+            "title": "Name",
+            "description": "Becomes part of the generated automation account name."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "required": [
+                "dependencies",
+                "publish"
+            ],
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "keyvault",
+                        "workspace"
+                    ],
+                    "properties": {
+                        "keyvault": {
+                            "$id": "#/service/dependencies/keyvault",
+                            "type": "string",
+                            "title": "Keyvault",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "workspace": {
+                            "$id": "#/service/dependencies/workspace",
+                            "type": "string",
+                            "title": "Workspace",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": "object",
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "required": [
+                        "resourceGroup",
+                        "automation"
+                    ],
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type": "string",
+                            "title": "ResourceGroup",
+                            "description": "Value to publish on deployed resource type."
+                        },
+                        "automation": {
+                            "$id": "#/service/publish/automation",
+                            "type": "string",
+                            "title": "Automation",
+                            "description": "Value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "automation": {
+            "$id": "#/automation",
+            "type": "object",
+            "title": "Automation",
+            "description": "Contains details required to deploy an Automation Account.",
+            "required": [
+                "certificateSecretName"
+            ],
+            "properties": {
+                "certificateName": {
+                    "$id": "#/automation/certificateName",
+                    "type": ["string", "null"],
+                    "title": "CertificateName",
+                    "description": "Name of certificate in an existing key vault."
+                },
+                "certificateSecretName": {
+                    "$id": "#/automation/certificateSecretName",
+                    "type": "string",
+                    "title": "CertificateSecretName",
+                    "description": "Name of certificate secret in an existing key vault."
+                },
+                "sourceControl": {
+                    "$id": "#/automation/sourceControl",
+                    "type": ["object", "null"],
+                    "title": "SourceControl",
+                    "description": "Container for an existing repo in source control.",
+                    "properties": {
+                        "keyVaultPersonalAccessToken": {
+                            "$id": "#/automation/sourceControl/keyVaultPersonalAccessToken",
+                            "type": ["string", "null"],
+                            "title": "KeyVaultPersonalAccessToken",
+                            "description": "Secret name of PAT token in existing key vault to access repo."
+                        },
+                        "url": {
+                            "$id": "#/automation/sourceControl/url",
+                            "type": ["string", "null"],
+                            "title": "Url",
+                            "description": "Url of source control repo."
+                        },
+                        "type": {
+                            "$id": "#/automation/sourceControl/type",
+                            "type": ["string", "null"],
+                            "title": "Type",
+                            "description": "Type of repo e.g Github.",
+                            "default": "github"
+                        },
+                        "branch": {
+                            "$id": "#/automation/sourceControl/branch",
+                            "type": ["string", "null"],
+                            "title": "Branch",
+                            "description": "Existing branch within repo.",
+                            "default": "master"
+                        },
+                        "folderPath": {
+                            "$id": "#/automation/sourceControl/folderPath",
+                            "type": ["string", "null"],
+                            "title": "FolderPath",
+                            "description": "Directory path of Runbook or DSC files.",
+                            "default": "/"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

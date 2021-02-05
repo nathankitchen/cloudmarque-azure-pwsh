@@ -1,23 +1,38 @@
-﻿component: sharedImageGallery         # Required to use settings with New-CmAzDeployment
+component: sharedImageGallery                           # Required to use settings with New-CmAzDeployment
 
-resourceGroupServiceTag:             # For deployment to existing resource group | cm-service tag value for new resource group
-resourceGroupName:                   # For creating new resource groups
-location:                            # Shared Image gallery region
+resourceGroupServiceTag:                                # For deployment to existing resource group | cm-service tag value for new resource group
+resourceGroupName: Paas-Test-Sig-Rg                     # For creating new resource groups
+location: Uk South                                      # Shared Image gallery region
 
-galleryName:                         # Shared Image gallery name
+galleryName: Paas-Test-Sig1                             # Shared Image gallery name
 
 imageDefinitions:
-  - definitionName:
-    publisher:
-    offer:
-    sku:
-    location:                        # Optional
-    osType:                          # Optional
-    osState:                         # Optional
-    endOfLifeDate:                   # Optional
-    versions:
-      - version:
-        imageServiceTag:
-        endOfLifeDate:               # Optional
-        replicaCount:                # Optional
-        targetRegions:
+- definitionName: Paas-Test-Sig-Def1
+  publisher: Paas-Test-Sig-Pub1
+  offer:  Paas-Test-Sig-Off1
+  sku:  Paas-Test-Sig-Sku1
+  location: Uk West                                     #optional
+  osType: Windows                                       #optional
+  osState: Specialized                                  #optional
+  endOfLifeDate: "2030-06-15T13:45:30"                  #optional
+  vCPUs:
+    min: 1
+    max: 10
+  memory:
+    min: 1024
+    max: 2048
+  versions:
+  - version: Paas-Test-Sig-V1
+    imageServiceTag: Paas-Test-Sig
+    endOfLifeDate: "2025-06-15T13:45:30"    #optional
+    replicaCount: 3                         #optional
+    targetRegions: [EU West]
+
+- definitionName: Paas-Test-Sig-Def2
+  publisher: Paas-Test-Sig-Pub2
+  offer:  Paas-Test-Sig-Off2
+  sku:  Paas-Test-Sig-Sku2
+  versions:
+  - version: Paas-Test-Sig-V2
+    imageServiceTag: Paas-Test-Sig
+    targetRegions: [EU West]
