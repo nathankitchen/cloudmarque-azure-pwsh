@@ -1,0 +1,93 @@
+component: functions                                          # Required to use settings with New-CmAzDeployment
+
+service:
+  publish:
+    resourceGroup: Paas-Test-Func-Rg
+    appServicePlan: Paas-Test-Func-Asp
+    function: Paas-Test-Func
+  dependencies:
+    appInsights: Core-Test-Ai                                 # Required to enable app insights on function
+    storage: Core-Test-St
+
+functionAppSolutions:
+  - name: Paas-Test-Func-Rg1
+    service:
+      publish:
+        resourceGroup:
+    consumptionPlans:                                         # Consumption plan has predefined type - each fuction will have its own service plan.
+      - name: Paas-Test-Func-Con1
+        runtime: python|3.7                                   # Accepts in format: runtime|runtimeVersion
+        kind: windows                                         # windows | linux
+        region: uksouth
+        enableAppInsight: true
+        service:
+          publish:
+            function:
+            appServicePlan:
+          dependencies:
+            storage:
+
+  - name: Paas-Test-Func-Rg2
+    service:
+      publish:
+        resourceGroup:
+    consumptionPlans:                                         # Consumption plan has predefined type - each fuction will have its own service plan.
+      - name: Paas-Test-Func-Con2
+        runtime: python|3.7                                   # Accepts in format: runtime|runtimeVersion
+        kind: linux                                           # windows | linux
+        region: uksouth
+        enableAppInsight: false
+        service:
+          publish:
+            function:
+            appServicePlan:
+          dependencies:
+            storage:
+
+  - name: Paas-Test-Func-Rg3
+    service:
+      publish:
+        resourceGroup:
+    appServicePlans:
+      - name: Paas-Test-Func-Asp1
+        sku: S1
+        region: uksouth
+        kind: windows
+        service:
+          publish:
+            appServicePlan:
+        functions:
+          - name: Paas-Test-Func3
+            runtime: dotnet|3
+            enableAppInsight: true
+            service:
+              publish:
+                function:
+              dependencies:
+                storage:
+
+  - name: Paas-Test-Func-Rg4
+    service:
+      publish:
+        resourceGroup:
+    appServicePlans:
+      - name: Paas-Test-Func-Asp2
+        sku: S1
+        region: uksouth
+        kind: linux
+        service:
+          publish:
+            appServicePlan:
+        functions:
+          - name: Paas-Test-Func4
+            runtime: python|3.7
+            enableAppInsight: true
+            service:
+              publish:
+                function:
+              dependencies:
+                storage:
+
+# As per current Azure restrictions:
+# - Consumption Plan and App service plan cannot be in same RG.
+# - Linux Plan and Windows Plan cannot be in same RG.

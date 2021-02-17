@@ -141,6 +141,10 @@ function New-CmAzDeployment {
                 New-CmAzPaasWeb -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
             }
 
+            functions {
+                New-CmAzPaasFunction -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
+            }
+
             webStatic {
                 New-CmAzPaaSWebStatic -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
             }

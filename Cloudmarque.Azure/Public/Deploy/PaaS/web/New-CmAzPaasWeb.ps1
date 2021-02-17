@@ -66,6 +66,7 @@
 			}
 
 			[System.Collections.ArrayList]$resourceGroupsToSet = @()
+			[System.Collections.ArrayList]$functionAppSolutions = @()
 
 			function New-ResourceGroup() {
 
@@ -126,6 +127,28 @@
 						}
 
 						$appServicePlan.resourceGroupName = $webSolution.generatedResourceGroupName
+
+						if ($appServicePlan.functions) {
+
+							$functionAppSolutions.add(
+								@{
+									name = $webSolution.Name
+									service = $webSolution.service
+									transFrmWeb = $true
+									appServicePlans = @(
+										@{
+											resourceGroupName = $webSolution.generatedResourceGroupName
+											name = $appServicePlan.name
+											functions = $appServicePlan.functions
+											sku = $appServicePlan.sku
+											region = $appServicePlan.region
+											kind = $appServicePlan.kind
+											service = $appServicePlan.service
+										}
+									)
+								}
+							) > $Null
+						}
 
 						foreach ($webapp in $appServicePlan.webapps) {
 
@@ -228,6 +251,26 @@
 					-Location $region `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-Webapp.json" `
 					-AppServiceDetails $AppServiceDetails
+
+				if ($SettingsObject.WebSolutions.appServicePlans.functions) {
+
+					$functionSettingsObject = @{
+						service = @{
+							publish = @{
+								resourceGroup = $SettingsObject.service.publish.resourceGroup
+								appServicePlan =  $SettingsObject.service.publish.appServicePlan
+								function = $SettingsObject.service.publish.function
+							}
+							dependencies = @{
+								appInsights = $SettingsObject.service.dependencies.appInsights
+								storage = $SettingsObject.service.dependencies.storage
+							}
+						}
+						functionAppSolutions = $functionAppSolutions
+					}
+
+					New-CmAzPaasFunction -SettingsObject $functionSettingsObject -OmitTags
+				}
 			}
 
 			if ($SettingsObject.WebSolutions.ApiManagementServices) {
@@ -385,7 +428,7 @@
 
 							$backEndPool.backends.Add($backEndObject) > $null
 						}
-						
+
 						if (!$backEndPool.healthCheckPath) {
 							$backEndPool.healthCheckPath = "/index.html"
 						}

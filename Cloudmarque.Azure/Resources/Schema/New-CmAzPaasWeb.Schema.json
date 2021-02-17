@@ -86,6 +86,12 @@
                             "type": ["string", "null"],
                             "title": "Slot",
                             "description": "Global default value to publish on deployed resource type."
+                        },
+                        "function": {
+                            "$id": "#/service/publish/function",
+                            "type": ["string", "null"],
+                            "title": "Function",
+                            "description": "Global default value to publish on deployed resource type."
                         }
                     },
                     "additionalProperties": false
@@ -112,6 +118,12 @@
                             "$id": "#/service/dependencies/webApplicationFirewallPolicy",
                             "type": ["string", "null"],
                             "title": "WebApplicationFirewallPolicy",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "storage": {
+                            "$id": "#/service/dependencies/storage",
+                            "type": ["string", "null"],
+                            "title": "storage",
                             "description": "Global default dependency value to fetch existing resource type."
                         }
                     },
@@ -223,6 +235,84 @@
                                                     "type": "string",
                                                     "title": "Region",
                                                     "description": "Location for app service plan, default location for webapps that share the plan."
+                                                },
+                                                "functions": {
+                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions",
+                                                    "type": "array",
+                                                    "title": "functions",
+                                                    "description": "Contains details used to deploy functions which share the same app service plan.",
+                                                    "additionalItems": false,
+                                                    "items": {
+                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items",
+                                                        "allOf": [
+                                                            {
+                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf",
+                                                                "type": "object",
+                                                                "required": ["name", "runtime"],
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/name",
+                                                                        "type": "string",
+                                                                        "title": "Name",
+                                                                        "description": "Becomes part of the generated function app's name."
+                                                                    },
+                                                                    "enableAppInsight": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/enableAppInsight",
+                                                                        "type": ["boolean", "null"],
+                                                                        "title": "EnableAppInsight",
+                                                                        "description": "Enables application insights for the web app.",
+                                                                        "default": false
+                                                                    },
+                                                                    "runtime": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/runtime",
+                                                                        "type": "string",
+                                                                        "title": "RunTime",
+                                                                        "description": "Defines the technology stack used to run the app."
+                                                                    },
+                                                                    "service": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/service",
+                                                                        "type": ["object", "null"],
+                                                                        "title": "Service",
+                                                                        "description": "Contains dependency and publish details for service location.",
+                                                                        "properties": {
+                                                                            "publish": {
+                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/service/publish",
+                                                                                "type": ["object", "null"],
+                                                                                "title": "Publish",
+                                                                                "description": "Contains publish details for service location.",
+                                                                                "properties": {
+                                                                                    "function": {
+                                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/service/publish/function",
+                                                                                        "type": ["string", "null"],
+                                                                                        "title": "function",
+                                                                                        "description": "Local overriding value to publish on deployed existing resource type."
+                                                                                    }
+                                                                                },
+                                                                                "additionalProperties": false
+                                                                            },
+                                                                            "dependencies": {
+                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/service/dependencies",
+                                                                                "type": ["object", "null"],
+                                                                                "title": "Dependencies",
+                                                                                "description": "Contains dependency details for service location.",
+                                                                                "properties": {
+                                                                                    "storage": {
+                                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/service/dependencies/storage",
+                                                                                        "type": ["string", "null"],
+                                                                                        "title": "storage",
+                                                                                        "description": "Local overriding value to fetch existing resource type."
+                                                                                    }
+                                                                                },
+                                                                                "additionalProperties": false
+                                                                            }
+                                                                        },
+                                                                        "additionalProperties": false
+                                                                    }
+                                                                },
+                                                                "additionalProperties": false
+                                                            }
+                                                        ]
+                                                    }
                                                 },
                                                 "webapps": {
                                                     "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps",

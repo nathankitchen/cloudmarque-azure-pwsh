@@ -1,0 +1,150 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ConsumptionPlans": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[parameters('ConsumptionPlans')[copyIndex('ConsumptionPlansCopy')].name]",
+            "resourceGroup": "[parameters('ConsumptionPlans')[copyIndex('ConsumptionPlansCopy')].resourceGroupName]",
+            "copy": {
+                "name": "ConsumptionPlansCopy",
+                "count": "[length(parameters('ConsumptionPlans'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "FunctionAppObject": {
+                        "Value": "[parameters('ConsumptionPlans')[copyIndex('ConsumptionPlansCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "FunctionAppObject": {
+                            "type": "object"
+                        }
+                    },
+                    "variables": {
+                        "windowsAppSettings": [
+                            {
+                                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                "value": "[parameters('FunctionAppObject').applicationInstrumentationKey]"
+                            },
+                            {
+                                "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                                "value": "[parameters('FunctionAppObject').applicationInstrumentationKey]"
+                            },
+                            {
+                                "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                                "value": "[if(empty(parameters('FunctionAppObject').applicationInstrumentationKey), json('null'), '~2')]"
+                            },
+                            {
+                                "name": "AzureWebJobsStorage",
+                                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('FunctionAppObject').storageAccount.Name, ';AccountKey=',  parameters('FunctionAppObject').storageAccountKey)]"
+                            },
+                            {
+                                "name": "FUNCTIONS_WORKER_RUNTIME",
+                                "value": "[parameters('FunctionAppObject').functionsWorker[0]]"
+                            },
+                            {
+                                "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                                "value": "10.14.1"
+                            },
+                            {
+                                "name": "FUNCTIONS_EXTENSION_VERSION",
+                                "value": "~3"
+                            },
+                            {
+                                "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('FunctionAppObject').storageAccount.Name, ';AccountKey=', parameters('FunctionAppObject').storageAccountKey)]"
+                            }
+                        ],
+                        "linuxAppSettings": [
+                            {
+                                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                "value": "[parameters('FunctionAppObject').applicationInstrumentationKey]"
+                            },
+                            {
+                                "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                                "value": "[parameters('FunctionAppObject').applicationInstrumentationKey]"
+                            },
+                            {
+                                "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                                "value": "[if(empty(parameters('FunctionAppObject').applicationInstrumentationKey), json('null'), '~2')]"
+                            },
+                            {
+                                "name": "AzureWebJobsStorage",
+                                "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('FunctionAppObject').storageAccount.Name, ';AccountKey=', parameters('FunctionAppObject').storageAccountKey)]"
+                            },
+                            {
+                                "name": "FUNCTIONS_WORKER_RUNTIME",
+                                "value": "[parameters('FunctionAppObject').functionsWorker[0]]"
+                            },
+                            {
+                                "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                                "value": "10.14.1"
+                            },
+                            {
+                                "name": "FUNCTIONS_EXTENSION_VERSION",
+                                "value": "~3"
+                            }
+                        ]
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Web/serverfarms",
+                            "apiVersion": "2020-06-01",
+                            "name": "[parameters('FunctionAppObject').planName]",
+                            "location": "[parameters('FunctionAppObject').region]",
+                            "tags": {
+                                "cm-service": "[parameters('FunctionAppObject').service.publish.appServicePlan]"
+                            },
+                            "sku": {
+                                "name": "Y1",
+                                "tier": "Dynamic",
+                                "size": "Y1",
+                                "family": "Y",
+                                "capacity": 0
+                            },
+                            "kind": "[parameters('FunctionAppObject').appServiceKind]",
+                            "properties": {
+                                "reserved": "[equals(parameters('FunctionAppObject').appServiceKind, 'linux')]"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Web/sites",
+                            "apiVersion": "2020-06-01",
+                            "name": "[parameters('FunctionAppObject').name]",
+                            "location": "[parameters('FunctionAppObject').region]",
+                            "kind": "[parameters('FunctionAppObject').kind]",
+                            "dependsOn": [
+                                "[parameters('FunctionAppObject').planName]"
+                            ],
+                            "tags": {
+                                "cm-service": "[parameters('FunctionAppObject').service.publish.function]"
+                            },
+                            "properties": {
+                                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('FunctionAppObject').planName)]",
+                                "siteConfig": {
+                                    "appSettings": "[if(equals(parameters('FunctionAppObject').appServiceKind, 'linux'), variables('linuxAppSettings'), variables('windowsAppSettings'))]",
+                                    "linuxFxVersion": "[if(equals(parameters('FunctionAppObject').appServiceKind, 'linux'), parameters('FunctionAppObject').runtime, json('null'))]"
+                                },
+                                "reserved": "[equals(parameters('FunctionAppObject').appServiceKind, 'linux')]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

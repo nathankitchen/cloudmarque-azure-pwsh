@@ -1,0 +1,458 @@
+{
+	"$schema": "http://json-schema.org/draft-consumption7/schema",
+	"$id": "New-CmAzPaasFunction",
+	"type": "object",
+	"title": "New-CmAzPaasFunction",
+	"description": "Settings Root.",
+	"required": [
+		"service",
+		"functionAppSolutions"
+	],
+	"properties": {
+		"component": {
+			"$id": "#/component",
+			"type": "string",
+			"title": "Component",
+			"description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+		},
+		"service": {
+			"$id": "#/service",
+			"type": "object",
+			"title": "Service",
+			"description": "Contains dependency and publish details for service location.",
+			"required": [
+				"publish",
+				"dependencies"
+			],
+			"properties": {
+				"publish": {
+					"$id": "#/service/publish",
+					"type": "object",
+					"title": "Publish",
+					"description": "Contains publish details for service location.",
+					"required": [
+						"function",
+						"appServicePlan",
+						"resourceGroup"
+					],
+					"properties": {
+						"resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type": ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "appServicePlan": {
+                            "$id": "#/service/publish/appServicePlan",
+                            "type": ["string", "null"],
+                            "title": "AppServicePlan",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "function": {
+                            "$id": "#/service/publish/function",
+                            "type": ["string", "null"],
+                            "title": "Function",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+					},
+					"additionalProperties": false
+				},
+				"dependencies": {
+					"$id": "#/service/dependencies",
+                    "type": ["object", "null"],
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "required": [
+                        "storage"
+                    ],
+                    "properties": {
+                        "appInsights": {
+                            "$id": "#/service/dependencies/appInsights",
+                            "type": ["string", "null"],
+                            "title": "AppInsights",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "storage": {
+                            "$id": "#/service/dependencies/storage",
+                            "type": ["string", "null"],
+                            "title": "storage",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        }
+                    },
+					"additionalProperties": false
+				}
+			},
+			"additionalProperties": false
+		},
+		"functionAppSolutions": {
+			"$id": "#/functionAppSolutions",
+			"type": "array",
+			"title": "FunctionAppSolutions",
+			"description": "List of details required to deploy all resource groups, app service plans and functions.",
+			"items": {
+				"$id": "#/functionAppSolutions/items",
+				"minItems": 1,
+				"oneOf": [
+					{
+						"$id": "#/functionAppSolutions/items/oneOf/con",
+						"type": "object",
+						"required": [
+							"name",
+							"consumptionPlans"
+						],
+						"properties": {
+							"name": {
+								"$id": "#/functionAppSolutions/items/oneOf/con/name",
+								"type": "string",
+								"title": "Name",
+								"description": "Becomes part of the generated resource group's name."
+							},
+							"service": {
+								"$id": "#/functionAppSolutions/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "publish": {
+                                        "$id": "#/functionAppSolutions/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "resourceGroup": {
+                                                "$id": "#/functionAppSolutions/items/allOf/service/publish/resourceGroup",
+                                                "type": ["string", "null"],
+                                                "title": "ResourceGroup",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+							},
+							"consumptionPlans": {
+								"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans",
+								"type": ["array", "null"],
+                                "title": "consumptionPlans",
+                                "description": "List of details required to deploy all app service plans and functions.",
+								"items": {
+									"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items",
+									"minItems": 1,
+									"allOf": [
+										{
+											"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf",
+											"type": "object",
+											"required": [
+												"region",
+												"name",
+												"kind",
+												"runtime"
+											],
+											"properties": {
+												"region": {
+													"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/region",
+													"type": "string",
+                                                    "title": "Region",
+                                                    "description": "Location for app service plan, default location for functions that share the plan."
+                                                },
+												"enableAppInsight": {
+													"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/enableAppInsight",
+													"type": ["boolean", "null"],
+                                                    "title": "EnableAppInsight",
+                                                    "description": "Enables application insights for the function app.",
+                                                    "default": false
+												},
+												"name": {
+													"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/name",
+													"type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated app service plan's name."
+                                                },
+												"service": {
+													"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/service",
+													"type": ["object", "null"],
+													"title": "Service",
+													"properties": {
+														"publish": {
+															"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+																"function": {
+																	"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/service/publish/function",
+																	"type": ["string", "null"],
+                                                                    "title": "AppServicePlan",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                },
+																"appServicePlan": {
+																	"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/service/publish/appServicePlan",
+																	"type": ["string", "null"],
+                                                                    "title": "function",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+															},
+															"additionalProperties": false
+														},
+														"dependencies": {
+															"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/service/dependencies",
+															"type": ["object", "null"],
+                                                            "title": "Dependencies",
+                                                            "description": "Contains dependency details for service location.",
+
+															"properties": {
+																"storage": {
+																	"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/service/dependencies/storage",
+																	"type": ["string", "null"],
+                                                                    "title": "storage",
+                                                                    "description": "Global default dependency value to fetch existing resource type."
+																}
+															},
+															"additionalProperties": false
+														}
+													},
+													"additionalProperties": false
+												},
+												"kind": {
+													"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/kind",
+													"type": "string",
+													"title": "Kind",
+													"description": "Type of OS.",
+													"enum": [
+														"linux", "windows"
+													]
+												},
+												"runtime": {
+													"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/runtime",
+													"type": "string",
+													"title": "Runtime",
+													"description": "Defines the technology stack used to run the app in runtime|runtimeVersion format."
+												}
+											},
+											"additionalProperties": false
+										}
+									]
+								}
+							}
+						},
+						"additionalProperties": false
+					},
+					{
+						"$id": "#/functionAppSolutions/items/oneOf/asp",
+						"type": "object",
+						"required": [
+							"name",
+							"appServicePlans"
+						],
+						"properties": {
+							"name": {
+								"$id": "#/functionAppSolutions/items/oneOf/asp/name",
+								"type": "string",
+								"title": "Name",
+								"description": "Becomes part of the generated resource group's name."
+							},
+							"transFrmWeb": {
+								"$id": "#/functionAppSolutions/items/oneOf/asp/transFrmWeb",
+								"type": ["boolean", "null"],
+								"title": "transfered from web",
+								"default": false,
+								"description": "Used for callback from New-CmAzPaasWeb."
+							},
+							"service": {
+								"$id": "#/functionAppSolutions/items/oneOf/asp/service",
+								"type": ["object", "null"],
+								"title": "Service",
+								"description": "Contains dependency and publish details for service location.",
+								"properties": {
+									"publish": {
+										"$id": "#/functionAppSolutions/items/oneOf/asp/service/publish",
+										"type": ["object", "null"],
+										"title": "Publish",
+										"description": "Contains publish details for service location.",
+										"properties": {
+											"resourceGroup": {
+												"$id": "#/functionAppSolutions/items/oneOf/asp/service/publish/resourceGroup",
+												"type": ["string", "null"],
+												"title": "ResourceGroup",
+												"description": "Local overriding value to publish on deployed existing resource type."
+											}
+										},
+										"additionalProperties": false
+									}
+								},
+								"additionalProperties": false
+							},
+							"appServicePlans": {
+								"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans",
+								"type": "array",
+								"title": "AppServicePlans",
+								"items": {
+									"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items",
+									"minItems": 1,
+									"allOf": [
+										{
+											"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf",
+											"type": "object",
+											"required": [
+												"region",
+												"sku",
+												"name",
+												"kind",
+												"functions"
+											],
+											"properties": {
+												"region": {
+													"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/region",
+													"type": "string",
+                                                    "title": "Region",
+                                                    "description": "Location for app service plan, default location for functions that share the plan."
+                                                },
+												"sku": {
+													"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/sku",
+													"type": "string",
+                                                    "title": "Sku",
+                                                    "description": "Sku of the app service plan. This defines the capacity of the resources."
+                                                },
+												"name": {
+													"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/name",
+													"type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated app service plan's name."
+												},
+												"resourceGroupName": {
+													"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/resourceGroupName",
+													"type": ["string", "null"],
+                                                    "title": "Resource Group name",
+                                                    "description": "Pre-generated resource group name. Used for callback from New-CmAzPaasWeb."
+                                                },
+												"service": {
+													"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/service",
+													"type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",
+                                                    "properties": {
+														"publish": {
+															"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/service/publish",
+															"type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+																"appServicePlan": {
+																	"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/service/publish/appServicePlan",
+																	"type": ["string", "null"],
+                                                                    "title": "AppServicePlan",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+															},
+															"additionalProperties": false
+														}
+													},
+													"additionalProperties": false
+												},
+												"kind": {
+													"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/kind",
+													"type": "string",
+													"title": "Kind",
+													"description": "Type of OS being used.",
+													"enum": [
+														"linux", "windows"
+													]
+												},
+												"functions": {
+													"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions",
+													"type": "array",
+                                                    "title": "functions",
+                                                    "description": "Contains details used to deploy functions which share the same app service plan.",
+                                                    "additionalItems": false,
+													"items": {
+														"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items",
+														"allOf": [
+															{
+																"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items/allOf",
+																"type": "object",
+																"required": [
+																	"name",
+																	"runtime"
+																],
+																"properties": {
+																	"name": {
+																		"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items/allOf/name",
+																		"type": "string",
+                                                                        "title": "Name",
+                                                                        "description": "Becomes part of the generated function app's name."
+																	},
+
+                                                                    "enableAppInsight": {
+                                                                        "$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items/allOf/enableAppInsight",
+                                                                        "type": ["boolean", "null"],
+                                                                        "title": "EnableAppInsight",
+                                                                        "description": "Enables application insights for the web app.",
+                                                                        "default": false
+                                                                    },
+																	"runtime": {
+																		"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items/allOf/runtime",
+																		"type": "string",
+                                                                        "title": "RunTime",
+																		"description": "Defines the technology stack used to run the app in runtime|runtimeVersion format"
+                                                                    },
+																	"service": {
+																		"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items/allOf/service",
+                                                                        "type": ["object", "null"],
+																		"title": "Service",
+                                                                        "description": "Contains dependency and publish details for service location.",
+                                                                        "properties": {
+																			"publish": {
+																				"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items/allOf/service/publish",
+																				"type": ["object", "null"],
+                                                                                "title": "Publish",
+                                                                                "description": "Contains publish details for service location.",
+                                                                                "properties": {
+																					"function": {
+																						"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items/allOf/service/publish/function",
+																						"type": ["string", "null"],
+                                                                                        "title": "function",
+                                                                                        "description": "Local overriding value to publish on deployed existing resource type."
+                                                                                    }
+																				},
+																				"additionalProperties": false
+																			},
+																			"dependencies": {
+																				"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items/allOf/service/dependencies",
+																				"type": ["object", "null"],
+                                                                                "title": "Dependencies",
+                                                                                "description": "Contains dependency details for service location.",
+                                                                                "properties": {
+																					"storage": {
+																						"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions/items/allOf/service/dependencies/storage",
+																						"type": ["string", "null"],
+                                                                                        "title": "storage",
+                                                                                        "description": "Local overriding value to fetch existing resource type."
+                                                                                    }
+																				},
+																				"additionalProperties": false
+																			}
+																		},
+																		"additionalProperties": false
+																	}
+																},
+																"additionalProperties": false
+															}
+														]
+													}
+												}
+											},
+											"additionalProperties": false
+										}
+									]
+								}
+							}
+						},
+						"additionalProperties": false
+					}
+				]
+			}
+		}
+	},
+	"additionalProperties": false
+}

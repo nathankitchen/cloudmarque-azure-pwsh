@@ -11,10 +11,12 @@ service:
     cdn: Web-test-Cdn
     endpoint: Web-test-Endpoint
     slot: Web-Test-Slot
+    function: Web-Test-Func
   dependencies:
     appInsights: Core-Test-Ai                                 # Required to enable app insights on webapp
     keyvault: Core-Test-Kv
     webApplicationFirewallPolicy:                             # Optional - Provide cm-service tag of frontdoor firewall policy
+    storage: Iaas-Test-Function                               # For function apps
 
 webSolutions:
 - name: Web-Test-Rg1
@@ -52,6 +54,16 @@ webSolutions:
           publish:
             cdn:
             endpoint:
+    functions:                                                # Pass functions
+    - name: Web-Test-Func1
+      runtime: python|3.7
+      enableAppInsight: true
+      service:
+        publish:
+          function:
+        dependencies:
+          storage:
+
   - name: Web-Test-Asp2
     service:
       publish:
@@ -71,6 +83,7 @@ webSolutions:
           webapp:
       slots:
         - Production
+
   apiManagementServices:
     - name: Web-Test-Api1
       region: UK South                                        # Optional - Defaults to global location

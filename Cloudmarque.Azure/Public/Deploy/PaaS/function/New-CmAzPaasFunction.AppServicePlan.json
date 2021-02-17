@@ -1,0 +1,149 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AppServicePlans": {
+            "type": "Array"
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[parameters('AppServicePlans')[copyIndex('AppServicePlansCopy')].name]",
+            "resourceGroup": "[parameters('AppServicePlans')[copyIndex('AppServicePlansCopy')].resourceGroupName]",
+            "copy": {
+                "name": "AppServicePlansCopy",
+                "count": "[length(parameters('AppServicePlans'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "AppServiceObject": {
+                        "Value": "[parameters('AppServicePlans')[copyIndex('AppServicePlansCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "AppServiceObject": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "condition": "[not(parameters('AppServiceObject').exists)]",
+                            "type": "Microsoft.Web/serverfarms",
+                            "apiVersion": "2018-02-01",
+                            "name": "[parameters('AppServiceObject').name]",
+                            "location": "[parameters('AppServiceObject').region]",
+                            "sku": {
+                                "name": "[parameters('AppServiceObject').sku]"
+                            },
+                            "kind": "[if(equals(parameters('AppServiceObject').kind, 'linux'), 'linux', '')]",
+                            "tags": {
+                                "cm-service": "[parameters('AppServiceObject').service.publish.appServicePlan]"
+                            },
+                            "properties": {
+                                "reserved": "[parameters('AppServiceObject').reserved]"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Resources/Deployments",
+                            "apiVersion": "2019-10-01",
+                            "name": "[parameters('AppServiceObject').functions[copyIndex('functionAppCopy')].name]",
+                            "resourceGroup": "[resourceGroup().name]",
+                            "copy": {
+                                "name": "functionAppCopy",
+                                "count": "[length(parameters('AppServiceObject').functions)]"
+                            },
+                            "dependsOn": [
+                                "[parameters('AppServiceObject').name]"
+                            ],
+                            "properties": {
+                                "mode": "Incremental",
+                                "expressionEvaluationOptions": {
+                                    "scope": "inner"
+                                },
+                                "parameters": {
+                                    "FunctionAppObject": {
+                                        "value": "[parameters('AppServiceObject').functions[copyIndex('functionAppCopy')]]"
+                                    },
+                                    "AppServicePlanName": {
+                                        "value": "[parameters('AppServiceObject').Name]"
+                                    }
+                                },
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "parameters": {
+                                        "FunctionAppObject": {
+                                            "type": "object"
+                                        },
+                                        "AppServicePlanName": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "resources": [
+                                        {
+                                            "type": "Microsoft.Web/sites",
+                                            "apiVersion": "2020-06-01",
+                                            "name": "[parameters('FunctionAppObject').name]",
+                                            "location": "[parameters('FunctionAppObject').region]",
+                                            "kind": "[parameters('FunctionAppObject').kind]",
+                                            "tags": {
+                                                "cm-service": "[parameters('FunctionAppObject').service.publish.function]"
+                                            },
+                                            "properties": {
+                                                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]",
+                                                "siteConfig": {
+                                                    "linuxFxVersion": "[if(empty(parameters('FunctionAppObject').linuxFxVersion), json('null'), parameters('FunctionAppObject').linuxFxVersion)]",
+                                                    "appSettings": [
+                                                        {
+                                                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                                            "value": "[parameters('FunctionAppObject').applicationInstrumentationKey]"
+                                                        },
+                                                        {
+                                                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                                                            "value": "[parameters('FunctionAppObject').applicationInstrumentationKey]"
+                                                        },
+                                                        {
+                                                            "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                                                            "value": "[if(empty(parameters('FunctionAppObject').applicationInstrumentationKey), json('null'), '~2')]"
+                                                        },
+                                                        {
+                                                            "name": "AzureWebJobsStorage",
+                                                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('FunctionAppObject').storageAccount.name, ';AccountKey=', listKeys(parameters('FunctionAppObject').storageAccount.resourceId, '2019-06-01').keys[0].value)]"
+                                                        },
+                                                        {
+                                                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                                                            "value": "[parameters('FunctionAppObject').functionsWorker[0]]"
+                                                        },
+                                                        {
+                                                            "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                                                            "value": "10.14.1"
+                                                        },
+                                                        {
+                                                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                                                            "value": "~3"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
