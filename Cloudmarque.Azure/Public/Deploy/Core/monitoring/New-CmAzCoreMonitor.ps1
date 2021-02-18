@@ -83,17 +83,17 @@ function New-CmAzCoreMonitor {
 					}
 
 					for ($j = 0; $j -lt $receivers.count; $j++) {
-						
+
 						$receiver = $receivers[$j]
-						$receiver[$nameKey] = Get-CmAzResourceName -Resource "ActionGroupReceiver" -Architecture "Core" -Region $SettingsObject.Location -Name "$($actionGroup[$nameKey])$($receiverType)-$($j)"
-						
+						$receiver[$nameKey] = Get-CmAzResourceName -Resource "ActionGroupReceiver" -Architecture "Core" -Region "Global" -Name "$($actionGroup[$nameKey])$($receiverType)-$($j)"
+
 						if ($receiverTypesWithCommonSchema -Contains $receiverType) {
 							$receiver.useCommonAlertSchema = $true
 						}
 					}
 				}
 
-				$actionGroup[$nameKey] = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region $SettingsObject.Location -Name $actionGroup[$nameKey]
+				$actionGroup[$nameKey] = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region "Global" -Name $actionGroup[$nameKey]
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actionGroup" -ResourceServiceContainer $actiongroup
 			}
