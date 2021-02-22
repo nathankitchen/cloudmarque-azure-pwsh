@@ -254,34 +254,34 @@ groups:
           ipAddress:                                              # Leave blank for dynamic ip allocations
           subnetName: Iaas-Test-Spoke1-Vnet2-Snet-hpcman          # Subnet belonging to the virtual network
 
-      #- name: Iaas-Test-Vm10
-      #  size: Standard_B1s
-      #  updateGroup: All
-      #  updateFrequency: Daily
-      #  plan:                                                     # Make sure you accept terms for using image.
-      #    name: "centos-8-3-free"
-      #    publisher: "cognosys"
-      #    product: "centos-8-3-free"
-      #  imageReference:
-      #    publisher: cognosys
-      #    offer: centos-8-3-free
-      #    sku: centos-8-3-free
-      #    version: latest
-      #  location: UK South
-      #  service:
-      #    publish:
-      #      vm: Iaas-Test-Vm10
-      #      nic: Iaas-Test-Nic10
-      #  osDisk:
-      #    osType: linux                                           # Windows or Linux
-      #    expandableDiskSizeGB: 127
-      #  dataDiskSizes: []                                         # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
-      #  networking:
-      #    service:
-      #      dependencies:
-      #        vnet: Iaas-Test-Spoke1-Vnet2
-      #    ipAddress:                                              # Leave blank for dynamic ip allocations
-      #    subnetName: Iaas-Test-Spoke1-Vnet2-Snet-hpcman          # Subnet belonging to the virtual network
+      - name: Iaas-Test-VmX                                       # Linux isn't officially supported at the moment.
+        size: Standard_B1s                                        # This is purely for testing the automatic acceptance of marketplace terms.
+        updateGroup: All
+        updateFrequency: Daily
+        plan:                                                     # Make sure you accept terms for using image.
+          name: "centos-8-3-free"
+          publisher: "cognosys"
+          product: "centos-8-3-free"
+        imageReference:
+          publisher: cognosys
+          offer: centos-8-3-free
+          sku: centos-8-3-free
+          version: latest
+        location: UK West
+        service:
+          publish:
+            vm: Iaas-Test-VmX
+            nic: Iaas-Test-Nic10
+        osDisk:
+          osType: linux                                           # Windows or Linux
+          expandableDiskSizeGB: 127
+        dataDiskSizes: []                                         # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        networking:
+          service:
+            dependencies:
+              vnet: Iaas-Test-Hub2-Vnet1
+          ipAddress:                                              # Leave blank for dynamic ip allocations
+          subnetName: Iaas-Test-Hub2-Vnet1-Snet-dc1               # Subnet belonging to the virtual network
 
   #NOTE: To allow disk encryption for Linux, you need to have at least 8gb of ram available and the vm needs to be generation 1.
   #NOTE: Supported Linux distros for disk encryption are listed here https://docs.microsoft.com/en-us/azure/virtual-machines/linux/disk-encryption-overview#supported-vms-and-operating-systems

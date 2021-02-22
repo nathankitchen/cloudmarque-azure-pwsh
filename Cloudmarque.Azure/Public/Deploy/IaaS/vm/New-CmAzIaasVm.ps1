@@ -10,6 +10,7 @@
 			 * Encrypts all os and data disks using a key encryption key from a specified keyvault.
 			 * Mounts all hard drives set up in the vms.
 			 * Enables azure monitor and links all vms to the core log analytics workspace.
+			 * Automatically accepts terms for using custom images.
 
 		.Parameter SettingsFile
 		 File path for the settings file to be converted into a settings object.
@@ -132,6 +133,17 @@
 
 					if (!$virtualMachine.plan) {
 						$virtualMachine.plan = ''
+					}
+					else {
+
+						Write-Verbose "Using custom image: $($virtualMachine.plan.publisher) $($virtualMachine.plan.product)"
+						$terms = Get-AzMarketplaceTerms -Publisher $virtualMachine.plan.publisher -Product $virtualMachine.plan.product -Name $virtualMachine.plan.name
+
+						if (!$terms.Accepted) {
+
+							Write-Warning "Image usage terms will be accepted automatically.."
+							Set-AzMarketplaceTerms -Publisher $virtualMachine.plan.publisher -Product $virtualMachine.plan.product -Name $virtualMachine.plan.name -Terms $terms -Accept
+						}
 					}
 
 					$virtualMachine.resourceGroupName = $resourceGroup.name

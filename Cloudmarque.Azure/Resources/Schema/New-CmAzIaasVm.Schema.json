@@ -261,7 +261,7 @@
                                                     "$id": "#/groups/items/allOf/virtualMachines/items/allOf/service",
                                                     "type": ["object", "null"],
                                                     "title": "Service",
-                                                    "description": "Contains dependency and publish details for service location.",                                                  
+                                                    "description": "Contains dependency and publish details for service location.",
                                                     "properties": {
                                                         "publish": {
                                                             "$id": "#/groups/items/allOf/virtualMachines/items/allOf/service/publish",
@@ -302,7 +302,7 @@
                                                             "type": "string",
                                                             "title": "OSType",
                                                             "description": "The over arching type of OS to use.",
-                                                            "enum": ["Windows", "Linux"]
+                                                            "enum": ["Windows", "Linux", "windows", "linux"]
                                                         },
                                                         "expandableDiskSizeGB": {
                                                             "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/expandableDiskSizeGB",
