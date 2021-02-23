@@ -56,7 +56,11 @@ function Set-CmAzSecurityCentre {
             Get-AzSecurityContact | Remove-AzSecurityContact
 
             Write-Verbose "Deploying security centre settings..."
+
+            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Region $SettingsObject.Location -Architecture "SaaS" -Name "Set-CmAzSecurityCentre"
+
             New-AzDeployment `
+                -Name $deploymentName `
                 -AssignUkNhs $SettingsObject.EnableUkNhs `
                 -Location $SettingsObject.Location `
                 -TemplateFile "$PSScriptRoot/Set-CmAzSecurityCentre.json" `

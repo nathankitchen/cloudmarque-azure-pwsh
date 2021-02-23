@@ -8,6 +8,17 @@ formats:
       - source: environment
       - source: region
       - source: hash
+  - name: deployment
+    separator: "-"
+    case: lower
+    components:
+      - source: name
+      - source: environment
+      - source: packageVersion
+      - source: timestamp
+    removeCharacters:
+      - ':'
+      - '.'
   - name: nsg
     separator: "-"
     case: lower
@@ -117,3 +128,4 @@ formats:
       - source: resource
       - source: name
       - source: hash
+

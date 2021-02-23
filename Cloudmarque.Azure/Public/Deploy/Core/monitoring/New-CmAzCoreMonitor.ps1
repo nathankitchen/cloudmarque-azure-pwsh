@@ -197,7 +197,11 @@ function New-CmAzCoreMonitor {
 			New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags
 
 			Write-Verbose "Deploying monitor resources..."
+
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.Location -Name "New-CmAzCoreMonitor"
+
 			New-AzResourceGroupDeployment `
+				-Name $deploymentName `
 				-ResourceGroupName $resourceGroupName `
 				-TemplateFile "$PSScriptRoot/New-CmAzCoreMonitor.json" `
 				-ActionGroups $SettingsObject.actionGroups `

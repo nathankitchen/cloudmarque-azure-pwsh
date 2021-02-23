@@ -88,7 +88,7 @@
 				}
 
 				$personalAccessToken = (Get-AzKeyVaultSecret -VaultName $keyVault.name -Name $keyVaultPersonalAccessToken).SecretValue
-				
+
 				if (!$personalAccessToken) {
 					Write-Error "No PAT found on key vault."
 				}
@@ -109,7 +109,10 @@
 			$automationAccountName = Get-CmAzResourceName -Resource "Automation" -Architecture "Core" -Region $SettingsObject.location -Name $SettingsObject.name
 
 			# Create Automation account
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.location -Name "New-CmAzCoreAutomation"
+
 			New-AzResourceGroupDeployment `
+				-Name $deploymentName `
 				-ResourceGroupName $nameResourceGroup `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreAutomation.json" `
 				-AccountName $automationAccountName `
@@ -117,8 +120,11 @@
 				-AutomationService $SettingsObject.service.publish.automation `
 				-Force > $Null
 
-			# Create Automation account
+			# Create Linked Services
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.location -Name "New-CmAzCoreAutomation.ls"
+
 			New-AzResourceGroupDeployment `
+				-Name $deploymentName `
 				-ResourceGroupName $workspace.resourceGroupName `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreAutomation.LinkedServices.json" `
 				-AccountName $automationAccountName `

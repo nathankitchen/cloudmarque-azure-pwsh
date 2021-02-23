@@ -66,7 +66,7 @@
 			else {
 				$logRetentionPeriodInDays = $SettingsObject.logRetentionPeriodInDays
 			}
-   
+
 			[system.Collections.ArrayList]$servers = @()
 			[system.Collections.ArrayList]$sharedServers = @()
 			[system.Collections.ArrayList]$UniqueSqlServerNames = @()
@@ -151,7 +151,7 @@
 				$elasticPool = "none"
 
 				if ($_.type -eq "elasticPool") {
-					
+
 					if($_.elasticPoolName) {
 						$elasticPool = 	Get-CmAzResourceName -Resource "AzureSQLElasticPool" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.elasticPoolName
 					}
@@ -197,11 +197,16 @@
 
 			$joinedSqlServers = @($servers, $sharedServers)
 
+			Write-Verbose "Deploying Sql Servers and databases..."
+
 			$joinedSqlServers | ForEach-Object {
 
 				if ($_) {
 
+					$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $SettingsObject.Location -Name "New-CmAzPaasSql"
+
 					New-AzResourceGroupDeployment `
+						-Name $deploymentName `
 						-ResourceGroupName $resourceGroup.ResourceGroupName `
 						-TemplateFile "$PSScriptRoot\New-CmAzPaasSql.json" `
 						-Servers $_ `

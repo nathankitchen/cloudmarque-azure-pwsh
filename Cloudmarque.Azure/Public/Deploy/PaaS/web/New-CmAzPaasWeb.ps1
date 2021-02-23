@@ -244,10 +244,12 @@
 				[System.Collections.ArrayList]$AppServiceDetails = @()
 				$AppServiceDetails += $SettingsObject.WebSolutions.AppServicePlans
 
-				Write-Verbose "Initiating deployment of webapps..."
+				Write-Verbose "Deploying Webapps..."
+
+				$deploymentNameWeb = Get-CmAzResourceName -Resource "Deployment" -Region $region -Architecture "PaaS" -Name "New-CmAzPaasWeb-WebApp"
 
 				New-AzDeployment  `
-					-Name "CmAzWebStack_Parent" `
+					-Name $deploymentNameWeb `
 					-Location $region `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-Webapp.json" `
 					-AppServiceDetails $AppServiceDetails
@@ -285,10 +287,12 @@
 				[System.Collections.ArrayList]$ApiManagementServices = @()
 				$ApiManagementServices += $SettingsObject.WebSolutions.ApiManagementServices
 
-				Write-Verbose "Initiating deployment of api management services..."
+				Write-Verbose "Deploying api management services..."
 
-				New-AzDeployment  `
-					-Name "CmAzApiManagementServices_Parent" `
+				$deploymentNameApim = Get-CmAzResourceName -Resource "Deployment" -Region $region -Architecture "PaaS" -Name "New-CmAzPaasWeb-ApiMs"
+
+				New-AzDeployment `
+					-Name $deploymentNameApim `
 					-Location $region `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-ApiManagementServices.json" `
 					-ApiManagementServices $ApiManagementServices
@@ -486,8 +490,12 @@
 					}
 				}
 
+				Write-Verbose "Deploying Frontdoor..."
+
+				$deploymentNameFd =  Get-CmAzResourceName -Resource "Deployment" -Region "Global" -Architecture "PaaS" -Name "New-CmAzPaasWeb-Fd"
+
 				New-AzResourceGroupDeployment  `
-					-Name "CmAz_Frontdoor" `
+					-Name $deploymentNameFd `
 					-ResourceGroupName $frontdoorRG `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-Frontdoor.json" `
 					-Frontdoor $SettingsObject.frontdoor `

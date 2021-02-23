@@ -98,7 +98,11 @@ function New-CmAzCoreKeyVault {
 			}
 
 			Write-Verbose "Deploying Keyvaults..."
+
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.location -Name "New-CmAzCoreKeyVault"
+
 			New-AzResourceGroupDeployment `
+				-Name $deploymentName `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreKeyVault.json" `
 				-ResourceGroupName $keyVaultResourceGroup `
 				-KeyvaultDetails $SettingsObject `

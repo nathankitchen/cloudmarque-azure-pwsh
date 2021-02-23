@@ -206,7 +206,11 @@
 				Write-Verbose "No valid virtual machines available for deployment..."
 			}
 			else {
+
+				$deploymentNameRgs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasVm-Rgs"
+
 				New-AzDeployment `
+					-Name $deploymentNameRgs `
 					-TemplateFile "$PSScriptRoot\New-CmAzIaasVm.ResourceGroups.json" `
 					-ResourceGroups $allResourceGroups `
 					-Location $SettingsObject.location
@@ -220,7 +224,10 @@
 					"LocalAdminPassword" = ConvertFrom-SecureString $LocalAdminPassword -AsPlainText;
 				}
 
+				$deploymentNameVm = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasVm"
+
 				New-AzResourceGroupDeployment `
+					-Name $deploymentNameVm  `
 					-TemplateFile "$PSScriptRoot\New-CmAzIaasVm.json" `
 					-ResourceGroupName $allResourceGroups[0].name `
 					-Credentials $credentials `

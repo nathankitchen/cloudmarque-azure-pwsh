@@ -87,31 +87,31 @@
 				if ($_.tier -eq "Standard") {
 					$_.kind = "StorageV2"
 				}
-	
+
 				if (!$_.kind) {
 					$_.kind = "StorageV2"
 				}
-	
+
 				if (!$_.minimumTlsVersion) {
 					$_.minimumTlsVersion = "TLS1_2"
 				}
-	
+
 				if (!$_.supportsHttpsTrafficOnly) {
 					$_.supportsHttpsTrafficOnly = $true
 				}
-	
+
 				if (!$_.allowBlobPublicAccess) {
 					$_.allowBlobPublicAccess = $true
 				}
-	
+
 				if (!$_.networkAclsBypass) {
 					$_.networkAclsBypass = "AzureServices"
 				}
-	
+
 				if (!$_.networkAclsDefaultAction) {
 					$_.networkAclsDefaultAction = "Allow"
 				}
-	
+
 				if (!$_.blobContainer) {
 					$_.blobContainer = @(@{
 							"name" = "none"
@@ -170,7 +170,7 @@
 			elseif ($SettingsObject.resourceGroupName) {
 
 				Write-Verbose "A new resource group will be created with the provided name."
-				$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Name $SettingsObject.resourceGroupName -Region $SettingsObject.Location
+				$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Name $SettingsObject.resourceGroupName -Region $SettingsObject.Location
 
 				$resourceGroup = New-AzResourceGroup -ResourceGroupName $resourceGroupName -Tag @{"cm-service" = $SettingsObject.service.publish.resourceGroup } -Location $SettingsObject.Location -Force
 				Write-Verbose "Resource Group created: $($resourceGroup.ResourceGroupName)"
@@ -181,8 +181,12 @@
 				Write-Error "Please provide appropriate service tag for existing resource group or provide unique name to create new."
 			}
 
+			Write-Verbose "Deploying Storage Accounts..."
+
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Region $SettingsObject.Location -Architecture "IaaS" -Name "New-CmAzIaasStorage"
+
 			New-AzResourceGroupDeployment `
-				-Name "CmAz_Storage_Master" `
+				-Name $deploymentName `
 				-ResourceGroupName $resourceGroup.resourceGroupName `
 				-TemplateFile "$PSScriptRoot/New-CmAzIaasStorage.json" `
 				-StorageSettingsArray $SettingsObject.storageAccounts `

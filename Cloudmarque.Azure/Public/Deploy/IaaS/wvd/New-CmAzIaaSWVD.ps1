@@ -129,10 +129,10 @@ function New-CmAzIaaSWVD {
 
 						Write-Verbose "Locating custom image with name: $($wvdEnvironment.hostVm.hostVmImage)."
 						$wvdEnvironment.hostVm.customImageId = (Get-AzResource -Name $wvdEnvironment.hostVm.hostVmImage | Where-Object {$_.ResourceType -like "Microsoft.Compute/*images"}).ResourceId
-						
+
 						if (!$wvdEnvironment.hostVm.customImageId) {
 							Write-Error "No custom images found with name: $($wvdEnvironment.hostVm.hostVmImage)." -Category InvalidArgument -CategoryTargetName "hostVmImage"
-						} 
+						}
 						elseif ($wvdEnvironment.hostVm.customImageId.count -gt 1) {
 							Write-Error "Multiple custom images found with name: $($wvdEnvironment.hostVm.hostVmImage)." -Category InvalidArgument -CategoryTargetName "hostVmImage"
 						}
@@ -180,8 +180,12 @@ function New-CmAzIaaSWVD {
 				$logAnalyticsID = (Get-CmAzService -Service $SettingsObject.logAnalyticsTag -ThrowIfUnavailable).resourceId
 			}
 
-			Write-Verbose "Deploying WVD infrastructure."
+			Write-Verbose "Deploying WVD infrastructure..."
+
+			$deploymentNameEnv = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Env"
+
 			New-AzDeployment `
+				-Name $deploymentNameEnv `
 				-Location $SettingsObject.azureDeploymentLocation `
 				-TemplateFile "$PSScriptRoot\New-CmAzWVDEnvironment.json" `
 				-Environments $SettingsObject.wvdEnvironments `
@@ -230,13 +234,21 @@ function New-CmAzIaaSWVD {
 			}
 
 			Write-Verbose "Deploying WVD hosts."
+
+			$deploymentNameHosts = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Hosts"
+
 			New-AzDeployment `
+				-Name $deploymentNameHosts `
 				-Location $SettingsObject.azureDeploymentLocation `
 				-TemplateFile "$PSScriptRoot\New-CmAzWVDHosts.json" `
 				-Environments $SettingsObject.wvdEnvironments
 
 			Write-Verbose "Deploying WVD host post setup."
+
+			$deploymentNamePs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Ps"
+
 			New-AzDeployment `
+				-Name $deploymentNamePs `
 				-Location $SettingsObject.azureDeploymentLocation `
 				-TemplateFile "$PSScriptRoot\New-CmAzWVDPostSetup.json" `
 				-Environments $SettingsObject.wvdEnvironments `

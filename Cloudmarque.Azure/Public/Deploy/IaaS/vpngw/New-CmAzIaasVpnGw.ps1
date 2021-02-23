@@ -100,7 +100,7 @@
 				}
 
 				if (!$vpnGw.P2s.VpnAddressPool -or !$vpnGw.service.dependencies.keyvault -or !$vpnGw.P2s.RootCertificateName) {
-	
+
 					Write-Verbose "P2s configuration not found."
 					$vpnGw.P2s = @{}
 					$vpnGw.P2s.VpnAddressPool = ""
@@ -129,7 +129,7 @@
 				}
 
 				if (!$vpnGw.S2s.ClientSitePublicIP -or !$vpnGw.S2s.CidrBlocks -or !$vpnGw.service.dependencies.keyvault ) {
-	
+
 						Write-Verbose "S2s configuration not found."
 						$vpnGw.S2s = @{}
 						$vpnGw.S2s.CidrBlocks = @()
@@ -144,7 +144,7 @@
 					$vpnGw.S2s.SharedKey = [System.Collections.ArrayList]@()
 					$vpnGw.S2s.SharedKeyObject = (Get-AzKeyVaultSecret -Name $vpnGw.S2s.KeyVaultSecret -VaultName ($keyVaultService.name)).SecretValueText
 					$vpnGw.S2s.SharedKey = $vpnGw.S2s.SharedKeyObject.ToString()
-					
+
 					if (!$vpnGw.S2s.SharedKey) {
 
 						Write-Verbose "Secret could not be retrieved! S2s configuration will be skipped."
@@ -171,9 +171,12 @@
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "virtualNetworkGateway" -ResourceServiceContainer $vpnGw
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "localNetworkGateway" -ResourceServiceContainer $vpnGw
 			}
+			Write-Verbose "Deploying Vpn Gateways..."
+
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasVpnGw"
 
 			New-AzResourceGroupDeployment `
-				-Name 'CmAz_VpnGW_Parent' `
+				-Name $deploymentName `
 				-ResourceGroupName $SettingsObject.ResourceGroupName `
 				-TemplateFile "$PSScriptRoot\New-CmAzIaasVpnGw.json" `
 				-VpnGwObject $SettingsObject `

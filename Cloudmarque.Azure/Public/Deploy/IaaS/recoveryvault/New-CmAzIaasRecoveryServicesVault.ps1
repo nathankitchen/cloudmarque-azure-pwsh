@@ -23,7 +23,7 @@ function New-CmAzIaasRecoveryServicesVault {
 	     File path for the tag settings file to be converted into a tag settings object.
 
         .Component
-         Core
+         IaaS
 
         .Example
          New-CmAzIaasRecoveryServicesVault -SettingsFile C:\ProjectDirectory\RecoveryServicesVault.yml
@@ -69,7 +69,7 @@ function New-CmAzIaasRecoveryServicesVault {
 
 
         Write-Verbose "Generating standardised Resource Group Name from input: $($SettingsObject.resourceGroupName)"
-        $resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName
+        $resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName
 
         Write-Verbose "Generated standardised Resource Group Name: $resourceGroupName"
         Write-Verbose "Checking if Resource Group exists."
@@ -84,7 +84,7 @@ function New-CmAzIaasRecoveryServicesVault {
 
         Write-Verbose "Generating standardised Recovery Services Vault names."
         Foreach ($vault in $SettingsObject.recoveryServicesVaults) {
-            $vault.name = Get-CmAzResourceName -Resource "recoveryservicesvault" -Architecture "Core" -Region $vault.location -Name $vault.name
+            $vault.name = Get-CmAzResourceName -Resource "recoveryservicesvault" -Architecture "IaaS" -Region $vault.location -Name $vault.name
             Write-Verbose "Generated standardised Key Vault name: $($vault.name)"
 
             Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "recoveryVault" -ResourceServiceContainer $vault
@@ -92,16 +92,24 @@ function New-CmAzIaasRecoveryServicesVault {
 
         $workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
 
-        Write-Verbose "Deploying Azure ARM template for Recovery Services Vaults."
+        Write-Verbose "Deploying Azure ARM template for Recovery Services Vaults..."
+
+        $deploymentNameRv = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasRecoveryServicesVault"
+
         New-AzResourceGroupDeployment `
+            -Name $deploymentNameRv `
             -ResourceGroupName $resourceGroupName `
             -TemplateFile "$PSScriptRoot\New-CmAzIaasRecoveryServicesVault.json" `
             -RecoveryServicesVaults $SettingsObject.recoveryServicesVaults `
             -Force
 
-        Write-Verbose "Deploying Azure ARM template for Recovery Services Diagnostics."
+        Write-Verbose "Deploying Recovery Services Diagnostics..."
         Foreach ($vault in $SettingsObject.recoveryServicesVaults) {
+
+            $deploymentNameRvSd = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasRecoveryServicesVault-Sd"
+
             New-AzResourceGroupDeployment `
+                -Name $deploymentNameRvSd `
                 -ResourceGroupName $resourceGroupName `
                 -TemplateFile "$PSScriptRoot\New-CmAzIaasRecoveryServicesDiagnostics.json" `
                 -VaultName $vault.name `
@@ -111,9 +119,13 @@ function New-CmAzIaasRecoveryServicesVault {
 
         if ($PolicySettingsObject) {
 
-            Write-Verbose "Deploying Azure ARM template for Recovery Services Policies."
+            Write-Verbose "Deploying Recovery Services Policies..."
             Foreach ($vault in $SettingsObject.recoveryServicesVaults) {
+
+                $deploymentNameRvSp = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasRecoveryServicesVault-Sp"
+
                 New-AzResourceGroupDeployment `
+                    -Name $deploymentNameRvSp `
                     -ResourceGroupName $resourceGroupName `
                     -TemplateFile "$PSScriptRoot\New-CmAzIaasRecoveryServicesPolicy.json" `
                     -VaultName $vault.name `

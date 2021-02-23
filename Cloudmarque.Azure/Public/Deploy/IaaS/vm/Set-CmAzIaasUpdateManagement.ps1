@@ -14,13 +14,13 @@ function Set-CmAzIaasUpdateManagement {
 		 Object containing the configuration values required to run this cmdlet.
 
 		.Component
-		 Core
+		 IaaS
 
 		.Example
-		 Set-CmAzCoreMonitorLoggingAutomation -SettingsFile "c:/directory/settingsFile.yml"
+		 Set-CmAzIaasUpdateManagement -SettingsFile "c:/directory/settingsFile.yml"
 
 		.Example
-		 Set-CmAzCoreMonitorLoggingAutomation -SettingsObject $settings
+		 Set-CmAzIaasUpdateManagement -SettingsObject $settings
 	#>
 
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
@@ -37,7 +37,7 @@ function Set-CmAzIaasUpdateManagement {
 
 	Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
-	if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Core Logging Automation")) {
+	if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy VM Update Management")) {
 
 		Write-Verbose "Removing pre-existing Automation JobSchedules..."
 		$automationAccount = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -ThrowIfUnavailable -ThrowIfMultiple
@@ -98,7 +98,7 @@ function Set-CmAzIaasUpdateManagement {
 					"expiryTime"       = $scheduleSetting.expiryTime;
 					"frequency"        = $frequency;
 					"interval"         = 1;
-					"name"             = Get-CmAzResourceName -Resource "AutomationSchedule" -Architecture "Core" -Region $scheduleSetting.Location -Name $scheduleSetting.Name;
+					"name"             = Get-CmAzResourceName -Resource "AutomationSchedule" -Architecture "IaaS" -Region $scheduleSetting.Location -Name $scheduleSetting.Name;
 					"startTime"        = $scheduleSetting.startTime;
 					"timeZone"         = "Europe/London";
 					"advancedSchedule" = @{
@@ -126,7 +126,11 @@ function Set-CmAzIaasUpdateManagement {
 		}
 
 		Write-Verbose "Deploying Schedule Management..."
+
+		$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region "Global" -Name "Set-CmAzIaasUpdateManagement"
+
 		New-AzResourceGroupDeployment `
+			-Name $deploymentName `
 			-ResourceGroupName $automationAccount.resourceGroupName `
 			-TemplateFile "$PSScriptRoot/Set-CmAzIaasUpdateManagement.json" `
 			-AutomationAccountName $automationAccount.name `

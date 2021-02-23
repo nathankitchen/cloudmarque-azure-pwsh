@@ -62,7 +62,7 @@
                 Write-Error "Please provide appropriate service tag for existing resource group or provide unique name to create new."
             }
 
-            $SettingsObject.galleryName = Get-CmAzResourceName -Resource "SharedImageGallery" -Architecture "Paas" -Region $SettingsObject.location -Name $SettingsObject.galleryName 
+            $SettingsObject.galleryName = Get-CmAzResourceName -Resource "SharedImageGallery" -Architecture "Paas" -Region $SettingsObject.location -Name $SettingsObject.galleryName
 
             $SettingsObject.imageDefinitions | ForEach-Object {
 
@@ -131,8 +131,12 @@
 
             }
 
+            Write-Verbose "Deploying Shared Image Gallery..."
+
+            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Paas" -Region $SettingsObject.location -Name "New-CmAzPaasSharedImageGallery"
+
             New-AzResourceGroupDeployment `
-                -Name "Cm_Gallery_$($SettingsObject.galleryName)" `
+                -Name $deploymentName `
                 -ResourceGroupName $resourceGroup.ResourceGroupName `
                 -TemplateFile "$PSScriptRoot\New-CmAzPaasSharedImageGallery.json" `
                 -Location $SettingsObject.location `

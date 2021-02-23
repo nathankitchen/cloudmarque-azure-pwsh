@@ -878,8 +878,11 @@
 
 			# Arm Deployment
 			Write-Verbose "Deploying resource groups..."
+
+			$deploymentNameRg = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-RGs"
+
 			New-AzDeployment `
-				-Name "Cm_network_resource_group_deployment_$(Get-Date -Format 'ddMMyyyyHHmmsssss')" `
+				-Name $deploymentNameRg `
 				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.ResourceGroups.json `
 				-Location $resourceGroupObjectArray[0].resourceGroup.location `
 				-NetworkingArrayObject $resourceGroupObjectArray
@@ -947,7 +950,11 @@
 				New-AzResourceGroup -Location $workspace.location -Name $networkWatcherResourceGroupName -Force
 
 				Write-Verbose "Deploying nsgs..."
+
+				$deploymentNameNsg = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $workspace.location -Name "New-CmAzIaasNetworking-Nsgs"
+
 				New-AzDeployment `
+					-Name $deploymentNameNsg `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.Nsgs.json `
 					-Location $workspace.location `
 					-Locations ($resourceGroupObjectArray.networkSecurityGroups.location | Sort-Object | Get-Unique) `
@@ -957,7 +964,11 @@
 			}
 
 			Write-Verbose "Deploying vnets and udrs..."
+
+			$deploymentNameVu = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-VUs"
+
 			New-AzDeployment `
+				-Name $deploymentNameVu `
 				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.json `
 				-Location $resourceGroupObjectArray[0].resourceGroup.location `
 				-NetworkingArrayObject $resourceGroupObjectArray
@@ -987,7 +998,11 @@
 				}
 
 				Write-Verbose "Configuring vnet peerings..."
+
+				$deploymentNamePeerings = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-Vps"
+
 				New-AzDeployment `
+					-Name $deploymentNamePeerings `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.vnetPeerings.json `
 					-Location $resourceGroupObjectArray[0].resourceGroup.location `
 					-VnetPeeringsObjectArray $vnetPeeringsObjectArray

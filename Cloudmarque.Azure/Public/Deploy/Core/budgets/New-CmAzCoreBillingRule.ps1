@@ -90,7 +90,11 @@ function New-CmAzCoreBillingRule {
 			}
 
 			Write-Verbose "Deploying budgets..."
+
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.location -Name "New-CmAzCoreBillingRule"
+
 			New-AzDeployment `
+				-Name $deploymentName `
 				-Location $SettingsObject.location `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreBillingRule.json" `
 				-Budgets $SettingsObject.budgets

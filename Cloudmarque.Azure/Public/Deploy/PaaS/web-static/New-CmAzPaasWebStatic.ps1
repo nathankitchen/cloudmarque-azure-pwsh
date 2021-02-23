@@ -97,7 +97,11 @@
 		$storageName = Get-CmAzResourceName -Resource "Storageaccount" -Architecture "IaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
 
 		Write-Verbose "Deploying cdn: $profileName..."
+
+		$deploymentNameCdn = Get-CmAzResourceName -Resource "Deployment" -Region $SettingsObject.Location -Architecture "PaaS" -Name "New-CmAzPaasWebStatic-cdn"
+
 		New-AzResourceGroupDeployment `
+			-Name $deploymentNameCdn `
 			-ResourceGroupName $resourceGroupName `
 			-TemplateFile "$PSScriptRoot/New-CmAzPaasWebStatic.Cdn.json" `
 			-StorageName $storageName `

@@ -198,9 +198,12 @@ function New-CmAzPaasFunction {
 
                 $region = $SettingsObject.functionAppSolutions.AppServicePlans.Region.count -gt 1 ? $SettingsObject.functionAppSolutions.AppServicePlans[0].Region : $SettingsObject.functionAppSolutions.AppServicePlans.Region
 
-                Write-Verbose "Initiating deployment of functions on app service plans..."
+                Write-Verbose "Deploying functions on app service plans..."
 
-                New-AzDeployment  `
+                $deploymentNameAsp = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $region -Name "New-CmAzPaasFunction"
+
+                New-AzDeployment `
+                    -Name $deploymentNameAsp `
                     -Location $region `
                     -TemplateFile "$PSScriptRoot\New-CmAzPaasFunction.AppServicePlan.json" `
                     -AppServicePlans $SettingsObject.functionAppSolutions.AppServicePlans
@@ -208,11 +211,14 @@ function New-CmAzPaasFunction {
 
             if ($SettingsObject.functionAppSolutions.ConsumptionPlans) {
 
-                $SettingsObject.functionAppSolutions.ConsumptionPlans.Region.count -gt 1 ? $SettingsObject.functionAppSolutions.ConsumptionPlans[0].Region : $SettingsObject.functionAppSolutions.ConsumptionPlans.Region
+                $region = $SettingsObject.functionAppSolutions.ConsumptionPlans.Region.count -gt 1 ? $SettingsObject.functionAppSolutions.ConsumptionPlans[0].Region : $SettingsObject.functionAppSolutions.ConsumptionPlans.Region
 
-                Write-Verbose "Initiating deployment of functions on consumption plans..."
+                Write-Verbose "Deploying functions on consumption plans..."
 
-                New-AzDeployment  `
+                $deploymentNameCon = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $region -Name "New-CmAzPaasFunction"
+
+                New-AzDeployment `
+                    -Name $deploymentNameCon `
                     -Location $region `
                     -TemplateFile "$PSScriptRoot\New-CmAzPaasFunction.Consumption.json" `
                     -ConsumptionPlans $SettingsObject.functionAppSolutions.ConsumptionPlans

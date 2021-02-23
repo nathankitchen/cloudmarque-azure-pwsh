@@ -472,3 +472,8 @@ resources:
   minLength: 1
   maxLength: 64
   generator: standard
+- name: Deployment
+  shortname: Dep
+  minLength: 1
+  maxLength: 64
+  generator: deployment

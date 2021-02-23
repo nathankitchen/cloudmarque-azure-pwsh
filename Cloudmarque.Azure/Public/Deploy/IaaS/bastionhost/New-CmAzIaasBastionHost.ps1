@@ -92,7 +92,13 @@
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "bastionPublicIP" -ResourceServiceContainer $bastionHost
 			}
 
-			New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
+			Write-Verbose "Deploying Bastion Hosts.."
+
+			$deploymentName = Get-CmAzResourceName 	-Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasBastionHost"
+
+			New-AzResourceGroupDeployment `
+				-Name $deploymentName `
+				-ResourceGroupName $resourceGroupName `
 				-TemplateFile "$PSScriptRoot\New-CmAzIaasBastionHost.json" `
 				-BastionHosts $SettingsObject.bastionHosts `
 				-Location $SettingsObject.location `
