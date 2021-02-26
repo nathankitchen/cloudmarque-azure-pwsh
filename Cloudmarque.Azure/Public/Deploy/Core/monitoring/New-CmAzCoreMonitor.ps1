@@ -159,6 +159,7 @@ function New-CmAzCoreMonitor {
 			}
 
 			$SettingsObject.alerts = @($keyvaultAdminAlert, $resourceHealthAlert, $serviceHealthAlert)
+			$SettingsObject.workspaceDataRetentionInDays ??= 90
 
 			Write-Verbose "Generating resource names..."
 			$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.Location -Name $SettingsObject.name
@@ -207,6 +208,7 @@ function New-CmAzCoreMonitor {
 				-ActionGroups $SettingsObject.actionGroups `
 				-Alerts $SettingsObject.alerts `
 				-AppInsightsName $appInsights `
+				-WorkspaceDataRetentionInDays $SettingsObject.workspaceDataRetentionInDays `
 				-ServiceContainer $SettingsObject.service.publish `
 				-WorkspaceName $workspace `
 				-Force

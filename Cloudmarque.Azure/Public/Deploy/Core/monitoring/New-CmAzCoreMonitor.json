@@ -11,6 +11,9 @@
         "AppInsightsName": {
             "type": "String"
         },
+        "WorkspaceDataRetentionInDays": {
+            "type": "Int"
+        },
         "ServiceContainer": {
             "type": "Object"
         },
@@ -60,7 +63,7 @@
                 "sku": {
                     "name": "pergb2018"
                 },
-                "retentionInDays": 90,
+                "retentionInDays": "[parameters('WorkspaceDataRetentionInDays')]",
                 "features": {
                     "searchVersion": 1,
                     "legacy": 0,

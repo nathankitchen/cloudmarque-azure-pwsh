@@ -37,6 +37,15 @@
             "description": "Set the cpu threshold for Azure Advisor.",
             "Enum": [0, 5, 10, 15, 20]
         },
+        "workspaceDataRetentionInDays": {
+            "$id": "#/workspaceDataRetentionInDays",
+            "type": ["integer", "null"],
+            "title": "WorkspaceDataRetentionInDays",
+            "description": "Log Analytics data retention in days.",
+            "minimum": 30,
+            "maximum": 90,
+            "default": 90
+        },
         "service": {
             "$id": "#/service",
             "type": "object",
