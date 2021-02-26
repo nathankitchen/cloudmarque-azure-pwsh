@@ -347,11 +347,11 @@
 					}
 
 					$routeTableObject = @{
-						tableName = $tableName;
+						tableName        = $tableName;
 						routePropagation = $routePropagation;
-						routes    = $routeObjectList;
-						location  = $location;
-						service   = @{
+						routes           = $routeObjectList;
+						location         = $location;
+						service          = @{
 							publish = @{
 								routeTable    = $servicePublish;
 								resourceGroup = $resourceGroupServicePublish
@@ -468,19 +468,21 @@
 
 							$vnetsGroup = $ResourceGroup.Group | Group-Object vnetName
 
-							if (!$vnetsGroup.name) {
-								Write-Error "Problem found in `"$($VnetsCsvFile)`". No route tables found. Please check the file." -Category ObjectNotFound -TargetObject $vnetsGroup
-							}
-
-							Write-Verbose "'$($ResourceGroup.Name)' has vnets = '$($($vnetsGroup.Name -notlike '').count)'"
 							$vnetObjectArray = [System.Collections.ArrayList]@()
 
-							foreach ($vnet in $vnetsGroup) {
+							if (!$vnetsGroup.name) {
+								Write-Warning "No virtual networks found for $($ResourceGroup.Name)."
+							}
+							else {
+								Write-Verbose "'$($ResourceGroup.Name)' has vnets = '$($($vnetsGroup.Name -notlike '').count)'"
 
-								if ($vnet.name) {
-									$vnetObject = vnetObject -vnetGroup $vnet.Group -vnetName $vnet.Name
-									Write-Verbose "Adding vnet = '$($vnet.Name)' to RG = '$($ResourceGroup.Name)'"
-									$vnetObjectArray.Add($vnetObject) > $Null
+								foreach ($vnet in $vnetsGroup) {
+
+									if ($vnet.name) {
+										$vnetObject = vnetObject -vnetGroup $vnet.Group -vnetName $vnet.Name
+										Write-Verbose "Adding vnet = '$($vnet.Name)' to RG = '$($ResourceGroup.Name)'"
+										$vnetObjectArray.Add($vnetObject) > $Null
+									}
 								}
 							}
 						}
@@ -490,19 +492,21 @@
 
 							$routeTableGroup = $ResourceGroup.Group | Group-Object tableName
 
-							if (!$routeTableGroup.name) {
-								Write-Error "Problem found in `"$($RouteTablesCsvFile)`". No route tables found. Please check the file." -Category ObjectNotFound -TargetObject $routeTableGroup
-							}
-
-							Write-Verbose "'$($ResourceGroup.Name)' has route tables = '$($($routeTableGroup.Name -notlike '').count)'"
 							$routeTableObjectArray = [System.Collections.ArrayList]@()
 
-							foreach ($routeTable in $routeTableGroup) {
+							if (!$routeTableGroup.name) {
+								Write-Warning "No route tables found for $($ResourceGroup.Name)."
+							}
+							else {
+								Write-Verbose "'$($ResourceGroup.Name)' has route tables = '$($($routeTableGroup.Name -notlike '').count)'"
 
-								if ($routeTable.name) {
-									$routeTableObject = routeTableObject -routeTableGroup $routeTable.Group -tableName $routeTable.Name
-									Write-Verbose "Adding UDR = '$($routeTable.Name)' to RG = '$($ResourceGroup.Name)'"
-									$routeTableObjectArray.Add($routeTableObject) > $Null
+								foreach ($routeTable in $routeTableGroup) {
+
+									if ($routeTable.name) {
+										$routeTableObject = routeTableObject -routeTableGroup $routeTable.Group -tableName $routeTable.Name
+										Write-Verbose "Adding UDR = '$($routeTable.Name)' to RG = '$($ResourceGroup.Name)'"
+										$routeTableObjectArray.Add($routeTableObject) > $Null
+									}
 								}
 							}
 						}
@@ -512,19 +516,21 @@
 
 							$nsgGroup = $ResourceGroup.Group | Group-Object nsgName
 
-							if (!$nsgGroup.name) {
-								Write-Error "Problem found in `"$($NsgsCsvFile)`". No network security groups found. Please check the file." -Category ObjectNotFound -TargetObject $nsgGroup
-							}
-
-							Write-Verbose "'$($ResourceGroup.Name)' has network security groups = '$($($nsgGroup.Name -notlike '').count)'"
 							$nsgObjectArray = [System.Collections.ArrayList]@()
 
-							foreach ($nsg in $nsgGroup) {
+							if (!$nsgGroup.name) {
+								Write-Warning "No network security groups found for $($ResourceGroup.Name)."
+							}
+							else {
+								Write-Verbose "'$($ResourceGroup.Name)' has network security groups = '$($($nsgGroup.Name -notlike '').count)'"
 
-								if ($nsg.name) {
-									$nsgObject = nsgObject -nsgGroup $nsg.Group -nsgName $nsg.Name
-									Write-Verbose "Adding nsg = '$($nsg.Name)' to RG = '$($ResourceGroup.Name)'"
-									$nsgObjectArray.Add($nsgObject) > $Null
+								foreach ($nsg in $nsgGroup) {
+
+									if ($nsg.name) {
+										$nsgObject = nsgObject -nsgGroup $nsg.Group -nsgName $nsg.Name
+										Write-Verbose "Adding nsg = '$($nsg.Name)' to RG = '$($ResourceGroup.Name)'"
+										$nsgObjectArray.Add($nsgObject) > $Null
+									}
 								}
 							}
 						}
@@ -639,7 +645,7 @@
 						$interimPath = "$(Split-Path $SettingsFile)/$ObjectType/$YmlFilePath"
 					}
 
-					if (!$interimPath.contains('.yml')){
+					if (!$interimPath.contains('.yml')) {
 						$interimPath = "$interimPath.yml"
 					}
 
@@ -678,7 +684,7 @@
 									try {
 										$interimGroupPath = "$(Split-Path $interimPath)/groups/$_"
 
-										if (!$interimGroupPath.contains('.yml')){
+										if (!$interimGroupPath.contains('.yml')) {
 											$interimGroupPath = "$interimGroupPath.yml"
 										}
 
@@ -947,7 +953,16 @@
 
 				$networkWatcherResourceGroupName = "NetworkWatcherRG"
 
-				New-AzResourceGroup -Location $workspace.location -Name $networkWatcherResourceGroupName -Force
+				$ifResourceGroupExists = Get-AzResourceGroup -Name $networkWatcherResourceGroupName  -ErrorAction SilentlyContinue
+
+				if (!$ifResourceGroupExists) {
+
+					Write-Verbose "Creating new Network Watcher Resource Group: $($networkWatcherResourceGroupName)..."
+					New-AzResourceGroup -Location $workspace.location -Name $networkWatcherResourceGroupName -Force
+				}
+				else {
+					Write-Verbose "$($networkWatcherResourceGroupName): Already exists..."
+				}
 
 				Write-Verbose "Deploying nsgs..."
 
@@ -957,9 +972,9 @@
 					-Name $deploymentNameNsg `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.Nsgs.json `
 					-Location $workspace.location `
-					-Locations ($resourceGroupObjectArray.networkSecurityGroups.location | Sort-Object | Get-Unique) `
+					-Locations (($resourceGroupObjectArray.networkSecurityGroups | Where-Object { $_.nsgname -ne "none" } ).location | Sort-Object | Get-Unique) `
 					-NetworkWatcherResourceGroupName $networkWatcherResourceGroupName `
-					-Nsgs $resourceGroupObjectArray.networkSecurityGroups `
+					-Nsgs ($resourceGroupObjectArray.networkSecurityGroups | Where-Object { $_.nsgname -ne "none" }) `
 					-Workspace $workspace
 			}
 
@@ -1009,10 +1024,12 @@
 			}
 
 			$resourceGroupsToSet = @()
-			$resourceGroupsToSet += ($resourceGroupObjectArray.resourceGroup | Where-object -Property createRG -eq $true).name
 			$resourceGroupsToSet += $networkWatcherResourceGroupName
+			$resourceGroupsToSet += ($resourceGroupObjectArray.resourceGroup | Where-Object -Property createRG -eq $true).name
 
 			if ($resourceGroupsToSet) {
+
+				Write-Verbose "Started tagging for resourcegroups..."
 				Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
 			}
 
@@ -1022,6 +1039,7 @@
 			$resourcesToSet += $resourceGroupObjectArray.networkSecurityGroups.nsgName | Where-Object { $_ -ne "none" }
 			$resourcesToSet += $resourceGroupObjectArray.routeTables.tableName | Where-Object { $_ -ne "none" }
 
+			Write-Verbose "Started tagging for resources..."
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
 
 			Write-Verbose "Finished."

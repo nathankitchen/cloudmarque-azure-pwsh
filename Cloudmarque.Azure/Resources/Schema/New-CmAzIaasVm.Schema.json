@@ -99,6 +99,18 @@
                             "type": ["string", "null"],
                             "title": "NIC",
                             "description": "Global default value to publish on deployed resource type."
+                        },
+                        "proximityPlacementGroup": {
+                            "$id": "#/service/publish/proximityPlacementGroup",
+                            "type": ["string", "null"],
+                            "title": "proximityPlacementGroup",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "availabilitySet": {
+                            "$id": "#/service/publish/availabilitySet",
+                            "type": ["string", "null"],
+                            "title": "availabilitySet",
+                            "description": "Global default value to publish on deployed resource type."
                         }
                     },
                     "additionalProperties": false
@@ -164,6 +176,175 @@
                                     }
                                 },
                                 "additionalProperties": false
+                            },
+                            "proximityPlacementGroups": {
+                                "$id": "#/groups/items/allOf/proximityPlacementGroups",
+                                "type": ["array", "null"],
+                                "title": "proximityPlacementGroups",
+                                "description": "Contains list of details required to deploy proximityPlacementGroups.",
+                                "items": {
+                                    "$id": "#/groups/items/allOf/proximityPlacementGroups/items",
+                                    "minLength" : 1,
+                                    "allOf": [
+                                        {
+                                            "$id": "#/groups/items/allOf/proximityPlacementGroups/items/allOf",
+                                            "type": "object",
+                                            "required": [
+                                                "name"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/groups/items/allOf/proximityPlacementGroups/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated proximityPlacementGroups name."
+                                                },
+                                                "location": {
+                                                    "$id": "#/groups/items/allOf/proximityPlacementGroups/items/allOf/location",
+                                                    "type": ["string", "null"],
+                                                    "title": "Location",
+                                                    "description": "ProximityPlacementGroup's location"
+                                                },
+                                                "service": {
+                                                    "$id": "#/groups/items/allOf/proximityPlacementGroups/items/allOf/service",
+                                                    "type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",
+                                                    "properties": {
+                                                        "publish": {
+                                                            "$id": "#/groups/items/allOf/proximityPlacementGroups/items/allOf/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+                                                                "proximityPlacementGroup": {
+                                                                    "$id": "#/groups/items/allOf/proximityPlacementGroups/items/allOf/service/publish/proximityPlacementGroup",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "proximityPlacementGroup",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "availabilitySets": {
+                                "$id": "#/groups/items/allOf/availabilitySets",
+                                "type": ["array", "null"],
+                                "title": "availabilitySets",
+                                "description": "Contains list of details required to deploy availabilitySets.",
+                                "items": {
+                                    "$id": "#/groups/items/allOf/availabilitySets/items",
+                                    "minLength" : 1,
+                                    "allOf": [
+                                        {
+                                            "$id": "#/groups/items/allOf/availabilitySets/items/allOf",
+                                            "type": "object",
+                                            "required": [
+                                                "name",
+                                                "platformUpdateDomainCount",
+                                                "platformFaultDomainCount",
+                                                "sku"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/groups/items/allOf/availabilitySets/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of the generated availabilitySets name."
+                                                },
+                                                "location": {
+                                                    "$id": "#/groups/items/allOf/availabilitySets/items/allOf/location",
+                                                    "type": ["string", "null"],
+                                                    "title": "Location",
+                                                    "description": "availabilitySets location"
+                                                },
+                                                "platformUpdateDomainCount": {
+                                                    "$id": "#/groups/items/allOf/availabilitySets/items/allOf/platformUpdateDomainCount",
+                                                    "type": ["integer", "null"],
+                                                    "title": "platformUpdateDomainCount",
+                                                    "description": "Provide total number of Update Domains in Availability set."
+                                                },
+                                                "platformFaultDomainCount": {
+                                                    "$id": "#/groups/items/allOf/availabilitySets/items/allOf/platformFaultDomainCount",
+                                                    "type": ["integer", "null"],
+                                                    "title": "platformFaultDomainCount",
+                                                    "description": "Provide total number of Fault Domains in availability set."
+                                                },
+                                                "proximityPlacementGroup": {
+                                                    "$id": "#/groups/items/allOf/availabilitySets/items/allOf/proximityPlacementGroup",
+                                                    "type": ["string", "null"],
+                                                    "title": "proximityPlacementGroup",
+                                                    "description": "Specifies proximity placement group to attach with availability set."
+                                                },
+                                                "sku": {
+                                                    "$id": "#/groups/items/allOf/availabilitySets/items/allOf/sku",
+                                                    "type": ["object", "null"],
+                                                    "title": "sku",
+                                                    "description": "sku details.",
+                                                    "required": [
+                                                        "name"
+                                                    ],
+                                                    "properties": {
+                                                        "name": {
+                                                            "$id": "#/groups/items/allOf/availabilitySets/items/allOf/sku/name",
+                                                            "type": "string",
+                                                            "title": "name",
+                                                            "description": "The sku name.",
+                                                            "enum": [ "classic", "aligned"]
+                                                        },
+                                                        "tier": {
+                                                            "$id": "#/groups/items/allOf/availabilitySets/items/allOf/sku/tier",
+                                                            "type": ["string", "null"],
+                                                            "title": "tier",
+                                                            "enum": [ "standard", "basic", null],
+                                                            "description": "Specifies the tier of virtual machines in a scale set."
+                                                        },
+                                                        "capacity": {
+                                                            "$id": "#/groups/items/allOf/availabilitySets/items/allOf/sku/capacity",
+                                                            "type": ["integer", "null"],
+                                                            "title": "capacity",
+                                                            "description": "Specifies the number of virtual machines in the scale set."
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                },
+                                                "service": {
+                                                    "$id": "#/groups/items/allOf/availabilitySets/items/allOf/service",
+                                                    "type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",
+                                                    "properties": {
+                                                        "publish": {
+                                                            "$id": "#/groups/items/allOf/availabilitySets/items/allOf/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+                                                                "availabilitySet": {
+                                                                    "$id": "#/groups/items/allOf/availabilitySets/items/allOf/service/publish/availabilitySet",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "availabilitySet",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
                             },
                             "virtualMachines": {
                                 "$id": "#/groups/items/allOf/virtualMachines",
@@ -257,6 +438,19 @@
                                                     "title": "Location",
                                                     "description": "Virtual machine deployment location"
                                                 },
+                                                "zone": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/zone",
+                                                    "type": ["integer", "null"],
+                                                    "title": "zone",
+                                                    "description": "Virtual machine deployment zone.",
+                                                    "enum": [ 1, 2, 3, null]
+                                                },
+                                                "availabilitySet": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/availabilitySet",
+                                                    "type": ["string", "null"],
+                                                    "title": "zone",
+                                                    "description": "Availability set of virtual machine."
+                                                },
                                                 "service": {
                                                     "$id": "#/groups/items/allOf/virtualMachines/items/allOf/service",
                                                     "type": ["object", "null"],
@@ -296,13 +490,16 @@
                                                         "osType",
                                                         "expandableDiskSizeGB"
                                                     ],
+                                                    "default": {
+                                                        "caching": "None"
+                                                    },
                                                     "properties": {
                                                         "osType": {
                                                             "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/osType",
                                                             "type": "string",
                                                             "title": "OSType",
                                                             "description": "The over arching type of OS to use.",
-                                                            "enum": ["Windows", "Linux", "windows", "linux"]
+                                                            "enum": ["windows", "linux"]
                                                         },
                                                         "expandableDiskSizeGB": {
                                                             "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/expandableDiskSizeGB",
@@ -310,22 +507,51 @@
                                                             "title": "ExpandableDiskSizeGB",
                                                             "description": "The size of the disk in gigabytes. (Overwrites disk size in vm image).",
                                                             "minimum": 1
+                                                        },
+                                                        "caching": {
+                                                            "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/caching",
+                                                            "type": "string",
+                                                            "title": "caching",
+                                                            "description": "Defines disk caching strategy",
+                                                            "enum": ["None","ReadOnly", "ReadWrite"]
                                                         }
                                                     },
                                                     "additionalProperties": false
                                                 },
-                                                "dataDiskSizes": {
-                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDiskSizes",
+                                                "dataDisks": {
+                                                    "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDisks",
                                                     "type": ["array", "null"],
                                                     "title": "DataDiskSizes",
                                                     "description": "List of details specifiying the size of and how many data disks will be deployed with the vm.",
                                                     "items": {
-                                                        "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDiskSizes/items",
+                                                        "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDisks/items",
                                                         "allOf": [
                                                             {
-                                                                "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDiskSizes/items/allOf",
-                                                                "type": "integer",
-                                                                "minimum": 1
+                                                                "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDisks/items/allOf",
+                                                                "type": "object",
+                                                                "required": [
+                                                                    "diskSizeGB"
+                                                                ],
+                                                                "default": {
+                                                                    "caching": "None"
+                                                                },
+                                                                "properties": {
+                                                                    "diskSizeGB": {
+                                                                        "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDisks/items/allOf/diskSizeGB",
+                                                                        "type": "integer",
+                                                                        "title": "diskSizeGB",
+                                                                        "description": "The size of the disk in gigabytes.",
+                                                                        "minimum": 1
+                                                                    },
+                                                                    "caching": {
+                                                                        "$id": "#/groups/items/allOf/virtualMachines/items/allOf/dataDisks/items/allOf/caching",
+                                                                        "type": "string",
+                                                                        "title": "Caching",
+                                                                        "description": "Defines disk caching strategy",
+                                                                        "enum": ["None", "ReadOnly", "ReadWrite"]
+                                                                    }
+                                                                },
+                                                                "additionalProperties": false
                                                             }
                                                         ]
                                                     }

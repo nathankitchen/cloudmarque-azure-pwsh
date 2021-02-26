@@ -8,7 +8,7 @@ regions:
 - name: EU West
   shortname: euw
 - name: WestEurope
-  shortname: euw 
+  shortname: euw
 - name: UK South
   shortname: uks
 - name: UKSouth
@@ -17,3 +17,5 @@ regions:
   shortname: ukw
 - name: UKWest
   shortname: ukw
+- name: East US
+  shortname: eus

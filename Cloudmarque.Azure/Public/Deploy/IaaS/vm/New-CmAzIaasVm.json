@@ -16,14 +16,65 @@
         },
         "AutomationAccount": {
             "type": "Object"
+        },
+        "ProximityPlacementGroups": {
+            "type": "array"
+        },
+        "AvailabilitySets": {
+            "type": "array"
         }
     },
     "resources": [
+        {
+            "condition": "[not(empty(parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].name))]",
+            "apiVersion": "2019-03-01",
+            "type": "Microsoft.Compute/proximityPlacementGroups",
+            "name": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].generatedName]",
+            "location": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].location]",
+            "copy": {
+                "name": "ProximityPlacementGroupsCopy",
+                "count": "[length(parameters('ProximityPlacementGroups'))]"
+            },
+            "tags": {
+                "cm-service": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].service.publish.proximityPlacementGroup]"
+            },
+            "properties": {}
+        },
+        {
+            "condition": "[not(empty(parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].name))]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "dependsOn": [
+                "ProximityPlacementGroupsCopy"
+            ],
+            "name": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].generatedName]",
+            "apiVersion": "2020-06-01",
+            "location": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].location]",
+            "copy": {
+                "name": "AvailabilitySetsCopy",
+                "count": "[length(parameters('AvailabilitySets'))]"
+            },
+            "tags": {
+                "cm-service": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].service.publish.availabilitySet]"
+            },
+            "properties": {
+                "platformFaultDomainCount": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].platformFaultDomainCount]",
+                "platformUpdateDomainCount": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].platformUpdateDomainCount]",
+                "proximityPlacementGroup": "[if(not(empty(parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].proximityPlacementGroup)), json(concat('{\"id\": \"', resourceId('Microsoft.Compute/proximityPlacementGroups', parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].proximityPlacementGroup), '\"}')), json('null'))]"
+            },
+            "sku": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].sku]"
+        },
         {
             "name": "[concat('VirtualMachineLevelTemplates', copyIndex('VirtualMachinesCopy'))]",
             "type": "Microsoft.Resources/Deployments",
             "resourceGroup": "[parameters('VirtualMachines')[copyIndex('VirtualMachinesCopy')].resourceGroupName]",
             "apiVersion": "2019-10-01",
+            "copy": {
+                "name": "VirtualMachinesCopy",
+                "count": "[Length(parameters('VirtualMachines'))]"
+            },
+            "dependsOn": [
+                "AvailabilitySetsCopy"
+            ],
             "properties": {
                 "mode": "Incremental",
                 "expressionEvaluationOptions": {
@@ -207,11 +258,13 @@
                             "dependsOn": [
                                 "[parameters('VM').nicName]"
                             ],
+                            "zones": "[if(equals(parameters('VM').zone, 'none'), json('null'), array(parameters('VM').zone))]",
                             "plan": "[if(empty(parameters('VM').plan), json('null'), parameters('VM').plan)]",
                             "properties": {
                                 "hardwareProfile": {
                                     "VMSize": "[parameters('VM').size]"
                                 },
+                                "availabilitySet": "[if(not(empty(parameters('VM').availabilitySet)), json(concat('{\"id\": \"', resourceId('Microsoft.Compute/availabilitySets', parameters('VM').availabilitySet), '\"}')), json('null'))]",
                                 "storageProfile": {
                                     "imageReference": {
                                         "publisher": "[parameters('VM').imageReference.publisher]",
@@ -223,7 +276,8 @@
                                         "osType": "[parameters('VM').osDisk.osType]",
                                         "name": "[parameters('VM').osDisk.name]",
                                         "createOption": "FromImage",
-                                        "diskSizeGB": "[parameters('VM').osDisk.expandableDiskSizeGB]"
+                                        "diskSizeGB": "[parameters('VM').osDisk.expandableDiskSizeGB]",
+                                        "caching": "[parameters('VM').osDisk.caching]"
                                     },
                                     "dataDisks": "[parameters('VM').dataDisks]"
                                 },
@@ -338,10 +392,6 @@
                         }
                     ]
                 }
-            },
-            "copy": {
-                "name": "VirtualMachinesCopy",
-                "count": "[Length(parameters('VirtualMachines'))]"
             }
         }
     ]

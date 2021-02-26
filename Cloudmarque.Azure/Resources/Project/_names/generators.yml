@@ -8,6 +8,17 @@ formats:
       - source: environment
       - source: region
       - source: hash
+  - name: default
+    separator: "-"
+    case: lower
+    components:
+      - source: organisation
+      - source: project
+      - source: environment
+      - source: region
+      - source: resource
+      - source: name
+      - source: hash
   - name: deployment
     separator: "-"
     case: lower
@@ -117,15 +128,3 @@ formats:
       - source: resource
       - source: name
       - source: hash
-  - name: default
-    separator: "-"
-    case: lower
-    components:
-      - source: organisation
-      - source: project
-      - source: environment
-      - source: region
-      - source: resource
-      - source: name
-      - source: hash
-

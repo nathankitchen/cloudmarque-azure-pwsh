@@ -11,7 +11,7 @@ function Set-DeployedResourceTags() {
         [Array]$ResourceGroupIds
     )
 
-    if(!$ResourceIds -and !$ResourceGroupIds) {
+    if (!$ResourceIds -and !$ResourceGroupIds) {
         Write-Warning "No resources provided for tagging."
         return
     }
@@ -24,10 +24,12 @@ function Set-DeployedResourceTags() {
     }
 
     if ($ResourceIds) {
-        $SettingsObject.resourceIds = $ResourceIds
+        $SettingsObject.resourceIds = @()
+        $SettingsObject.resourceIds += $ResourceIds | Where-Object { $_ }
     }
-    elseif($ResourceGroupIds) {
-        $SettingsObject.resourceGroupIds = $ResourceGroupIds
+    elseif ($ResourceGroupIds) {
+        $SettingsObject.resourceGroupIds = @()
+        $SettingsObject.resourceGroupIds += $ResourceGroupIds | Where-Object { $_ }
     }
 
     Write-Verbose "Setting tagging details for deployed resources..."

@@ -106,7 +106,7 @@ resources:
   shortname: vm
   minLength: 1
   maxLength: 64
-  generator: VirtualMachine
+  generator: virtualmachine
 - name: Disk
   shortname: dsk
   minLength: 1
@@ -124,6 +124,11 @@ resources:
   generator: virtualmachine
 - name: AvailabilitySet
   shortname: avail
+  minLength: 1
+  maxLength: 64
+  generator: standard
+- name: ProximityPlacementGroup
+  shortname: prox
   minLength: 1
   maxLength: 64
   generator: standard

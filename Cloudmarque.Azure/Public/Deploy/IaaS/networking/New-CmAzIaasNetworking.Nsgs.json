@@ -41,7 +41,7 @@
                     },
                     "resources": [
                         {
-                            "name": "[concat('NetworkWatcher_', parameters('Locations')[copyIndex('NetworkWatcherCopy')])]",
+                            "name": "[concat('NetworkWatcher_', replace(parameters('Locations')[copyIndex('NetworkWatcherCopy')], ' ', ''))]",
                             "type": "Microsoft.Network/networkWatchers",
                             "apiVersion": "2019-04-01",
                             "copy": {

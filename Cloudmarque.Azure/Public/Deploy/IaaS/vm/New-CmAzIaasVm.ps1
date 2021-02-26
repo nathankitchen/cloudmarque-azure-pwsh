@@ -125,7 +125,75 @@
 
 				$resourceGroup.name = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Region $resourceGroup.location -Name $resourceGroup.name
 
+				if ($resourceGroup.proximityPlacementGroups) {
+					foreach ($placementGroup in $resourceGroup.proximityPlacementGroups) {
+
+						$placementGroup.location ??= $resourceGroup.location
+
+						$placementGroup.generatedName = Get-CmAzResourceName -Resource "ProximityPlacementGroup" -Architecture "IaaS" -Region $placementGroup.location -Name $placementGroup.name
+						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "ProximityPlacementGroup" -ResourceServiceContainer $placementGroup
+					}
+				}
+				else {
+					$resourceGroup.proximityPlacementGroups = @(
+						@{
+							name          = ""
+							generatedName = "none";
+							location      = $resourceGroup.location
+							service       = @{
+								publish = @{
+									proximityPlacementGroup = "none"
+								}
+							}
+						}
+					)
+				}
+
+				if ($resourceGroup.availabilitySets) {
+					foreach ($set in $resourceGroup.availabilitySets) {
+
+						$set.generatedName = Get-CmAzResourceName -Resource "AvailabilitySet" -Architecture "IaaS" -Region $set.location -Name $set.name
+
+						if ($set.proximityPlacementGroup) {
+
+							$set.proximityPlacementGroup = ($resourceGroup.proximityPlacementGroups | Where-Object { $_.name -eq $set.proximityPlacementGroup }).generatedName
+
+							if (!$set.proximityPlacementGroup) {
+								Write-Error "Proximity group not found in settings..."
+							}
+						}
+						else {
+							$set.proximityPlacementGroup = ""
+						}
+
+						$set.location ??= $resourceGroup.location
+
+						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "availabilitySet" -ResourceServiceContainer $set
+					}
+				}
+				else {
+					$resourceGroup.availabilitySets = @(
+						@{
+							name          = ""
+							generatedName = "none";
+							location      = $resourceGroup.location;
+							sku           = @{
+								name = "Classic"
+							};
+							service       = @{
+								publish = @{
+									availabilitySet = "none"
+								}
+							}
+						}
+					)
+				}
+
 				foreach ($virtualMachine in $resourceGroup.virtualMachines) {
+
+					if ($virtualMachine.zones -and $virtualMachine.availabilitySet) {
+						Write-Error "Virtual Machines with both Availability Zones and Availability Sets are not supported by Azure..."
+					}
 
 					if (!$virtualMachine.location) {
 						$virtualMachine.location = $resourceGroup.location
@@ -156,21 +224,40 @@
 
 					Write-Verbose "Generating standardised resource names..."
 					$virtualMachine.computerName = Get-CmAzResourceName -Resource "ComputerName" -Architecture "Core" -Region $virtualMachine.location -Name $virtualMachine.name -MaxLength 15
-					$virtualMachine.nicName = Get-CmAzResourceName -Resource "NetworkInterfaceCard" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.name
-					$virtualMachine.osDisk.Name = Get-CmAzResourceName -Resource "OSDisk" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.name
 					$virtualMachine.fullName = Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.name
 
-					Write-Verbose "Building data disks..."
-					$virtualMachine.DataDisks = @()
+					$virtualMachine.nicName = Get-CmAzResourceName -Resource "NetworkInterfaceCard" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.fullName
+					$virtualMachine.osDisk.Name = Get-CmAzResourceName -Resource "OSDisk" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.fullName
 
-					for ($i = 0; $i -lt $virtualMachine.dataDiskSizes.count; $i++) {
+					$virtualMachine.osDisk.caching ??= "None"
 
-						$virtualMachine.dataDisks += @{
-							"Name"         = Get-CmAzResourceName -Resource "DataDisk" -Architecture "IaaS" -Region $virtualMachine.location -Name "$($virtualMachine.name)$($i + 1)";
-							"Lun"          = $i + 1;
-							"CreateOption" = "Empty";
-							"DiskSizeGB"   = $virtualMachine.dataDiskSizes[$i]
+					$virtualMachine.zone ??= "none"
+
+					if ($virtualMachine.availabilitySet) {
+
+						$virtualMachine.availabilitySet = ($resourceGroup.availabilitySets | Where-Object { $_.name -eq $virtualMachine.availabilitySet }).generatedName
+
+						if (!$virtualMachine.availabilitySet) {
+							Write-Error "Availability Set not found in settings..."
 						}
+					}
+					else {
+						$virtualMachine.availabilitySet = ""
+					}
+
+					Write-Verbose "Building data disks..."
+
+					if ($virtualMachine.dataDisks) {
+
+						for ($i = 0; $i -lt $virtualMachine.dataDisks.Count; $i++) {
+							$virtualMachine.dataDisks[$i].name = Get-CmAzResourceName -Resource "DataDisk" -Architecture "IaaS" -Region $virtualMachine.location -Name "$($virtualMachine.name)$($i + 1)";
+							$virtualMachine.dataDisks[$i].Lun = $i + 1;
+							$virtualMachine.dataDisks[$i].CreateOption = "Empty";
+							$virtualMachine.dataDisks[$i].caching ??= "None"
+						}
+					}
+					else {
+						$virtualMachine.dataDisks = @()
 					}
 
 					Write-Verbose "Building update tag.."
@@ -178,7 +265,7 @@
 
 						$scheduleSettings = Get-CmAzSettingsFile -Path "$PSScriptRoot/scheduleTypes.yml"
 
-						$inValidScheduleSettings = 	!$scheduleSettings -or !$scheduleSettings.updateGroups[$virtualMachine.updateGroup] -or	(!$scheduleSettings.updateFrequencies[$virtualMachine.updateFrequency] -and $daysOfWeek -notcontains $virtualMachine.updateFrequency)
+						$inValidScheduleSettings = !$scheduleSettings -or !$scheduleSettings.updateGroups[$virtualMachine.updateGroup] -or	(!$scheduleSettings.updateFrequencies[$virtualMachine.updateFrequency] -and $daysOfWeek -notcontains $virtualMachine.updateFrequency)
 
 						if ($inValidScheduleSettings) {
 							Write-Error "No valid schedule settings." -Category ObjectNotFound -CategoryTargetName "scheduleTypeSettingsObject"
@@ -235,6 +322,8 @@
 					-WorkspaceId $workspace.resourceId `
 					-KeyVault $keyVaultDetails `
 					-AutomationAccount $automationAccount `
+					-ProximityPlacementGroups $resourceGroup.ProximityPlacementGroups `
+					-AvailabilitySets $resourceGroup.availabilitySets `
 					-Force
 			}
 
