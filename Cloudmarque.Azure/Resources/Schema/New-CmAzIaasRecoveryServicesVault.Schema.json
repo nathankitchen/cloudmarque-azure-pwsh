@@ -92,7 +92,7 @@
             "additionalItems": false,
             "items": {
                 "$id": "#/recoveryServicesVaults/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/recoveryServicesVaults/items/allOf",

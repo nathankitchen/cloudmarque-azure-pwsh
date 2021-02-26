@@ -252,7 +252,7 @@
             "description": "All details required to deploy multiple action groups.",
             "items": {
                 "$id": "#/actionGroups/items",
-                "minLength" : 1,
+                "minItems" : 1,
                 "allOf": [
                     {
                         "$id": "#/actionGroups/items/allOf",

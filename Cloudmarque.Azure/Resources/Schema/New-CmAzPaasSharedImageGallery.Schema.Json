@@ -94,7 +94,7 @@
                                 "title": "OSType",
                                 "description": "The over arching operating system type included in the disk when creating a vm from a managed image.",
                                 "default": "Linux",
-                                "enum": ["Windows", "Linux", null]
+                                "enum": ["Windows", "Linux", "windows", "linux", null]
                             },
                             "osState": {
                                 "$id": "#/imageDefinitions/items/allOf/osState",
@@ -102,7 +102,7 @@
                                 "title": "OSState",
                                 "description": "The operating system state.",
                                 "default": "Generalized",
-                                "enum": ["Generalized", "Specialized", null]
+                                "enum": ["Generalized", "Specialized", "generalized", "specialized", null]
                             },
                             "endOfLifeDate": {
                                 "$id": "#/imageDefinitions/items/allOf/endOfLifeDate",
@@ -203,7 +203,7 @@
                                                     "description": "All locations that the image will be copied to.",
                                                     "items": {
                                                         "$id": "#/imageDefinitions/items/allOf/versions/items",
-                                                        "minLength": 1,
+                                                        "minItems": 1,
                                                         "allOf": [
                                                             {
                                                                 "$id": "#/imageDefinitions/items/allOf/versions/items",

@@ -59,7 +59,7 @@
             "description": "Contains details required to deploy all windows vm update schedules.",
             "items": {
                 "$id": "#/windowsUpdateSchedules/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/windowsUpdateSchedules/items/allOf",
@@ -82,14 +82,14 @@
                                 "type": "string",
                                 "title": "Frequency",
                                 "description": "The update frequency.",
-                                "enum": ["Monthly", "Weekly", "Daily"]
+                                "enum": ["Monthly", "Weekly", "Daily", "monthly", "weekly", "daily"]
                             },
                             "updateGroup": {
                                 "$id": "#/windowsUpdateSchedules/items/allOf/updateGroup",
                                 "type": "string",
                                 "title": "UpdateGroup",
                                 "description": "Pre-defined group of azure defined vm update bundles.",
-                                "enum": ["Critical", "CriticalSecurity", "Recommended", "All"]
+                                "enum": ["Critical", "CriticalSecurity", "Recommended", "All", "critical", "criticalsecurity", "recommended", "all"]
                             },
                             "location": {
                                 "$id": "#/windowsUpdateSchedules/items/allOf/location",
@@ -124,7 +124,7 @@
                                 "type": ["string", "null"],
                                 "title": "DayOfWeek",
                                 "description": "Days of the week for the update schedule to execute (Weekly schedules only).",
-                                "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", null]
+                                "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", null]
                             }
                         },
                         "additionalProperties": false

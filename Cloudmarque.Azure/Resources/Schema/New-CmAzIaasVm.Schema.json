@@ -131,7 +131,7 @@
             "description": "Contains list of details required to deploy resource groups, vm's and associated resources.",
             "items": {
                 "$id": "#/groups/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/groups/items/allOf",
@@ -298,13 +298,13 @@
                                                             "type": "string",
                                                             "title": "name",
                                                             "description": "The sku name.",
-                                                            "enum": [ "classic", "aligned"]
+                                                            "enum": ["Classic", "Aligned", "classic", "aligned"]
                                                         },
                                                         "tier": {
                                                             "$id": "#/groups/items/allOf/availabilitySets/items/allOf/sku/tier",
                                                             "type": ["string", "null"],
                                                             "title": "tier",
-                                                            "enum": [ "standard", "basic", null],
+                                                            "enum": ["Standard", "Basic", "standard", "basic", null],
                                                             "description": "Specifies the tier of virtual machines in a scale set."
                                                         },
                                                         "capacity": {
@@ -353,7 +353,7 @@
                                 "description": "Contains list of details required to deploy vm's and associated resources.",
                                 "items": {
                                     "$id": "#/groups/items/allOf/virtualMachines/items",
-                                    "minLength" : 1,
+                                    "minItems" : 1,
                                     "allOf": [
                                         {
                                             "$id": "#/groups/items/allOf/virtualMachines/items/allOf",
@@ -383,15 +383,14 @@
                                                     "type": ["string", "null"],
                                                     "title": "UpdateGroup",
                                                     "description": "Pre-defined group of azure defined vm update bundles.",
-                                                    "enum": ["Critical", "CriticalSecurity", "Recommended", "All", null]
-
+                                                    "enum": ["Critical", "CriticalSecurity", "Recommended", "All", "critical", "criticalsecurity", "recommended", "all", null]
                                                 },
                                                 "updateFrequency": {
                                                     "$id": "#/groups/items/allOf/virtualMachines/items/allOf/updateFrequency",
                                                     "type": ["string", "null"],
                                                     "title": "UpdateFrequency",
                                                     "description": "The frequency of the updates applied to the vm.",
-                                                    "enum": ["Monthly", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Daily", null]
+                                                    "enum": ["Monthly", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Daily", "monthly", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "daily", null]
                                                 },
                                                 "imageReference": {
                                                     "$id": "#/groups/items/allOf/virtualMachines/items/allOf/imageReference",
@@ -499,7 +498,7 @@
                                                             "type": "string",
                                                             "title": "OSType",
                                                             "description": "The over arching type of OS to use.",
-                                                            "enum": ["windows", "linux"]
+                                                            "enum": ["Windows", "Linux", "windows", "linux"]
                                                         },
                                                         "expandableDiskSizeGB": {
                                                             "$id": "#/groups/items/allOf/virtualMachines/items/allOf/osDisk/expandableDiskSizeGB",
@@ -513,7 +512,7 @@
                                                             "type": "string",
                                                             "title": "caching",
                                                             "description": "Defines disk caching strategy",
-                                                            "enum": ["None","ReadOnly", "ReadWrite"]
+                                                            "enum": ["None", "ReadOnly", "ReadWrite", "none", "readonly", "readwrite"]
                                                         }
                                                     },
                                                     "additionalProperties": false
@@ -548,7 +547,7 @@
                                                                         "type": "string",
                                                                         "title": "Caching",
                                                                         "description": "Defines disk caching strategy",
-                                                                        "enum": ["None", "ReadOnly", "ReadWrite"]
+                                                                        "enum": ["None", "ReadOnly", "ReadWrite", "none", "readonly", "readwrite"]
                                                                     }
                                                                 },
                                                                 "additionalProperties": false

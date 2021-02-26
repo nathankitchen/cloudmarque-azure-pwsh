@@ -79,7 +79,7 @@
             "description": "List of details required to deploy all storage accounts.",
             "items": {
                 "$id": "#/storageAccounts/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/storageAccounts/items/allOf",
@@ -106,7 +106,7 @@
                                 "type": "string",
                                 "title": "AccountType",
                                 "description": "The storage account's sku name.",
-                                "enum": ["Standard", "Premium"]
+                                "enum": ["Standard", "Premium", "standard", "premium"]
                             },
                             "kind": {
                                 "$id": "#/storageAccounts/items/allOf/kind",
@@ -114,14 +114,14 @@
                                 "title": "Kind",
                                 "description": "The storage account's type.",
                                 "default": "StorageV2",
-                                "enum": ["Storage", "StorageV2", "BlobStorage", "FileStorage", "BlockBlobStorage", null]
+                                "enum": ["Storage", "StorageV2", "BlobStorage", "FileStorage", "BlockBlobStorage", "storage", "storagev2", "blobstorage", "filestorage", "blockblobstorage", null]
                             },
                             "replication": {
                                 "$id": "#/storageAccounts/items/allOf/replication",
                                 "type": ["string", "null"],
                                 "title": "Replication",
                                 "description": "Data storage redundancy.",
-                                "enum": ["LRS", "ZRS", "GRS", "RAGRS", null],
+                                "enum": ["LRS", "ZRS", "GRS", "RAGRS", "lrs", "zrs", "grs", "ragrs", null],
                                 "default": "LRS"
                             },
                             "blobContainer": {
@@ -158,7 +158,7 @@
                                                     "title": "PublicAccess",
                                                     "description": "Sets access level of the items in the container.",
                                                     "default": "None",
-                                                    "enum": ["Container", "Blob", "None", null]
+                                                    "enum": ["Container", "Blob", "None", "container", "blob", "none", null]
                                                 }
                                             },
                                             "additionalProperties": false
@@ -266,7 +266,7 @@
                                 "title": "NetworkAclsBypass",
                                 "description": "Specifies if traffic will be bypassed for logging, metrics, azureServices or none.",
                                 "default": "AzureServices",
-                                "enum": ["None", "Logging", "Metrics", "AzureServices", null]
+                                "enum": ["None", "Logging", "Metrics", "AzureServices", "none", "logging", "metrics", "azureservices", null]
                             },
                             "networkAclsDefaultAction": {
                                 "$id": "#/storageAccounts/items/allOf/networkAclsDefaultAction",
@@ -274,7 +274,7 @@
                                 "title": "NetworkAclsDefaultAction",
                                 "description": "Default action when no other rules match.",
                                 "default": "Allow",
-                                "enum": ["Allow", "Deny", null]
+                                "enum": ["Allow", "Deny", "allow", "deny", null]
                             },
                             "service": {
                                 "$id": "#/storageAccounts/items/allOf/service",

@@ -97,7 +97,7 @@
             "description": "All details required to deploy multiple key vaults.",
             "items": {
                 "$id": "#/keyVaults/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/keyVaults/items/allOf",
@@ -120,7 +120,7 @@
                                 "type": "string",
                                 "title": "Type",
                                 "description": "Specifies if a user or service principal will be linked to the key vault's access policy.",
-                                "enum": ["ServicePrincipal", "User"]
+                                "enum": ["ServicePrincipal", "User", "serviceprincipal", "user"]
                             },
                             "location": {
                                 "$id": "#/keyVaults/items/allOf/location",

@@ -52,7 +52,7 @@
             "description": "All details required to deploy multiple budgets.",
             "items": {
                 "$id": "#/budgets/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/budgets/items/allOf",
@@ -78,7 +78,7 @@
                                 "type": "string",
                                 "title": "Category",
                                 "description": "Budget's category, highlights if the budget is marked as cost or usage",
-                                "enum": ["Cost", "Usage"]
+                                "enum": ["Cost", "Usage", "cost", "usage"]
                             },
                             "accountNumber": {
                                 "$id": "#/budgets/items/allOf/accountNumber",
@@ -91,7 +91,7 @@
                                 "type": "string",
                                 "title": "TimeGrain",
                                 "description": "The budget's tracking interval.",
-                                "enum": ["Monthly", "Quarterly", "Annually"]
+                                "enum": ["Monthly", "Quarterly", "Annually", "monthly", "quarterly", "annually"]
                             },
                             "amount": {
                                 "$id": "#/budgets/items/allOf/amount",
@@ -121,7 +121,7 @@
                                 "description": "Alert thresholds for the budget.",
                                 "items": {
                                     "$id": "#/budgets/items/allOf/thresholds/items",
-                                    "minLength": 1,
+                                    "minItems": 1,
                                     "maxLength": 5,
                                     "allOf": [
                                         {

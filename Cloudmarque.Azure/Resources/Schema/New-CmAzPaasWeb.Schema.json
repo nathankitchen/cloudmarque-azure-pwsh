@@ -802,7 +802,7 @@
                                         "type": ["string", "null"],
                                         "title": "Protocol",
                                         "description": "Web access protocol.",
-                                        "enum": ["Http", "Https", null]
+                                        "enum": ["Http", "Https", "http", "https", null]
                                     }
                                 },
                                 "additionalProperties": false
@@ -840,7 +840,7 @@
                                         "description": "Url pattern",
                                         "items": {
                                             "$id": "#/frontdoor/rules/items/allOf/pattern/items",
-                                            "minLength": 1,
+                                            "minItems": 1,
                                             "allOf": [
                                                 {
                                                     "$id": "#/frontdoor/rules/items/allOf/pattern/items/allOf",

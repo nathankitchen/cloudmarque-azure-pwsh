@@ -52,7 +52,7 @@
                     {
                         "$id": "#/definitions/daysOfTheWeek/items/allOf",
                         "type": "string",
-                        "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+                        "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
                     }
                 ]
             }
@@ -107,7 +107,7 @@
                             {
                                 "$id": "#/definitions/weeklyRetentionFormat/weeksOfTheMonth/items/allOf",
                                 "type": "string",
-                                "enum": ["First", "Second", "Third", "Fourth", "Last", "Invalid"]
+                                "enum": ["First", "Second", "Third", "Fourth", "Last", "Invalid", "first", "second", "third", "fourth", "last", "invalid"]
                             }
                         ]
                     }
@@ -120,7 +120,7 @@
             "type": ["string", "null"],
             "title": "RetentionScheduleFormatType",
             "description": "What frequency format should be used for backups.",
-            "enum": ["Invalid", "Daily", "Weekly", null]
+            "enum": ["Invalid", "Daily", "Weekly", "invalid", "daily", "weekly", null]
         }
     },
     "required": [
@@ -134,7 +134,7 @@
             "description": "List of policies containing backup details, schedule times and the backup's retention periods.",
             "items": {
                 "$id": "#/policies/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/policies/items/allOf",
@@ -176,7 +176,7 @@
                                         "type": ["string", "null"],
                                         "title": "ScheduleRunFrequency",
                                         "description": "Frequency metric for the backup schedule.",
-                                        "Enum": ["Daily", "Weekly", "Monthly"]
+                                        "Enum": ["Daily", "Weekly", "Monthly", "daily", "weekly", "monthly"]
                                     },
                                     "scheduleRunTimes": {
                                         "$id": "#/policies/items/allOf/schedule/scheduleRunTimes",
@@ -199,7 +199,7 @@
                                         "type": ["string", "null"],
                                         "title": "SchedulePolicyType",
                                         "description": "Type of policy to be scheduled.",
-                                        "enum": ["LogSchedulePolicy", "LongTermSchedulePolicy", "SimpleSchedulePolicy", null]
+                                        "enum": ["LogSchedulePolicy", "LongTermSchedulePolicy", "SimpleSchedulePolicy", "logschedulepolicy", "longtermschedulepolicy", "simpleschedulepolicy", null]
                                     },
                                     "scheduleRunDays": {
                                         "$id": "#/policies/items/allOf/schedule/scheduleRunDays",
@@ -212,7 +212,7 @@
                                                 {
                                                     "$id": "#/policies/items/allOf/schedule/scheduleRunTimes/items/allOf",
                                                     "type": "string",
-                                                    "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+                                                    "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
                                                 }
                                             ]
                                         }
@@ -246,7 +246,7 @@
                                         "type": "string",
                                         "title": "RetentionPolicyType",
                                         "description": "Type of retention policy to use.",
-                                        "enum": ["SimpleRetentionPolicy", "LongTermRetentionPolicy"]
+                                        "enum": ["SimpleRetentionPolicy", "LongTermRetentionPolicy", "simpleretentionpolicy", "longtermretentionpolicy"]
                                     },
                                     "dailySchedule": {
                                         "$id": "#/policies/items/allOf/retention/dailySchedule",
@@ -307,9 +307,7 @@
                                                         {
                                                             "$id": "#/policies/items/allOf/retention/yearlySchedule/monthsOfYear/items/allOf",
                                                             "type": "string",
-                                                            "enum": [
-                                                                "Invalid", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
-                                                            ]
+                                                            "enum": ["Invalid", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "invalid", "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
                                                         }
                                                     ]
                                                 }

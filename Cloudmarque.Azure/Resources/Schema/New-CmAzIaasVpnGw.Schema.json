@@ -98,7 +98,7 @@
             "description": "Contains list of details required to deploy vpn gateways and its dependent resources.",
             "items": {
                 "$id": "#/vpnGw/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/vpnGw/items/allOf",

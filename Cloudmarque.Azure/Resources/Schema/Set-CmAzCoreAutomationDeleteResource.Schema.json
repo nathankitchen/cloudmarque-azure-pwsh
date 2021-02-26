@@ -90,7 +90,7 @@
                     "type": ["string", "null"],
                     "title": "Frequency",
                     "description": "Schedule execution frequency.",
-                    "enum": ["Daily", "Weekly", "Monthly", null],
+                    "enum": ["Daily", "Weekly", "Monthly", "daily", "weekly", "monthly", null],
                     "default": "Daily"
                 }
             },

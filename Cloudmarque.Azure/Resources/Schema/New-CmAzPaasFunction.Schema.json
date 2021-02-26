@@ -219,9 +219,7 @@
 													"type": "string",
 													"title": "Kind",
 													"description": "Type of OS.",
-													"enum": [
-														"linux", "windows"
-													]
+													"enum": ["Linux", "Windows", "linux", "windows"]
 												},
 												"runtime": {
 													"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items/allOf/runtime",
@@ -355,9 +353,7 @@
 													"type": "string",
 													"title": "Kind",
 													"description": "Type of OS being used.",
-													"enum": [
-														"linux", "windows"
-													]
+													"enum": ["Linux", "Windows", "linux", "windows"]
 												},
 												"functions": {
 													"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items/allOf/functions",

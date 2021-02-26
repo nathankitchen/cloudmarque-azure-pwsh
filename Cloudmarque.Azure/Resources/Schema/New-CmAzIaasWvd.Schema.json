@@ -34,7 +34,7 @@
             "description": "List of details required to deploy all wvd environments, vm's and any other associated resources.",
             "items": {
                 "$id": "#/wvdEnvironments/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/wvdEnvironments/items",
@@ -85,7 +85,7 @@
                                         "type": ["string", "null"],
                                         "title": "HostpoolType",
                                         "description": "The hostpool type.",
-                                        "enum": ["Personal", "Pooled", null],
+                                        "enum": ["Personal", "Pooled", "personal", "pooled", null],
                                         "default": "Pooled"
                                     },
                                     "hostpoolBalancing": {
@@ -93,7 +93,7 @@
                                         "type": ["string", "null"],
                                         "title": "HostpoolBalancing",
                                         "description": "Configures the wvd load balancer.",
-                                        "enum": ["Automatic", "Direct", "DepthFirst", "BreadthFirst", null],
+                                        "enum": ["Automatic", "Direct", "DepthFirst", "BreadthFirst", "automatic", "direct", "depthfirst", "breadthfirst", null],
                                         "default": "DepthFirst"
                                     },
                                     "hostpoolMaxSessions": {
@@ -148,7 +148,7 @@
                                         "type": ["string", "null"],
                                         "title": "HostVmImageType",
                                         "description": "The vm image type.",
-                                        "enum": ["Gallery", "CustomImage", null],
+                                        "enum": ["Gallery", "CustomImage", "gallery", "customimage", null],
                                         "default": "Gallery"
                                     },
                                     "hostVmImage": {

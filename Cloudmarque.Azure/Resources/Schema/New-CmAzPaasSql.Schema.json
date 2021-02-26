@@ -106,7 +106,7 @@
             "description": "Container of details required to deploy servers, databases and/or other associated resources.",
             "items": {
                 "$id": "#/sqlConfig/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/sqlConfig/items",
@@ -204,7 +204,7 @@
                                 "description": "List of details required to deploy all databases.",
                                 "items": {
                                     "$id": "#/sqlConfig/items/allOf/databases/items",
-                                    "minLength": 1,
+                                    "minItems": 1,
                                     "anyOf": [
                                         {
                                             "$id": "#/sqlConfig/items/allOf/databases/items/anyOf/string",

@@ -93,7 +93,7 @@
             "description": "Container for Bastion Host details.",
             "items": {
                 "$id": "#/bastionHosts/items",
-                "minLength": 1,
+                "minItems": 1,
                 "allOf": [
                     {
                         "$id": "#/bastionHosts/items/allOf",

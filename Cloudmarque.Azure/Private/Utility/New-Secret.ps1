@@ -8,10 +8,5 @@ function New-Secret() {
 
     $secretValues = Get-Password -MinPasswordLength $MinLength -Count $Count
 
-    if ($secretValues -Is [String]) {
-        @($secretValues)
-    }
-    else {
-        $secretValues
-    }
+    , @($secretValues)
 }
