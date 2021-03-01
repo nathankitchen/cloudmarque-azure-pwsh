@@ -132,7 +132,7 @@ stages:
                   -SkipAutomaticTags `
                   -Force
 
-                $dataFile = Import-PowerShellDataFile "$PSScriptRoot\..\..\Cloudmarque.Azure.psd1
+                $dataFile = Import-PowerShellDataFile "$(Pipeline.Workspace)\$(moduleName)\$(moduleName).psd1
 
                 $isPreRelease = $false
 
