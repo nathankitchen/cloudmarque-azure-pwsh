@@ -93,7 +93,7 @@ stages:
 - stage: CreateCloudmarqueAzureArtifact
   displayName: Create Cloudmarque.Azure Artifact
   dependsOn: Test
-  condition: and(succeeded(), eq(parameters.release, true))
+  condition: and(succeeded(), eq(${{ parameters.release }}, true))
   jobs:
   - job:
     steps:
