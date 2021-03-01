@@ -1,28 +1,8 @@
 parameters:
-- name: ReleaseNotes
-  displayName: Release Notes
-  type: string
-  default: null
-- name: PreRelease
-  displayName: PreRelease Suffix
-  type: string
-  default: null
-- name: MajorRelease
-  displayName: Major Release
-  type: number
-  default: 0
-- name: MinorRelease
-  displayName: Minor Release
-  type: number
-  default: 0
-- name: PatchRelease
-  displayName: Patch Release
-  type: number
-  default: 0
-- name: Hotfix
-  displayName: Hotfix
-  type: number
-  default: 0
+- name: Release
+  displayName: Release to PSGallery and Github
+  type: boolean
+  default: false
 
 trigger:
 - master
@@ -32,13 +12,7 @@ pool:
 
 variables:
   moduleName: Cloudmarque.Azure
-  ${{ if ne(parameters.Hotfix, 0) }}:
-    version: ${{ parameters.MajorRelease }}.${{ parameters.MinorRelease }}.${{ parameters.PatchRelease }}.${{ parameters.Hotfix }}
-  ${{ if eq(parameters.Hotfix, 0) }}:
-    version: ${{ parameters.MajorRelease }}.${{ parameters.MinorRelease }}.${{ parameters.PatchRelease }}
   createArtifacts: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'Manual')))]
-  isRelease: $[and(eq(variables.createArtifacts, true), ne('${{ parameters.ReleaseNotes }}', 'null'))]
-  isPreRelease: $[ne('${{ parameters.PreRelease }}', 'null')]
 
 stages:
 - stage: Build
@@ -123,28 +97,6 @@ stages:
   jobs:
   - job:
     steps:
-    - task: PowerShell@2
-      displayName: Update Manifest
-      inputs:
-        workingDirectory: $(Build.SourcesDirectory)
-        pwsh: true
-        failOnStderr: true
-        errorActionPreference: Stop
-        targetType: Inline
-        script: |
-          . .\init.ps1
-          . .\$(moduleName)\install-dependencies.ps1
-
-          Write-Host "Null suffix"
-          $suffix = $null
-
-          if([System.Convert]::ToBoolean('$(isPreRelease)')) {
-            Write-Host "Populate suffix"
-            $suffix = '${{ parameters.PreRelease }}'
-          }
-          
-          Write-Host "Build"
-          Build-CloudmarqueAzure -Version $(version) -Suffix $suffix -ReleaseNotes '${{ parameters.ReleaseNotes }}'
     - task: PublishPipelineArtifact@1
       displayName: Publish Module Artifact
       inputs:
@@ -163,20 +115,6 @@ stages:
       runOnce:
         deploy:
           steps:
-          - task: GitHubRelease@1
-            inputs:
-              gitHubConnection: Trustmarque Github
-              repositoryName: Trustmarque/cloudmarque-azure-pwsh
-              action: create
-              target: $(Build.SourceVersion)
-              title: $(moduleName) $(version)
-              assetUploadMode: replace
-              isPreRelease: $(isPreRelease)
-              addChangeLog: false
-              tagSource: userSpecifiedTag
-              tag: v$(version)
-              releaseNotesSource: inline
-              releaseNotesInline: "${{ parameters.ReleaseNotes }}"
           - task: PowerShell@2
             inputs:
               workingDirectory: $(Pipeline.Workspace)
@@ -193,3 +131,30 @@ stages:
                   -Repository PSGallery `
                   -SkipAutomaticTags `
                   -Force
+
+                $dataFile = Import-PowerShellDataFile "$PSScriptRoot\..\..\Cloudmarque.Azure.psd1
+
+                $isPreRelease = $false
+
+                if($dataFile.privateData.psData.preRelease) {
+                  $isPreRelease = $true
+                }
+
+                echo "##vso[task.setvariable variable=releaseNotes]$dataFile.privateData.psData.releaseNotes"
+                echo "##vso[task.setvariable variable=isPreRelease]$isPreRelease"
+                echo "##vso[task.setvariable variable=isPreRelease]$dataFile.moduleVersion"
+
+          - task: GitHubRelease@1
+            inputs:
+              gitHubConnection: Trustmarque Github
+              repositoryName: Trustmarque/cloudmarque-azure-pwsh
+              action: create
+              target: $(Build.SourceVersion)
+              title: $(moduleName) $(version)
+              assetUploadMode: replace
+              isPreRelease: $(isPreRelease)
+              addChangeLog: false
+              tagSource: userSpecifiedTag
+              tag: v$(version)
+              releaseNotesSource: inline
+              releaseNotesInline: "$(releaseNotes)"
