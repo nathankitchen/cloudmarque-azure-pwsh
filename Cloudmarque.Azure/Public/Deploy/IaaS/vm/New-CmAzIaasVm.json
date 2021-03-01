@@ -25,43 +25,98 @@
         }
     },
     "resources": [
+
         {
-            "condition": "[not(empty(parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].name))]",
-            "apiVersion": "2019-03-01",
-            "type": "Microsoft.Compute/proximityPlacementGroups",
-            "name": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].generatedName]",
-            "location": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].location]",
+            "name": "[concat('ProximityPlacementGroupTemplate', copyIndex('ProximityPlacementGroupsCopy'))]",
+            "type": "Microsoft.Resources/Deployments",
+            "resourceGroup": "[parameters('AvailabilitySets')[copyIndex('ProximityPlacementGroupsCopy')].resourceGroupName]",
+            "apiVersion": "2019-10-01",
             "copy": {
                 "name": "ProximityPlacementGroupsCopy",
                 "count": "[length(parameters('ProximityPlacementGroups'))]"
             },
-            "tags": {
-                "cm-service": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].service.publish.proximityPlacementGroup]"
-            },
-            "properties": {}
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "ProximityPlacementGroup": {
+                        "value": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ProximityPlacementGroup": {
+                            "type": "Object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "apiVersion": "2019-03-01",
+                            "type": "Microsoft.Compute/proximityPlacementGroups",
+                            "name": "[parameters('ProximityPlacementGroup').generatedName]",
+                            "location": "[parameters('ProximityPlacementGroup').location]",
+                            "tags": {
+                                "cm-service": "[parameters('ProximityPlacementGroup').service.publish.proximityPlacementGroup]"
+                            },
+                            "properties": {}
+                        }
+                    ]
+                }
+            }
         },
         {
-            "condition": "[not(empty(parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].name))]",
-            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[concat('AvailabilitySetsTemplate', copyIndex('AvailabilitySetsCopy'))]",
+            "type": "Microsoft.Resources/Deployments",
+            "resourceGroup": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].resourceGroupName]",
+            "apiVersion": "2019-10-01",
+            "copy": {
+                "name": "AvailabilitySetsCopy",
+                "count": "[Length(parameters('AvailabilitySets'))]"
+            },
             "dependsOn": [
                 "ProximityPlacementGroupsCopy"
             ],
-            "name": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].generatedName]",
-            "apiVersion": "2020-06-01",
-            "location": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].location]",
-            "copy": {
-                "name": "AvailabilitySetsCopy",
-                "count": "[length(parameters('AvailabilitySets'))]"
-            },
-            "tags": {
-                "cm-service": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].service.publish.availabilitySet]"
-            },
             "properties": {
-                "platformFaultDomainCount": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].platformFaultDomainCount]",
-                "platformUpdateDomainCount": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].platformUpdateDomainCount]",
-                "proximityPlacementGroup": "[if(not(empty(parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].proximityPlacementGroup)), json(concat('{\"id\": \"', resourceId('Microsoft.Compute/proximityPlacementGroups', parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].proximityPlacementGroup), '\"}')), json('null'))]"
-            },
-            "sku": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].sku]"
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "AvailabilitySet": {
+                        "value": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "AvailabilitySet": {
+                            "type": "Object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/availabilitySets",
+                            "name": "[parameters('AvailabilitySet').generatedName]",
+                            "apiVersion": "2020-06-01",
+                            "location": "[parameters('AvailabilitySet').location]",
+                            "tags": {
+                                "cm-service": "[parameters('AvailabilitySet').service.publish.availabilitySet]"
+                            },
+                            "properties": {
+                                "platformFaultDomainCount": "[parameters('AvailabilitySet').platformFaultDomainCount]",
+                                "platformUpdateDomainCount": "[parameters('AvailabilitySet').platformUpdateDomainCount]",
+                                "proximityPlacementGroup": "[if(not(empty(parameters('AvailabilitySet').proximityPlacementGroup)), json(concat('{\"id\": \"', resourceId('Microsoft.Compute/proximityPlacementGroups', parameters('AvailabilitySet').proximityPlacementGroup), '\"}')), json('null'))]"
+                            },
+                            "sku": "[parameters('AvailabilitySet').sku]"
+                        }
+                    ]
+                }
+            }
         },
         {
             "name": "[concat('VirtualMachineLevelTemplates', copyIndex('VirtualMachinesCopy'))]",

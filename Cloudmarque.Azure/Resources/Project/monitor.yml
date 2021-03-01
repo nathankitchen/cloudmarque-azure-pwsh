@@ -100,7 +100,7 @@ actionGroups:
   sms:
   voice:
   webhooks:
-  
+
 - name: Core-Test-Ag5
   shortname: CTA5
   service:

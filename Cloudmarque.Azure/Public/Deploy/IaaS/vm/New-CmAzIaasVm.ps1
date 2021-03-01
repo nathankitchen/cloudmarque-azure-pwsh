@@ -114,6 +114,8 @@
 
 			$allResourceGroups = @()
 			$allVirtualMachines = @()
+			$allProximityPlacementGroups = @()
+			$allAvailabilitySets = @()
 
 			$daysOfWeek = [DayOfWeek].GetEnumNames()
 
@@ -132,21 +134,11 @@
 
 						$placementGroup.generatedName = Get-CmAzResourceName -Resource "ProximityPlacementGroup" -Architecture "IaaS" -Region $placementGroup.location -Name $placementGroup.name
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "ProximityPlacementGroup" -ResourceServiceContainer $placementGroup
+
+						$placementGroup.resourceGroupName = $resourceGroup.name
+
+						$allProximityPlacementGroups += $placementGroup
 					}
-				}
-				else {
-					$resourceGroup.proximityPlacementGroups = @(
-						@{
-							name          = ""
-							generatedName = "none";
-							location      = $resourceGroup.location
-							service       = @{
-								publish = @{
-									proximityPlacementGroup = "none"
-								}
-							}
-						}
-					)
 				}
 
 				if ($resourceGroup.availabilitySets) {
@@ -167,32 +159,18 @@
 						}
 
 						$set.location ??= $resourceGroup.location
+						$set.resourceGroupName = $resourceGroup.name
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "availabilitySet" -ResourceServiceContainer $set
+
+						$allAvailabilitySets += $set
 					}
-				}
-				else {
-					$resourceGroup.availabilitySets = @(
-						@{
-							name          = ""
-							generatedName = "none";
-							location      = $resourceGroup.location;
-							sku           = @{
-								name = "Classic"
-							};
-							service       = @{
-								publish = @{
-									availabilitySet = "none"
-								}
-							}
-						}
-					)
 				}
 
 				foreach ($virtualMachine in $resourceGroup.virtualMachines) {
 
-					if ($virtualMachine.zones -and $virtualMachine.availabilitySet) {
-						Write-Error "Virtual Machines with both Availability Zones and Availability Sets are not supported by Azure..."
+					if ($virtualMachine.zones -And $virtualMachine.availabilitySet) {
+						Write-Error "Virtual Machines with both Availability Zones and Availability Sets are not supported by Azure..." -Category InvalidArgument -CategoryTargetName "VirtualMachines"
 					}
 
 					if (!$virtualMachine.location) {
@@ -200,7 +178,7 @@
 					}
 
 					if (!$virtualMachine.plan) {
-						$virtualMachine.plan = ''
+						$virtualMachine.plan = ""
 					}
 					else {
 
@@ -319,11 +297,11 @@
 					-ResourceGroupName $allResourceGroups[0].name `
 					-Credentials $credentials `
 					-VirtualMachines $allVirtualMachines `
+					-ProximityPlacementGroups $allProximityPlacementGroups `
+					-AvailabilitySets $allAvailabilitySets `
 					-WorkspaceId $workspace.resourceId `
 					-KeyVault $keyVaultDetails `
 					-AutomationAccount $automationAccount `
-					-ProximityPlacementGroups $resourceGroup.ProximityPlacementGroups `
-					-AvailabilitySets $resourceGroup.availabilitySets `
 					-Force
 			}
 

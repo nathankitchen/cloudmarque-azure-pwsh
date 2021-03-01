@@ -1,13 +1,13 @@
 component: virtualmachines                                        # Required to use settings with New-CmAzDeployment
 
 location: UK South
-dscConfigNode:                                                   # Optional, represents compiled node of a DSC runbook.
+dscConfigNode:                                                    # Optional, represents compiled node of a DSC runbook.
 
 service:
   dependencies:
     automation: Core-Test-Auto
     keyvault: Core-Test-Kv
-    vnet:                                                        # Optional, providing a keyvault will encrypt all vm disks
+    vnet:                                                         # Optional, providing a keyvault will encrypt all vm disks
     workspace: Core-Test-Ws
   publish:
     resourceGroup: Iaas-Test-Vm-Rg
@@ -19,7 +19,7 @@ service:
 diskEncryptionKey: Iaas-Test-Key-Enc-Key1
 
 groups:
-  - name: Iaas-Test-Vm-Rg1                                       # Leave blank to have the vm collection provision its own resource group
+  - name: Iaas-Test-Vm-Rg1                                        # Leave blank to have the vm collection provision its own resource group
     location: UK South
     service:
       publish:
@@ -36,12 +36,25 @@ groups:
       - name: set1
         location: UK South
         sku:
-          name: aligned                                          # aligned or classic
-          tier:                                                  # standard or basic
+          name: aligned                                           # aligned or classic
+          tier:                                                   # standard or basic
           capacity:
         platformUpdateDomainCount: 5
         platformFaultDomainCount: 2
-        proximityPlacementGroup: ppg1                            # Proximity placementgroup and availability set must have same location.
+        proximityPlacementGroup: ppg1                             # Proximity placementgroup and availability set must have same location.
+        service:
+          publish:
+            availabilitySet:
+
+      - name: set2
+        location: UK South
+        sku:
+          name: aligned                                           # aligned or classic
+          tier:                                                   # standard or basic
+          capacity:
+        platformUpdateDomainCount: 5
+        platformFaultDomainCount: 2
+        proximityPlacementGroup:                                  # Proximity placementgroup and availability set must have same location.
         service:
           publish:
             availabilitySet:
@@ -57,7 +70,7 @@ groups:
           offer: Windows-10
           sku: rs5-pro
           version: latest
-        zone:
+        zone:                                                     # Availability Zone. Cannot be used with availability set.
         location: UK South
         service:
           publish:
@@ -110,6 +123,7 @@ groups:
         size: Standard_B1s
         updateGroup: Critical
         updateFrequency: Daily
+        availabilitySet: set2
         imageReference:
           publisher: MicrosoftWindowsDesktop
           offer: Windows-10
@@ -246,7 +260,7 @@ groups:
         osDisk:
           osType: windows                                         # windows or linux
           expandableDiskSizeGB: 127
-        dataDisks: []                                         # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        dataDisks: []                                             # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
         networking:
           service:
             dependencies:
@@ -271,7 +285,7 @@ groups:
         osDisk:
           osType: windows                                         # windows or linux
           expandableDiskSizeGB: 127
-        dataDisks: []                                         # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        dataDisks: []                                             # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
         networking:
           service:
             dependencies:
@@ -296,7 +310,7 @@ groups:
         osDisk:
           osType: windows                                         # windows or linux
           expandableDiskSizeGB: 127
-        dataDisks: []                                         # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
+        dataDisks: []                                             # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
         networking:
           service:
             dependencies:

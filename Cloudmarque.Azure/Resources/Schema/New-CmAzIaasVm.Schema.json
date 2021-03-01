@@ -358,12 +358,36 @@
                                         {
                                             "$id": "#/groups/items/allOf/virtualMachines/items/allOf",
                                             "type": "object",
-                                            "required": [
-                                                "name",
-                                                "size",
-                                                "imageReference",
-                                                "osDisk",
-                                                "networking"
+                                            "anyOf": [
+                                                { 
+                                                    "required" : [
+                                                        "name",
+                                                        "size",
+                                                        "imageReference",
+                                                        "osDisk",
+                                                        "networking"
+                                                    ] 
+                                                },
+                                                { 
+                                                    "required" : [
+                                                        "name",
+                                                        "size",
+                                                        "imageReference",
+                                                        "osDisk",
+                                                        "networking",
+                                                        "availabilitySet"
+                                                    ] 
+                                                },
+                                                { 
+                                                    "required" : [
+                                                        "name",
+                                                        "size",
+                                                        "imageReference",
+                                                        "osDisk",
+                                                        "networking",
+                                                        "zone"
+                                                    ] 
+                                                }
                                             ],
                                             "properties": {
                                                 "name": {
@@ -440,15 +464,15 @@
                                                 "zone": {
                                                     "$id": "#/groups/items/allOf/virtualMachines/items/allOf/zone",
                                                     "type": ["integer", "null"],
-                                                    "title": "zone",
+                                                    "title": "Zone",
                                                     "description": "Virtual machine deployment zone.",
                                                     "enum": [ 1, 2, 3, null]
                                                 },
                                                 "availabilitySet": {
                                                     "$id": "#/groups/items/allOf/virtualMachines/items/allOf/availabilitySet",
-                                                    "type": ["string", "null"],
-                                                    "title": "zone",
-                                                    "description": "Availability set of virtual machine."
+                                                    "type": ["string","null"],
+                                                    "title": "AvailabilitySet",
+                                                    "description": "Becomes part of the generated virtual machine's availability set name."
                                                 },
                                                 "service": {
                                                     "$id": "#/groups/items/allOf/virtualMachines/items/allOf/service",
