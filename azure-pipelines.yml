@@ -31,6 +31,7 @@ stages:
           . .\$(moduleName)\install-dependencies.ps1
           . .\init.ps1
           Sync-CloudmarqueAzure
+
 - stage: Test
   displayName: Test Cloudmarque.Azure
   dependsOn: Build
@@ -110,7 +111,7 @@ stages:
   condition: succeeded()
   jobs:
   - deployment:
-    environment: Prod
+    environment: Dev
     strategy:
       runOnce:
         deploy:
