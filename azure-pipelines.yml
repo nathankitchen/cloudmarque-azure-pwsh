@@ -123,6 +123,8 @@ stages:
               targetType: Inline
               script: |
 
+                . .\$(moduleName)\install-dependencies.ps1
+
                 Publish-Module `
                   -Path $(moduleName) `
                   -NuGetApiKey $(NugetApiKey) `
