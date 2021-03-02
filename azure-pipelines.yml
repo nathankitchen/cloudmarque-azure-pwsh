@@ -15,80 +15,80 @@ variables:
   createArtifacts: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/release_1.0.10'), or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'Manual')))]
 
 stages:
-# - stage: Build
-#   displayName: Build Cloudmarque.Azure
-#   jobs:
-#   - job:
-#     steps:
-#     - task: PowerShell@2
-#       inputs:
-#         workingDirectory: $(Build.SourcesDirectory)
-#         pwsh: true
-#         failOnStderr: true
-#         errorActionPreference: Stop
-#         targetType: Inline
-#         script: |
-#           . .\$(moduleName)\install-dependencies.ps1
-#           . .\init.ps1
-#           Sync-CloudmarqueAzure
-# - stage: Test
-#   displayName: Test Cloudmarque.Azure
-#   dependsOn: Build
-#   condition: succeeded()
-#   jobs:
-#   - job:
-#     steps:
-#     - task: AzurePowerShell@5
-#       inputs:
-#         azureSubscription: $(ServiceConnection)
-#         workingDirectory: $(Build.SourcesDirectory)
-#         pwsh: true
-#         errorActionPreference: stop
-#         ScriptType: InlineScript
-#         FailOnStandardError: true
-#         azurePowerShellVersion: 'LatestVersion'
-#         Inline: |
-#           . .\init.ps1
-#           Test-CloudmarqueAzure
-#     - task: PublishTestResults@2
-#       displayName: Publish Tests
-#       inputs:
-#         testResultsFormat: NUnit
-#         testResultsFiles: $(moduleName)/publish/Tests/*.xml
-#         failTaskOnFailedTests: true
+- stage: Build
+  displayName: Build Cloudmarque.Azure
+  jobs:
+  - job:
+    steps:
+    - task: PowerShell@2
+      inputs:
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        failOnStderr: true
+        errorActionPreference: Stop
+        targetType: Inline
+        script: |
+          . .\$(moduleName)\install-dependencies.ps1
+          . .\init.ps1
+          Sync-CloudmarqueAzure
+- stage: Test
+  displayName: Test Cloudmarque.Azure
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job:
+    steps:
+    - task: AzurePowerShell@5
+      inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+          . .\init.ps1
+          Test-CloudmarqueAzure
+    - task: PublishTestResults@2
+      displayName: Publish Tests
+      inputs:
+        testResultsFormat: NUnit
+        testResultsFiles: $(moduleName)/publish/Tests/*.xml
+        failTaskOnFailedTests: true
 
-# - stage: CreateDocumentationArtifact
-#   displayName: Create Documentation Artifact
-#   dependsOn: Test
-#   condition: and(succeeded(), eq(variables.createArtifacts, true))
-#   jobs:
-#   - job:
-#     steps:
-#     - task: PowerShell@2
-#       displayName: Build Artifact
-#       inputs:
-#         workingDirectory: $(Build.SourcesDirectory)
-#         pwsh: true
-#         failOnStderr: true
-#         errorActionPreference: Stop
-#         targetType: Inline
-#         script: |
-#           . .\init.ps1
-#           . .\$(moduleName)\install-dependencies.ps1
-#           New-CloudmarqueAzureDocs
-#     - task: PublishPipelineArtifact@1
-#       displayName: Publish Artifact
-#       inputs:
-#         targetPath: publish/docs
-#         artifactName: docs
-#         publishLocation: Pipeline
+- stage: CreateDocumentationArtifact
+  displayName: Create Documentation Artifact
+  dependsOn: Test
+  condition: and(succeeded(), eq(variables.createArtifacts, true))
+  jobs:
+  - job:
+    steps:
+    - task: PowerShell@2
+      displayName: Build Artifact
+      inputs:
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        failOnStderr: true
+        errorActionPreference: Stop
+        targetType: Inline
+        script: |
+          . .\init.ps1
+          . .\$(moduleName)\install-dependencies.ps1
+          New-CloudmarqueAzureDocs
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Artifact
+      inputs:
+        targetPath: publish/docs
+        artifactName: docs
+        publishLocation: Pipeline
 
-#     - task: PublishPipelineArtifact@1
-#       displayName: Publish Artifact
-#       inputs:
-#         targetPath: cloudmarque.azure/resources/schema
-#         artifactName: schema
-#         publishLocation: Pipeline
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Artifact
+      inputs:
+        targetPath: cloudmarque.azure/resources/schema
+        artifactName: schema
+        publishLocation: Pipeline
 
 - stage: CreateCloudmarqueAzureArtifact
   displayName: Create Cloudmarque.Azure Artifact
@@ -139,7 +139,7 @@ stages:
                 if($dataFile.privateData.psData.preRelease) {
                   $isPreRelease = $true
                 }
-                
+
                 echo "##vso[task.setvariable variable=releaseNotes]$($dataFile.privateData.psData.releaseNotes)"
                 echo "##vso[task.setvariable variable=isPreRelease]$($isPreRelease)"
                 echo "##vso[task.setvariable variable=version]$($dataFile.moduleVersion)"
