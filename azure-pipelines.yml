@@ -134,13 +134,13 @@ stages:
 
                 $dataFile = Import-PowerShellDataFile "$(moduleName)/$(moduleName).psd1"
 
-                Write-Host $dataFile
-
                 $isPreRelease = $false
 
                 if($dataFile.privateData.psData.preRelease) {
                   $isPreRelease = $true
                 }
+
+                Write "DEBUG $($dataFile.privateData.psData.preRelease)"
 
                 echo "##vso[task.setvariable variable=releaseNotes]$($dataFile.privateData.psData.releaseNotes)"
                 echo "##vso[task.setvariable variable=isPreRelease]$($isPreRelease)"
