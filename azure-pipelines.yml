@@ -125,7 +125,7 @@ stages:
               script: |
 
                 ls
-                $dataFile = Import-PowerShellDataFile "$(Pipeline.Workspace)/$(moduleName)/$(moduleName).psd1"
+                $dataFile = Import-PowerShellDataFile "$(Pipeline.Workspace)/cloudmarque.azure/cloudmarque.azure.psd1"
 
                 $isPreRelease = $false
 
