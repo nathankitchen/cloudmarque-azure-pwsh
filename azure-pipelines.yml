@@ -125,16 +125,16 @@ stages:
 
                 . .\$(moduleName)\install-dependencies.ps1
 
-                Publish-Module `
-                  -Path $(moduleName) `
-                  -NuGetApiKey $(NugetApiKey) `
-                  -Repository PSGallery `
-                  -SkipAutomaticTags `
-                  -Force
+                # Publish-Module `
+                #   -Path $(moduleName) `
+                #   -NuGetApiKey $(NugetApiKey) `
+                #   -Repository PSGallery `
+                #   -SkipAutomaticTags `
+                #   -Force
 
                 $dataFile = Import-PowerShellDataFile "$(moduleName)/$(moduleName).psd1"
 
-                $data.psobject.properties
+                Write-Host $dataFile
 
                 $isPreRelease = $false
 
