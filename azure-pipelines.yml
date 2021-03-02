@@ -133,6 +133,8 @@ stages:
 
                 $dataFile = Import-PowerShellDataFile "$(moduleName)/$(moduleName).psd1"
 
+                $data.psobject.properties
+
                 $isPreRelease = $false
 
                 if($dataFile.privateData.psData.preRelease) {
@@ -142,18 +144,3 @@ stages:
                 echo "##vso[task.setvariable variable=releaseNotes]$dataFile.privateData.psData.releaseNotes"
                 echo "##vso[task.setvariable variable=isPreRelease]$isPreRelease"
                 echo "##vso[task.setvariable variable=isPreRelease]$dataFile.moduleVersion"
-
-          - task: GitHubRelease@1
-            inputs:
-              gitHubConnection: Trustmarque Github
-              repositoryName: Trustmarque/cloudmarque-azure-pwsh
-              action: create
-              target: $(Build.SourceVersion)
-              title: "$(moduleName) $(version)"
-              assetUploadMode: replace
-              isPreRelease: $(isPreRelease)
-              addChangeLog: false
-              tagSource: userSpecifiedTag
-              tag: v$(version)
-              releaseNotesSource: inline
-              releaseNotesInline: "$(releaseNotes)"
