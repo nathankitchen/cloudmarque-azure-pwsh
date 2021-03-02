@@ -111,7 +111,7 @@ stages:
   condition: succeeded()
   jobs:
   - deployment:
-    environment: Dev
+    environment: Prod
     strategy:
       runOnce:
         deploy:
@@ -136,7 +136,7 @@ stages:
 
                 $dataFile = Import-PowerShellDataFile "$(moduleName)/$(moduleName).psd1"
 
-                $isPreRelease = $false
+                $isPreRelease = $true
 
                 if($dataFile.privateData.psData.preRelease) {
                   $isPreRelease = $true
@@ -159,4 +159,4 @@ stages:
               tagSource: userSpecifiedTag
               tag: v$(version)
               releaseNotesSource: inline
-              releaseNotesInline: $releaseNotes
+              releaseNotesInline: $(releaseNotes)
