@@ -112,6 +112,8 @@ stages:
   jobs:
   - deployment:
     environment: Prod
+    variables: 
+      releaseNotesPath: $(Build.SourceDirectory)/releaseNotes.txt
     strategy:
       runOnce:
         deploy:
@@ -142,23 +144,21 @@ stages:
                   $isPreRelease = $true
                 }
 
-                Write-Host $dataFile.privateData.psData.releaseNotes
+                Set-Content $(releaseNotesPath) $dataFile.privateData.psData.releaseNotes.txt
 
-                Write-Host "##vso[task.setvariable variable=releaseNotes]$($dataFile.privateData.psData.releaseNotes)"
                 Write-Host "##vso[task.setvariable variable=isPreRelease]$($isPreRelease)"
                 Write-Host "##vso[task.setvariable variable=version]$($dataFile.moduleVersion)"
 
           - task: GitHubRelease@1
             inputs:
-              gitHubConnection: Trustmarque Github
-              repositoryName: Trustmarque/cloudmarque-azure-pwsh
-              action: create
-              target: $(Build.SourceVersion)
-              title: "$(moduleName) $(version)"
-              assetUploadMode: replace
+              gitHubConnection: 'Trustmarque Github'
+              repositoryName: 'Trustmarque/cloudmarque-azure-pwsh'
+              action: 'create'
+              target: '$(Build.SourceVersion)'
+              tagSource: 'userSpecifiedTag'
+              tag: 'v$(version)'
+              title: '$(moduleName) $(version)'
+              releaseNotesFilePath: $(releaseNotesPath)
+              assets: '$(Pipeline.Workspace)/*'
               isPreRelease: $(isPreRelease)
               addChangeLog: false
-              tagSource: userSpecifiedTag
-              tag: v$(version)
-              releaseNotesSource: inline
-              releaseNotesInline: $(releaseNotes)
