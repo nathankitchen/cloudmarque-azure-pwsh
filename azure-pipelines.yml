@@ -149,12 +149,12 @@ stages:
               gitHubConnection: Trustmarque Github
               repositoryName: Trustmarque/cloudmarque-azure-pwsh
               action: create
-              target: $(Build.SourceVersion)
-              title: $(moduleName) $(version)
+              target: "$(Build.SourceVersion)"
+              title: "$(moduleName) $(version)"
               assetUploadMode: replace
-              isPreRelease: $(isPreRelease)
+              isPreRelease: "$(isPreRelease)"
               addChangeLog: false
               tagSource: userSpecifiedTag
-              tag: v$(version)
+              tag: "v$(version)"
               releaseNotesSource: inline
               releaseNotesInline: "$releaseNotes"
