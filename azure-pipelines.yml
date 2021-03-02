@@ -15,48 +15,48 @@ variables:
   createArtifacts: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/release_1.0.10'), or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'Manual')))]
 
 stages:
-- stage: Build
-  displayName: Build Cloudmarque.Azure
-  jobs:
-  - job:
-    steps:
-    - task: PowerShell@2
-      inputs:
-        workingDirectory: $(Build.SourcesDirectory)
-        pwsh: true
-        failOnStderr: true
-        errorActionPreference: Stop
-        targetType: Inline
-        script: |
-          . .\$(moduleName)\install-dependencies.ps1
-          . .\init.ps1
-          Sync-CloudmarqueAzure
+# - stage: Build
+#   displayName: Build Cloudmarque.Azure
+#   jobs:
+#   - job:
+#     steps:
+#     - task: PowerShell@2
+#       inputs:
+#         workingDirectory: $(Build.SourcesDirectory)
+#         pwsh: true
+#         failOnStderr: true
+#         errorActionPreference: Stop
+#         targetType: Inline
+#         script: |
+#           . .\$(moduleName)\install-dependencies.ps1
+#           . .\init.ps1
+#           Sync-CloudmarqueAzure
 
-- stage: Test
-  displayName: Test Cloudmarque.Azure
-  dependsOn: Build
-  condition: succeeded()
-  jobs:
-  - job:
-    steps:
-    - task: AzurePowerShell@5
-      inputs:
-        azureSubscription: $(ServiceConnection)
-        workingDirectory: $(Build.SourcesDirectory)
-        pwsh: true
-        errorActionPreference: stop
-        ScriptType: InlineScript
-        FailOnStandardError: true
-        azurePowerShellVersion: 'LatestVersion'
-        Inline: |
-          . .\init.ps1
-          Test-CloudmarqueAzure
-    - task: PublishTestResults@2
-      displayName: Publish Tests
-      inputs:
-        testResultsFormat: NUnit
-        testResultsFiles: $(moduleName)/publish/Tests/*.xml
-        failTaskOnFailedTests: true
+# - stage: Test
+#   displayName: Test Cloudmarque.Azure
+#   dependsOn: Build
+#   condition: succeeded()
+#   jobs:
+#   - job:
+#     steps:
+#     - task: AzurePowerShell@5
+#       inputs:
+#         azureSubscription: $(ServiceConnection)
+#         workingDirectory: $(Build.SourcesDirectory)
+#         pwsh: true
+#         errorActionPreference: stop
+#         ScriptType: InlineScript
+#         FailOnStandardError: true
+#         azurePowerShellVersion: 'LatestVersion'
+#         Inline: |
+#           . .\init.ps1
+#           Test-CloudmarqueAzure
+#     - task: PublishTestResults@2
+#       displayName: Publish Tests
+#       inputs:
+#         testResultsFormat: NUnit
+#         testResultsFiles: $(moduleName)/publish/Tests/*.xml
+#         failTaskOnFailedTests: true
 
 - stage: CreateDocumentationArtifact
   displayName: Create Documentation Artifact
@@ -111,9 +111,9 @@ stages:
   condition: succeeded()
   jobs:
   - deployment:
-    environment: Prod
+    environment: Dev
     variables: 
-      releaseNotesPath: $(Build.SourcesDirectory)/releaseNotes.txt
+      releaseNotesPath: $(Build.StagingDirectory)/releaseNotes.txt
     strategy:
       runOnce:
         deploy:
@@ -136,7 +136,7 @@ stages:
                 #   -SkipAutomaticTags `
                 #   -Force
 
-                $dataFile = Import-PowerShellDataFile "$(moduleName)/$(moduleName).psd1"
+                $dataFile = Import-PowerShellDataFile "$(moduleName)/$(moduleName).psd1" -Verbose
 
                 $isPreRelease = $false
 
@@ -144,7 +144,7 @@ stages:
                   $isPreRelease = $true
                 }
 
-                Set-Content $(releaseNotesPath) $dataFile.privateData.psData.releaseNotes.txt
+                Set-Content $(releaseNotesPath) $dataFile.privateData.psData.releaseNotes.txt -Verbose
 
                 Write-Host "##vso[task.setvariable variable=isPreRelease]$($isPreRelease)"
                 Write-Host "##vso[task.setvariable variable=version]$($dataFile.moduleVersion)"
@@ -158,7 +158,6 @@ stages:
               tagSource: 'userSpecifiedTag'
               tag: 'v$(version)'
               title: '$(moduleName) $(version)'
-              releaseNotesFilePath: $(releaseNotesPath)
-              assets: '$(Pipeline.Workspace)/*'
+              releaseNotesFilePath: '$(releaseNotesPath)'
               isPreRelease: $(isPreRelease)
               addChangeLog: false
