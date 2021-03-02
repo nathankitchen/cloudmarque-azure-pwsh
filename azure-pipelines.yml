@@ -113,7 +113,7 @@ stages:
   - deployment:
     environment: Prod
     variables: 
-      releaseNotesPath: $(Build.SourceDirectory)/releaseNotes.txt
+      releaseNotesPath: $(Build.SourcesDirectory)/releaseNotes.txt
     strategy:
       runOnce:
         deploy:
