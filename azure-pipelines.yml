@@ -60,7 +60,7 @@ stages:
 - stage: CreateDocumentationArtifact
   displayName: Create Documentation Artifact
   dependsOn: Test
-  condition: and(succeeded(), eq(variables.createArtifacts, true))
+  condition: and(succeeded(), eq(${{ parameters.release }}, true))
   jobs:
   - job:
     steps:
@@ -109,7 +109,7 @@ stages:
   condition: succeeded()
   jobs:
   - deployment:
-    environment: Dev
+    environment: Prod
     strategy:
       runOnce:
         deploy:
