@@ -125,7 +125,7 @@ stages:
               script: |
                 . .\$(moduleName)\install-dependencies.ps1
 
-                $dataFile = Import-PowerShellDataFile "..\$(moduleName)\$(moduleName).psd1
+                $dataFile = Import-PowerShellDataFile "$(moduleName)\$(moduleName).psd1
 
                 $isPreRelease = $false
 
