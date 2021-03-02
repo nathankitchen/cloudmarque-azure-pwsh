@@ -136,7 +136,7 @@ stages:
 
                 $dataFile = Import-PowerShellDataFile "$(moduleName)/$(moduleName).psd1"
 
-                $isPreRelease = $true
+                $isPreRelease = $false
 
                 if($dataFile.privateData.psData.preRelease) {
                   $isPreRelease = $true
