@@ -109,7 +109,7 @@ stages:
   condition: succeeded()
   jobs:
   - deployment:
-    environment: Dev
+    environment: Prod
     variables: 
       releaseNotesPath: $(Build.StagingDirectory)/releaseNotes.txt
     strategy:
@@ -127,12 +127,12 @@ stages:
 
                 . .\$(moduleName)\install-dependencies.ps1
 
-                # Publish-Module `
-                #   -Path $(moduleName) `
-                #   -NuGetApiKey $(NugetApiKey) `
-                #   -Repository PSGallery `
-                #   -SkipAutomaticTags `
-                #   -Force
+                Publish-Module `
+                  -Path $(moduleName) `
+                  -NuGetApiKey $(NugetApiKey) `
+                  -Repository PSGallery `
+                  -SkipAutomaticTags `
+                  -Force
 
                 $dataFile = Import-PowerShellDataFile "$(moduleName)/$(moduleName).psd1"
 
@@ -157,5 +157,6 @@ stages:
               tag: 'v$(version)'
               title: '$(moduleName) $(version)'
               releaseNotesFilePath: '$(releaseNotesPath)'
+              assets: '$(Build.ArtifactStagingDirectory)/$(version)/*'
               isPreRelease: $(isPreRelease)
               addChangeLog: false
