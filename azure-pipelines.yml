@@ -117,15 +117,15 @@ stages:
           steps:
           - task: PowerShell@2
             inputs:
-              workingDirectory: $(Pipeline.Workspace)
+              workingDirectory: $()
               pwsh: true
               failOnStderr: true
               errorActionPreference: Stop
               targetType: Inline
               script: |
-                . .\$(moduleName)\install-dependencies.ps1
 
-                $dataFile = Import-PowerShellDataFile "$(moduleName)\$(moduleName).psd1
+                ls
+                $dataFile = Import-PowerShellDataFile "$(Pipeline.Workspace)/$(moduleName)/$(moduleName).psd1
 
                 $isPreRelease = $false
 
