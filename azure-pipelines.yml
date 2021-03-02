@@ -142,6 +142,10 @@ stages:
                   $isPreRelease = $true
                 }
 
-                echo "##vso[task.setvariable variable=releaseNotes]$dataFile.privateData.psData.releaseNotes"
-                echo "##vso[task.setvariable variable=isPreRelease]$isPreRelease"
-                echo "##vso[task.setvariable variable=isPreRelease]$dataFile.moduleVersion"
+                echo "##vso[task.setvariable variable=releaseNotes]$($dataFile.privateData.psData.releaseNotes)"
+                echo "##vso[task.setvariable variable=isPreRelease]$($isPreRelease)"
+                echo "##vso[task.setvariable variable=version]$($dataFile.moduleVersion)"
+
+                Write-Host $releaseNotes
+                Write-Host $isPreRelease
+                Write-Host $version
