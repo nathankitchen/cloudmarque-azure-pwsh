@@ -143,3 +143,18 @@ stages:
                 echo "##vso[task.setvariable variable=releaseNotes]$($dataFile.privateData.psData.releaseNotes)"
                 echo "##vso[task.setvariable variable=isPreRelease]$($isPreRelease)"
                 echo "##vso[task.setvariable variable=version]$($dataFile.moduleVersion)"
+
+          - task: GitHubRelease@1
+            inputs:
+              gitHubConnection: Trustmarque Github
+              repositoryName: Trustmarque/cloudmarque-azure-pwsh
+              action: create
+              target: $(Build.SourceVersion)
+              title: $(moduleName) $(version)
+              assetUploadMode: replace
+              isPreRelease: $(isPreRelease)
+              addChangeLog: false
+              tagSource: userSpecifiedTag
+              tag: v$(version)
+              releaseNotesSource: inline
+              releaseNotesInline: "$releaseNotes"
