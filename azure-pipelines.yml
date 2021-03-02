@@ -110,7 +110,7 @@ stages:
   condition: succeeded()
   jobs:
   - deployment:
-    environment: Prod
+    environment: Dev
     strategy:
       runOnce:
         deploy:
@@ -123,6 +123,13 @@ stages:
               errorActionPreference: Stop
               targetType: Inline
               script: |
+
+                Publish-Module `
+                  -Path $(moduleName) `
+                  -NuGetApiKey $(NugetApiKey) `
+                  -Repository PSGallery `
+                  -SkipAutomaticTags `
+                  -Force
 
                 $dataFile = Import-PowerShellDataFile "$(moduleName)/$(moduleName).psd1"
 
@@ -142,7 +149,7 @@ stages:
               repositoryName: Trustmarque/cloudmarque-azure-pwsh
               action: create
               target: $(Build.SourceVersion)
-              title: $(moduleName) $(version)
+              title: "$(moduleName) $(version)"
               assetUploadMode: replace
               isPreRelease: $(isPreRelease)
               addChangeLog: false
