@@ -1,6 +1,6 @@
 parameters:
 - name: Release
-  displayName: Release to PSGallery and Github
+  displayName: Release to Production
   type: boolean
   default: false
 
@@ -58,10 +58,10 @@ stages:
         testResultsFiles: $(moduleName)/publish/Tests/*.xml
         failTaskOnFailedTests: true
 
-- stage: CreateDocumentationArtifact
-  displayName: Create Documentation Artifact
+- stage: CreateCloudmarqueDocumentationArtifact
+  displayName: Create Cloudmarque Documentation Artifact
   dependsOn: Test
-  condition: and(succeeded(), eq(${{ parameters.release }}, true))
+  condition: and(succeeded(), eq(variables.createArtifacts, true))
   jobs:
   - job:
     steps:
@@ -91,10 +91,10 @@ stages:
         artifactName: schema
         publishLocation: Pipeline
 
-- stage: CreateCloudmarqueAzureArtifact
-  displayName: Create Cloudmarque.Azure Artifact
+- stage: CreateCloudmarqueAzureModuleArtifact
+  displayName: Create Cloudmarque.Azure Module Artifact
   dependsOn: Test
-  condition: and(succeeded(), eq(${{ parameters.release }}, true))
+  condition: and(succeeded(), eq('{{ parameters.Release }}', true))
   jobs:
   - job:
     steps:
@@ -107,7 +107,7 @@ stages:
 
 - stage: Release
   displayName: Release Cloudmarque.Azure
-  dependsOn: CreateCloudmarqueAzureArtifact
+  dependsOn: CreateCloudmarqueAzureModuleArtifact
   condition: succeeded()
   jobs:
   - deployment:
