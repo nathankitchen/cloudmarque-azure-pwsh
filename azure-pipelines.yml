@@ -157,5 +157,6 @@ stages:
               tag: 'v$(version)'
               title: '$(moduleName) $(version)'
               releaseNotesFilePath: '$(releaseNotesPath)'
+              assets: '$(Build.SourcesDirectory)'
               isPreRelease: $(isPreRelease)
               addChangeLog: false
