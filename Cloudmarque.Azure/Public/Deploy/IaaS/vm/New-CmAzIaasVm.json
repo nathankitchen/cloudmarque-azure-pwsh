@@ -27,9 +27,10 @@
     "resources": [
 
         {
+            "condition": "[not(equals(parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].generatedName, 'none'))]",
             "name": "[concat('ProximityPlacementGroupTemplate', copyIndex('ProximityPlacementGroupsCopy'))]",
             "type": "Microsoft.Resources/Deployments",
-            "resourceGroup": "[parameters('AvailabilitySets')[copyIndex('ProximityPlacementGroupsCopy')].resourceGroupName]",
+            "resourceGroup": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].resourceGroupName]",
             "apiVersion": "2019-10-01",
             "copy": {
                 "name": "ProximityPlacementGroupsCopy",
@@ -69,6 +70,7 @@
             }
         },
         {
+            "condition": "[not(equals(parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].generatedName, 'none'))]",
             "name": "[concat('AvailabilitySetsTemplate', copyIndex('AvailabilitySetsCopy'))]",
             "type": "Microsoft.Resources/Deployments",
             "resourceGroup": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].resourceGroupName]",
@@ -199,7 +201,7 @@
                                 "adminPassword": "[parameters('Credentials')['LocalAdminPassword']]",
                                 "windowsConfiguration": {
                                     "provisionVMAgent": true,
-                                    "enableAutomaticUpdates": true
+                                    "enableAutomaticUpdates": true,
                                 },
                                 "allowExtensionOperations": true
                             },

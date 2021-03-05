@@ -359,16 +359,16 @@
                                             "$id": "#/groups/items/allOf/virtualMachines/items/allOf",
                                             "type": "object",
                                             "anyOf": [
-                                                { 
+                                                {
                                                     "required" : [
                                                         "name",
                                                         "size",
                                                         "imageReference",
                                                         "osDisk",
                                                         "networking"
-                                                    ] 
+                                                    ]
                                                 },
-                                                { 
+                                                {
                                                     "required" : [
                                                         "name",
                                                         "size",
@@ -376,9 +376,9 @@
                                                         "osDisk",
                                                         "networking",
                                                         "availabilitySet"
-                                                    ] 
+                                                    ]
                                                 },
-                                                { 
+                                                {
                                                     "required" : [
                                                         "name",
                                                         "size",
@@ -386,7 +386,7 @@
                                                         "osDisk",
                                                         "networking",
                                                         "zone"
-                                                    ] 
+                                                    ]
                                                 }
                                             ],
                                             "properties": {

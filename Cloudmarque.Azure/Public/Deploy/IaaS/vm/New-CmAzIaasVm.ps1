@@ -140,6 +140,21 @@
 						$allProximityPlacementGroups += $placementGroup
 					}
 				}
+				else {
+
+					$placementGroup = @{
+						resourceGroupName = $resourceGroup.name
+						generatedName     = "none";
+						location          = "uksouth";
+						service           = @{
+							publish = @{
+								proximityPlacementGroup = "none"
+							}
+						}
+					}
+
+					$allProximityPlacementGroups += $placementGroup
+				}
 
 				if ($resourceGroup.availabilitySets) {
 					foreach ($set in $resourceGroup.availabilitySets) {
@@ -165,11 +180,27 @@
 
 						$allAvailabilitySets += $set
 					}
+				} else {
+					$set = @{
+						resourceGroupName = $resourceGroup.name
+						generatedName     = "none";
+						location          = "uksouth";
+						platformFaultDomainCount = "2";
+						platformUpdateDomainCount = "2";
+						sku = "aligned"
+						service           = @{
+							publish = @{
+								proximityPlacementGroup = "none"
+							}
+						}
+					}
+
+					$allAvailabilitySets += $set
 				}
 
 				foreach ($virtualMachine in $resourceGroup.virtualMachines) {
 
-					if ($virtualMachine.zones -And $virtualMachine.availabilitySet) {
+					if ($virtualMachine.zone -And $virtualMachine.availabilitySet) {
 						Write-Error "Virtual Machines with both Availability Zones and Availability Sets are not supported by Azure..." -Category InvalidArgument -CategoryTargetName "VirtualMachines"
 					}
 
