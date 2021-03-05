@@ -101,7 +101,7 @@ function New-CmAzCoreMonitor {
 			Write-Verbose "Setting alerts..."
 			$keyvaultAdminAlert = @{
 				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Region "Global"-Name "$($SettingsObject.name)-KeyvaultAdmin";
-				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region $SettingsObject.Location -Name $SettingsObject.alerts.keyvaultAdmin.actionGroupName;
+				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region "Global" -Name $SettingsObject.alerts.keyvaultAdmin.actionGroupName;
 				"enabled" = $SettingsObject.alerts.keyvaultAdmin.enabled ??= $false;
 				"servicePublish" = $SettingsObject.service.publish.keyvaultAdminAlert;
 				"conditions" = @(
@@ -118,7 +118,7 @@ function New-CmAzCoreMonitor {
 
 			$resourceHealthAlert = @{
 				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Region "Global"-Name "$($SettingsObject.name)-ResourceHealth";
-				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region $SettingsObject.Location -Name $SettingsObject.alerts.resourceHealth.actionGroupName;
+				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region "Global" -Name $SettingsObject.alerts.resourceHealth.actionGroupName;
 				"enabled" = $SettingsObject.alerts.resourceHealth.enabled ??= $false;
 				"servicePublish" = $SettingsObject.service.publish.resourceHealthAlert;
 				"conditions" = @(
@@ -143,7 +143,7 @@ function New-CmAzCoreMonitor {
 
 			$serviceHealthAlert = @{
 				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Region "Global"-Name "$($SettingsObject.name)-ServiceHealth";
-				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region $SettingsObject.Location -Name $SettingsObject.alerts.serviceHealth.actionGroupName;
+				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region "Global" -Name $SettingsObject.alerts.serviceHealth.actionGroupName;
 				"enabled" = $SettingsObject.alerts.serviceHealth.enabled ??= $false;
 				"servicePublish" = $SettingsObject.service.publish.serviceHealthAlert;
 				"conditions" = @(
