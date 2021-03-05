@@ -94,7 +94,7 @@ stages:
 - stage: CreateCloudmarqueAzureModuleArtifact
   displayName: Create Cloudmarque.Azure Module Artifact
   dependsOn: Test
-  condition: and(succeeded(), eq('{{ parameters.Release }}', true))
+  condition: and(succeeded(), eq('${{ parameters.Release }}', true))
   jobs:
   - job:
     steps:
