@@ -135,16 +135,8 @@ PrivateData = @{
         IconUri = 'https://github.com/Trustmarque/cloudmarque-azure-pwsh/blob/master/Cloudmarque.Azure/icon.png?raw=true'
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Added ability to set the log analytics workspaces data retention in New-CmAzCoreMonitor.
-* Added ability to specify availability sets or zones in New-CmAzIaasVm.
-* Added ability to set disk caching policies in New-CmAzIaasVm.
-* Added Project Readme file.
-* Added support for provisioning Azure Functions through either New-CmAzPaasWeb or New-CmAzPaasFunction.
-* Added unique name generation support for deployments.
-* Automated the acceptance of terms and conditions for custom marketplace images.
-* Fixed name generation for nics and action groups.
-* Minor fixes to json schema based validation and tagging functionality.
-* Minor fixes to New-CmAzIaasNetworking.'
+        ReleaseNotes = '* Addressed deployment issue when availability zones and proximityPlacementGroups are not set in New-CmAzIaasVm.
+* Addressed regression issue where action group were no longer linked to alerts in New-CmAzCoreMonitor.'
 
         # Prerelease string of this module
         # Prerelease = ''
