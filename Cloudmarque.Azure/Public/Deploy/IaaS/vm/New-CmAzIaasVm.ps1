@@ -119,6 +119,8 @@
 
 			$daysOfWeek = [DayOfWeek].GetEnumNames()
 
+			$allowedTimeZones = Get-CmAzSettingsFile -Path "$PSScriptRoot/timeZones.yml"
+
 			foreach ($resourceGroup in $SettingsObject.groups) {
 
 				if (!$resourceGroup.location) {
@@ -241,6 +243,15 @@
 					$virtualMachine.osDisk.caching ??= "None"
 
 					$virtualMachine.zone ??= "none"
+
+					if ($virtualMachine.timeZone) {
+
+						Write-Verbose "TimeZone settings found."
+						$virtualMachine.timeZone = $allowedTimeZones.timeZones.contains($virtualMachine.timeZone) ? $virtualMachine.timeZone : (Write-Error "Please provide valid Windows timezone format...")
+					}
+					else {
+						$virtualMachine.timeZone = "UTC"
+					}
 
 					if ($virtualMachine.availabilitySet) {
 

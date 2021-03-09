@@ -65,6 +65,7 @@ groups:
         availabilitySet: set1
         updateGroup: Critical
         updateFrequency: Daily
+        timeZone: AUS Eastern Standard Time                      # List of allowed values can be fetched by running command on windows OS - (Get-TimeZone -ListAvailable | select ID). Default - UTC
         imageReference:
           publisher: MicrosoftWindowsDesktop
           offer: Windows-10
@@ -354,3 +355,4 @@ groups:
   #NOTE: The DSC extension for Linux and the Azure Monitor virtual machine extension for Linux currently present a conflict and aren't supported in a side-by-side configuration. Don't use the two solutions together on the same VM.
   #NOTE: Make sure to accept terms before using custom image from market place. https://docs.microsoft.com/en-us/powershell/module/az.marketplaceordering/set-azmarketplaceterms?view=azps-5.3.0
   #NOTE: Availability set and zone cannot be configured together in a virtual machine.
+  #NOTE: Time Zones are only applicable to windows VMs.
