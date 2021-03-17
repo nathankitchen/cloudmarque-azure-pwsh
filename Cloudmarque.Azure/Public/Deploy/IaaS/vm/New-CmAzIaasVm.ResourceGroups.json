@@ -6,8 +6,7 @@
             "type": "Array"
         }
     },
-    "resources": [
-    {
+    "resources": [{
         "type": "Microsoft.Resources/resourceGroups",
         "apiVersion": "2018-05-01",
         "name": "[parameters('ResourceGroups')[copyIndex('ResourceGroupsCopy')].name]",
@@ -19,5 +18,5 @@
             "name": "ResourceGroupsCopy",
             "count": "[Length(parameters('ResourceGroups'))]"
         }
-    }
-] }
+    }]
+}

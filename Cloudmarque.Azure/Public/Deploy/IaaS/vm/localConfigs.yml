@@ -1,3 +1,12 @@
+days:
+  sunday: "1"
+  monday: "2"
+  tuesday: "3"
+  wednesday: "4"
+  thrusday: "5"
+  friday: "6"
+  saturday: "7"
+
 timeZones:                              # Valid Windows TimeZones.
 - Dateline Standard Time
 - UTC-11

@@ -65,14 +65,14 @@ groups:
         availabilitySet: set1
         updateGroup: Critical
         updateFrequency: Daily
-        timeZone: AUS Eastern Standard Time                      # List of allowed values can be fetched by running command on windows OS - (Get-TimeZone -ListAvailable | select ID). Default - UTC
+        timeZone: AUS Eastern Standard Time                       # List of allowed values can be fetched by running command on windows OS - (Get-TimeZone -ListAvailable | select ID). Default - UTC
         imageReference:
           publisher: MicrosoftWindowsDesktop
           offer: Windows-10
           sku: rs5-pro
           version: latest
         zone:                                                     # Availability Zone. Cannot be used with availability set.
-        location: UK South
+        location: UK South                                        # Optional - default to resource group location.
         service:
           publish:
             vm: Iaas-Test-Vm1
@@ -90,6 +90,22 @@ groups:
               vnet: Iaas-Test-Spoke1-Vnet1
           ipAddress:                                              # Leave blank for dynamic ip allocations
           subnetName: Iaas-Test-Spoke1-Vnet1-Snet-hpcman          # Subnet belonging to the virtual network
+        antimalware:
+          enable: true
+          realtimeProtectionEnabled: true
+          exclusions:
+            paths:
+            - D:\\somelogs
+            - D:\\SomeOtherLogs
+            extensions:
+            - .mdf
+            - .ldf
+            processes:
+            - random.exe
+          schedule:
+            scanType: Quick
+            day: sunday
+            time: 120
 
       - name: Iaas-Test-Vm2
         size: Standard_B1s
@@ -303,7 +319,7 @@ groups:
           offer: Windows-10
           sku: rs5-pro
           version: latest
-        location: UK West
+        location: East US
         service:
           publish:
             vm: Iaas-Test-Vm9
@@ -315,9 +331,26 @@ groups:
         networking:
           service:
             dependencies:
-              vnet: Iaas-Test-Spoke1-Vnet2
+              vnet: Iaas-Test-Int-Vnet1
           ipAddress:                                              # Leave blank for dynamic ip allocations
-          subnetName: Iaas-Test-Spoke1-Vnet2-Snet-hpcman          # Subnet belonging to the virtual network
+          subnetName: Iaas-Test-Int-Vnet1-Snet-ext1               # Subnet belonging to the virtual network
+        vulnerabilityScan: true
+        antimalware:
+          enable: true
+          realtimeProtectionEnabled: true
+          exclusions:
+            paths:
+            - D:\\somelogs
+            - D:\\SomeOtherLogs
+            extensions:
+            - .mdf
+            - .ldf
+            processes:
+            - random.exe
+          schedule:
+            scanType: Quick
+            day: sunday
+            time: 120
 
       - name: Iaas-Test-VmX                                       # Linux isn't officially supported at the moment.
         size: Standard_B1s                                        # This is purely for testing the automatic acceptance of marketplace terms.
@@ -325,9 +358,9 @@ groups:
         updateFrequency: Daily
         zone: 2
         plan:                                                     # Make sure you accept terms for using image.
-          name: "centos-8-3-free"
-          publisher: "cognosys"
-          product: "centos-8-3-free"
+          name: centos-8-3-free
+          publisher: cognosys
+          product: centos-8-3-free
         imageReference:
           publisher: cognosys
           offer: centos-8-3-free
@@ -348,6 +381,7 @@ groups:
               vnet: Iaas-Test-Int-Vnet1
           ipAddress:                                              # Leave blank for dynamic ip allocations
           subnetName: Iaas-Test-Int-Vnet1-Snet-ext1               # Subnet belonging to the virtual network
+        vulnerabilityScan: true
 
   #NOTE: To allow disk encryption for Linux, you need to have at least 8gb of ram available and the vm needs to be generation 1.
   #NOTE: Supported Linux distros for disk encryption are listed here https://docs.microsoft.com/en-us/azure/virtual-machines/linux/disk-encryption-overview#supported-vms-and-operating-systems

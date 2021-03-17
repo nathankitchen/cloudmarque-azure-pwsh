@@ -119,7 +119,7 @@
 
 			$daysOfWeek = [DayOfWeek].GetEnumNames()
 
-			$allowedTimeZones = Get-CmAzSettingsFile -Path "$PSScriptRoot/timeZones.yml"
+			$localConfigs = Get-CmAzSettingsFile -Path "$PSScriptRoot/localConfigs.yml"
 
 			foreach ($resourceGroup in $SettingsObject.groups) {
 
@@ -130,8 +130,8 @@
 				$resourceGroup.name = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Region $resourceGroup.location -Name $resourceGroup.name
 
 				if ($resourceGroup.proximityPlacementGroups) {
-					foreach ($placementGroup in $resourceGroup.proximityPlacementGroups) {
 
+					foreach ($placementGroup in $resourceGroup.proximityPlacementGroups) {
 						$placementGroup.location ??= $resourceGroup.location
 
 						$placementGroup.generatedName = Get-CmAzResourceName -Resource "ProximityPlacementGroup" -Architecture "IaaS" -Region $placementGroup.location -Name $placementGroup.name
@@ -159,12 +159,11 @@
 				}
 
 				if ($resourceGroup.availabilitySets) {
-					foreach ($set in $resourceGroup.availabilitySets) {
 
+					foreach ($set in $resourceGroup.availabilitySets) {
 						$set.generatedName = Get-CmAzResourceName -Resource "AvailabilitySet" -Architecture "IaaS" -Region $set.location -Name $set.name
 
 						if ($set.proximityPlacementGroup) {
-
 							$set.proximityPlacementGroup = ($resourceGroup.proximityPlacementGroups | Where-Object { $_.name -eq $set.proximityPlacementGroup }).generatedName
 
 							if (!$set.proximityPlacementGroup) {
@@ -182,15 +181,16 @@
 
 						$allAvailabilitySets += $set
 					}
-				} else {
+				}
+				else {
 					$set = @{
-						resourceGroupName = $resourceGroup.name
-						generatedName     = "none";
-						location          = "uksouth";
-						platformFaultDomainCount = "2";
+						resourceGroupName         = $resourceGroup.name
+						generatedName             = "none";
+						location                  = "uksouth";
+						platformFaultDomainCount  = "2";
 						platformUpdateDomainCount = "2";
-						sku = "aligned"
-						service           = @{
+						sku                       = "aligned"
+						service                   = @{
 							publish = @{
 								proximityPlacementGroup = "none"
 							}
@@ -236,21 +236,52 @@
 					Write-Verbose "Generating standardised resource names..."
 					$virtualMachine.computerName = Get-CmAzResourceName -Resource "ComputerName" -Architecture "Core" -Region $virtualMachine.location -Name $virtualMachine.name -MaxLength 15
 					$virtualMachine.fullName = Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.name
-
 					$virtualMachine.nicName = Get-CmAzResourceName -Resource "NetworkInterfaceCard" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.fullName
 					$virtualMachine.osDisk.Name = Get-CmAzResourceName -Resource "OSDisk" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.fullName
 
 					$virtualMachine.osDisk.caching ??= "None"
-
 					$virtualMachine.zone ??= "none"
 
 					if ($virtualMachine.timeZone) {
 
 						Write-Verbose "TimeZone settings found."
-						$virtualMachine.timeZone = $allowedTimeZones.timeZones.contains($virtualMachine.timeZone) ? $virtualMachine.timeZone : (Write-Error "Please provide valid Windows timezone format...")
+						$virtualMachine.timeZone = $localConfigs.timeZones.contains($virtualMachine.timeZone) ? $virtualMachine.timeZone : (Write-Error "Please provide valid Windows timezone format...")
 					}
 					else {
 						$virtualMachine.timeZone = "UTC"
+					}
+
+					if ($virtualMachine.antimalware) {
+
+						Write-Verbose "Antimalware settings found."
+						$virtualMachine.antimalware.exclusions = @{
+							paths      = $virtualMachine.antimalware.exclusions.paths -join (';');
+							extensions = $virtualMachine.antimalware.exclusions.extensions -join (';');
+							processes  = $virtualMachine.antimalware.exclusions.processes -join (';')
+						}
+
+						if ($virtualMachine.antimalware.schedule) {
+							$virtualMachine.antimalware.schedule.scanType ??= "Quick"
+							$virtualMachine.antimalware.schedule.day = $localConfigs.days.$($virtualMachine.antimalware.schedule.day)
+							$virtualMachine.antimalware.schedule.time = $virtualMachine.antimalware.schedule.time.toString()
+							$virtualMachine.antimalware.schedule.isEnabled = "true"
+						}
+						else {
+							$virtualMachine.antimalware.schedule = @{ isEnabled = "false" }
+						}
+
+						$virtualMachine.antimalware.realtimeProtectionEnabled = $virtualMachine.antimalware.realtimeProtectionEnabled ? "true" : "false"
+					}
+					else {
+						$virtualMachine.antimalware = @{
+							enable = $false
+							exclusions = @{
+								Path       = "";
+								Extensions = "";
+								Processes  = "";
+							}
+							schedule = @{ isEnabled = "false" }
+						}
 					}
 
 					if ($virtualMachine.availabilitySet) {
@@ -264,6 +295,8 @@
 					else {
 						$virtualMachine.availabilitySet = ""
 					}
+
+					$virtualMachine.vulnerabilityScan ??= $false
 
 					Write-Verbose "Building data disks..."
 

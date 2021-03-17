@@ -402,6 +402,12 @@
 													"title": "Size",
 													"description": "Preset vm hardware configuration option (predefined in azure)."
 												},
+												"vulnerabilityScan": {
+													"$id": "#/groups/items/allOf/virtualMachines/items/allOf/vulnerabilityScan",
+													"type": ["boolean", "null"],
+													"title": "VulnerabilityScan",
+													"description": "Enable or Disable Azure Defender's integrated vulnerability assessment solution."
+												},
 												"updateGroup": {
 													"$id": "#/groups/items/allOf/virtualMachines/items/allOf/updateGroup",
 													"type": ["string", "null"],
@@ -662,6 +668,95 @@
 															"type": "string",
 															"title": "SubnetName",
 															"description": "Name of subnet to use in existing vnet."
+														}
+													},
+													"additionalProperties": false
+												},
+												"antimalware": {
+													"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware",
+													"type": ["object", "null"],
+													"title": "Antimalware",
+													"description": "Container of details in regards to antimalware scanner. Only Windows OS supported.",
+													"required": [
+														"enable"
+													],
+													"properties": {
+														"enable": {
+															"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/enable",
+															"type": "boolean",
+															"title": "Enable",
+															"description": "Status of Antimalware service on virtual machine."
+														},
+														"realtimeProtectionEnabled": {
+															"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/realtimeProtectionEnabled",
+															"type": ["boolean", "null"],
+															"title": "realtimeProtectionEnabled",
+															"description": "Status of Antimalware service real time protection feature."
+														},
+														"exclusions": {
+															"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/exclusions",
+															"type": ["object", "null"],
+															"title": "Exclusions",
+															"description": "Container of exclusions from antimalware scanner.",
+															"properties": {
+																"paths": {
+																	"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/exclusions/paths",
+																	"type": ["array", "null"],
+																	"title": "Paths",
+																	"description": "Paths to exclude from antimalware scanner."
+																},
+																"extensions": {
+																	"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/exclusions/extensions",
+																	"type": ["array", "null"],
+																	"title": "Extensions",
+																	"description": "File extensions to exclude from antimalware scanner."
+																},
+																"processes": {
+																	"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/exclusions/processes",
+																	"type": ["array", "null"],
+																	"title": "Processes",
+																	"description": "OS Processes to excluded from antimalware scanner."
+																}
+															},
+															"additionalProperties": false
+														},
+														"schedule": {
+															"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/schedule",
+															"type": ["object", "null"],
+															"title": "schedule",
+															"description": "Schedule to run antimalware scanner.",
+															"required": [
+																"day",
+																"time",
+																"scanType"
+															],
+															"properties": {
+																"scanType": {
+																	"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/schedule/scanType",
+																	"type": ["string", "null"],
+																	"title": "ScanType",
+																	"description": "Type of scan.",
+																	"enum": ["Quick", "Full"]
+																},
+																"day": {
+																	"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/schedule/extensions",
+																	"type": ["string", "null"],
+																	"title": "Day",
+																	"description": "Day of the week for scheduled run.",
+																	"enum": [
+																		"sunday", "monday", "tuesday", "wednesday", "thrusday", "friday", "saturday"
+																	]
+																},
+																"time": {
+																	"$id": "#/groups/items/allOf/virtualMachines/items/allOf/antimalware/schedule/processes",
+																	"type": ["integer", "null"],
+																	"title": "time",
+																	"description": "Scan time measured in minutes from midnight. For example: 12AM = 0, 3AM = 180",
+																	"minimum": 0,
+																	"maximum": 1440
+																}
+															},
+															"additionalProperties": false
 														}
 													},
 													"additionalProperties": false

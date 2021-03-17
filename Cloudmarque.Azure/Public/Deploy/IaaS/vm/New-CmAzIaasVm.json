@@ -181,6 +181,7 @@
                         "initDataDisks": "InitDataDisks",
                         "initDataDisksExtensionResourceId": "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('initDataDisks'))]",
                         "isWindows": "[equals(toLower(parameters('VM').osDisk.osType), 'windows')]",
+                        "antimalwareExtensionName": "Antimalware",
                         "windowsDeploymentDetails": {
                             "monitoringAgentExtentionType": "MicrosoftMonitoringAgent",
                             "monitoringAgentExtensionTypeHandlerVersion": "1.0",
@@ -202,7 +203,7 @@
                                 "windowsConfiguration": {
                                     "provisionVMAgent": true,
                                     "enableAutomaticUpdates": true,
-                                   "timeZone": "[parameters('VM').timeZone]"
+                                    "timeZone": "[parameters('VM').timeZone]"
                                 },
                                 "allowExtensionOperations": true
                             },
@@ -423,6 +424,49 @@
                             }
                         },
                         {
+                            "condition": "[and(parameters('VM').antimalware.enable, variables('isWindows'))]",
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "name": "[concat(parameters('VM').fullName,'/', variables('antimalwareExtensionName'))]",
+                            "apiVersion": "2015-06-15",
+                            "location": "[parameters('VM').location]",
+                            "dependsOn": [
+                                "[parameters('VM').fullName]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dependencyAgentExtensionType)]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').monitoringAgentExtensionName)]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dscExtensionName)]"
+                            ],
+                            "properties": {
+                                "publisher": "Microsoft.Azure.Security",
+                                "type": "IaaSAntimalware",
+                                "typeHandlerVersion": "1.3",
+                                "autoUpgradeMinorVersion": true,
+                                "settings": {
+                                    "AntimalwareEnabled": true,
+                                    "Exclusions": {
+                                        "Paths": "[parameters('VM').antimalware.exclusions.paths]",
+                                        "Extensions": "[parameters('VM').antimalware.exclusions.extensions]",
+                                        "Processes": "[parameters('VM').antimalware.exclusions.processes]"
+                                    },
+                                    "RealtimeProtectionEnabled": "[parameters('VM').antimalware.realtimeProtectionEnabled]",
+                                    "ScheduledScanSettings": "[parameters('VM').antimalware.schedule]"
+                                },
+                                "protectedSettings": null
+                            }
+                        },
+                        {
+                            "condition": "[parameters('VM').vulnerabilityScan]",
+                            "type": "Microsoft.Compute/virtualMachines/providers/serverVulnerabilityAssessments",
+                            "apiVersion": "2020-01-01",
+                            "dependsOn": [
+                                "[parameters('VM').fullName]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dependencyAgentExtensionType)]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').monitoringAgentExtensionName)]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dscExtensionName)]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('antimalwareExtensionName'))]"
+                            ],
+                            "name": "[concat(parameters('VM').fullName, '/Microsoft.Security/default')]"
+                        },
+                        {
                             "type": "Microsoft.Compute/virtualMachines/extensions",
                             "name": "[concat(parameters('VM').fullName, '/DiskEncryption')]",
                             "apiVersion": "2019-03-01",
@@ -430,7 +474,9 @@
                             "dependsOn": [
                                 "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dependencyAgentExtensionType)]",
                                 "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').monitoringAgentExtensionName)]",
-                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dscExtensionName)]"
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('deploymentDetails').dscExtensionName)]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/extensions', parameters('VM').fullName, variables('antimalwareExtensionName'))]",
+                                "[resourceId(parameters('VM').resourceGroupName, 'Microsoft.Compute/virtualMachines/providers/serverVulnerabilityAssessments', parameters('VM').fullName, 'Microsoft.Security', 'default')]"
                             ],
                             "properties": {
                                 "publisher": "Microsoft.Azure.Security",
@@ -447,7 +493,7 @@
                                     "KekVaultResourceId": "[parameters('KeyVault').resourceId]"
                                 }
                             }
-                        }
+                        },
                     ]
                 }
             }
