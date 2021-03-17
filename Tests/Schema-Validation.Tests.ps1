@@ -1,7 +1,7 @@
 Describe "Each deployment cmdlet has an associated schema for input settings validation." {
 
-    $deploymentCmdlets = Get-ChildItem -Path "$PSScriptRoot\..\Cloudmarque.Azure\Public\Deploy" -Filter "*.ps1" -Exclude "networking" -Recurse -Force
-    $deploymentNames = $deploymentCmdlets.baseName | Where-Object { $_ -ne "New-CmAzIaasNetworking" -and $_ -ne "New-CmAzDeployment" }
+    $deploymentCmdlets = Get-ChildItem -Path "$PSScriptRoot\..\Cloudmarque.Azure\Public\Deploy" -Filter "*.ps1" -Recurse -Force
+    $deploymentNames = $deploymentCmdlets.baseName | Where-Object { $_ -ne "New-CmAzIaasNetworking" }
 
     It "<_> should have a associated validation schema" -ForEach $deploymentNames {
 
