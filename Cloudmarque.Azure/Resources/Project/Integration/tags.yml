@@ -1,3 +1,4 @@
+component: tags
 resourceIds: []                         # Leave blank to apply tags to all resource in resourcegroup.
 resourceGroupIds: []                    # Leave blank if specific resource ids are provided
 tags:

@@ -1,7 +1,7 @@
-﻿Describe "Get-CmAzResourceName" {
+﻿Describe "Get-CmAzResourceName Tests" {
 
     BeforeAll {
-        $projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project"
+        $projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\Integration"
         $region = "UK South"
         $architecture = "Core"
     }

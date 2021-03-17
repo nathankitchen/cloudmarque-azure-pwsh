@@ -1,4 +1,4 @@
-﻿Describe "Testing CmdLets are documented..." {
+﻿Describe "Testing all public cmdLets are documented" {
 
     $commands = Get-Command -Module "Cloudmarque.Azure"
 

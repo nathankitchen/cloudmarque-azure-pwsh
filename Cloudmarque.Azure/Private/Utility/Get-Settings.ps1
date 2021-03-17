@@ -17,9 +17,9 @@ function Get-Settings() {
         Write-Error "Please provide the a cmdlet name, so the correct validation scshema can be loaded." -Category InvalidArgument -CategoryTargetName "CmdletName"
     }
 
-    $schemaFile = (Get-SchemaPath -CmdletName $CmdletName) 
-
     $ErrorActionPreference = "Stop"
+
+    $schemaFile = Get-SchemaPath -CmdletName $CmdletName
 
     $success = Test-Json -Json ($SettingsObject | ConvertTo-Json -Depth 32) -Schema (Get-Content -Path $schemaFile -Raw)
 

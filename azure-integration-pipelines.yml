@@ -30,7 +30,7 @@ stages:
             -DefinitionName "$(Build.DefinitionName)" `
             -DefinitionVersion "$(Build.DefinitionVersion)"
 
-          New-CmazCore -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/core.yml" -Verbose
+          New-CmazCore -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/core.yml" -Verbose
 
 - stage: Paas
   dependsOn: Core
@@ -57,10 +57,11 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)"
 
           # Below resources are not being deployed because of known cdn api issue with Set-AzResource in Set-CmAzTag
-          # New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/web.yml" -Verbose
-          # New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/webstatic.yml" -Verbose
+          # New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/web.yml" -Verbose
+          # New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/webstatic.yml" -Verbose
+
           New-AzResourceGroup -Name "Web-Test-Rg" -location uksouth -tag @{'cm-service' = "Web-Test-Rg"; 'cm-integration-test-delete' = "true" } -Force
-          New-CmazPaasSql -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/sql.yml" -Verbose
+          New-CmazPaasSql -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/sql.yml" -Verbose
 
 - stage: Iaas
   dependsOn: Core
@@ -87,14 +88,14 @@ stages:
             -DefinitionName "$(Build.DefinitionName)" `
             -DefinitionVersion "$(Build.DefinitionVersion)"
 
-          New-CmAzIaasStorage -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/storage.yml" -Verbose
+          New-CmAzIaasStorage -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/storage.yml" -Verbose
 
           New-CmAzIaasNetworking `
-              -VnetsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/vnet.csv" `
-              -RouteTablesCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/udr.csv" `
-              -NsgsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/networking/csv/nsg.csv" `
-              -Verbose `
-              -Confirm:$false
+            -VnetsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/csv/vnet.csv" `
+            -RouteTablesCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/csv/udr.csv" `
+            -NsgsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/csv/nsg.csv" `
+            -Verbose `
+            -Confirm:$false
 
   - job: IaasVmPatchVault
     dependsOn: IaasNetwork
@@ -120,17 +121,17 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)"
 
           New-CmAzIaasVm `
-            -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/virtualmachines.yml" `
+            -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/virtualmachines.yml" `
             -LocalAdminUsername (ConvertTo-SecureString $(AdminUsername) -AsPlainText -Force) `
             -LocalAdminPassword (ConvertTo-SecureString $(AdminPassword) -AsPlainText -Force) `
             -Verbose
 
           New-CmAzIaasRecoveryServicesVault `
-            -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/recoveryvault.yml" `
-            -PolicySettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/recoverypolicy.yml" `
+            -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/recoveryvault.yml" `
+            -PolicySettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/recoverypolicy.yml" `
             -Verbose
 
-          Set-CmAzIaasUpdateManagement -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/updateManagement.yml" -Verbose
+          Set-CmAzIaasUpdateManagement -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/updateManagement.yml" -Verbose
 
   - job: IaasBastionVPN
     dependsOn: IaasNetwork
@@ -155,8 +156,8 @@ stages:
             -DefinitionName "$(Build.DefinitionName)" `
             -DefinitionVersion "$(Build.DefinitionVersion)"
 
-          New-CmAzIaasBastionHost -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/bastionHost.yml" -Verbose
-          New-CmAzIaasVpnGw -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/vpngw.yml" -Verbose
+          New-CmAzIaasBastionHost -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/bastionHost.yml" -Verbose
+          New-CmAzIaasVpnGw -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/vpngw.yml" -Verbose
 
 - stage: Security
   dependsOn: Core
@@ -182,7 +183,7 @@ stages:
             -DefinitionName "$(Build.DefinitionName)" `
             -DefinitionVersion "$(Build.DefinitionVersion)"
 
-          Set-CmAzSecurityCentre -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/security.yml" -Verbose
+          Set-CmAzSecurityCentre -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/security.yml" -Verbose
 
 - stage: TearDown
   dependsOn: [

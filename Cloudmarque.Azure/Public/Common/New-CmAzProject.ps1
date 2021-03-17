@@ -13,26 +13,47 @@
 		.Parameter Project
 		 The filepath where the user's Cloudmarque project will be set.
 
+		.Parameter ConfigName
+		 The name of the project configuration to load.
+		
+		.Parameter ListAvailable
+		 Confirm weither to list the available project configurations instead.
 
 		.Example
-		 New-CmAzProject -Project "MyProject"
+		 New-CmAzProject -Project "MyProject" -Name "Integration"
 	#>
 
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Low")]
 	param(
-		[Parameter(Mandatory = $true)]
-		[string]$Project
+		[string]$Project,
+		[string]$ConfigName = "Integration",
+		[switch]$ListAvailable
 	)
+
+	$ErrorActionPreference = "Stop"
 
 	if ($PSCmdlet.ShouldProcess($Project, "Create new directory")) {
 
-		$Source = "$PSScriptRoot/../../Resources/Project"
-		$Files = "*"
+		$source = "$PSScriptRoot\..\..\Resources\Project"
 
-		New-Item -Path $Project -ItemType Directory -Force > $Null
+		$availableConfigs = Get-ChildItem -Path $source -Directory -Force
 
-		Get-ChildItem $Source | Copy-Item -Destination $Project -Recurse -filter $Files
+		if($ListAvailable) {
+			$availableConfigs.baseName
+		}
+		elseif (!$Project) {
+			Write-Error "Please specify a output directory" -Category InvalidArgument -CategoryTargetName "ConfigName"
+		}
+		elseif ($availableConfigs.baseName -NotContains $ConfigName) {
+			Write-Error "Project configuration not found." -Category InvalidArgument -CategoryTargetName "Project"
+		}
+		else {
 
-		Write-Verbose "Initialized new Project Directory."
+			New-Item -Path $Project -ItemType Directory -Force > $Null
+	
+			Get-ChildItem "$source/$ConfigName" | Copy-Item -Destination $Project -Recurse -Filter "*" -Force
+	
+			Write-Verbose "Initialized new Project Directory."
+		}
 	}
 }

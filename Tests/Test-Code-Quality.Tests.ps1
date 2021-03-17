@@ -1,4 +1,4 @@
-﻿Describe 'Testing against PSSA rules' {
+﻿Describe "Testing against PSSA rules" {
 
     BeforeAll {
         $analysis = Invoke-ScriptAnalyzer -Path "filesystem::$PSScriptRoot/../Cloudmarque.Azure" -Recurse

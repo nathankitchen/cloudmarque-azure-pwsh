@@ -81,6 +81,10 @@ function New-CmAzDeployment {
                 New-CmAzCoreAutomation -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
             }
 
+            deleteservice {
+                Set-CmAzCoreAutomationDeleteResource -SettingsObject $SettingsObject
+            }
+
             budgets {
                 New-CmAzCoreBillingRule -SettingsObject $SettingsObject
             }
@@ -115,6 +119,10 @@ function New-CmAzDeployment {
 
             storage {
                 New-CmAzIaasStorage -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
+            }
+
+            tags {
+                Set-CmAzTag -SettingsObject $SettingsObject
             }
 
             virtualmachines {

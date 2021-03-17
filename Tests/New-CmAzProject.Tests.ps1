@@ -1,27 +1,37 @@
 ﻿Describe "New-CmAzProject Tests" {
 	
 	BeforeAll {
-		$source = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project"
-		$destination = "$PSScriptRoot\testFiles"
+		$source = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\Integration"
+		$destination = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\UnitTest"
 	}
 
-	Context "New-CmAzProject" {
+	It "should Copy files from set source to expected destination." {
 
-		It "Should Copy files from set source to expected destination." {
+		New-CmAzProject -Project $destination
 
-			New-Item -Path $destination -ItemType "directory"
+		$sourceItems = Get-ChildItem $source -Recurse -Force
+		$destinationItems = Get-ChildItem $destination -Recurse -Force
 
-			New-CmAzProject -Project $destination
+		$differences = Compare-Object $sourceItems $destinationItems -Property Name, Length
+		$differences | Should -Be $null
+	}
 
-			$sourceItems = Get-ChildItem $source -Recurse -Force
-			$destinationItems = Get-ChildItem $destination -Recurse -Force
+	It "should list all available projects" {
 
-			$differences = Compare-Object $sourceItems $destinationItems -Property Name, Length
-			$differences | Should -Be $null
-		}
+		$actualProjectConfigs = (Get-ChildItem -Path "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project" -Directory -Force).baseName
+		$expectedProjectConfigs = New-CmAzProject -ListAvailable
 
-		AfterAll {
-			Remove-Item -path $destination -Recurse -Force
-		}
+		$differences = Compare-Object $expectedProjectConfigs $actualProjectConfigs -Property Name, Length
+		$differences | Should -Be $null
+	}
+
+	It "throws an error when a config is not found" {
+		{
+			New-CmAzProject -ConfigName "NotFound" -Project $destination
+		} | Should -Throw "Project configuration not found."
+	}
+
+	AfterAll {
+		Remove-Item -path $destination -Recurse -Force
 	}
 }

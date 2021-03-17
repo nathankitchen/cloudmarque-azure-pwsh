@@ -1,7 +1,7 @@
-﻿Describe "*-CmAzContext Lifecycle Tests" {
+﻿Describe "CmAzContext Tests" {
 
 	BeforeAll {
-		$projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project";
+		$projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\Integration";
 		$azureContextFilePath = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\context.json"
 
 		Save-AzContext -Path $azureContextFilePath -Force
@@ -57,7 +57,7 @@
 
 		It "Should auto create a project root if confirmation parameter is y" {
 
-			$testProjectRoot = "$PSScriptRoot\TestProject"
+			$testProjectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\UnitTest"
 
 			Set-CmAzContext -ProjectRoot $testProjectRoot -Environment "Development" -ProjectConfirmation "y"
 

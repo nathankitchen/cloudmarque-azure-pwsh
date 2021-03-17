@@ -1,3 +1,4 @@
+component: deleteservice
 location: UKSouth                   # Automation account location
 
 service:

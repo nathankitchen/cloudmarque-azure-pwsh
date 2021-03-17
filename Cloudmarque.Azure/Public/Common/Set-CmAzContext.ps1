@@ -22,8 +22,11 @@
    		.Parameter ProjectRoot
      	 Where settings and resource files are created.
 
+		.Parameter ProjectConfigName
+		 Name of the project configuration to output.
+
     	.Parameter ProjectConfirmation
-     	 Override for prompt to create a new project root, default is 'y'.
+     	 Override for prompt to create a new project root, default is 'n'.
 
     	.Parameter BuildId
      	 The identifier of the current build.
@@ -47,6 +50,7 @@
      	 Set-CmAzContext  `
       		-Environment "Development"
       		-ProjectRoot "C:/MyProject"
+			-ProjectConfigName "Integration"
       		-ProjectConfirmation "y"
       		-BuildId "0.0.2"
       		-BuildRepoName "MyRepoName"
@@ -60,6 +64,7 @@
 		[string]$Environment = "Development",
 		[Parameter(Mandatory = $true)]
 		[string]$ProjectRoot,
+		[string]$ProjectConfigName = "Integration",
 		[string]$ProjectConfirmation = "n",
 		[string]$BuildId = "001",
 		[string]$BuildRepoName = "Local",
@@ -92,7 +97,7 @@
 			}
 
 			if ($ProjectConfirmation -eq "y") {
-				New-CmAzProject -Project $ProjectRoot
+				New-CmAzProject -Project $ProjectRoot -ConfigName $ProjectConfigName
 			}
 
 			$fullProjectRootPath = (Get-Item $ProjectRoot).FullName

@@ -1,40 +1,47 @@
-Sync-CloudmarqueAzure
-
-$excludes = @("generators.yml", "naming.yaml")
-$resourceFiles = Get-ChildItem -Path "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project" -Recurse -Force -Exclude $excludes -File | Select-String "component" -List | Select-Object Filename, Path
-$errorMessage = "Please provide appropriate component value in settings file or object.."
-
 Describe "New-CmAzDeployment Tests" {
 
-    Context "Cmdlet is successfully identified" {
+    Context "<_.baseName> configuration" -Foreach (Get-ChildItem -Path "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project" -Directory -Force) {
 
-        It "should be able to call the correctly associated command for <_.Filename>" -TestCases $resourceFiles {
+        $excludedFiles = @("partners.yml", "recoveryPolicy.yml")
+        $settingsFiles = Get-ChildItem -Path $_.pspath -Filter "*.yml" -Exclude $excludedFiles -Depth 0 -Force
+
+        It "should be able to call the correctly associated command for <_.baseName>" -ForEach $settingsFiles {
+            
+            $deployments = ""
+
             {
-                $deployments = ""
+                if ($_.name -eq "virtualmachines.yml") {
 
-                if ($_.Filename -eq "virtualmachines.yml") {
-
-                    $username = ConvertTo-SecureString -String "testuser" -AsPlainText -Force
-                    $password = ConvertTo-SecureString -String (Get-Password -MinPasswordLength 20) -AsPlainText -Force
-
-                    $deployments = New-CmAzDeployment -SettingsFile $_.Path -LocalAdminUsername $username -LocalAdminPassword $password -WhatIf -Verbose 4>&1 -Erroraction continue
-                }
-                elseif ($_.Filename -eq "recoveryvault.yml") {
+                    # Workaround as secure string doesn't work being passed in as params to dynamic invoke-expression calls
+                    $username = ConvertTo-SecureString 'testUser' -AsPlainText -Force
+                    $password = ConvertTo-SecureString 'testPass' -AsPlainText -Force
 
                     $deployments = New-CmAzDeployment `
-                        -SettingsFile $_.Path `
-                        -PolicySettingsFile "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\recoverypolicy.yml" `
+                        -SettingsFile $_.psPath `
                         -LocalAdminUsername $username `
                         -LocalAdminPassword $password `
-                        -WhatIf -Verbose 4>&1 -Erroraction continue
+                        -WhatIf `
+                        -Verbose 4>&1
                 }
-                else {
-                    $deployments = New-CmAzDeployment -SettingsFile $_.Path -WhatIf -Verbose 4>&1 -Erroraction continue
+                elseif ($_.name -eq "recoveryvault.yml") {
+                    
+                    $deployments = New-CmAzDeployment `
+                        -SettingsFile $_.psPath `
+                        -PolicySettingsFile "$($_.directory)\recoverypolicy.yml" `
+                        -WhatIf `
+                        -Verbose 4>&1
+                }
+                else  {
+                    
+                    $deployments = New-CmAzDeployment `
+                        -SettingsFile $_.psPath `
+                        -WhatIf `
+                        -Verbose 4>&1
                 }
 
-                $deployments.toString() | Should -Not -BeNull
+                $deployments.toString() | Should -Not -BeNullOrEmpty 
 
-            } | Should -Not -Throw $errorMessage
+            } | Should -Not -Throw
         }
     }
 
@@ -42,11 +49,11 @@ Describe "New-CmAzDeployment Tests" {
 
         It "should throw error message" {
             {
-                $SettingsObject = Get-CmAzSettingsFile -Path "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\security.yml"
+                $SettingsObject = Get-CmAzSettingsFile -Path "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\Integration\security.yml"
                 $SettingsObject.component = ""
 
-                New-CmAzDeployment -SettingsFile $SettingsObject -WhatIf
-            }  | Should -Throw $errorMessage
+                New-CmAzDeployment -SettingsObject $SettingsObject -WhatIf
+            }  | Should -Throw "Please provide appropriate component value in settings file or object.."
         }
     }
 }
