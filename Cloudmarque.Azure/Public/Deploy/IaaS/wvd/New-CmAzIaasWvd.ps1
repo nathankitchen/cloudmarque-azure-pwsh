@@ -1,4 +1,4 @@
-function New-CmAzIaaSWVD {
+function New-CmAzIaasWvd {
 
 	<#
 		.Synopsis

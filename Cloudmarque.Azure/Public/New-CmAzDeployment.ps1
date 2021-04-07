@@ -134,7 +134,7 @@ function New-CmAzDeployment {
             }
 
             wvd {
-                New-CmAzIaaSWVD -SettingsObject $SettingsObject
+                New-CmAzIaasWvd -SettingsObject $SettingsObject
             }
 
             sharedImageGallery {

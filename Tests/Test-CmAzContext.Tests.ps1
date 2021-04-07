@@ -2,10 +2,9 @@
 
 	BeforeAll {
 		$projectRoot = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\Integration";
-		$azureContextFilePath = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\context.json"
+		$azureContextFilePath = "$PSScriptRoot\..\Cloudmarque.Azure\Resources\Project\Integration\context.json"
 
 		Save-AzContext -Path $azureContextFilePath -Force
-
 		$cloudmarqueContext = Get-CmAzContext
 	}
 
