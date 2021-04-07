@@ -234,8 +234,9 @@
 				)
 
 				Write-Verbose "Trying to Pull Certificate from KeyVault..."
-				$pfxFileByte = [System.Convert]::FromBase64String((Get-AzKeyVaultSecret -VaultName $keyVault.name -Name $certificateName).SecretValueText)
-				$pfxCertPathForRunAsAccount = Join-Path  -Path $($projectContext.ProjectRoot) ($CertificateName + ".pfx")
+				$secretValue = (Get-AzKeyVaultSecret -VaultName $keyVault.name -Name $certificateName).SecretValue | ConvertFrom-SecureString -AsPlainText
+				$pfxFileByte = [System.Convert]::FromBase64String($secretValue)
+				$pfxCertPathForRunAsAccount = Join-Path -Path $($projectContext.ProjectRoot) ($CertificateName + ".pfx")
 
 				# Write to a file
 				$certCollection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
@@ -243,8 +244,6 @@
 
 				#Export the .pfx file
 				$certificatePasswordSecretValueText = $certificatePassword | ConvertFrom-SecureString -AsPlainText
-
-				$certificatePasswordSecretValueText
 
 				$protectedCertificateBytes = $certCollection.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12, $certificatePasswordSecretValueText)
 				[System.IO.File]::WriteAllBytes($PfxCertPathForRunAsAccount, $protectedCertificateBytes)

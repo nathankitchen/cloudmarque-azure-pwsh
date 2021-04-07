@@ -23,8 +23,8 @@
     Process {
 
         $modules =  @(
-            @{ ModuleName = "Pester"; ModuleVersion = "5.1.1" },
-            @{ ModuleName = "PSScriptAnalyzer"; ModuleVersion = "1.19.1" }
+            @{ ModuleName = "Pester"; RequiredVersion = "5.1.1" },
+            @{ ModuleName = "PSScriptAnalyzer"; RequiredVersion = "1.19.1" }
         );
 
         .$PSScriptRoot/Cloudmarque.Azure/Install-Dependencies.ps1 -AdditionalModules $modules -Scope $Scope -ImportModules $true -Verbose
@@ -37,6 +37,8 @@
 
         New-Item -Path $publishPath -Name $Project -ItemType Directory -Force > $Null
         New-Item -Path $testPath -Name $Project -ItemType Directory -Force > $Null
+
+        Import-Module Pester
 
         $configuration = [PesterConfiguration]@{
 

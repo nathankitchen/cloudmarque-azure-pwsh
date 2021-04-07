@@ -16,8 +16,8 @@ param(
 $cloudmarque = "Cloudmarque.Azure"
 
 Write-Verbose "Importing $cloudmarque..."
-. "$PSScriptRoot\$cloudmarque\Install-Dependencies.ps1"
-. "$PSScriptRoot\init.ps1"
+. "$PSScriptRoot/$cloudmarque/Install-Dependencies.ps1"
+. "$PSScriptRoot/Init.ps1"
 
 Sync-CloudmarqueAzure
 

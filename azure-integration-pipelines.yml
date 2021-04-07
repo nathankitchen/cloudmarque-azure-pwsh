@@ -2,9 +2,6 @@ variables:
   moduleName: Cloudmarque.Azure
   environment: Integration
 
-pool:
-  vm-image: windows-latest
-
 stages:
 
 - stage: Core
@@ -28,7 +25,8 @@ stages:
             -BuildNumber "$(Build.BuildNumber)" `
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
-            -DefinitionVersion "$(Build.DefinitionVersion)"
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
 
           New-CmazCore -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/core.yml" -Verbose
 
@@ -54,7 +52,8 @@ stages:
             -BuildNumber "$(Build.BuildNumber)" `
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
-            -DefinitionVersion "$(Build.DefinitionVersion)"
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
 
           # Below resources are not being deployed because of known cdn api issue with Set-AzResource in Set-CmAzTag
           # New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/web.yml" -Verbose
@@ -86,7 +85,8 @@ stages:
             -BuildNumber "$(Build.BuildNumber)" `
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
-            -DefinitionVersion "$(Build.DefinitionVersion)"
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
 
           New-CmAzIaasStorage -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/storage.yml" -Verbose
 
@@ -118,7 +118,8 @@ stages:
             -BuildNumber "$(Build.BuildNumber)" `
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
-            -DefinitionVersion "$(Build.DefinitionVersion)"
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
 
           New-CmAzIaasVm `
             -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/virtualmachines.yml" `
@@ -154,7 +155,8 @@ stages:
             -BuildNumber "$(Build.BuildNumber)" `
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
-            -DefinitionVersion "$(Build.DefinitionVersion)"
+            -DefinitionVersion "$(Build.DefinitionVersion)"  `
+            -Verbose
 
           New-CmAzIaasBastionHost -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/bastionHost.yml" -Verbose
           New-CmAzIaasVpnGw -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/vpngw.yml" -Verbose
@@ -181,7 +183,8 @@ stages:
             -BuildNumber "$(Build.BuildNumber)" `
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
-            -DefinitionVersion "$(Build.DefinitionVersion)"
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
 
           Set-CmAzSecurityCentre -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/security.yml" -Verbose
 
@@ -213,7 +216,8 @@ stages:
             -BuildNumber "$(Build.BuildNumber)" `
             -RepositoryName "$(Build.Repository.Name)" `
             -DefinitionName "$(Build.DefinitionName)" `
-            -DefinitionVersion "$(Build.DefinitionVersion)"
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
 
           Write-Verbose "Resetting security membership..."
           $resourceTypes = @("VirtualMachines", "AppServices", "SqlServers", "SqlServerVirtualMachines", "StorageAccounts", "KubernetesService", "ContainerRegistry", "KeyVaults")

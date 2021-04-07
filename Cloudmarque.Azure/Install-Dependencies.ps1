@@ -33,27 +33,16 @@ if ($IsWindows) {
     $resolvedScope = if ($Scope -Eq "Auto") { if ($isAdmin) { "AllUsers" } else { "CurrentUser" } } else { $Scope }
 }
 
-foreach ($moduleProps in $modules) {
+foreach ($module in $modules) {
 
-    $module = New-Object psobject -Property $moduleProps;
+    Write-Verbose "Looking for $($module.ModuleName) version $($module.RequiredVersion ?? $module.ModuleVersion)..."
+    $existingModules = Get-InstalledModule -Name $module.ModuleName -ErrorAction SilentlyContinue | Where-Object { $_.version -eq $module.requiredVersion }
 
-    Write-Verbose "Looking for $($module.ModuleName) version $($module.RequiredVersion)..."
-
-    if (!(Get-Module -Name $module.ModuleName | Where-Object { ($_.Version -Join ".") -Eq $module.RequiredVersion })) {
-
-        Write-Verbose "Not imported, checking whether it's installed..."
-
-        if (!(Get-Module -ListAvailable -Name $module.ModuleName | Where-Object { ($_.Version -Join ".") -Eq $module.RequiredVersion })) {
-            Write-Verbose "Installing $($module.ModuleName) for $resolvedScope..."
-            Install-Module -Name $module.ModuleName -RequiredVersion $module.RequiredVersion -Scope $resolvedScope -Force -AllowClobber -SkipPublisherCheck
-        }
-
-        if ($ImportModules) {
-            Write-Verbose "Importing $($module.ModuleName) version $($module.RequiredVersion)..."
-            Import-Module -Name $module.ModuleName -RequiredVersion $module.RequiredVersion -Force
-        }
+    if ($existingModules) {
+        Write-Verbose "Skipping $($module.ModuleName) $($module.RequiredVersion): already available."
     }
     else {
-        Write-Verbose "Skipping $($module.ModuleName) $($module.RequiredVersion): already available"
+        Write-Verbose "Installing $($module.ModuleName) for $resolvedScope..."
+        Install-Module -Name $module.ModuleName -RequiredVersion $module.RequiredVersion -Scope $resolvedScope -Force -AllowClobber -AllowPrerelease
     }
 }
