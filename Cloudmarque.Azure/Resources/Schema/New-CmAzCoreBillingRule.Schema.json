@@ -143,7 +143,7 @@
                                         "$id": "#/budgets/items/allOf/service/dependencies",
                                         "type": ["object", "null"],
                                         "title": "Dependencies",
-                                        "description": "Contains publish details for service location.",
+                                        "description": "Contains dependency details for service location.",
                                         "properties": {
                                             "actiongroup": {
                                                 "$id": "#/budgets/items/allOf/service/dependencies/actiongroup",

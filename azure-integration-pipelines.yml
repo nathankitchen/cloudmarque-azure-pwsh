@@ -58,7 +58,6 @@ stages:
           # Below resources are not being deployed because of known cdn api issue with Set-AzResource in Set-CmAzTag
           # New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/web.yml" -Verbose
           # New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/webstatic.yml" -Verbose
-
           New-AzResourceGroup -Name "Web-Test-Rg" -location uksouth -tag @{'cm-service' = "Web-Test-Rg"; 'cm-integration-test-delete' = "true" } -Force
           New-CmazPaasSql -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/sql.yml" -Verbose
 
@@ -187,6 +186,38 @@ stages:
             -Verbose
 
           Set-CmAzSecurityCentre -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/security.yml" -Verbose
+
+- stage: Monitor
+  dependsOn: [
+    "Iaas",
+    "Paas",
+    "Security"
+  ]
+  jobs:
+  - job:
+    steps:
+    - task: AzurePowerShell@5
+      inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
+
+          New-CmAzMonitorLogAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/logAlerts.yml" -Verbose
+          New-CmAzMonitorMetricAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/metricAlerts.yml" -Verbose
 
 - stage: TearDown
   dependsOn: [

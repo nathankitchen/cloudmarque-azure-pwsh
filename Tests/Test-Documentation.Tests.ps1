@@ -38,7 +38,7 @@
 
             It "Should have a valid component" -TestCases $testCase {
                 param($name, $docs)
-                $docs.component | Should -BeIn @('Common','Core','IaaS','PaaS','Endpoints','Security','DevOps')
+                $docs.component | Should -BeIn @('Common','Core','IaaS','PaaS', 'Monitor', 'Endpoints','Security','DevOps')
             }
 
             It "<command> -<name> should have documentation" -TestCases $paramCase {

@@ -1,0 +1,98 @@
+component: logAlerts
+
+service:
+  dependencies:
+    workspace: Core-Test-Ws
+    actionGroups: [Core-Test-Ag1]
+  publish:
+    logAlert: Core-Test-La
+
+groups:
+  ## DEFAULT VM ALERT RULE SET ##
+- name: VMStandard
+  alertSets:
+  - type: VirtualMachines
+    alerts:
+    - name: High_CPU_Usage_Percent
+    - name: High_CPU_Usage_Percent_Range
+    - name: Low_Disk_Space
+      severity: Critical
+      enabled: true
+      schedule:
+        frequencyInMinutes: 10
+        timeWindowInMinutes: 60
+      parameters:
+        _maxValue: 5
+        _maxValueMB: 102400
+        _timeWindow: 5m
+    - name: Low_Disk_Space
+    - name: High_Memory_Usage_Percent
+    - name: High_Memory_Usage_Percent_Range
+    - name: Corrupt_NTFS
+    - name: Unexpected_Shutdown
+    - name: VM_NonResponsive
+    - name: VM_Missing_Backup
+    - name: VM_Antimalware_Not_Up_To_Date
+    - name: VM_Critical_Or_Security_Updates_Missing
+
+## DEFAULT SQL ALERT RULE SET ##
+# - name: SQLStandard
+#   alertSets:
+#   - type: SQL
+#     alerts:
+  #   - name: Failed_Recovery
+  #   - name: nFgs_In_System_FGs
+  #   - name: nMark_Suspect_Db
+  #   - name: nRvr_DB_UnRs_Txn
+  #   - name: Low_Memory_Or_Disk
+  #   - name: Low_Memory_CLR
+  #   - name: Failed_DB_Recovery
+  #   - name: Max_User_Connection
+  #   - name: Failed_Backup
+  #   - name: nCleanup
+  #   - name: nForeign_Key
+  #   - name: nSpace_For_Logfile
+  #   - name: Exceeded_Capacity
+  #   - name: Failed_MSDTC_Txn
+  #   - name: Exceeded_Log_Capacity
+  #   - name: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_DatabaseConsistencyErrors
+  #   - name: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_SQLOpsJobExecutionfailures
+  #   - name: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Custom_Error_60200
+  #   - name: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Event14151_ExpiredSubscription
+  #   - name: Failed_SQL_Server_Agent
+  #   - name: Unavailable_DB_Log
+  #   - name: Exceeded_Txn_Repxn_Thd
+  #   - name: Failed_Service_Broker
+  #   - name: Exceeded_Blocking_Thd
+  #   - name: nPage_Available_FG
+  #   - name: fileGroupFull
+
+## CUSTOM EXAMPLE ##
+# - name: VMStandard
+#   alertSets:
+#   - type: virtualMachines
+#     alerts:
+#     - name: HighCpuAll
+#       enabled: true                                                                                         # optional
+#       description:                                                                                          # optional
+#       threshold:
+#         operator: greaterThan
+#         value: 0
+#       severity: critcal                                                                                     # optional
+#       schedule:                                                                                             # optional
+#         frequencyInMinutes: 30
+#         timeWindowInMinutes: 240
+#       service:
+#         dependencies:
+#           actionGroups: []
+#         publish:
+#           logAlert:
+#       customisedActions:                                                                                    # optional
+#         emailSubject: "HighCpuAll - VM - alerts"
+#         webhookJsonPayload: |-                                                                              # optional
+#           {
+#             "text": "#alertrulename fired with #searchresultcount over threshold of #thresholdvalue."
+#           }
+#       parameters:
+#         _maxValue: 85
+#         _timeWindow: 4h

@@ -81,6 +81,10 @@ function New-CmAzDeployment {
                 New-CmAzCoreAutomation -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
             }
 
+            logAlerts {
+                New-CmAzMonitorLogAlerts -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
+            }
+
             deleteservice {
                 Set-CmAzCoreAutomationDeleteResource -SettingsObject $SettingsObject
             }

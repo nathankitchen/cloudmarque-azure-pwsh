@@ -1,6 +1,6 @@
 component: core                                 # Required to use settings with New-CmAzDeployment
 
 automationSettings: ./automation.yml            # Path to automation settings file.
-budgetSettings: ./budgets.yml                   # Path to budget settings file
-keyvaultSettings: ./keyvaults.yml               # Path to keyvault settings file
-monitorSettings: ./monitor.yml                  # Path to monitor settings file
+budgetSettings: ./budgets.yml                   # Path to budget settings file.
+keyvaultSettings: ./keyvaults.yml               # Path to keyvault settings file.
+monitorSettings: ./monitor.yml                  # Path to monitor settings file.

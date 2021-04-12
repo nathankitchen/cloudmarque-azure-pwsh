@@ -8,6 +8,7 @@ tokens:
     iaas: iaas
     paas: paas
     endpoints: end
+    monitor: mon
     security: sec
   environments:
     default: shr

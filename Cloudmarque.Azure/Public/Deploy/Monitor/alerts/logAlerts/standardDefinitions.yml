@@ -1,0 +1,625 @@
+Severity:
+  Critical: 0
+  Error: 1
+  Warning: 2
+  Informational: 3
+  Verbose: 4
+
+Queries:
+- virtualMachines:
+  - name: High_CPU_Usage_Percent
+    description: Triggers an alert for when CPU usage percentage reaches a set threshold.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 10
+      timeWindowInMinutes: 60
+    severity: 0
+    defaults:
+      _minPercentage: 100
+      _timeWindow: 1h
+    query: |-
+      InsightsMetrics
+      | where Origin == "vm.azm.ms"
+      | where Namespace == "Processor" and Name == "UtilizationPercentage" 
+      | summarize AverageCPUPercentage = avg(Val) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId 
+      | where AverageCPUPercentage >= @@@_minPercentage@@@
+
+  - name: High_CPU_Usage_Percent_Range
+    description: Triggers an alert for when CPU usage percentage reaches a set range.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 10
+      timeWindowInMinutes: 60
+    severity: 0
+    defaults:
+      _minPercentage: 95
+      _maxPercentage: 99
+      _timeWindow: 30m
+    query: |-
+      InsightsMetrics
+      | where Origin == "vm.azm.ms"
+      | where Namespace == "Processor" and Name == "UtilizationPercentage" 
+      | summarize AverageCPUPercentage = avg(Val) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId 
+      | where AverageCPUPercentage >= @@@_minPercentage@@@ and AverageCPUPercentage <= @@@_maxPercentage@@@
+
+  - name: Low_Disk_Space
+    description: Triggers an alert for when available Disk space percentage and MB value falls below set thresholds.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 10
+      timeWindowInMinutes: 60
+    severity: 2
+    defaults:
+      _maxValueMB: 153600
+      _maxPercentage: 15
+      _timeWindow: 1h
+    query: |-
+      InsightsMetrics
+      | where Origin == "vm.azm.ms"
+      | where Namespace == "LogicalDisk" and Name == "FreeSpaceMB"
+      | extend Disk=tostring(todynamic(Tags)["vm.azm.ms/mountId"])
+      | extend TotalSpaceMB = toreal(todynamic(Tags)["vm.azm.ms/diskSizeMB"])
+      | extend FreeSpacePercentage = Val / TotalSpaceMB * 100
+      | extend FreeSpaceMB = Val
+      | summarize AverageFreeSpacePercentage = avg(FreeSpacePercentage) by bin(TimeGenerated, @@@_timeWindow@@@), FreeSpaceMB, _ResourceId, Disk
+      | where AverageFreeSpacePercentage <= @@@_maxPercentage@@@ and FreeSpaceMB <= @@@_maxValueMB@@@
+
+  - name: High_Memory_Usage_Percent
+    description: Triggers an alert for when Memory usage percentage reaches a set threshold.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 10
+      timeWindowInMinutes: 60
+    severity: 0
+    defaults:
+      _minPercentage: 1
+      _timeWindow: 1h
+    query: |-
+      InsightsMetrics 
+      | where Origin == "vm.azm.ms" 
+      | where Namespace == "Memory" and Name == "AvailableMB" 
+      | extend TotalMemory = toreal(todynamic(Tags)["vm.azm.ms/memorySizeMB"]) 
+      | extend AvailableMemoryPercentage = (toreal(Val) / TotalMemory) * 100.0 
+      | summarize AverageAvailableMemoryPercentage = avg(AvailableMemoryPercentage) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId
+      | where AverageAvailableMemoryPercentage < @@@_minPercentage@@@
+
+  - name: High_Memory_Usage_Percent_Range
+    description: Triggers an alert for when Memory usage percentage reaches a set range.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 10
+      timeWindowInMinutes: 60
+    severity: 2
+    defaults:
+      _minPercentage: 1
+      _maxPercentage: 5
+      _timeWindow: 30m
+    query: |-
+      InsightsMetrics 
+      | where Origin == "vm.azm.ms" 
+      | where Namespace == "Memory" and Name == "AvailableMB" 
+      | extend TotalMemory = toreal(todynamic(Tags)["vm.azm.ms/memorySizeMB"]) 
+      | extend AvailableMemoryPercentage = (toreal(Val) / TotalMemory) * 100.0 
+      | summarize AverageAvailableMemoryPercentage = avg(AvailableMemoryPercentage) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId
+      | where AverageAvailableMemoryPercentage >= @@@_minPercentage@@@ and AverageAvailableMemoryPercentage <= @@@_maxPercentage@@@
+
+  - name: Corrupt_NTFS
+    description: Corrupt NTFS on VM disk.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 60
+      timeWindowInMinutes: 120
+    severity: 2
+    query: |-
+      Event 
+      | where EventLog == "System" and Source == "DISK" or Source == "Ntfs" and EventID == 55
+      | project _ResourceId
+
+  - name: Unexpected_Shutdown
+    description: Unexpected VM shutdown.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 60
+      timeWindowInMinutes: 120
+    severity: 2
+    query: |-
+      Event 
+      | where EventLog == "System" and EventID == 6008 
+      | project _ResourceId
+
+  - name: VM_NonResponsive
+    description: VM not responsive.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 5
+      timeWindowInMinutes: 15
+    severity: 2
+    defaults:
+      _timeWindow: 15m
+    query: |-
+      Heartbeat
+      | summarize LastHeartbeat = max(TimeGenerated) by ResourceId
+      | where LastHeartbeat < ago(@@@_timeWindow@@@)
+
+  - name: VM_Missing_Backup
+    description: Missed backup for VM.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 1440
+      timeWindowInMinutes: 1440
+    severity: 2
+    query: |-
+      AddonAzureBackupJobs
+      | where JobOperation == "Backup"
+      | summarize arg_max(TimeGenerated, *) by JobUniqueId
+      | where JobStatus == Failed
+  
+  - name: VM_Antimalware_Not_Up_To_Date
+    description: Antimalware installed on vm is not up to date.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 1440
+      timeWindowInMinutes: 1440
+    severity: 2
+    query: |-
+      ProtectionStatus
+      | summarize arg_max(TimeGenerated,*) by ResourceId
+      | where ProtectionStatus == "Signatures out of date"
+
+  - name: VM_Critical_Or_Security_Updates_Missing
+    description: VM updated with latest critical/security updates.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 360
+      timeWindowInMinutes: 360
+    severity: 2
+    query: |-
+      Update
+      | where Classification in ("Security Updates", "Critical Updates")
+      | where UpdateState == "Needed" and Optional == false and Approved == true
+
+  - SQL:
+    - name: Failed_Recovery
+      description: Triggers an alert whenever there are issues detected in connecting or opening to the master database.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 3417 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Cannot recover the master database", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ": SQL-Cannot recover the master database"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: nFgs_In_System_FGs
+      description: Triggers an alert whenever there are issues detected with the database filegroup.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where  EventID == 8932 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Could not find filegroup in sys.filegroups", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":Could not find filegroup in sys.filegroups"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: nMark_Suspect_Db
+      description: Alert is triggered whenever there are corruption/inconsistency issues detected with the database and engine not being able to mark the database as suspect.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 3413 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Could not mark database as suspect", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":Could not mark database as suspect"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: nRvr_DB_UnRs_Txn
+      description: Alert is triggered whenever there are inconsistency issues detected with the database.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 3431 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Could not recover database because of unresolved transaction outcomes", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":Could not recover database because of unresolved transaction outcomes"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Low_Memory_Or_Disk
+      description: Alert is triggered whenever there are low memory conditions detected.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where  EventID == 945 
+        | project Computer, TimeGenerated, AlertType_s = "Database cannot be opened due to inaccessible files or insufficient memory or disk space", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":Database cannot be opened due to inaccessible files or insufficient memory or disk space"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Low_Memory_CLR
+      description: Alert is triggered whenever there are low memory conditions detected for CLR execution.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where  EventID == 6289 
+        | project Computer, TimeGenerated, AlertType_s = "Failed to allocate memory for common language runtime (CLR) functionality", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":Failed to allocate memory for common language runtime (CLR) functionality"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Failed_DB_Recovery
+      description: Alert is triggered whenever there are errors logged for database recovery.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where  EventID == 3414 
+        | project Computer, TimeGenerated, AlertType_s = "An error occurred during database recovery", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":An error occurred during database recovery"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Max_User_Connection
+      description: Alert is triggered whenever the connection pool is exhausted, can occur due to low memory condition and other performance issues
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where  EventID == 17809 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-The maximum number of user connections has already been reached", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-The maximum number of user connections has already been reached"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Failed_Backup
+      description: Alert is triggered whenever the backup operation fails due performance issues.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where  EventID == 3267 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-The server is too busy to perform the backup or restore operation", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-The server is too busy to perform the backup or restore operation"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: nCleanup
+      description: Alert is created when there was no successful rollback of killed process.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where  EventID == 6103 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Could not do cleanup for the killed process", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Could not do cleanup for the killed process"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: nForeign_Key
+      description: Alert is created when there are database inconsistency detected.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 439 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Could not find FOREIGN KEY constraints for table, although the table is flagged as having them", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":Could not find FOREIGN KEY constraints for table, although the table is flagged as having them"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: nSpace_For_Logfile
+      description: Alert is created when the database logfiles go out of space.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where  EventID == 3619 
+        | project Computer, TimeGenerated, AlertType_s = "Could not write a CHECKPOINT record in database because the log is out of space", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":Could not write a CHECKPOINT record in database because the log is out of space"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Exceeded_Capacity
+      description: Alert is created when the database capacity threshold is exceeded.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 17063 
+        | where EventID == 60120 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Database capacity threshold exceeded", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Database capacity threshold exceeded"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Failed_MSDTC_Txn
+      description: Alert is fired when inconsistency is detected with the distributed transaction.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where  EventID == 8510 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Enlist of MSDTC transaction failed", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Enlist of MSDTC transaction failed"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Exceeded_Log_Capacity
+      description: Alert is fired when log file Capacity threshold exceeded.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 17063 
+        | where EventID == 60110 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Log Capacity threshold exceeded", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Log Capacity threshold exceeded"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_DatabaseConsistencyErrors
+      description: Alert is fired when inconsistency is detected with the distributed transaction.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 17063 
+        | where EventID == 70000 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Database Consistency errors", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Database Consistency errors"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_SQLOpsJobExecutionfailures
+      description: Alert is fired when SQL Server job execution fails event 17063.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 17063 
+        | where EventID == 61001 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Microsoft SQLServer 2014 Monitoring Event 17063 SQLOpsJobExecutionfailures", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Microsoft SQLServer 2014 Monitoring Event 17063 SQLOpsJobExecutionfailures"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Custom_Error_60200
+      description: Alert is fired when SQL Server event id 60200 is fired.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 17063 
+        | where EventID == 60200 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Microsoft SQLServer 2014 Monitoring Override Custom Error 60200", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Microsoft SQLServer 2014 Monitoring Override Custom Error 60200"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Event14151_ExpiredSubscription
+      description: Alert is fired when event 14151.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 14151 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Microsoft SQLServer 2014 Monitoring Override Event14151 ExpiredSubscription", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Microsoft SQLServer 2014 Monitoring Override Event14151 ExpiredSubscription"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Failed_SQL_Server_Agent
+      description: Alert is fired when SQL Server agent service could not be started.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 103 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-SQLServerAgent could not be started", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-SQLServerAgent could not be started"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Unavailable_DB_Log
+      description: Alert is fired when the log for database is not available.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 9001 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-The log for database is not available", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-The log for database is not available"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Exceeded_Txn_Repxn_Thd
+      description: Alert is fired when SQL Server transactional replication latency threshold exceededs.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 17063 
+        | where EventID == 60201 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Transactional replication latency threshold exceeded", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Transactional replication latency threshold exceeded"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Failed_Service_Broker
+      description: Alert is fired when the Service Broker message fails to get delivered.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 9736 
+        | project Computer, TimeGenerated, AlertType_s = "SQL -SQL Server Service Broker dialog caught an error", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL -SQL Server Service Broker dialog caught an error"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: Exceeded_Blocking_Thd
+      description: Alert is fired when the blocking threshold exceededs.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 17063 
+        | where EventID == 60100 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Blocking threshold exceeded", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Blocking threshold exceeded"), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: nPage_Available_FG
+      description: Alert is fired when engine could not allocate new page for database. There are no more pages available in filegroup.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 1101 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Could not allocate new page for database.There are no more pages available in filegroup.", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Could not allocate new page for database.There are no more pages available in filegroup."), AlertDetails_s = strcat("Event description:", Rendereddescription)
+
+    - name: fileGroupFull
+      description: Alert is fired when engine could not allocate space for object in database because the filegroup is full.
+      threshold:
+        operator: greaterThan
+        value: 0
+      schedule:
+        frequencyInMinutes: 30
+        timeWindowInMinutes: 240
+      severity: 4
+      query: |-
+        Event 
+        | where EventLog == "Application" 
+        | where Source == "MSSQLSERVER" 
+        | where EventID == 1105 
+        | project Computer, TimeGenerated, AlertType_s = "SQL-Could not allocate space for object in database because the filegroup is full", AffectedCI_s = Computer, AlertTitle_s = strcat(Computer, ":SQL-Could not allocate space for object  in database  because the  filegroup is full"), AlertDetails_s = strcat("Event description:", Rendereddescription)
