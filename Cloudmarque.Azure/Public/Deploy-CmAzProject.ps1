@@ -2,10 +2,15 @@ function Deploy-CmAzProject {
 
     <#
 		.Synopsis
-		 Auto-deploys Azure resources depending on the type of component defined in settings.
+		 Auto deploys resources specified in targeted directories and files of various types.
 
         .Description
-		 Wrapper function to auto-identify background script to process provided settings and deploy Azure infrastructure.
+		 Auto deploys resources with the following file types:
+         * Powershell (.ps1)
+         * Arm Templates (.json)
+         * Azure Bicep file (.bicep)
+         * Cloudmarque Yml files via New-CmAzDeployment
+         * Directories containing any of the above.
 
         .Parameter SettingsFile
 		 File path for the settings file to be converted into a settings object.
@@ -13,25 +18,11 @@ function Deploy-CmAzProject {
         .Parameter SettingsObject
          Object containing the configuration values required to run this cmdlet.
 
-        .Parameter TagSettingsFile
-         File path for settings containing tags definition.
-
-			* Uppercase
-			* Lowercase
-			* Numeric
-			* Special
-
         .Component
 		 Common
 
         .Example
          Deploy-CmAzProject -SettingsFile "c:/directory/settingsFile.yml"
-
-        .Example
-		 Deploy-CmAzProject -SettingsFile "c:/directory/settingsFile.yml" -TagSettingsFile "c:/directory/tags.yml"
-
-        .Example
-		 Deploy-CmAzProject -SettingsFile "c:/directory/virtualmachine.yml" -LocalAdminUsername $adminUser -LocalAdminPassword $adminPassword
 	#>
 
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
@@ -40,12 +31,10 @@ function Deploy-CmAzProject {
         [parameter(Mandatory = $true, ParameterSetName = "Settings File")]
         [String]$SettingsFile,
         [parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
-        [Object]$SettingsObject,
-        [String]$TagSettingsFile
+        [Object]$SettingsObject
     )
 
     $ErrorActionPreference = "Stop"
-
 
 	try {
 
