@@ -25,7 +25,7 @@ function Deploy-CmAzProject {
          Deploy-CmAzProject -SettingsFile "c:/directory/settingsFile.yml"
 	#>
 
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "High")]
 
     param(
         [parameter(Mandatory = $true, ParameterSetName = "Settings File")]
