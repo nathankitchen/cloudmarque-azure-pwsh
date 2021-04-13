@@ -1,0 +1,23 @@
+Severity:
+  Critical: 0
+  Error: 1
+  Warning: 2
+  Informational: 3
+  Verbose: 4
+
+timeWindowInMinutes:
+  1: PT1M
+  5: PT5M
+  15: PT15M
+  30: PT30M
+  60: PT1H
+  360: PT6H
+  720: PT12H
+  1440: PT24H
+
+frequencyInMinutes:
+  1: PT1M
+  2: PT2M
+  15: PT15M
+  30: PT30M
+  60: PT1H

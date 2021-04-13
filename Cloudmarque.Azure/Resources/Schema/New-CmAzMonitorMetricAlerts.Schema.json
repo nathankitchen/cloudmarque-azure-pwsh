@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "New-CmAzCoreKeyvault",
+    "$id": "New-CmAzMonitorMetricAlerts",
     "type": "object",
-    "title": "New-CmAzMonitorLogAlerts",
+    "title": "New-CmAzMonitorMetricAlerts",
     "description": "Settings Root.",
     "required": [
         "component",
@@ -17,28 +17,16 @@
         },
         "service": {
             "$id": "#/service",
-            "type": "object",
+            "type": ["object", "null"],
             "title": "Service",
             "description": "Contains dependency and publish details for service location.",
-            "required": [
-                "dependencies"
-            ],
             "properties": {
                 "dependencies": {
                     "$id": "#/service/dependencies",
-                    "type": "object",
+                    "type": ["object", "null"],
                     "title": "Dependencies",
                     "description": "Contains dependency details for service location.",
-                    "required": [
-                        "workspace"
-                    ],
                     "properties": {
-                        "workspace": {
-                            "$id": "#/service/dependencies/workspace",
-                            "type": "string",
-                            "title": "Workspace",
-                            "description": "Dependency value to fetch existing resource type."
-                        },
                         "actionGroups": {
                             "$id": "#/service/dependencies/actionGroups",
                             "type": ["array", "null"],
@@ -54,10 +42,10 @@
                     "title": "Publish",
                     "description": "Contains publish details for service location.",
                     "properties": {
-                        "logAlert": {
-                            "$id": "#/service/publish/logAlert",
+                        "metricAlert": {
+                            "$id": "#/service/publish/metricAlert",
                             "type": ["string", "null"],
-                            "title": "Log Alert",
+                            "title": "Metric Alert",
                             "description": "Global default value to publish on deployed resource type."
                         }
                     },
@@ -102,49 +90,62 @@
                                             "$id": "#/groups/items/allOf/alertSets/items/allOf",
                                             "type": "object",
                                             "required": [
-                                                "type",
+                                                "resourceType",
                                                 "alerts"
                                             ],
                                             "properties": {
-                                                "type": {
-                                                    "$id": "#/groups/items/allOf/alertSets/items/allOf/type",
+                                                "resourceType": {
+                                                    "$id": "#/groups/items/allOf/alertSets/items/allOf/resourceType",
                                                     "type": "string",
-                                                    "title": "Type",
-                                                    "description": "The type of resource the collection of alerts is grouped against."
+                                                    "title": "Resource Type",
+                                                    "description": "The resource Type as defined in the Azure namespace."
                                                 },
                                                 "alerts": {
                                                     "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts",
                                                     "type": "array",
                                                     "title": "Alerts",
-                                                    "description": "Contains all details of the log alert rules to be deployed.",
+                                                    "description": "Contains all details of the metric alert rules to be deployed.",
                                                     "items": {
                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items",
                                                         "minItems": 1,
+                                                        "required": [
+                                                            "metricName",
+                                                            "location",
+                                                            "threshold",
+                                                            "service"
+                                                        ],
                                                         "allOf": [
                                                             {
                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf",
                                                                 "type": "object",
                                                                 "properties": {
-                                                                    "type": {
-                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/name",
-                                                                        "type": ["string", "null"],
-                                                                        "title": "Name",
-                                                                        "description": "The name of the log alert rule."
+                                                                    "metricName": {
+                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/metricName",
+                                                                        "name": "string",
+                                                                        "title": "Metric Name",
+                                                                        "description": "The name of the metric alert rule."
                                                                     },
                                                                     "description": {
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/description",
                                                                         "type": ["string", "null"],
                                                                         "title": "Description",
-                                                                        "description": "Description of the log alert."
+                                                                        "description": "Description of the metric alert rule."
+                                                                    },
+                                                                    "location": {
+                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/location",
+                                                                        "type": "string",
+                                                                        "title": "Location",
+                                                                        "description": "Location of the resources that the alert rule is set to."
                                                                     },
                                                                     "threshold": {
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold",
-                                                                        "type": ["object", "null"],
+                                                                        "type": "object",
                                                                         "title": "Threshold",
-                                                                        "description": "Contains threshold details for the log alert rule query.",
+                                                                        "description": "Contains threshold details for the metric alert rule.",
                                                                         "required": [
                                                                             "operator",
-                                                                            "value"
+                                                                            "value",
+                                                                            "timeAggregation"
                                                                         ],
                                                                         "properties": {
                                                                             "operator": {
@@ -152,13 +153,20 @@
                                                                                 "type": "string",
                                                                                 "title": "Operator",
                                                                                 "description": "The value comparison operator.",
-                                                                                "enum": ["greaterThan", "equal", "lessThan"]
+                                                                                "enum": ["Equals", "NotEquals", "GreaterThan", "GreaterThanOrEqual", "LessThan", "LessThanOrEqual"]
                                                                             },
                                                                             "value": {
                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold/value",
                                                                                 "type": "integer",
                                                                                 "title": "Value",
                                                                                 "description": "The threshold value that triggers the alert."
+                                                                            },
+                                                                            "timeAggregation": {
+                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold/timeAggregation",
+                                                                                "type": "string",
+                                                                                "title": "Time Aggregation",
+                                                                                "enum": ["Average", "Maximum", "Minimum", "Total", "Count"],
+                                                                                "description": "The type of aggregation to apply to the monitored data."
                                                                             }
                                                                         },
                                                                         "additonalProperties": false
@@ -181,7 +189,7 @@
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/schedule",
                                                                         "type": ["object", "null"],
                                                                         "title": "Schedule",
-                                                                        "description": "Contains the log alert rule schedule details.",
+                                                                        "description": "Container of metric alert rule schedule details.",
                                                                         "required": [
                                                                             "frequencyInMinutes",
                                                                             "timeWindowInMinutes"
@@ -191,30 +199,42 @@
                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/schedule/frequencyInMinutes",
                                                                                 "type": "integer",
                                                                                 "title": "Frequency In Minutes",
-                                                                                "description": "The frequency in which the log analytics query is executed.",
-                                                                                "enum": [5, 10, 15, 30, 45, 60, 120, 180, 240, 300, 360, 1440]
+                                                                                "description": "The frequency in which the metric alert rule is run.",
+                                                                                "enum": [1, 2, 15, 30, 60]
                                                                             },
-                                                                            "timeWindowInMinutes": {
+                                                                            "aggregationGranulat": {
                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/schedule/timeWindowInMinutes",
                                                                                 "type": "integer",
                                                                                 "title": "Time Window In Minutes",
-                                                                                "description": "The time windows of results to return for the log analytics query",
-                                                                                "enum": [5, 10, 15, 30, 45, 60, 120, 180, 240, 300, 360, 1440, 2880]
+                                                                                "description": "The interval over which the data is grouped according to the selected aggregation type.",
+                                                                                "enum": [1, 5, 15, 30, 60, 360, 720, 1440]
                                                                             }
                                                                         },
                                                                         "additonalProperties": false
                                                                     },
                                                                     "service": {
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service",
-                                                                        "type": ["object", "null"],
+                                                                        "type": "object",
                                                                         "title": "Service",
                                                                         "description": "Contains dependency and publish details for service location.",
                                                                         "properties": {
                                                                             "dependencies": {
                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/dependencies",
-                                                                                "type": ["object", "null"],
+                                                                                "type": "object",
                                                                                 "title": "Dependencies",
                                                                                 "description": "Contains dependency details for service location.",
+                                                                                "oneOf": [
+                                                                                    {
+                                                                                        "required" : [
+                                                                                            "resources"
+                                                                                        ]
+                                                                                    },
+                                                                                    {
+                                                                                        "required" : [
+                                                                                            "resourceGroups"
+                                                                                        ]
+                                                                                    }
+                                                                                ],
                                                                                 "properties": {
                                                                                     "actionGroups": {
                                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/dependencies/actionGroups",
@@ -224,55 +244,31 @@
                                                                                         "items": {
                                                                                             "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/dependencies/actionGroups/items"
                                                                                         }
+                                                                                    },
+                                                                                    "resources": {
+                                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/dependencies/resources",
+                                                                                        "type": ["array", "null"],
+                                                                                        "title": "Resources",
+                                                                                        "description": "Service tag value to fetch existing resources of which to apply the metric alert rule.",
+                                                                                        "items": {
+                                                                                            "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/dependencies/resources/items"
+                                                                                        }
+                                                                                    },
+                                                                                    "resourceGroups": {
+                                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/dependencies/resourceGroups",
+                                                                                        "type": ["array", "null"],
+                                                                                        "title": "Resource Groups",
+                                                                                        "description": "Service tag value to fetch existing resource groups of which to apply the metric alert rule.",
+                                                                                        "items": {
+                                                                                            "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/dependencies/resourceGroups/items"
+                                                                                        }
                                                                                     }
+                                                                                    
                                                                                 },
-                                                                                "additionalProperties": false
-                                                                            },
-                                                                            "publish": {
-                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/publish",
-                                                                                "type": ["object", "null"],
-                                                                                "title": "Publish",
-                                                                                "description": "Contains publish details for service location.",
-                                                                                "properties": {
-                                                                                    "logAlert": {
-                                                                                        "$id": "#/service/publish/logAlert",
-                                                                                        "type": ["string", "null"],
-                                                                                        "title": "Log Alert",
-                                                                                        "description": "Local overriding value to publish on deployed existing resource type."
-                                                                                    }
-                                                                                },
-                                                                                "additionalProperties": false
+                                                                                "additonalProperties": false
                                                                             }
                                                                         },
                                                                         "additonalProperties": false
-                                                                    },
-                                                                    "customisedActions": {
-                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/customisedActions",
-                                                                        "type": ["object", "null"],
-                                                                        "title": "Customised Actions",
-                                                                        "description": "Container of additonal custom actions for when an alert is triggered.",
-                                                                        "properties": {
-                                                                            "emailSubject": {
-                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/customisedActions/emailSubject",
-                                                                                "type": "string",
-                                                                                "title": "Email Subject",
-                                                                                "description": "Subject of email sent from action group."
-                                                                            },
-                                                                            "webhookJsonPayload": {
-                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/customisedActions/webhookJsonPayload",
-                                                                                "type": "string",
-                                                                                "title": "Webhook Json Payload",
-                                                                                "description": "Specify a custom json payload that gets sent to the webhook instead of the default alert payload."
-                                                                            }
-                                                                        },
-                                                                        "additonalProperties": false
-                                                                    },
-                                                                    "parameters": {
-                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/parameters",
-                                                                        "type": ["object", "null"],
-                                                                        "title": "Parameters",
-                                                                        "description": "Any required parameters for the log alert",
-                                                                        "additonalProperties": true
                                                                     }
                                                                 },
                                                                 "additonalProperties": false

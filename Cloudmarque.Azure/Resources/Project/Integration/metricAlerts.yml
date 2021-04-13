@@ -1,0 +1,71 @@
+component: metricAlerts
+
+service:
+  dependencies:
+    actionGroups: [Core-Test-Ag1]
+  publish:
+    metricAlert: Mon-Test-Ma
+
+groups:
+- name: VMStandard
+  alertSets:
+  - resourceType: Microsoft.Compute/virtualMachines
+    alerts:
+    
+    - metricName: Data Disk IOPS Consumed Percentage
+      location: UK South
+      severity: Warning
+      threshold:
+        operator: GreaterThanOrEqual
+        value: 95
+        timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          resourceGroups: [Iaas-Test-Vm-Rg1]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                # evaluationFrequency
+        timeWindowInMinutes: 60                               # windowSize
+
+    - metricName: Data Disk IOPS Consumed Percentage
+      location: UK South
+      severity: Critical
+      threshold:
+        operator: Equals
+        value: 100
+        timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          resources: [Iaas-Test-Vm-Rg1]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                # evaluationFrequency
+        timeWindowInMinutes: 60                               # windowSize
+
+  # - name: VMStandard-rg
+  #   alertSets:
+  #   - resourceType: Microsoft.Compute/virtualMachines
+  #     alerts:
+  #     - metricName: CPU Credits Remaining
+  #       location: UK South
+  #       severity: Critical
+  #       threshold:
+  #         operator: GreaterThan
+  #         value: 0
+  #         timeAggregation: Average
+  #       service:
+  #         dependencies:
+  #           resourceGroups:
+  #             - Iaas-Test-Spoke1-Rg2
+  #       schedule:
+  #         frequencyInMinutes: 1                                # evaluationFrequency
+  #         timeWindowInMinutes: 5                               # windowSize
+
+
+# Notes:
+# 1. Refer to https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-supported
+# 2. Multi-resource metric alert rules are only available for multiple resources in the same location.

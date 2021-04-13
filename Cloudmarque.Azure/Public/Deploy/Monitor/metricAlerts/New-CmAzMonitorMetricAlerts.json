@@ -1,0 +1,78 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Alerts": {
+            "type": "array"
+        }
+    },
+    "resources": [
+        {
+            "name": "[concat('AlertsTemplate', copyIndex('AlertCopy'))]",
+            "type": "Microsoft.Resources/Deployments",
+            "resourceGroup": "[parameters('Alerts')[copyIndex('AlertCopy')].resourceGroup]",
+            "apiVersion": "2019-10-01",
+            "copy": {
+                "name": "AlertCopy",
+                "count": "[length(parameters('Alerts'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "Alert": {
+                        "value": "[parameters('Alerts')[copyIndex('AlertCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "Alert": {
+                            "type": "Object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Insights/metricAlerts",
+                            "name": "[parameters('Alert').name]",
+                            "apiVersion": "2018-03-01",
+                            "location": "global",
+                            "tags": {
+                                "cm-service": "[parameters('Alert').service.publish.metricAlert]"
+                            },
+                            "properties": {
+                                "description": "[parameters('Alert').description]",
+                                "enabled": "[parameters('Alert').enabled]",
+                                "severity": "[parameters('Alert').severity]",
+                                "scopes": "[parameters('Alert').scopes]",
+                                "autoMitigate": true,
+                                "targetResourceType": "[parameters('Alert').resourceType]",
+                                "targetResourceRegion": "[parameters('Alert').location]",
+                                "evaluationFrequency":"[parameters('Alert').schedule.frequencyInMinutes]",
+                                "windowSize": "[parameters('Alert').schedule.timeWindowInMinutes]",
+                                "criteria": {
+                                    "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
+                                    "allOf": [
+                                        {
+                                            "name" : "Alert Critirion",
+                                            "metricName": "[parameters('Alert').metricName]",
+                                            "metricNamespace": "[parameters('Alert').resourceType]",
+                                            "dimensions":[],
+                                            "operator": "[parameters('Alert').threshold.operator]",
+                                            "threshold" : "[parameters('Alert').threshold.value]",
+                                            "timeAggregation": "[parameters('Alert').threshold.timeAggregation]"
+                                        }
+                                    ]
+                                },
+                                "actions":  "[parameters('Alert').actionGroups]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

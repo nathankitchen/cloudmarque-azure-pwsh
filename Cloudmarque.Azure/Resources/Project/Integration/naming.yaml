@@ -31,6 +31,8 @@ tokens:
     actiongroupreceiver: agrec
     keyvault: kv
     computerName: cn
+    alert: alt
+    deployment: dep
 generator:
  - name: default
    split: "-"
