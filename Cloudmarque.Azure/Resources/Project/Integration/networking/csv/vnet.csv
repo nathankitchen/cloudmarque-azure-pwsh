@@ -18,4 +18,4 @@ Iaas-Test-Hub2-Rg,UKWest,Iaas-Test-Hub2-Vnet1,10.0.0.0/23,,,Iaas-Test-Hub2-Vnet1
 Iaas-Test-Hub2-Rg,UKWest,Iaas-Test-Hub2-Vnet1,10.0.0.0/23,,,Iaas-Test-Hub2-Vnet1-Snet-management1,10.0.0.96/27,Iaas-Test-Hub2-Vnet1-Snet-Nsg-management1,Iaas-Test-Hub2-Vnet1-Snet-Udr-management1,,
 Iaas-Test-Hub2-Rg,UKWest,Iaas-Test-Hub2-Vnet1,10.0.0.0/23,,,Iaas-Test-Hub2-Vnet1-Snet-fwpub1,10.0.0.128/27,Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwpub1,Iaas-Test-Hub2-Vnet1-Snet-Udr-fwpub1,,
 Iaas-Test-Hub2-Rg,UKWest,Iaas-Test-Hub2-Vnet1,10.0.0.0/23,,,Iaas-Test-Hub2-Vnet1-Snet-dc1,10.0.0.192/27,,,,
-Iaas-Test-Int-Rg,East US,Iaas-Test-Int-Vnet1,10.20.0.0/23,,,Iaas-Test-Int-Vnet1-Snet-ext1,10.20.0.0/24,,,Iaas-Test-Int-Vnet1,Iaas-Test-Int-Rg
+Iaas-Test-Int-Rg,EastUS,Iaas-Test-Int-Vnet1,10.20.0.0/23,,,Iaas-Test-Int-Vnet1-Snet-ext1,10.20.0.0/24,,,Iaas-Test-Int-Vnet1,Iaas-Test-Int-Rg

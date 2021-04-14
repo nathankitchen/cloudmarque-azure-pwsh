@@ -33,9 +33,7 @@ function New-CmAzMonitorMetricAlerts {
 		[parameter(Mandatory = $true, ParameterSetName = "Settings File")]
 		[string]$SettingsFile,
 		[parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
-		[object]$SettingsObject,
-		[AllowEmptyString()]
-		[String]$TagSettingsFile
+		[object]$SettingsObject
 	)
 
 	$ErrorActionPreference = "Stop"
@@ -52,6 +50,8 @@ function New-CmAzMonitorMetricAlerts {
 			$definitionSeverityNames = $standardDefinitions.Severity.GetEnumerator().Name
 
 			$alerts = @()
+
+			$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable
 
 			foreach ($group in $SettingsObject.groups) {
 
@@ -94,54 +94,49 @@ function New-CmAzMonitorMetricAlerts {
 							}
 						}
 
-						foreach ($resource in $alert.service.dependencies.resources) {
+						foreach ($targetResourceService in $alert.service.dependencies.targetResources) {
 
-							$resourceService = Get-CmAzService -Service $resource -ThrowIfUnavailable
-							$alert.scopes += ($resourceService | Where-object { $_.location -eq $alert.location.replace(' ', '') }).resourceId
+							$targetResource = Get-CmAzService -Service $targetResourceService -ThrowIfUnavailable
+							$alert.scopes += ($targetResource | Where-object { $_.location -eq $alert.targetResourceLocation.replace(' ', '') }).resourceId
 						}
 
-						foreach ($resourceGroup in $alert.service.dependencies.resourceGroups) {
+						foreach ($targetResourceGroupService in $alert.service.dependencies.targetResourceGroups) {
 
-							$resourceGroupService = Get-CmAzService -Service $resourceGroup -ThrowIfUnavailable -IsResourceGroup
-							$alert.scopes += ($resourceGroupService).resourceId
+							$targetResourceGroup = Get-CmAzService -Service $targetResourceGroupService -ThrowIfUnavailable -IsResourceGroup
+							$alert.scopes += $targetResourceGroup.resourceId
 						}
 
 						$alert.description ??= "Alert for $($alert.metricName) on $($alertSet.resourceType)"
-
-						$resourceGroup = $resourceGroupService ? $resourceGroupService.resourceGroupName : $resourceService.ResourceGroupName
-
 						$alert.enabled ??= $true
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "metricAlert" -ResourceServiceContainer $alert
 
 						$alerts += @{
-							name = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $alert.location -Name "$($group.name)-$i-$($alert.threshold.value)"
-							metricName = $alert.metricName
-							resourceGroup = $resourceGroup -is [System.Array] ? $resourceGroup[0] : $resourceGroup
-							resourceType = $alertSet.resourceType
-							location = $alert.location
-							schedule = $alert.schedule
-							actionGroups = $alert.actionGroups
-							scopes = $alert.scopes
-							threshold = $alert.threshold
-							severity = $alert.severity
-							service = $alert.service
-							description = $alert.description
-							enabled = $alert.enabled
+							name = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $alert.targetResourceLocation -Name "$($group.name)-$i-$($alert.threshold.value)";
+							metricName = $alert.metricName;
+							resourceType = $alertSet.resourceType;
+							targetResourceLocation = $alert.targetResourceLocation;
+							schedule = $alert.schedule;
+							actionGroups = $alert.actionGroups;
+							scopes = $alert.scopes;
+							threshold = $alert.threshold;
+							severity = $alert.severity;
+							service = $alert.service;
+							description = $alert.description;
+							enabled = $alert.enabled;
 						}
 					}
 				}
 			}
 
-			$location = $alerts.location -is [System.Array] ? $alerts[0].location : $alerts.location
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Monitor" -Region $resourceGroup.location -Name "New-CmAzMonitorMetricAlerts"
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Monitor" -Region $location -Name "New-CmAzMonitorMetricAlerts"
-
-			New-AzDeployment `
+			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
 				-TemplateFile "$PSScriptRoot\New-CmAzMonitorMetricAlerts.json" `
+				-ResourceGroupName $resourceGroup.resourceGroupName `
 				-Alerts $alerts `
-				-location $location
+				-Force
 
 			Write-Verbose "Finished!"
 		}

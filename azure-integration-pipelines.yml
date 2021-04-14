@@ -190,8 +190,7 @@ stages:
 - stage: Monitor
   dependsOn: [
     "Iaas",
-    "Paas",
-    "Security"
+    "Paas"
   ]
   jobs:
   - job:
@@ -223,7 +222,8 @@ stages:
   dependsOn: [
     "Iaas",
     "Paas",
-    "Security"
+    "Security",
+    "Monitor"
   ]
   condition: always()
   displayName: Tear Down
@@ -265,10 +265,10 @@ stages:
             Write-Verbose "Fetching resource groups.."
             $resources = Get-CmAzService -ServiceKey "cm-integration-test-delete" -Service "true" -IsResourceGroup -Verbose
 
-            foreach ($resource in $resources) {
+            $resources | ForEach-Object {
 
               try {
-                Remove-AzResourceGroup -Name $resource.resourceGroupName -Verbose -Force
+                Remove-AzResourceGroup -Name $_.resourceGroupName -Verbose -Force
               }
               catch {
                 $errorThrown = $true

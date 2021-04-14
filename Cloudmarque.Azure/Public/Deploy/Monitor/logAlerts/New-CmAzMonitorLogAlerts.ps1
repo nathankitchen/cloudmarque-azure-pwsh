@@ -35,9 +35,7 @@ function New-CmAzMonitorLogAlerts {
 		[parameter(Mandatory = $true, ParameterSetName = "Settings File")]
 		[string]$SettingsFile,
 		[parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
-		[object]$SettingsObject,
-		[AllowEmptyString()]
-		[String]$TagSettingsFile
+		[object]$SettingsObject
 	)
 
 	$ErrorActionPreference = "Stop"
@@ -113,10 +111,10 @@ function New-CmAzMonitorLogAlerts {
 	
 						$alert.description ??= $definition.description
 	
-						$alert.actionGroupInfo = @{ actionGroups = @(); }
+						$alert.actionGroupInfo = @{ actionGroup = @(); }
 	
 						foreach ($actionGroup in $alert.service.dependencies.actionGroups) {
-							$alert.actionGroupInfo.actionGroups += (Get-CmAzService -Service $actionGroup -ThrowIfUnavailable -ThrowIfMultiple).resourceId
+							$alert.actionGroupInfo.actionGroup += (Get-CmAzService -Service $actionGroup -ThrowIfUnavailable -ThrowIfMultiple).resourceId
 						}
 	
 						if($alert.customisedActions) {
@@ -133,7 +131,6 @@ function New-CmAzMonitorLogAlerts {
 							name = $alertName;
 							enabled = $alert.enabled;
 							query = $definition.query;
-							workspace = $workspace;
 							schedule = $alert.schedule;
 							aznsAction = $alert.actionGroupInfo;
 							threshold = $alert.threshold;
@@ -147,11 +144,13 @@ function New-CmAzMonitorLogAlerts {
 
 			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Monitor" -Region $workspace.location -Name $MyInvocation.MyCommand.Name
 
-			New-AzDeployment `
+			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
-				-Location $workspace.location `
 				-TemplateFile "$PSScriptRoot\New-CmAzMonitorLogAlerts.json" `
-				-Alerts $alerts
+				-ResourceGroupName $workspace.resourceGroupName `
+				-Alerts $alerts `
+				-Workspace $workspace `
+				-Force
 
 			Write-Verbose "Finished!"
 		}

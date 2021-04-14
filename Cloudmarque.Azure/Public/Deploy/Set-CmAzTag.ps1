@@ -111,7 +111,6 @@
 					catch {
 						Write-Error "Issue locating resources in resource group: $($resourceGroupId)." -Category ObjectNotFound -CategoryTargetName "ResourceGroupIds"
 					}
-
 				}
 			}
 			else {
@@ -119,7 +118,6 @@
 			}
 
 			Write-Verbose "Tagging initiated.."
-
 			$resources  | ForEach-Object -Parallel {
 
 				$tagsToSet = @{}
@@ -144,7 +142,7 @@
 				}
 			}
 
-			Write-Verbose "Finished tagging resources!"
+			Write-Verbose "Finished!"
 		}
 	}
 	catch {

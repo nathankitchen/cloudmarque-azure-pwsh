@@ -1,7 +1,7 @@
 component: automation                                           # Required to use settings with New-CmAzDeployment
 
 location: UK South
-name: Core-Test-Auto2021
+name: Core-Test-Auto042021
 
 service:
   dependencies:

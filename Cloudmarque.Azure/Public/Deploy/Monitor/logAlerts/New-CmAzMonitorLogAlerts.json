@@ -4,76 +4,45 @@
     "parameters": {
         "Alerts": {
             "type": "array"
+        },
+        "Workspace": {
+            "type": "object"
         }
     },
     "resources": [
         {
-            "name": "[concat('AlertsTemplate', copyIndex('AlertCopy'))]",
-            "type": "Microsoft.Resources/Deployments",
-            "resourceGroup": "[parameters('Alerts')[copyIndex('AlertCopy')].workspace.resourceGroupName]",
-            "apiVersion": "2019-10-01",
+            "type": "Microsoft.Insights/scheduledQueryRules",
+            "name": "[parameters('Alerts')[copyIndex('AlertCopy')].name]",
+            "apiVersion": "2018-04-16",
+            "location": "[parameters('Workspace').location]",
+            "tags": {
+                "cm-service": "[parameters('Alerts')[copyIndex('AlertCopy')].service.publish.logAlert]"
+            },
+            "properties": {
+                "description": "[parameters('Alerts')[copyIndex('AlertCopy')].description]",
+                "enabled": "[parameters('Alerts')[copyIndex('AlertCopy')].enabled]",
+                "source": {
+                    "query": "[parameters('Alerts')[copyIndex('AlertCopy')].query]",
+                    "dataSourceId": "[parameters('Workspace').resourceId]",
+                    "queryType": "ResultCount"
+                },
+                "schedule": {
+                    "frequencyInMinutes": "[parameters('Alerts')[copyIndex('AlertCopy')].schedule.frequencyInMinutes]",
+                    "timeWindowInMinutes": "[parameters('Alerts')[copyIndex('AlertCopy')].schedule.timeWindowInMinutes]"
+                },
+                "action": {
+                    "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction",
+                    "severity": "[parameters('Alerts')[copyIndex('AlertCopy')].severity]",
+                    "trigger": {
+                        "thresholdOperator": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.Operator]",
+                        "threshold": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.value]"
+                    },
+                    "aznsAction": "[parameters('Alerts')[copyIndex('AlertCopy')].aznsAction]"
+                }
+            },
             "copy": {
                 "name": "AlertCopy",
                 "count": "[length(parameters('Alerts'))]"
-            },
-            "properties": {
-                "mode": "Incremental",
-                "expressionEvaluationOptions": {
-                    "scope": "inner"
-                },
-                "parameters": {
-                    "Alert": {
-                        "value": "[parameters('Alerts')[copyIndex('AlertCopy')]]"
-                    },
-                    "Location": {
-                        "value": "[parameters('Alerts')[copyIndex('AlertCopy')].workspace.location]"
-                    }
-                },
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "parameters": {
-                        "Alert": {
-                            "type": "Object"
-                        },
-                        "Location": {
-                            "type": "string"
-                        }
-                    },
-                    "resources": [
-                        {
-                            "type": "Microsoft.Insights/scheduledQueryRules",
-                            "name": "[parameters('Alert').name]",
-                            "apiVersion": "2018-04-16",
-                            "location": "[parameters('Location')]",
-                            "tags": {
-                                "cm-service": "[parameters('Alert').service.publish.logAlert]"
-                            },
-                            "properties": {
-                                "description": "[parameters('Alert').description]",
-                                "enabled": "[parameters('Alert').enabled]",
-                                "source": {
-                                    "query": "[parameters('Alert').query]",
-                                    "dataSourceId": "[parameters('Alert').workspace.resourceId]",
-                                    "queryType": "ResultCount"
-                                },
-                                "schedule": {
-                                    "frequencyInMinutes": "[parameters('Alert').schedule.frequencyInMinutes]",
-                                    "timeWindowInMinutes": "[parameters('Alert').schedule.timeWindowInMinutes]"
-                                },
-                                "action": {
-                                    "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction",
-                                    "severity": "[parameters('Alert').severity]",
-                                    "trigger": {
-                                        "thresholdOperator": "[parameters('Alert').threshold.Operator]",
-                                        "threshold": "[parameters('Alert').threshold.value]"
-                                    },
-                                    "aznsAction": "[parameters('Alert').aznsAction]"
-                                }
-                            }
-                        }
-                    ]
-                }
             }
         }
     ]

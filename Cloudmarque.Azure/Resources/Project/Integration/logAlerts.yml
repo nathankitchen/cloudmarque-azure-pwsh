@@ -16,6 +16,7 @@ groups:
     - name: High_CPU_Usage_Percent
     - name: High_CPU_Usage_Percent_Range
     - name: Low_Disk_Space
+      description: Critically low available disk space percentage and MB value.
       severity: Critical
       enabled: true
       schedule:
@@ -28,12 +29,11 @@ groups:
     - name: Low_Disk_Space
     - name: High_Memory_Usage_Percent
     - name: High_Memory_Usage_Percent_Range
-    - name: Corrupt_NTFS
-    - name: Unexpected_Shutdown
     - name: VM_NonResponsive
     - name: VM_Missing_Backup
     - name: VM_Antimalware_Not_Up_To_Date
     - name: VM_Critical_Or_Security_Updates_Missing
+    - name: VM_Reboot
 
 ## DEFAULT SQL ALERT RULE SET ##
 # - name: SQLStandard
