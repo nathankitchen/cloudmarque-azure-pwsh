@@ -6,11 +6,11 @@ function Deploy-CmAzProject {
 
         .Description
 		 Auto deploys resources with the following file types:
-         * Powershell (.ps1)
-         * Arm Templates (.json)
-         * Azure Bicep file (.bicep)
-         * Cloudmarque Yml files via New-CmAzDeployment
-         * Directories containing any of the above.
+            * Powershell (.ps1)
+            * Arm Templates (.json)
+            * Azure Bicep file (.bicep)
+            * Cloudmarque Yml files via New-CmAzDeployment
+            * Directories containing any of the above.
 
         .Parameter SettingsFile
 		 File path for the settings file to be converted into a settings object.
