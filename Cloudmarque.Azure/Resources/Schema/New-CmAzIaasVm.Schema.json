@@ -474,12 +474,12 @@
 													"description": "Virtual machine deployment zone.",
 													"enum": [ 1, 2, 3, null]
 												},
-												"timeZone": {
- 													"$id": "#/groups/items/allOf/virtualMachines/items/allOf/timeZone",
-													"type": ["string", "null"],
-													"title": "timeZone",
-													"description": "Timezone for virtual machine. Applicable for Windows OS only."
-                                                },
+												"timeZone": {
+ 													"$id": "#/groups/items/allOf/virtualMachines/items/allOf/timeZone",
+													"type": ["string", "null"],
+													"title": "timeZone",
+													"description": "Timezone for virtual machine. Applicable for Windows OS only."
+												},
 												"availabilitySet": {
 													"$id": "#/groups/items/allOf/virtualMachines/items/allOf/availabilitySet",
 													"type": ["string","null"],
