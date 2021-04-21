@@ -1,0 +1,157 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "New-CmAzIaasVnetPeerings",
+	"type": "object",
+	"title": "New-CmAzIaasVnetPeerings",
+	"description": "Settings Root.",
+	"required": [
+		"peerings"
+	],
+	"properties": {
+		"component": {
+			"$id": "#/component",
+			"type": [
+				"string",
+				"null"
+			],
+			"title": "Component",
+			"description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+		},
+		"peerings": {
+			"$id": "#/peerings",
+			"type": "array",
+			"title": "Peerings",
+			"description": "Contains list of details required to deploy vnet peerings.",
+			"items": {
+				"$id": "#/peerings/items",
+				"minItems": 1,
+				"allOf": [
+					{
+						"$id": "#/peerings/items/allOf",
+						"type": "object",
+						"required": [
+							"source",
+							"targets"
+						],
+						"properties": {
+							"source": {
+								"$id": "#/peerings/items/allOf/source",
+								"type": [
+									"object"
+								],
+								"title": "Source",
+								"description": "Contains source vnet information.",
+								"required": [
+									"resourceGroup",
+									"vnetName"
+								],
+								"properties": {
+									"resourceGroup": {
+										"$id": "#/peerings/items/allOf/source/resourceGroup",
+										"type": [
+											"string"
+										],
+										"title": "ResourceGroup",
+										"description": "Resourcegroup of source Vnet."
+									},
+									"vnetName": {
+										"$id": "#/peerings/items/allOf/source/publish/vnet",
+										"type": [
+											"string"
+										],
+										"title": "VnetName",
+										"description": "Source virtual network name."
+									}
+								},
+								"additionalProperties": false
+							},
+							"targets": {
+								"$id": "#/peerings/items/allOf/targets",
+								"type": [
+									"array"
+								],
+								"title": "targets",
+								"description": "Contains list of target vnet details required to deploy vnet peerings with source vnet.",
+								"items": {
+									"$id": "#/peerings/items/allOf/targets/items",
+									"minItems": 1,
+									"allOf": [
+										{
+											"$id": "#/peerings/items/allOf/targets/items/allOf",
+											"type": "object",
+											"required": [
+												"vnetName"
+											],
+											"properties": {
+												"resourceGroup": {
+													"$id": "#/peerings/items/allOf/targets/items/allOf/resourceGroup",
+													"type": "string",
+													"title": "resourceGroup",
+													"description": "Target vnet resource group name."
+												},
+												"vnetName": {
+													"$id": "#/peerings/items/allOf/targets/items/allOf/vnetName",
+													"type": "string",
+													"title": "VnetName",
+													"description": "Target vnet name."
+												},
+												"subscriptionId": {
+													"$id": "#/peerings/items/allOf/targets/items/allOf/subscriptionId",
+													"type": [
+														"string",
+														"null"
+													],
+													"title": "SubscriptionId",
+													"description": "Subscription id of target vnet."
+												},
+												"allowVirtualNetworkAccess": {
+													"$id": "#/peerings/items/allOf/targets/items/allOf/allowVirtualNetworkAccess",
+													"type": [
+														"boolean",
+														"null"
+													],
+													"title": "AllowVirtualNetworkAccess",
+													"description": "Gets or sets whether resources in the source virtual network space would be able to access the VMs in target virtual network space."
+												},
+												"allowForwardedTraffic": {
+													"$id": "#/peerings/items/allOf/targets/items/allOf/allowForwardedTraffic",
+													"type": [
+														"boolean",
+														"null"
+													],
+													"title": "AllowForwardedTraffic",
+													"description": "Gets or sets whether the forwarded traffic from target virtual network will be allowed/disallowed. "
+												},
+												"allowGatewayTransit": {
+													"$id": "#/peerings/items/allOf/targets/items/allOf/allowGatewayTransit",
+													"type": [
+														"boolean",
+														"null"
+													],
+													"title": "AllowGatewayTransit",
+													"description": "Gets or sets if gateway links can be used in target virtual networking to link to this virtual network."
+												},
+												"useRemoteGateways": {
+													"$id": "#/peerings/items/allOf/targets/items/allOf/useRemoteGateways",
+													"type": [
+														"boolean",
+														"null"
+													],
+													"title": "UseRemoteGateways",
+													"description": "Gets or sets if target gateways can be used on source virtual network"
+												}
+											},
+											"additionalProperties": false
+										}
+									]
+								}
+							}
+						},
+						"additionalProperties": false
+					}
+				]
+			}
+		}
+	},
+	"additionalProperties": false
+}

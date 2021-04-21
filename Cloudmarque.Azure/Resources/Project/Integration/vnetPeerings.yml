@@ -1,0 +1,28 @@
+component: vnetPeerings
+
+peerings:
+- source:
+    resourceGroup: Iaas-Test-Int-Rg
+    vnetName: Iaas-Test-Int-Vnet1
+  targets:
+  - subscriptionId: 027f406c-1ba6-4f66-91f1-d2de4b6eff21
+    resourceGroup: Iaas-Test-Int-Rg
+    vnetName: Iaas-Test-Int-Vnet1
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    allowGatewayTransit: false
+    useRemoteGateways: false
+
+  - resourceGroup: Iaas-Test-Hub1-Rg
+    vnetName: Iaas-Test-Hub1-Vnet1
+
+- source:
+    resourceGroup: Iaas-Test-Hub1-Rg
+    vnetName: Iaas-Test-Hub1-Vnet1
+  targets:
+  - resourceGroup: Iaas-Test-Int-Rg
+    vnetName: Iaas-Test-Int-Vnet1
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    allowGatewayTransit: false
+    useRemoteGateways: false

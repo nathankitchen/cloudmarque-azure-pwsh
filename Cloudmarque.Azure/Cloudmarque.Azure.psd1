@@ -97,7 +97,7 @@ FunctionsToExport = 'Clear-CmAzContext', 'Get-CmAzContext', 'Get-CmAzResourceNam
                 'Set-CmAzIaasUpdateManagement', 'New-CmAzIaasVpnGw',
                 'New-CmAzIaasWvd', 'New-CmAzPaasSql', 'New-CmAzPaasWeb', 'New-CmAzPaasFunction', 'New-CmAzDeployment',
                 'New-CmAzPaasWebStatic', 'Set-BlobStorageContentType', 'New-CmAzMonitorLogAlerts', 'New-CmAzMonitorMetricAlerts',
-                'New-CmAzSecurityPartner', 'Set-CmAzSecurityCentre', 'New-CmAzIaasStorage'
+                'New-CmAzSecurityPartner', 'Set-CmAzSecurityCentre', 'New-CmAzIaasStorage', 'New-CmAzIaasVnetPeerings'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
