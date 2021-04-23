@@ -8,7 +8,7 @@ Severity:
 Queries:
 - virtualMachines:
   - name: High_CPU_Usage_Percent
-    description: Triggers an alert for when CPU usage percentage reaches a set threshold.
+    description: Critically high average CPU percentage usage.
     threshold:
       operator: greaterThan
       value: 0
@@ -27,14 +27,14 @@ Queries:
       | where AverageCPUPercentage >= @@@_minPercentage@@@
 
   - name: High_CPU_Usage_Percent_Range
-    description: Triggers an alert for when CPU usage percentage reaches a set range.
+    description: High average CPU percentage usage.
     threshold:
       operator: greaterThan
       value: 0
     schedule:
       frequencyInMinutes: 10
       timeWindowInMinutes: 60
-    severity: 0
+    severity: 2
     defaults:
       _minPercentage: 95
       _maxPercentage: 99
@@ -47,7 +47,7 @@ Queries:
       | where AverageCPUPercentage >= @@@_minPercentage@@@ and AverageCPUPercentage <= @@@_maxPercentage@@@
 
   - name: Low_Disk_Space
-    description: Triggers an alert for when available Disk space percentage and MB value falls below set thresholds.
+    description: Low available disk space percentage and MB value.
     threshold:
       operator: greaterThan
       value: 0
@@ -71,7 +71,7 @@ Queries:
       | where AverageFreeSpacePercentage <= @@@_maxPercentage@@@ and FreeSpaceMB <= @@@_maxValueMB@@@
 
   - name: High_Memory_Usage_Percent
-    description: Triggers an alert for when Memory usage percentage reaches a set threshold.
+    description: Critically high average memory usage percentage.
     threshold:
       operator: greaterThan
       value: 0
@@ -92,7 +92,7 @@ Queries:
       | where AverageAvailableMemoryPercentage < @@@_minPercentage@@@
 
   - name: High_Memory_Usage_Percent_Range
-    description: Triggers an alert for when Memory usage percentage reaches a set range.
+    description: High average memory usage percentage.
     threshold:
       operator: greaterThan
       value: 0
@@ -158,7 +158,7 @@ Queries:
       | where LastHeartbeat < ago(@@@_timeWindow@@@)
 
   - name: VM_Missing_Backup
-    description: Missed backup for VM.
+    description: Missed scheduled VM backup.
     threshold:
       operator: greaterThan
       value: 0
@@ -170,7 +170,7 @@ Queries:
       AddonAzureBackupJobs
       | where JobOperation == "Backup"
       | summarize arg_max(TimeGenerated, *) by JobUniqueId
-      | where JobStatus == Failed
+      | where JobStatus == "Failed"
   
   - name: VM_Antimalware_Not_Up_To_Date
     description: Antimalware installed on vm is not up to date.
@@ -187,7 +187,7 @@ Queries:
       | where ProtectionStatus == "Signatures out of date"
 
   - name: VM_Critical_Or_Security_Updates_Missing
-    description: VM updated with latest critical/security updates.
+    description: VM does not have the latest critical and security updates.
     threshold:
       operator: greaterThan
       value: 0
@@ -199,6 +199,20 @@ Queries:
       Update
       | where Classification in ("Security Updates", "Critical Updates")
       | where UpdateState == "Needed" and Optional == false and Approved == true
+
+  - name: VM_Reboot
+    description: VM/s have been rebooted.
+    threshold:
+      operator: greaterThan
+      value: 0
+    schedule:
+      frequencyInMinutes: 30
+      timeWindowInMinutes: 45
+    severity: 2
+    query: |-
+      AzureActivity 
+      | where OperationName == "Restart Virtual Machine"
+      | summarize by bin(TimeGenerated, 45m), _ResourceId
 
   - SQL:
     - name: Failed_Recovery

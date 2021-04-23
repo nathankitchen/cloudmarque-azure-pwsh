@@ -50,7 +50,7 @@
 
 			$SettingsObject.resourceGroupName = (Get-CmAzService -Service $SettingsObject.service.dependencies.resourcegroup -IsResourceGroup -ThrowIfUnavailable -ThrowIfMultiple).ResourceGroupName
 
-			[System.Collections.ArrayList]$resourcesToBeSet = @()
+			$resourcesToBeSet = @()
 
 			foreach ($vpnGw in $SettingsObject.VpnGw) {
 
@@ -113,9 +113,9 @@
 
 					# This approach is because Vpn Gw expects Raw certificate data
 					$keyVaultCertificateObject = Get-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $vpnGw.P2s.RootCertificateName
-					$vpnGw.P2s.ClientRootCertData = [Convert]::ToBase64String($keyVaultCertificateObject.Certificate.GetRawCertData())
-
-					if (!$vpnGw.P2s.ClientRootCertData) {
+					$clientRootCertData = $keyVaultCertificateObject.Certificate.GetRawCertData()
+					
+					if (!$clientRootCertData) {
 
 						Write-Verbose "Certificate Not Found! P2s will not be configured."
 						$vpnGw.P2s = @{}
@@ -125,6 +125,7 @@
 					}
 					else {
 						Write-Verbose "Certificate $($vpnGw.P2s.RootCertificateName) found, p2s will be configured."
+						$vpnGw.P2s.ClientRootCertData = [Convert]::ToBase64String($clientRootCertData)
 					}
 				}
 
@@ -138,14 +139,14 @@
 						$vpnGw.S2s.localGatewayName = "none"
 				}
 				else {
+					
 					# This apporach is because Key vault reference cannot be used directly in Arm template because of conflict with copy
 					# SharedKeyObject is created to resolve with CLIXML type of object created when you run Az commands.
 					$keyVaultService = Get-CmAzService -Service $vpnGw.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
-					$vpnGw.S2s.SharedKey = [System.Collections.ArrayList]@()
+					$vpnGw.S2s.SharedKey = @()
 					$vpnGw.S2s.SharedKeyObject = (Get-AzKeyVaultSecret -Name $vpnGw.S2s.KeyVaultSecret -VaultName ($keyVaultService.name)).SecretValueText
-					$vpnGw.S2s.SharedKey = $vpnGw.S2s.SharedKeyObject.ToString()
 
-					if (!$vpnGw.S2s.SharedKey) {
+					if (!$vpnGw.S2s.SharedKeyObject) {
 
 						Write-Verbose "Secret could not be retrieved! S2s configuration will be skipped."
 						$vpnGw.S2s = @{}
@@ -164,6 +165,7 @@
 							-Name $vpnGw.GatewayName
 
 						$resourcesToBeSet += $vpnGw.S2s.localGatewayName
+						$vpnGw.S2s.SharedKey = $vpnGw.S2s.SharedKeyObject.ToString()
 					}
 				}
 

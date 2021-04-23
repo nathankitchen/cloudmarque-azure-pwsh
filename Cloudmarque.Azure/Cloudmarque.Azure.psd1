@@ -11,7 +11,7 @@
 RootModule = 'Cloudmarque.Azure.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.10.1'
+ModuleVersion = '1.0.11'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Core'
@@ -97,7 +97,7 @@ FunctionsToExport = 'Clear-CmAzContext', 'Get-CmAzContext', 'Get-CmAzResourceNam
                 'Set-CmAzIaasUpdateManagement', 'New-CmAzIaasVpnGw',
                 'New-CmAzIaasWvd', 'New-CmAzPaasSql', 'New-CmAzPaasWeb', 'New-CmAzPaasFunction', 'New-CmAzDeployment',
                 'New-CmAzPaasWebStatic', 'Set-BlobStorageContentType', 'New-CmAzMonitorLogAlerts', 'New-CmAzMonitorMetricAlerts',
-                'New-CmAzSecurityPartner', 'Set-CmAzSecurityCentre', 'New-CmAzIaasStorage'
+                'New-CmAzSecurityPartner', 'Set-CmAzSecurityCentre', 'New-CmAzIaasStorage', 'New-CmAzIaasVnetPeerings'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -135,8 +135,10 @@ PrivateData = @{
         IconUri = 'https://github.com/Trustmarque/cloudmarque-azure-pwsh/blob/master/Cloudmarque.Azure/icon.png?raw=true'
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Addressed deployment issue when availability zones and proximityPlacementGroups are not set in New-CmAzIaasVm.
-* Addressed regression issue where action group were no longer linked to alerts in New-CmAzCoreMonitor.'
+        ReleaseNotes = '* Added Timezone config support for VMs.
+* Added AntiMalware and vulnerability scanning support for VMs.
+* Added design changes in order to support choosing from a range of pre-defined configurations in New-CmAzProject.
+* Inital implementation of support for deploying multi resource, single metric alerts and log alerts.'
 
         # Prerelease string of this module
         # Prerelease = ''

@@ -89,7 +89,7 @@
 			$generatedName = "";
 			$nameSegments = @();
 
-			$regionConvention = $regions.regions | Where-Object { $_.name -Eq $Region }
+			$regionConvention = $regions.regions | Where-Object { $_.name -Eq $Region -or $_.alias -Eq $Region }
 
 			if (!$regionConvention) {
 				throw "No regional naming convention found in _names\regions.yml for '$Region'"

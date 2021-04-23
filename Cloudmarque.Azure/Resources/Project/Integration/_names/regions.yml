@@ -19,3 +19,5 @@ regions:
   shortname: ukw
 - name: East US
   shortname: eus
+  alias:
+    - eastus

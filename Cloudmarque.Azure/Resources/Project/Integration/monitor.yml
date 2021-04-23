@@ -1,6 +1,6 @@
 component: monitor                                                    # Required to use settings with New-CmAzDeployment
 
-name: coretestmonitor2021
+name: coretestmonitor042021
 location: UK South
 advisorLowCPUThresholdPercentage: 5									                  # Can be set to 0, 5, 10, 15 or 20
 workspaceDataRetentionInDays: 30                                      # Optional
