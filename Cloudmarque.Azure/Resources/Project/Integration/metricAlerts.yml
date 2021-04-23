@@ -12,6 +12,108 @@ groups:
   alertSets:
   - resourceType: Microsoft.Compute/virtualMachines
     alerts:
+    - metricName: OS Disk Used Burst BPS Credits Percentage
+      targetResourceLocation: East US
+      severity: Warning
+      threshold:
+        operator: GreaterThanOrEqual
+        value: 85
+        timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                # evaluationFrequency
+        timeWindowInMinutes: 60                               # windowSize
+
+    - metricName: OS Disk Used Burst BPS Credits Percentage
+      targetResourceLocation: East US
+      severity: Critical
+      threshold:
+        operator: GreaterThanOrEqual
+        value: 95
+        timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                # evaluationFrequency
+        timeWindowInMinutes: 60                               # windowSize
+
+    - metricName: Data Disk Used Burst BPS Credits Percentage
+      targetResourceLocation: East US
+      severity: Warning
+      threshold:
+        operator: GreaterThanOrEqual
+        value: 85
+        timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                # evaluationFrequency
+        timeWindowInMinutes: 60                               # windowSize
+
+    - metricName: Data Disk Used Burst BPS Credits Percentage
+      targetResourceLocation: East US
+      severity: Critical
+      threshold:
+        operator: GreaterThanOrEqual
+        value: 95
+        timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                # evaluationFrequency
+        timeWindowInMinutes: 60                               # windowSize
+
+    - metricName: OS Disk IOPS Consumed Percentage
+      targetResourceLocation: East US
+      severity: Warning
+      threshold:
+        operator: GreaterThanOrEqual
+        value: 95
+        timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                # evaluationFrequency
+        timeWindowInMinutes: 60                               # windowSize
+
+    - metricName: OS Disk IOPS Consumed Percentage
+      targetResourceLocation: East US
+      severity: Critical
+      threshold:
+        operator: Equals
+        value: 100
+        timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                # evaluationFrequency
+        timeWindowInMinutes: 60                               # windowSize
+
     - metricName: Data Disk IOPS Consumed Percentage
       targetResourceLocation: East US
       severity: Warning

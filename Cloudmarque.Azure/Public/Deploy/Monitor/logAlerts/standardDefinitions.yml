@@ -170,7 +170,7 @@ Queries:
       AddonAzureBackupJobs
       | where JobOperation == "Backup"
       | summarize arg_max(TimeGenerated, *) by JobUniqueId
-      | where JobStatus == Failed
+      | where JobStatus == "Failed"
   
   - name: VM_Antimalware_Not_Up_To_Date
     description: Antimalware installed on vm is not up to date.
