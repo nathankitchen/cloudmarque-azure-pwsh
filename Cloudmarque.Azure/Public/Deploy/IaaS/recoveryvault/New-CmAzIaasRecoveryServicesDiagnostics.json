@@ -11,7 +11,6 @@
     },
     "variables": {
         "BackupDiagnosticTypes": [
-            "AzureBackupReport",
             "CoreAzureBackup",
             "AddonAzureBackupJobs",
             "AddonAzureBackupAlerts",
@@ -74,7 +73,8 @@
             "properties": {
                 "name": "[parameters('Workspace').name]",
                 "workspaceId": "[resourceId(parameters('Workspace').resourceGroupName, 'Microsoft.OperationalInsights/Workspaces/', parameters('Workspace').name)]",
-                "logs": "[variables('DiagnosticLogs')[copyIndex('DiagnosticSettingsCopy')].value]"
+                "logs": "[variables('DiagnosticLogs')[copyIndex('DiagnosticSettingsCopy')].value]",
+                "logAnalyticsDestinationType": "Dedicated"
             },
             "copy": {
                 "name": "DiagnosticSettingsCopy",
