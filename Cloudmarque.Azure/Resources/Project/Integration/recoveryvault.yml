@@ -24,24 +24,3 @@ recoveryServicesVaults:
   service:
     publish:
       recoveryVault: Iaas-Test-Rec-Vault3
-
-- name: Iaas-Test-Rec-Vault3
-  backupLevel: Standard
-  location: UK West
-  service:
-    publish:
-      recoveryVault:
-
-- name: Iaas-Test-Rec-Vault4
-  backupLevel: Standard
-  location: UK South
-  service:
-    publish:
-      recoveryVault: Iaas-Test-Rec-Vault4
-      
-- name: Iaas-Test-Rec-Vault5
-  backupLevel: Standard
-  location: UK West
-  service:
-    publish:
-      recoveryVault: Iaas-Test-Rec-Vault5

@@ -1,3 +1,15 @@
+parameters:
+- name: Iaas
+  type: boolean
+- name: Paas
+  type: boolean
+- name: Monitor
+  type: boolean
+- name: Security
+  type: boolean
+- name: TearDown
+  type: boolean
+
 variables:
   moduleName: Cloudmarque.Azure
   environment: Integration
@@ -31,6 +43,7 @@ stages:
           New-CmazCore -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/core.yml" -Verbose
 
 - stage: Paas
+  condition: and(succeeded(), eq('${{ parameters.Paas }}', true))
   dependsOn: Core
   jobs:
   - job:
@@ -62,6 +75,7 @@ stages:
           New-CmazPaasSql -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/sql.yml" -Verbose
 
 - stage: Iaas
+  condition: and(succeeded(), eq('${{ parameters.Iaas }}', true))
   dependsOn: Core
   jobs:
   - job: IaasNetwork
@@ -161,6 +175,7 @@ stages:
           New-CmAzIaasVpnGw -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/vpngw.yml" -Verbose
 
 - stage: Security
+  condition: and(succeeded(), eq('${{ parameters.Security }}', true))
   dependsOn: Core
   jobs:
   - job:
@@ -192,6 +207,7 @@ stages:
     "Iaas",
     "Paas"
   ]
+  condition: and(eq('${{ parameters.Monitor }}', true), in(dependencies.Iaas.result, 'Succeeded', 'Skipped'), in(dependencies.Paas.result, 'Succeeded', 'Skipped'))
   jobs:
   - job:
     steps:
@@ -225,7 +241,7 @@ stages:
     "Security",
     "Monitor"
   ]
-  condition: always()
+  condition: and(always(), eq('${{ parameters.TearDown }}', true))
   displayName: Tear Down
   jobs:
   - job:

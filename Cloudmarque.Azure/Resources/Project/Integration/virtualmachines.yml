@@ -380,32 +380,6 @@ groups:
       subnetName: Iaas-Test-Int-Vnet1-Snet-ext1               # Subnet belonging to the virtual network
     vulnerabilityScan: false                                  # Only supported for predefined images.
 
-  - name: IaasTestVm11                                       # Linux isn't officially supported at the moment.
-    size: Standard_B1s
-    updateGroup: All
-    updateFrequency: Daily
-    imageReference:
-      publisher: Canonical
-      offer: UbuntuServer
-      sku: 18.04-LTS
-      version: latest
-    location: East US
-    service:
-      publish:
-        vm: Iaas-Test-Vm11
-        nic: Iaas-Test-Nic11
-    osDisk:
-      osType: linux                                           # windows or linux
-      expandableDiskSizeGB: 127
-    dataDisks: []                                             # Memory size for subsequent data disks, number of sizes provided dictates the number of data disks.
-    networking:
-      service:
-        dependencies:
-          vnet: Iaas-Test-Int-Vnet1
-      ipAddress:                                              # Leave blank for dynamic ip allocations
-      subnetName: Iaas-Test-Int-Vnet1-Snet-ext1               # Subnet belonging to the virtual network
-    vulnerabilityScan: true
-
   #NOTE: To allow disk encryption for Linux, you need to have at least 8gb of ram available and the vm needs to be generation 1.
   #NOTE: Supported Linux distros for disk encryption are listed here https://docs.microsoft.com/en-us/azure/virtual-machines/linux/disk-encryption-overview#supported-vms-and-operating-systems
   #NOTE: Supported Linux Distros for DSC are listed here https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/dsc-linux
