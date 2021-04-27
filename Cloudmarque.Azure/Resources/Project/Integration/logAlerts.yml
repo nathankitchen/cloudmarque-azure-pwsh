@@ -23,7 +23,7 @@ groups:
         frequencyInMinutes: 10
         timeWindowInMinutes: 60
       parameters:
-        _maxValue: 5
+        _maxPercentage: 5
         _maxValueMB: 102400
         _timeWindow: 5m
     - name: Low_Disk_Space
