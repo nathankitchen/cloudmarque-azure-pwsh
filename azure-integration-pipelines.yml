@@ -1,14 +1,19 @@
 parameters:
 - name: Iaas
   type: boolean
+  default: true
 - name: Paas
   type: boolean
+  default: true
 - name: Monitor
   type: boolean
+  default: true
 - name: Security
   type: boolean
+  default: true
 - name: TearDown
   type: boolean
+  default: true
 
 variables:
   moduleName: Cloudmarque.Azure
