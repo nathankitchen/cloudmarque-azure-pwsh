@@ -1,0 +1,79 @@
+nsgName: Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwpub1
+location:
+service:
+  publish:
+    networkSecurityGroup: Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwpub1
+    resourceGroup:
+ruleGroups:
+- nsg.all-subnets.rules
+rules:
+- Access: Allow
+  direction: Inbound
+  priority: "200"
+  destinationIp:
+  - 10.0.0.134
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow All traffic into firewall external interface
+  ruleName: AllowFirewallTrafficInbound
+  protocol: "*"
+  sourceIp:
+  - "*"
+
+- Access: Allow
+  direction: Outbound
+  priority: "1610"
+  destinationIp:
+  - "*"
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow all traffic leaving the firewall outside interface
+  ruleName: AllowInternetOutbound
+  protocol: "*"
+  sourceIp:
+  - 10.0.0.132
+  - 10.0.0.133
+  - 10.0.0.134
+
+- Access: Deny
+  direction: Outbound
+  priority: "1620"
+  destinationIp:
+  - "*"
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Deny any traffic that isn't natted behind the firewall
+  ruleName: DenyNonNattedTraffic
+  protocol: "*"
+  sourceIp:
+  - 192.168.0.0/16
+- Access: Deny
+  direction: Inbound
+  priority: "100"
+  destinationIp:
+  - 10.0.0.134
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "3389"
+  - "1433"
+  - "1521"
+  - "3306"
+  - "445"
+  - "23"
+  - "110"
+  - "123"
+  - "5800"
+  - "5900"
+  - "25"
+  Description: This stops Azure warning that you have allow all inbound + extra ports
+  ruleName: DenyUnnecessaryPorts
+  protocol: "*"
+  sourceIp:
+  - "*"

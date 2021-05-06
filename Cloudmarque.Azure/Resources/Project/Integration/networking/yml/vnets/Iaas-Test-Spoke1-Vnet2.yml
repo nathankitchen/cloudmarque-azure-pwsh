@@ -1,0 +1,24 @@
+vnetName: Iaas-Test-Spoke1-Vnet2
+vnetpeerings:
+addressSpace:
+- 10.8.0.0/22
+- 10.25.0.0/22
+dnsServers:
+- 81.23.42.13
+- 81.23.42.11
+location: ukwest
+service:
+  publish:
+    resourceGroup: Iaas-Test-Spoke1-Rg2
+    vnet: Iaas-Test-Spoke1-Vnet2
+subnets:
+- cidr: 10.8.0.0/27
+  networkSecurityGroup: Iaas-Test-Spoke1-Vnet2-Snet-Nsg-hpcman
+  routeTable: Iaas-Test-Spoke1-Vnet2-Snet-Udr-hpcman
+  serviceEndpoints: []
+  subnetName: Iaas-Test-Spoke1-Vnet2-Snet-hpcman
+- cidr: 10.8.2.32/27
+  networkSecurityGroup: Iaas-Test-Spoke1-Vnet2-Snet-Nsg-hpcworker
+  routeTable: Iaas-Test-Spoke1-Vnet2-Snet-Udr-hpcworker
+  serviceEndpoints: []
+  subnetName: Iaas-Test-Spoke1-Vnet2-Snet-hpcworker

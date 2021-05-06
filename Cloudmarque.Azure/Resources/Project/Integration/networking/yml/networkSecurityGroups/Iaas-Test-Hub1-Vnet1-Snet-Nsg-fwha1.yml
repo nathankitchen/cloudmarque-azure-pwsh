@@ -1,0 +1,41 @@
+nsgName: Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwha1
+location:
+service:
+  publish:
+    networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwha1
+    resourceGroup:
+ruleGroups:
+- nsg.all-subnets.rules
+rules:
+- Access: Allow
+  direction: Inbound
+  priority: "1570"
+  destinationIp:
+  - 192.168.0.84
+  - 192.168.0.85
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow HA traffic between nodes
+  ruleName: AllowInboundTrafficBetweenNodes
+  protocol: "*"
+  sourceIp:
+  - 192.168.0.84
+  - 192.168.0.85
+- Access: Allow
+  direction: Outbound
+  priority: "1580"
+  destinationIp:
+  - 192.168.0.84
+  - 192.168.0.85
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow HA traffic between nodes
+  ruleName: AllowOutboundTrafficBetweenNodes
+  protocol: "*"
+  sourceIp:
+  - 192.168.0.84
+  - 192.168.0.85

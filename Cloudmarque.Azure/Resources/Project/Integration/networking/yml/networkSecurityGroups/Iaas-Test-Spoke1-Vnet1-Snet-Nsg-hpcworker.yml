@@ -1,0 +1,38 @@
+nsgName: Iaas-Test-Spoke1-Vnet1-Snet-Nsg-hpcworker
+location:
+service:
+  publish:
+    networkSecurityGroup: Iaas-Test-Spoke1-Vnet1-Snet-Nsg-hpcworker
+    resourceGroup:
+ruleGroups:
+- nsg.all-subnets.rules
+- nsg.all-member-server-subnets.rules
+rules:
+- Access: Allow
+  direction: Inbound
+  priority: "210"
+  destinationIp:
+  - 10.10.0.32/27
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow All traffic between the HPC Subnets
+  ruleName: AllowAnyFromHPCManInbound
+  protocol: "*"
+  sourceIp:
+  - 10.10.0.0/27
+- Access: Allow
+  direction: Outbound
+  priority: "200"
+  destinationIp:
+  - 10.10.0.0/27
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow All traffic between the HPC Subnets
+  ruleName: AllowAnyToHPCManOutbound
+  protocol: "*"
+  sourceIp:
+  - 10.10.0.32/27

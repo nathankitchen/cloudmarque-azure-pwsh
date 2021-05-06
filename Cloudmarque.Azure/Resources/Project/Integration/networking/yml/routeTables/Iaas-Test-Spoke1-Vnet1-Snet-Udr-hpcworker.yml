@@ -1,0 +1,15 @@
+tableName: Iaas-Test-Spoke1-Vnet1-Snet-Udr-hpcworker
+location:
+service:
+  publish:
+    routeTable: Iaas-Test-Spoke1-Vnet1-Snet-Udr-hpcworker
+routes:
+- routeName: DefaultRouteViaFirewall
+  nextHopType: VirtualAppliance
+  cidr: 0.0.0.0/0
+  nextHopIpAddress: 192.168.0.38
+- routeName: Iaas-Test-Spoke1-Vnet1-vnetlocal
+  nextHopType: vNetLocal
+  cidr: 10.10.0.0/22
+  nextHopIpAddress:
+

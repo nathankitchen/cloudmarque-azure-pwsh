@@ -1,48 +1,126 @@
-# vnets, networkSecurityGroups, routeTables are default folder locations for yaml files, but you can also provide relative path to files in different directories as well.
-# Do not add .yml extension to filenames
-# All the relative paths are resolved to the project root directory
-
 component: networking
 
 service:
   dependencies:
-    storage:
-    workspace:
+    workspace: Core-Test-Ws
+    storage: Core-Test-St
 
 networking:
-- ResourceGroupName: rg-1
-  location:                     # Resource group location. optional - Not required if resource group already exists. Defaults to vnet location for new resourcegroup
+- ResourceGroupName: Iaas-Test-Hub1-Rg
   service:
     publish:
-      vnet:
-      networkSecurityGroup:
-      routeTable:
-      resourceGroup:
+      resourceGroup: Iaas-Test-Hub1-Rg
+  location: uksouth
   vnets:
-    - vnet-1                    # defaults to ./vnets/vnet-1.yml
+  - Iaas-Test-Hub1-Vnet1
   networkSecurityGroups:
-    - nsg-1                     # defaults to ./networkSecurityGroups/nsg-1.yml
-    - nsg-2                     # defaults to ./networkSecurityGroups/nsg-2.yml
+  - Iaas-Test-Hub1-Vnet1-Snet-Nsg-dc1
+  - Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwha1
+  - Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwman1
+  - Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwpriv1
+  - Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwpub1
+  - Iaas-Test-Hub1-Vnet1-Snet-Nsg
   routeTables:
-    - udr-1                     # defaults to ./routeTables/udr-1.yml
-    - udr-2                     # defaults to ./routeTables/udr-2.yml
+  - Iaas-Test-Hub1-Vnet1-Snet-Udr-dc1
+  - Iaas-Test-Hub1-Vnet1-Snet-Udr-fw
+  - Iaas-Test-Hub1-Vnet1-Snet-Udr-gatewaysubnet
+  - Iaas-Test-Hub1-Vnet1-Snet-Udr-management1
+  - Iaas-Test-Hub1-Vnet1-Snet-Udr-servers1
 
-- ResourceGroupName: rg-2
+- ResourceGroupName: Iaas-Test-Hub2-Rg
   service:
     publish:
-      vnet:
-      networkSecurityGroup:
-      routeTable:
-      resourceGroup:
-    dependency:
-      storage:
-      workspace:
-  location:                     # optional
+      resourceGroup: Iaas-Test-Hub2-Rg
+  location: ukwest
   vnets:
-    - ./customfolder/vnet-2
+  - Iaas-Test-Hub2-Vnet1
   networkSecurityGroups:
-    - ./customfolder/nsg-3
-    - ./customfolder/nsg-4
+  - Iaas-Test-Hub2-Vnet1-Snet-Nsg-dc1
+  - Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwha1
+  - Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwman1
+  - Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwpriv1
+  - Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwpub1
+  - Iaas-Test-Hub2-Vnet1-Snet-Nsg
   routeTables:
-    - ./customfolder/udr-3
-    - ./customfolder/udr-4
+  - Iaas-Test-Hub2-Vnet1-Snet-Udr-dc1
+  - Iaas-Test-Hub2-Vnet1-Snet-Udr-fw
+  - Iaas-Test-Hub2-Vnet1-Snet-Udr-gatewaysubnet
+  - Iaas-Test-Hub2-Vnet1-Snet-Udr-management1
+  - Iaas-Test-Hub2-Vnet1-Snet-Udr-servers1
+
+- ResourceGroupName: Iaas-Test-Int-Rg
+  service:
+    publish:
+      resourceGroup: Iaas-Test-Int-Rg
+  location: eastus
+  vnets:
+  - Iaas-Test-Int-Vnet1
+
+- ResourceGroupName: Iaas-Test-Spoke1-Rg
+  service:
+    publish:
+      resourceGroup: Iaas-Test-Spoke1-Rg
+  location: uksouth
+  vnets:
+  - Iaas-Test-Spoke1-Vnet1
+  networkSecurityGroups:
+  - Iaas-Test-Spoke1-Vnet1-Snet-Nsg-hpcman
+  - Iaas-Test-Spoke1-Vnet1-Snet-Nsg-hpcworker
+  routeTables:
+  - Iaas-Test-Spoke1-Vnet1-Snet-Udr-hpcman
+  - Iaas-Test-Spoke1-Vnet1-Snet-Udr-hpcworker
+
+- ResourceGroupName: Iaas-Test-Spoke1-Rg2
+  service:
+    publish:
+      resourceGroup: Iaas-Test-Spoke1-Rg2
+  location: ukwest
+  vnets:
+  - Iaas-Test-Spoke1-Vnet2
+  networkSecurityGroups:
+  - Iaas-Test-Spoke1-Vnet2-Snet-Nsg-hpcman
+  - Iaas-Test-Spoke1-Vnet2-Snet-Nsg-hpcworker
+  routeTables:
+  - Iaas-Test-Spoke1-Vnet2-Snet-Udr-hpcman
+  - Iaas-Test-Spoke1-Vnet2-Snet-Udr-hpcworker
+
+# NOTE: vnets, networkSecurityGroups, routeTables are default folder locations for yaml files, but you can also provide relative path to files in different directories as well.
+# NOTE: Do not add .yml extension to filenames
+# NOTE: All the relative paths are resolved to the project root directory
+
+# - ResourceGroupName: rg-1
+#   location:                     # Resource group location. optional - Not required if resource group already exists. Defaults to vnet location for new resourcegroup
+#   service:
+#     publish:
+#       vnet:
+#       networkSecurityGroup:
+#       routeTable:
+#       resourceGroup:
+#   vnets:
+#     - vnet-1                    # defaults to ./vnets/vnet-1.yml
+#   networkSecurityGroups:
+#     - nsg-1                     # defaults to ./networkSecurityGroups/nsg-1.yml
+#     - nsg-2                     # defaults to ./networkSecurityGroups/nsg-2.yml
+#   routeTables:
+#     - udr-1                     # defaults to ./routeTables/udr-1.yml
+#     - udr-2                     # defaults to ./routeTables/udr-2.yml
+
+# - ResourceGroupName: rg-2
+#   service:
+#     publish:
+#       vnet:
+#       networkSecurityGroup:
+#       routeTable:
+#       resourceGroup:
+#     dependency:
+#       storage:
+#       workspace:
+#   location:                     # optional
+#   vnets:
+#     - ./customfolder/vnet-2
+#   networkSecurityGroups:
+#     - ./customfolder/nsg-3
+#     - ./customfolder/nsg-4
+#   routeTables:
+#     - ./customfolder/udr-3
+#     - ./customfolder/udr-4

@@ -1,0 +1,105 @@
+- Access: Allow
+  direction: Inbound
+  priority: "3000"
+  destinationIp:
+  - VirtualNetwork
+  sourcePort:
+  - '*'
+  destinationPort:
+  - '*'
+  Description: Allow Azure Load Balancer Health Probes
+  ruleName: AllowAzureLoadBalancerInBound
+  protocol: '*'
+  sourceIp:
+  - AzureLoadBalancer
+
+- Access: Allow
+  direction: Outbound
+  priority: "3010"
+  destinationIp:
+  - Internet
+  sourcePort:
+  - '*'
+  destinationPort:
+  - "80"
+  - "443"
+  Description: Allow Access to Internet via HTTP-HTTPS to URL whitelist on firewall
+  ruleName: AllowHTTP-HTTPSOutbound
+  protocol: TCP
+  sourceIp:
+  - VirtualNetwork
+
+- Access: Allow
+  direction: Outbound
+  priority: "3020"
+  destinationIp:
+  - 168.63.129.16
+  sourcePort:
+  - '*'
+  destinationPort:
+  - '*'
+  Description: Allow VM Agent to Communicate Status with Azure
+  ruleName: AllowAzureAgentOubound
+  protocol: '*'
+  sourceIp:
+  - VirtualNetwork
+
+- Access: Allow
+  direction: Outbound
+  priority: "3030"
+  destinationIp:
+  - '*'
+  sourcePort:
+  - '*'
+  destinationPort:
+  - "1688"
+  Description: Allow VM to Communicate with Azure KMS Server
+  ruleName: AllowVMtoAzureKMSOubound
+  protocol: TCP
+  sourceIp:
+  - VirtualNetwork
+
+- Access: Allow
+  direction: Outbound
+  priority: "3040"
+  destinationIp:
+  - '*'
+  sourcePort:
+  - '*'
+  destinationPort:
+  - '*'
+  Description: Allow outbound ping
+  ruleName: AllowICMPOutbound
+  protocol: ICMP
+  sourceIp:
+  - VirtualNetwork
+
+- Access: Deny
+  direction: Outbound
+  priority: "4000"
+  destinationIp:
+  - '*'
+  sourcePort:
+  - '*'
+  destinationPort:
+  - '*'
+  Description: Deny Any Outbound
+  ruleName: DenyAnyOutbound
+  protocol: '*'
+  sourceIp:
+  - VirtualNetwork
+
+- Access: Deny
+  direction: Inbound
+  priority: "4000"
+  destinationIp:
+  - '*'
+  sourcePort:
+  - '*'
+  destinationPort:
+  - '*'
+  Description: Deny Any Inbound
+  ruleName: DenyAnyInbound
+  protocol: '*'
+  sourceIp:
+  - '*'

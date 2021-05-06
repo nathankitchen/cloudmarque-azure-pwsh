@@ -1,0 +1,32 @@
+vnetName: Iaas-Test-Int-Vnet1
+addressSpace:
+- 10.20.0.0/23
+dnsServers:
+location: EastUS
+service:
+  publish:
+    resourceGroup: Iaas-Test-Int-Rg
+    vnet: Iaas-Test-Int-Vnet1
+subnets:
+- subnetName: Iaas-Test-Int-Vnet1-Snet-ext1
+  cidr: 10.20.0.0/24
+  networkSecurityGroup:
+  routeTable:
+  serviceEndpoints:
+  - Storage
+- subnetName: Iaas-Test-Int-Vnet1-Snet-sendp
+  cidr: 10.20.1.0/24
+  networkSecurityGroup:
+  routeTable:
+  serviceEndpoints:
+  - AzureActiveDirectory
+  - AzureCosmosDB
+  - ContainerRegistry
+  - CognitiveServices
+  - EventHub
+  - KeyVault
+  - ServiceBus
+  - Storage
+  - Sql
+  - Web
+

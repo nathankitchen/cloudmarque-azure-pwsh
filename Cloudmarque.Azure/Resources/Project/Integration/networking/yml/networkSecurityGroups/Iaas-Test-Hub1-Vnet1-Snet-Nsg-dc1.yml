@@ -1,0 +1,152 @@
+nsgName: Iaas-Test-Hub1-Vnet1-Snet-Nsg-dc1
+location:
+service:
+  publish:
+    networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-dc1
+    resourceGroup: Iaas-Test-Hub1-Rg
+  dependencies:
+    workspace: Core-Test-Ws
+    storage: Core-Test-St
+ruleGroups:
+- nsg.all-subnets.rules
+rules:
+- Access: Allow
+  direction: Inbound
+  priority: "2110"
+  destinationIp:
+  - 192.168.0.196
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "135"
+  - "139"
+  - "445"
+  - "636"
+  - "3268"
+  - "6269"
+  - 49152-65535
+  Description: Allow RPC, LDAP GC, LDAP GC SSL, LDAP SSL ,SMB, User/Computer Authentication
+  ruleName: AllowAD-TCP-Traffic-Inbound
+  protocol: TCP
+  sourceIp:
+  - 10.0.0.0/23
+  - 10.8.0.0/22
+  - 10.112.124.10
+  - 192.168.0.0/23
+  - 10.10.0.0/22
+- Access: Allow
+  direction: Inbound
+  priority: "2120"
+  destinationIp:
+  - 192.168.0.196
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "464"
+  - "389"
+  - "53"
+  - "88"
+  Description: Allow Kerberos, LDAP,DNS.
+  ruleName: AllowAD-TCP-UDP-Traffic-Inbound
+  protocol: "*"
+  sourceIp:
+  - 10.0.0.0/23
+  - 10.8.0.0/22
+  - 10.112.124.10
+  - 192.168.0.0/23
+  - 10.10.0.0/22
+- Access: Allow
+  direction: Outbound
+  priority: "2130"
+  destinationIp:
+  - 10.0.0.0/23
+  - 10.8.0.0/22
+  - 10.112.124.10
+  - 192.168.0.0/23
+  - 10.10.0.0/22
+  sourcePort:
+    - "*"
+  destinationPort:
+  - "*"
+  Description: Allow AD Servers to Initiate connections to Workloads.
+  ruleName: AllowAD-TCP-UDP-Traffic-Outbound
+  protocol: "*"
+  sourceIp:
+  - 192.168.0.196
+- Access: Allow
+  direction: Inbound
+  priority: "2100"
+  destinationIp:
+  - 192.168.0.196
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "123"
+  - "137"
+  - "138"
+  Description: Allow Windows Time,DFS, Group Policy,Netlogon
+  ruleName: AllowAD-UDP-Traffic-Inbound
+  protocol: UDP
+  sourceIp:
+  - 10.0.0.0/23
+  - 10.8.0.0/22
+  - 10.112.124.10
+  - 192.168.0.0/23
+  - 10.10.0.0/22
+
+- Access: Allow
+  direction: Outbound
+  priority: "2140"
+  destinationIp:
+  - "*"
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "53"
+  Description: Allow External DNS queries
+  ruleName: AllowDNSOutbound
+  protocol: "*"
+  sourceIp:
+  - 192.168.0.196
+
+- Access: Allow
+  direction: Inbound
+  priority: "2150"
+  destinationIp:
+  - 192.168.0.196
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow ICMP from within the vdc.
+  ruleName: AllowICMPInbound
+  protocol: ICMP
+  sourceIp:
+  - 10.0.0.0/23
+  - 10.8.0.0/22
+  - 10.112.124.10
+  - 192.168.0.0/23
+  - 10.10.0.0/22
+
+- Access: Allow
+  direction: Inbound
+  priority: "2320"
+  destinationIp:
+  - 192.168.0.0/23
+  - 10.10.0.0/22
+  - 10.0.0.0/23
+  - 10.8.0.0/22
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "3389"
+  - "22"
+  - "80"
+  - "443"
+  - "445"
+  Description: Allow Management from Jump Server
+  ruleName: AllowManagementprotocolsfromJumpboxesInbound
+  protocol: "*"
+  sourceIp:
+  - 192.168.0.96/27
+  - 10.0.0.96/27

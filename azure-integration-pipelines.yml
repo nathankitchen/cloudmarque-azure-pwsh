@@ -108,6 +108,7 @@ stages:
 
           New-CmAzIaasStorage -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/storage.yml" -Verbose
 
+          Write-Host "Testing the CSV deployment..."
           New-CmAzIaasNetworking `
             -VnetsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/csv/vnet.csv" `
             -RouteTablesCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/csv/udr.csv" `

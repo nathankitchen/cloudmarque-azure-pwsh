@@ -1,0 +1,16 @@
+tableName: Iaas-Test-Hub1-Vnet1-Snet-Udr-gatewaysubnet
+location:
+service:
+  publish:
+    routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-gatewaysubnet
+    resourceGroup:
+routes:
+- routeName: Iaas-Test-Hub1-Vnet1-via-firewall
+  nextHopType: VirtualAppliance
+  cidr: 192.168.0.0/23
+  nextHopIpAddress: 192.168.0.38
+- routeName: Iaas-Test-Spoke1-Vnet1-via-firewall
+  nextHopType: VirtualAppliance
+  cidr: 10.10.0.0/22
+  nextHopIpAddress: 192.168.0.38
+

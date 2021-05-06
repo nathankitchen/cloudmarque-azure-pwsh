@@ -1,0 +1,41 @@
+nsgName: Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwman1
+location:
+service:
+  publish:
+    networkSecurityGroup: Iaas-Test-Hub2-Vnet1-Snet-Nsg-fwman1
+    resourceGroup:
+ruleGroups:
+- nsg.all-subnets.rules
+rules:
+- Access: Allow
+  direction: Inbound
+  priority: "1550"
+  destinationIp:
+  - 10.0.0.68
+  - 10.0.0.69
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow traffic between the nodes
+  ruleName: AllowInboundTrafficBetweenNodes
+  protocol: "*"
+  sourceIp:
+  - 10.0.0.68
+  - 10.0.0.69
+- Access: Allow
+  direction: Outbound
+  priority: "1560"
+  destinationIp:
+  - 10.0.0.68
+  - 10.0.0.69
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow traffic between the nodes
+  ruleName: AllowOutboundTrafficBetweenNodes
+  protocol: "*"
+  sourceIp:
+  - 10.0.0.68
+  - 10.0.0.69

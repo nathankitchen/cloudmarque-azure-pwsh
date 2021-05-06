@@ -11,6 +11,8 @@
 			* Creates network security groups.
 			* Creates resource groups if doesn't exist.
 			* Configure resources in mulitple resource groups at once.
+			* Configure vnet peering within the subscription declaratively.
+			* Configure service endpoints.
 			* Ability to optionally configure networking component independently.
 
 		.Parameter SettingsFile
@@ -84,6 +86,10 @@
 			}
 
 			$resourceGroupObjectArray = [System.Collections.ArrayList]@()
+
+			# Remove once json checks are in place
+
+			$allowedServiceEndpoints = @("AzureActiveDirectory", "AzureCosmosDB", "ContainerRegistry", "CognitiveServices", "EventHub", "KeyVault", "ServiceBus", "Storage", "Sql", "Web")
 
 			# Code to Create Object from CSV
 
@@ -191,12 +197,33 @@
 						[String]$subnetName
 					)
 
+					$subnetServiceEndpoints = @()
+
+					$subnetGroup.serviceEndpoints.split('|') | ForEach-Object {
+
+						if ($allowedServiceEndpoints.Contains($_)) {
+
+							$endpoint = @{
+								service = "Microsoft.$_"
+							}
+
+							$subnetServiceEndpoints += $endpoint
+						}
+						elseif ($_ -ne '') {
+
+							Write-Error "$($subnetName): service $_ doesn't exist."
+						}
+
+					}
+
 					$subnetObject = @{
 						subnetName           = $subnetName;
 						cidr                 = $subnetGroup.cidr;
 						networkSecurityGroup = $subnetGroup.networkSecurityGroup;
 						routeTable           = $subnetGroup.routeTable;
+						serviceEndpoints     = $subnetServiceEndpoints
 					}
+
 					$subnetObject
 				}
 
@@ -537,7 +564,7 @@
 
 						# Default values if required for ARM template sanity checks
 						if (!$vnetObjectArray) {
-							$vnetObjectArray = @(@{vnetName = "none"; vnetPeerings = @(); location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
+							$vnetObjectArray = @(@{vnetName = "none"; vnetPeerings = @(); location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0"; serviceEndpoints = @() }); service = @{publish = @{vnet = "" } } })
 						}
 
 						if (!$routeTableObjectArray) {
@@ -669,11 +696,11 @@
 						ForEach ($object in $returnObject) {
 
 							if ($ObjectType -eq "networkSecurityGroups") {
-								$groupName = "ruleGroup"
+								$groupName = "ruleGroups"
 								$childObject = "rules"
 							}
 							elseif ($ObjectType -eq "routeTables") {
-								$groupName = "routeGroup"
+								$groupName = "routeGroups"
 								$childObject = "routes"
 							}
 
@@ -735,12 +762,33 @@
 								Write-Error "$($vnetObjectYml.vnetName) is missing subnet configuration."
 							}
 
-							$vnetObjectYml.subnets | Where-Object { !$_.networkSecurityGroup } | ForEach-Object {
-								$_.networkSecurityGroup = ""
-							}
+							$vnetObjectYml.subnets | ForEach-Object {
 
-							$vnetObjectYml.subnets | Where-Object { !$_.routeTable } | ForEach-Object {
-								$_.routeTable = ""
+								$_.networkSecurityGroup ??= ""
+								$_.routeTable ??= ""
+
+								if (!$_.serviceEndpoints) {
+
+									$_.serviceEndpoints = @()
+								}
+								else {
+
+									$buildServiceEndpoints = @()
+
+									foreach ($endpoint in $_.serviceEndpoints) {
+
+										if ($allowedServiceEndpoints.Contains($endpoint)) {
+
+											$buildServiceEndpoints += @{ service = "Microsoft.$endpoint" }
+										}
+										elseif ($endpoint -ne '') {
+
+											Write-Error "$($subnetName): service $endpoint doesn't exist."
+										}
+									}
+
+									$_.serviceEndpoints = $buildServiceEndpoints
+								}
 							}
 
 							$vnetObjectYml | Where-Object { !$_.location } | ForEach-Object {
@@ -814,7 +862,7 @@
 
 					# Default values if required for ARM template sanity checks
 					if (!$vnetObjectArray) {
-						$vnetObjectArray = @(@{vnetName = "none"; vnetPeerings = @(); location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0" }); service = @{publish = @{vnet = "" } } })
+						$vnetObjectArray = @(@{vnetName = "none"; vnetPeerings = @(); location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0"; serviceEndpoints = @() }); service = @{publish = @{vnet = "" } } })
 					}
 
 					if (!$routeTableObjectArray) {

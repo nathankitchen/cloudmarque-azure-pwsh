@@ -1,0 +1,57 @@
+- nsgName: Iaas-Test-Hub1-Vnet1-Snet-Nsg-servers1
+  location:
+  service:
+    publish:
+      networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-servers1
+      resourceGroup: Iaas-Test-Hub1-Rg
+  ruleGroups:
+  - nsg.all-member-server-subnets.rules
+
+- nsgName: Iaas-Test-Hub1-Vnet1-Snet-Nsg-management1
+  location:
+  service:
+    publish:
+      networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-management1
+      resourceGroup:
+    dependencies:
+      workspace:
+      storage:
+  ruleGroups:
+  - nsg.all-subnets.rules
+  - nsg.all-member-server-subnets.rules
+  rules:
+    - Access: Allow
+      direction: Outbound
+      priority: "2300"
+      destinationIp:
+      - 192.168.0.0/23
+      - 10.10.0.0/22
+      - 10.0.0.0/23
+      - 10.8.0.0/22
+      sourcePort:
+      - "*"
+      destinationPort:
+      - "3389"
+      - "22"
+      - "80"
+      - "443"
+      - "445"
+      Description: Allow Management from Jump Server
+      ruleName: AllowManagementprotocolsfromJumpboxesOutbound
+      protocol: "*"
+      sourceIp:
+      - 192.168.0.96/27
+    - Access: Allow
+      direction: Inbound
+      priority: "200"
+      destinationIp:
+      - 192.168.0.100
+      sourcePort:
+      - "*"
+      destinationPort:
+      - "22"
+      Description: Allow Access to the SFTP server
+      ruleName: AllowSSHFromAnywhereInbound
+      protocol: "*"
+      sourceIp:
+      - "*"

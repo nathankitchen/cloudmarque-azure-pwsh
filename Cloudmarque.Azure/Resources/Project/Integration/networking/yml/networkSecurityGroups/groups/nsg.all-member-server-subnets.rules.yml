@@ -1,0 +1,131 @@
+- ruleName: AllowAD-UDP-Traffic-Outbound
+  access: Allow
+  direction: Outbound
+  priority: "2200"
+  destinationIp:
+  - 192.168.0.196
+  - 10.0.0.196
+  - 10.112.124.10
+  sourcePort:
+  - '*'
+  destinationPort:
+  - "123"
+  - "137"
+  - "138"
+  Description: Allow Windows Time,DFS, Group Policy,Netlogon
+  protocol: UDP
+  sourceIp:
+  - VirtualNetwork
+
+- ruleName: AllowAD-TCP-Traffic-Outbound
+  access: Allow
+  direction: Outbound
+  priority: "2210"
+  destinationIp:
+  - 192.168.0.196
+  - 10.0.0.196
+  - 10.112.124.10
+  sourcePort:
+  - '*'
+  destinationPort:
+  - "135"
+  - "139"
+  - "445"
+  - "636"
+  - "3268"
+  - "6269"
+  - 49152-65535
+  Description: Allow RPC, LDAP GC, LDAP GC SSL, LDAP SSL ,SMB, User/Computer Authentication
+  protocol: TCP
+  sourceIp:
+  - VirtualNetwork
+
+- ruleName: AllowAD-TCP-UDP-Traffic-Outbound
+  access: Allow
+  direction: Outbound
+  priority: "2220"
+  destinationIp:
+  - 192.168.0.196
+  - 10.0.0.196
+  - 10.112.124.10
+  sourcePort:
+  - '*'
+  destinationPort:
+  - "464"
+  - "389"
+  - "53"
+  - "88"
+  Description: Allow Kerberos, LDAP,DNS.
+  protocol: '*'
+  sourceIp:
+  - VirtualNetwork
+
+- ruleName: AllowAD-TCP-UDP-Traffic-Inbound
+  access: Allow
+  direction: Inbound
+  priority: "2230"
+  destinationIp:
+  - VirtualNetwork
+  sourcePort:
+  - '*'
+  destinationPort:
+  - '*'
+  Description: Trust Traffic from AD servers.
+  protocol: '*'
+  sourceIp:
+  - 192.168.0.196
+  - 10.0.0.196
+  - 10.112.124.10
+
+- ruleName: AllowAzureFileShareUKSaccessOutbound
+  access: Allow
+  direction: outbound
+  priority: "2240"
+  destinationIp:
+  - Storage.UKSouth
+  sourcePort:
+  - '*'
+  destinationPort:
+  - "445"
+  Description: Allow Member servers to access Azure File Share
+  protocol: tcp
+  sourceIp:
+  - VirtualNetwork
+
+- ruleName: AllowAzureFileShareUKWaccessOutbound
+  access: Allow
+  direction: outbound
+  priority: "2250"
+  destinationIp:
+  - Storage.UKWest
+  sourcePort:
+  - '*'
+  destinationPort:
+  - "445"
+  Description: Allow Member servers to access Azure File Share
+  protocol: tcp
+  sourceIp:
+  - VirtualNetwork
+
+- ruleName: AllowManagementprotocolsfromJumpboxesInbound
+  access: Allow
+  direction: Inbound
+  priority: "2310"
+  destinationIp:
+  - 192.168.0.0/23
+  - 10.10.0.0/22
+  - 10.0.0.0/23
+  - 10.8.0.0/22
+  sourcePort:
+  - '*'
+  destinationPort:
+  - "3389"
+  - "22"
+  - "80"
+  - "443"
+  - "445"
+  Description: Allow Management from Jump Server
+  protocol: '*'
+  sourceIp:
+  - 192.168.0.96/27
+  - 10.0.0.96/27

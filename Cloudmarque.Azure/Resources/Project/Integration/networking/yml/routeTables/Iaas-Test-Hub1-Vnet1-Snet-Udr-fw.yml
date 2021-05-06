@@ -1,0 +1,64 @@
+- tableName: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwha1
+  location:
+  service:
+    publish:
+      routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwha1
+      resourceGroup:
+  routes:
+  - routeName: vNetLocal
+    nextHopType: vNetLocal
+    cidr: 192.168.0.80/28
+    nextHopIpAddress:
+
+- tableName: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwman1
+  location:
+  service:
+    publish:
+      routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwman1
+      resourceGroup:
+  routes:
+  - routeName: AllowInternet
+    nextHopType: internet
+    cidr: 0.0.0.0/0
+    nextHopIpAddress:
+  - routeName: vNetLocal
+    nextHopType: vNetLocal
+    cidr: 192.168.0.64/28
+    nextHopIpAddress:
+
+- tableName: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwpriv1
+  location:
+  service:
+    publish:
+      routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwpriv1
+      resourceGroup:
+  routes:
+  - routeName: UKWHubviaUKWFW
+    nextHopType: VirtualAppliance
+    cidr: 10.0.0.0/23
+    nextHopIpAddress: 10.0.0.38
+  - routeName: UKWSpokeviaUKWFW
+    nextHopType: VirtualAppliance
+    cidr: 10.8.0.0/22
+    nextHopIpAddress: 10.0.0.38
+  - routeName: vNetLocal
+    nextHopType: vNetLocal
+    cidr: 192.168.0.32/27
+    nextHopIpAddress:
+
+- tableName: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwpub1
+  location:
+  service:
+    publish:
+      routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwpub1
+      resourceGroup:
+  routes:
+  - routeName: AzureInternet
+    nextHopType: internet
+    cidr: 0.0.0.0/0
+    nextHopIpAddress:
+  - routeName: vNetLocal
+    nextHopType: vNetLocal
+    cidr: 192.168.0.128/27
+    nextHopIpAddress:
+

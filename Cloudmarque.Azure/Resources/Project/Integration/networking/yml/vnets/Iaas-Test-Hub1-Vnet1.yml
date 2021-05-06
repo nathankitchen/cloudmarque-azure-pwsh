@@ -1,0 +1,50 @@
+vnetName: Iaas-Test-Hub1-Vnet1
+addressSpace:
+- 192.168.0.0/23
+dnsServers:
+location: UKSouth
+service:
+  publish:
+    resourceGroup: Iaas-Test-Hub1-Rg
+    vnet: Iaas-Test-Hub1-Vnet1
+subnets:
+- cidr: 192.168.0.32/27
+  networkSecurityGroup:
+  routeTable:
+  serviceEndpoints: []
+  subnetName: AzureBastionSubnet
+- cidr: 192.168.0.0/27
+  networkSecurityGroup:
+  routeTable:
+  serviceEndpoints: []
+  subnetName: GatewaySubnet
+- cidr: 192.168.0.192/27
+  networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-dc1
+  routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-dc1
+  serviceEndpoints: []
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-dc1
+- cidr: 192.168.0.80/28
+  networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwha1
+  routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwha1
+  serviceEndpoints: []
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-fwha1
+- cidr: 192.168.0.64/28
+  networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwman1
+  routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwman1
+  serviceEndpoints: []
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-fwman1
+- cidr: 192.168.0.128/27
+  networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwpub1
+  routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwpub1
+  serviceEndpoints: []
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-fwpub1
+- cidr: 192.168.0.96/27
+  networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-management1
+  routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-management1
+  serviceEndpoints: []
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-management1
+- cidr: 192.168.1.0/26
+  networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-servers1
+  routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-servers1
+  serviceEndpoints: []
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-servers1

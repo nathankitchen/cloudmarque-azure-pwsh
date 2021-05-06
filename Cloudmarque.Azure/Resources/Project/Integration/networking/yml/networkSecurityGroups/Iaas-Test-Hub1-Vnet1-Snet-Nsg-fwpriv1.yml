@@ -1,0 +1,37 @@
+nsgName: Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwpriv1
+location:
+service:
+  publish:
+    networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwpriv1
+    resourceGroup:
+ruleGroups:
+- nsg.all-subnets.rules
+rules:
+- Access: Allow
+  direction: Inbound
+  priority: "1600"
+  destinationIp:
+  - "*"
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow traffic to enter the private interface destined anywhere
+  ruleName: AllowvNetInbound
+  protocol: "*"
+  sourceIp:
+  - VirtualNetwork
+- Access: Allow
+  direction: Outbound
+  priority: "1590"
+  destinationIp:
+  - VirtualNetwork
+  sourcePort:
+  - "*"
+  destinationPort:
+  - "*"
+  Description: Allow traffic to enter and leave private interface (internet subnet routing)
+  ruleName: AllowvNetOutbound
+  protocol: "*"
+  sourceIp:
+  - "*"

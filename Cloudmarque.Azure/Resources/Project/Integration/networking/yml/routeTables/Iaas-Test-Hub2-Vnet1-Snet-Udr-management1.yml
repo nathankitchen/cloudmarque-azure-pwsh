@@ -1,0 +1,16 @@
+tableName: Iaas-Test-Hub2-Vnet1-Snet-Udr-management1
+location:
+service:
+  publish:
+    routeTable: Iaas-Test-Hub2-Vnet1-Snet-Udr-management1
+    resourceGroup:
+routes:
+- routeName: DefaultRouteViaFirewall
+  nextHopType: VirtualAppliance
+  cidr: 0.0.0.0/0
+  nextHopIpAddress: 10.0.0.38
+- routeName: Iaas-Test-Hub2-Vnet1-vnetlocal
+  nextHopType: vNetLocal
+  cidr: 10.0.0.0/23
+  nextHopIpAddress:
+
