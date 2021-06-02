@@ -6,6 +6,8 @@ location: UK South
 service:
   dependencies:
     workspace: Core-Test-Ws
+    vnet:
+    privateZones: []
   publish:
     resourceGroup: Iaas-Test-Rec-Rg
     recoveryVault: Iaas-Test-Rec-Vault1
@@ -16,11 +18,23 @@ recoveryServicesVaults:
   location: UK South
   service:
     publish:
-      recoveryVault: Iaas-Test-Rec-Vault2
+      recoveryVault: Iaas-Test-Rec-Vault1
 
 - name: Iaas-Test-Rec-Vault2
   backupLevel: Standard
   location: UK South
   service:
     publish:
-      recoveryVault: Iaas-Test-Rec-Vault3
+      recoveryVault: Iaas-Test-Rec-Vault2
+  managedIdentity: true
+  privateEndpoints:
+  - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+    subResourceName: AzureSiteRecovery
+    name:                                                       # Defaults to resource name.
+    service:
+      dependencies:
+        vnet: Iaas-Test-Hub1-Vnet1
+        privateZones:
+        - privatelink-recoveryvault
+      publish:
+        privateEndpoint: Iaas-siterecovery-endpoint

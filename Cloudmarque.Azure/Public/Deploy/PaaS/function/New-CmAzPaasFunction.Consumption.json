@@ -105,7 +105,7 @@
                             "type": "Microsoft.Web/serverfarms",
                             "apiVersion": "2020-06-01",
                             "name": "[parameters('FunctionAppObject').planName]",
-                            "location": "[parameters('FunctionAppObject').region]",
+                            "location": "[parameters('FunctionAppObject').location]",
                             "tags": {
                                 "cm-service": "[parameters('FunctionAppObject').service.publish.appServicePlan]"
                             },
@@ -125,7 +125,7 @@
                             "type": "Microsoft.Web/sites",
                             "apiVersion": "2020-06-01",
                             "name": "[parameters('FunctionAppObject').name]",
-                            "location": "[parameters('FunctionAppObject').region]",
+                            "location": "[parameters('FunctionAppObject').location]",
                             "kind": "[parameters('FunctionAppObject').kind]",
                             "dependsOn": [
                                 "[parameters('FunctionAppObject').planName]"

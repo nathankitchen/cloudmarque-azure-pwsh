@@ -43,7 +43,7 @@
                             "type": "Microsoft.ApiManagement/service",
                             "apiVersion": "2019-12-01",
                             "name": "[parameters('apiManagementServiceObject').generatedName]",
-                            "location": "[parameters('apiManagementServiceObject').region]",
+                            "location": "[parameters('apiManagementServiceObject').location]",
                             "sku": {
                                 "name": "[parameters('apiManagementServiceObject').sku]",
                                 "capacity": "[parameters('apiManagementServiceObject').skuCount]"

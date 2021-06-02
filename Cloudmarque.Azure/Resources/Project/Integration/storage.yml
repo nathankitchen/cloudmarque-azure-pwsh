@@ -6,6 +6,8 @@ location: UK West
 service:
   dependencies:
     resourceGroup:                              # For deployment to exisiting resource Group
+    vnet:
+    privateZones: []
   publish:
     storage: Iaas-Test-St
     resourceGroup: Iaas-Test-Rg                 # For creating new resource groups
@@ -36,7 +38,7 @@ storageAccounts:
   networkAclsDefaultAction: Allow               # Optional
   service:                                      # Optional
     publish:
-      storage:
+      storage: Iaas-Test-St2
 
 - storageAccountName: IaasTestSt3
   accountType: Standard
@@ -51,6 +53,8 @@ storageAccounts:
     - name: blob1
     - name: blob2
     - name: blob3
+    - name: $web
+      publicAccess: Blob
   minimumTlsVersion: TLS1_2                     # Optional
   supportsHttpsTrafficOnly: True                # Optional
   allowBlobPublicAccess: True                   # Optional
@@ -58,7 +62,17 @@ storageAccounts:
   networkAclsDefaultAction: Allow               # Optional
   service:                                      # Optional
     publish:
-      storage:
+      storage: Iaas-Test-St4
+  # privateEndpoints:
+  # - subnetName: Iaas-Test-Hub2-Vnet1-Snet-dc1
+  #   subResourceName: web
+  #   service:
+  #     dependencies:
+  #       vnet: Iaas-Test-Hub2-Vnet1
+  #       privateZones:
+  #       - privatelink-storage-web
+  #     publish:
+  #       privateEndpoint: IaasTestSt4-Web-Endpoint
 
 - storageAccountName: IaasTestSt5
   accountType: Standard
@@ -98,6 +112,7 @@ storageAccounts:
 
 - storageAccountName: IaasTestSt8
   accountType: Standard
+  location: uksouth
   blobContainer:
     - name: blob1
     - name: blob2
@@ -121,7 +136,44 @@ storageAccounts:
   networkAclsDefaultAction: Allow               # Optional
   service:                                      # Optional
     publish:
-      storage:
+      storage: Iaas-Test-Stg-Function
+  # privateEndpoints:
+  # - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  #   subResourceName: blob
+  #   service:
+  #     dependencies:
+  #       vnet: Iaas-Test-Hub1-Vnet1
+  #       privateZones:
+  #       - privatelink-storage-blob
+  #     publish:
+  #       privateEndpoint: IaasTestSt1-Web-Endpoint
+  # - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  #   subResourceName: file
+  #   service:
+  #     dependencies:
+  #       vnet: Iaas-Test-Hub1-Vnet1
+  #       privateZones:
+  #       - privatelink-storage-file
+  #     publish:
+  #       privateEndpoint: IaasTestSt1-Web-Endpoint
+  # - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  #   subResourceName: table
+  #   service:
+  #     dependencies:
+  #       vnet: Iaas-Test-Hub1-Vnet1
+  #       privateZones:
+  #       - privatelink-storage-table
+  #     publish:
+  #       privateEndpoint: IaasTestSt1-Web-Endpoint
+  # - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  #   subResourceName: queue
+  #   service:
+  #     dependencies:
+  #       vnet: Iaas-Test-Hub1-Vnet1
+  #       privateZones:
+  #       - privatelink-storage-queue
+  #     publish:
+  #       privateEndpoint: IaasTestSt1-Web-Endpoint
 
 - storageAccountName: IaasTestSt9
   location: UK South
@@ -171,3 +223,6 @@ storageAccounts:
   service:                                      # Optional
     publish:
       storage:
+
+# Note - Storage privateEndpoints are deployed with privateendpoints.yml as networking has dependency on storage.
+# Note - Above example shows private endpoint can also be deployed with storage.

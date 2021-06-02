@@ -1,0 +1,88 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "PrivateEndpoints": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[take(concat('cm_pe_', parameters('PrivateEndpoints')[copyIndex('PrivateEndpointsCopy')].name, copyIndex('PrivateEndpointsCopy')), 64)]",
+            "resourceGroup": "[parameters('PrivateEndpoints')[copyIndex('PrivateEndpointsCopy')].resourceGroupName]",
+            "copy": {
+                "name": "PrivateEndpointsCopy",
+                "count": "[length(parameters('PrivateEndpoints'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "PrivateEndpoint": {
+                        "value": "[parameters('PrivateEndpoints')[copyIndex('PrivateEndpointsCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "PrivateEndpoint": {
+                            "type": "Object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateEndpoints",
+                            "apiVersion": "2020-06-01",
+                            "name": "[parameters('PrivateEndpoint').name]",
+                            "location": "[parameters('PrivateEndpoint').location]",
+                            "tags": {
+                                "cm-service": "[parameters('PrivateEndpoint').service.publish.privateEndpoint]"
+                            },
+                            "properties": {
+                                "subnet": {
+                                    "id": "[resourceId( parameters('PrivateEndpoint').vnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', parameters('PrivateEndpoint').vnetName, parameters('PrivateEndpoint').subnetName)]"
+                                },
+                                "privateLinkServiceConnections": [
+                                    {
+                                        "name": "[parameters('PrivateEndpoint').name]",
+                                        "properties": {
+                                            "privateLinkServiceId": "[parameters('PrivateEndpoint').resourceId]",
+                                            "groupIds": ["[parameters('PrivateEndpoint').subResourceName]"]
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                            "apiVersion": "2020-06-01",
+                            "name": "[concat(parameters('PrivateEndpoint').name, '/default')]",
+                            "dependsOn": [
+                                "[parameters('PrivateEndpoint').name]"
+                            ],
+                            "properties": {
+                                "copy": [
+                                    {
+                                        "name": "privateDnsZoneConfigs",
+                                        "count": "[length(parameters('PrivateEndpoint').privateDnsZoneConfigs)]",
+                                        "input": {
+                                            "name": "[parameters('PrivateEndpoint').privateDnsZoneConfigs[copyIndex('privateDnsZoneConfigs')].name]",
+                                            "properties": {
+                                                "privateDnsZoneId": "[parameters('PrivateEndpoint').privateDnsZoneConfigs[copyIndex('privateDnsZoneConfigs')].privateDnsZoneId]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

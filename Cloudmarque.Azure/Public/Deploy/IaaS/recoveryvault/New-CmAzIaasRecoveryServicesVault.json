@@ -15,6 +15,9 @@
             "tags": {
                 "cm-service": "[parameters('RecoveryServicesVaults')[copyIndex('recoveryVaultCopy')].service.publish.recoveryVault]"
             },
+            "identity": {
+                "type": "[parameters('RecoveryServicesVaults')[copyIndex('recoveryVaultCopy')].managedIdentity]"
+            },
             "properties": {},
             "sku": {
                 "tier": "[parameters('RecoveryServicesVaults')[copyIndex('recoveryVaultCopy')].backupLevel]",

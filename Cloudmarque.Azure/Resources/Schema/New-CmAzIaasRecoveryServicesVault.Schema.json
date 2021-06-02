@@ -53,6 +53,18 @@
                             "type": "string",
                             "title": "Workspace",
                             "description": "Dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "privateZones": {
+                            "$id": "#/service/dependencies/privateZones",
+                            "type": ["array", "null"],
+                            "title": "PrivateZones",
+                            "description": "Dependency value to fetch existing resource type. Enables private zone integration."
                         }
                     },
                     "additionalProperties": false
@@ -76,7 +88,13 @@
                             "$id": "#/recoveryServicesVaults/items/allOf/service/publish/recoveryVault",
                             "type": ["string", "null"],
                             "title": "RecoveryVault",
-                            "description": "Global default value to publish on deployed resource type."                                             
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "privateEndpoint": {
+                            "$id": "#/service/publish/privateEndpoint",
+                            "type": ["string", "null"],
+                            "title": "PrivateEndpoint",
+                            "description": "Global default value to publish on deployed resource type."
                         }
                     },
                     "additionalProperties": false
@@ -115,11 +133,103 @@
                                 "title": "BackupLevel",
                                 "description": "The recovery vault sku level."
                             },
+                            "managedIdentity": {
+                                "$id": "#/recoveryServicesVaults/items/allOf/managedIdentity",
+                                "type": ["boolean", "null"],
+                                "title": "managedIdentity",
+                                "description": "The managed identity for authentication with Azure AD"
+                            },
                             "location": {
                                 "$id": "#/recoveryServicesVaults/items/allOf/location",
                                 "type": "string",
                                 "title": "Location",
                                 "description": "Recovery vault deployment location"
+                            },
+                            "privateEndpoints": {
+                                "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints",
+                                "type": ["array", "null"],
+                                "title": "PrivateEndpoints",
+                                "description": "Container for private endpoint details.",
+                                "items": {
+                                    "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf",
+                                            "type": "object",
+                                            "required": [
+                                                "subnetName",
+                                                "subResourceName"
+                                            ],
+                                            "properties": {
+                                                "subnetName": {
+                                                    "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf/subnetName",
+                                                    "type": "string",
+                                                    "title": "SubnetName",
+                                                    "description": "Names of underlying sub-resources to create private connection with."
+                                                },
+                                                "name": {
+                                                    "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf/name",
+                                                    "type": ["string", "null"],
+                                                    "title": "Name",
+                                                    "description": "Becomes part of private endpoint name."
+                                                },
+                                                "subResourceName": {
+                                                    "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf/subResourceName",
+                                                    "type": "string",
+                                                    "title": "SubResourceName",
+                                                    "enum": ["AzureBackup", "AzureSiteRecovery"],
+                                                    "description": "Sub-Resource Name."
+                                                },
+                                                "service": {
+                                                    "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf/service",
+                                                    "type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",
+                                                    "properties": {
+                                                        "dependencies": {
+                                                            "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf/service/dependencies",
+                                                            "type":["object", "null"],
+                                                            "title": "Dependencies",
+                                                            "description": "Contains dependency details for service location.",
+                                                            "properties": {
+                                                                "vnet": {
+                                                                    "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf/service/dependencies/vnet",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "Vnet",
+                                                                    "description": "Local overriding dependency value to fetch existing resource type."
+                                                                },
+                                                                "privateZones": {
+                                                                    "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf/service/dependencies/privateZones",
+                                                                    "type": ["array", "null"],
+                                                                    "title": "PrivateZones",
+                                                                    "description": "Dependency value to fetch existing resource type. Enables private zone integration."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        },
+                                                        "publish": {
+                                                            "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+                                                                "privateEndpoint": {
+                                                                    "$id": "#/recoveryServicesVaults/items/allOf/privateEndpoints/items/allOf/service/publish/privateEndpoint",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "privateEndpoint",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
                             },
                             "service": {
                                 "$id": "#/recoveryServicesVaults/items/allOf/service",
@@ -137,7 +247,7 @@
                                                 "$id": "#/recoveryServicesVaults/items/allOf/service/publish/recoveryVault",
                                                 "type": ["string", "null"],
                                                 "title": "RecoveryVault",
-                                                "description": "Local overriding value to publish on deployed existing resource type."                                             
+                                                "description": "Local overriding value to publish on deployed existing resource type."
                                             }
                                         },
                                         "additionalProperties": false

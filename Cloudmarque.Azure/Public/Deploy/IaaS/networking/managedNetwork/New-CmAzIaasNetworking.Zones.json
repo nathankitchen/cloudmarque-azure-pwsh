@@ -1,0 +1,70 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "PrivateDnsZones": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[concat('cm_pzs_', parameters('PrivateDnsZones')[copyIndex('PrivateDnsZonesCopy')].DNS)]",
+            "resourceGroup": "[parameters('PrivateDnsZones')[copyIndex('PrivateDnsZonesCopy')].resourceGroupName]",
+            "copy": {
+                "name": "PrivateDnsZonesCopy",
+                "count": "[length(parameters('PrivateDnsZones'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "PrivateDnsZone": {
+                        "value": "[parameters('PrivateDnsZones')[copyIndex('PrivateDnsZonesCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "PrivateDnsZone": {
+                            "type": "Object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateDnsZones",
+                            "apiVersion": "2020-01-01",
+                            "name": "[parameters('PrivateDnsZone').DNS]",
+                            "tags": {
+                                "cm-service": "[parameters('PrivateDnsZone').service.publish.zone]"
+                            },
+                            "location": "global"                        },
+                        {
+                            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                            "apiVersion": "2020-01-01",
+                            "dependsOn": [
+                                "[parameters('PrivateDnsZone').DNS]"
+                            ],
+                            "name": "[concat(parameters('PrivateDnsZone').DNS, '/', parameters('PrivateDnsZone').virtualNetworkLinks[copyIndex('virtualNetworkLinksCopy')].vnetName, '-link')]",
+                            "location": "global",
+                            "properties": {
+                                "virtualNetwork": {
+                                    "id": "[resourceId(parameters('PrivateDnsZone').virtualNetworkLinks[copyIndex('virtualNetworkLinksCopy')].vnetResourceGroupName, 'Microsoft.Network/virtualNetworks', parameters('PrivateDnsZone').virtualNetworkLinks[copyIndex('virtualNetworkLinksCopy')].vnetName)]"
+                                },
+                                "registrationEnabled": false
+                            },
+                            "copy": {
+                                "name": "virtualNetworkLinksCopy",
+                                "count": "[length(parameters('PrivateDnsZone').virtualNetworkLinks)]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

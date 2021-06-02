@@ -46,10 +46,10 @@
                             "title": "ResourceGroup",
                             "description": "Dependency value to fetch existing resource type."
                         },
-                        "workpace": {
-                            "$id": "#/service/dependencies/workpace",
+                        "workspace": {
+                            "$id": "#/service/dependencies/workspace",
                             "type": ["string", "null"],
-                            "title": "Workpace",
+                            "title": "Workspace",
                             "description": "Dependency value to fetch existing resource type."
                         },
                         "keyvault": {
@@ -57,6 +57,18 @@
                             "type": ["string", "null"],
                             "title": "Keyvault",
                             "description": "Global overriding dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "privateZones": {
+                            "$id": "#/service/dependencies/privateZones",
+                            "type": ["array", "null"],
+                            "title": "PrivateZones",
+                            "description": "Dependency value to fetch existing resource type. Enables private zone integration."
                         }
                     },
                     "additionalProperties": false
@@ -83,6 +95,12 @@
                             "$id": "#/service/publish/elasticPool",
                             "type": ["string", "null"],
                             "title": "ElasticPool",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "privateEndpoint": {
+                            "$id": "#/service/publish/privateEndpoint",
+                            "type": ["string", "null"],
+                            "title": "PrivateEndpoint",
                             "description": "Global default value to publish on deployed resource type."
                         }
                     },
@@ -125,6 +143,84 @@
                                 "title": "Family",
                                 "description": "The database product to use.",
                                 "enum": ["azureSql", "postgressql", "mariaDb", "mySql"]
+                            },
+                            "privateEndpoints": {
+                                "$id": "#/sqlConfig/items/allOf/privateEndpoints",
+                                "type": ["array", "null"],
+                                "title": "PrivateEndpoints",
+                                "description": "Container for private endpoint details.",
+                                "items": {
+                                    "$id": "#/sqlConfig/items/allOf/privateEndpoints/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/sqlConfig/items/allOf/privateEndpoints/items/allOf",
+                                            "type": "object",
+                                            "required": [
+                                                "subnetName"
+                                            ],
+                                            "properties": {
+                                                "subnetName": {
+                                                    "$id": "#/sqlConfig/items/allOf/privateEndpoints/items/allOf/subnetName",
+                                                    "type": "string",
+                                                    "title": "SubnetName",
+                                                    "description": "Names of underlying sub-resources to create private connection with."
+                                                },
+                                                "name": {
+                                                    "$id": "#/sqlConfig/items/allOf/privateEndpoints/items/allOf/name",
+                                                    "type": ["string", "null"],
+                                                    "title": "Name",
+                                                    "description": "Becomes part of private endpoint name."
+                                                },
+                                                "service": {
+                                                    "$id": "#/sqlConfig/items/allOf/privateEndpoints/items/allOf/service",
+                                                    "type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",
+                                                    "properties": {
+                                                        "dependencies": {
+                                                            "$id": "#/sqlConfig/items/allOf/privateEndpoints/items/allOf/service/dependencies",
+                                                            "type": ["object", "null"],
+                                                            "title": "Dependencies",
+                                                            "description": "Contains dependency details for service location.",
+                                                            "properties": {
+                                                                "vnet": {
+                                                                    "$id": "#/sqlConfig/items/allOf/privateEndpoints/items/allOf/service/dependencies/vnet",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "Vnet",
+                                                                    "description": "Local overriding dependency value to fetch existing resource type."
+                                                                },
+                                                                "privateZones": {
+                                                                    "$id": "#/sqlConfig/items/allOf/privateEndpoints/items/allOf/service/dependencies/privateZones",
+                                                                    "type": ["array", "null"],
+                                                                    "title": "PrivateZones",
+                                                                    "description": "Dependency value to fetch existing resource type. Enables private zone integration."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        },
+                                                        "publish": {
+                                                            "$id": "#/sqlConfig/items/allOf/privateEndpoints/items/allOf/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+                                                                "privateEndpoint": {
+                                                                    "$id": "#/sqlConfig/items/allOf/privateEndpoints/items/allOf/service/publish/privateEndpoint",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "privateEndpoint",
+                                                                    "description": "Local overriding value to publish on deployed existing resource type."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
                             },
                             "type": {
                                 "$id": "#/sqlConfig/items/allOf/type",

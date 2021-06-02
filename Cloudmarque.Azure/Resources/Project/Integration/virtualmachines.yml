@@ -14,7 +14,7 @@ service:
     vm: Iaas-Test-Vm
     nic: Iaas-Test-Nic
     proximityPlacementGroup: Iaas-Test-Ppg
-    availabilitySet: Iaas-Test-Aset
+    availabilitySet: Iaas-Test-Vm-Aset
 
 diskEncryptionKey: Iaas-Test-Key-Enc-Key1
 
@@ -25,13 +25,13 @@ groups:
     publish:
       resourceGroup: Iaas-Test-Vm-Rg1
   proximityPlacementGroups:
-  - name: ppg1
+  - name: Iaas-Test-Vm-Ppg1
     location: UK South
     service:
       publish:
         proximityPlacementGroup:
   availabilitySets:
-  - name: set1
+  - name: Iaas-Test-Vm-ASet1
     location: UK South
     sku:
       name: aligned                                           # aligned or classic
@@ -39,11 +39,11 @@ groups:
       capacity:
     platformUpdateDomainCount: 5
     platformFaultDomainCount: 2
-    proximityPlacementGroup: ppg1                             # Proximity placementgroup and availability set must have same location.
+    proximityPlacementGroup: Iaas-Test-Vm-Ppg1                # Proximity placementgroup and availability set must have same location.
     service:
       publish:
         availabilitySet:
-  - name: set2
+  - name: Iaas-Test-Vm-ASet2
     location: UK South
     sku:
       name: aligned                                           # aligned or classic
@@ -59,15 +59,15 @@ groups:
   virtualMachines:
   - name: IaasTestVm1
     size: Standard_B1s
-    availabilitySet: set1
+    availabilitySet: Iaas-Test-Vm-ASet1
     updateGroup: Critical
     updateFrequency: Daily
     timeZone: AUS Eastern Standard Time                       # List of allowed values can be fetched by running command on windows OS - (Get-TimeZone -ListAvailable | select ID). Default - UTC
     imageReference:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
-      sku: rs5-pro
-      version: latest
+      sku: 20h1-ent
+      version: 19041.928.2104091205
     zone:                                                     # Availability Zone. Cannot be used with availability set.
     location: UK South                                        # Optional - default to resource group location.
     service:
@@ -112,8 +112,8 @@ groups:
     imageReference:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
-      sku: rs5-pro
-      version: latest
+      sku: 20h1-ent
+      version: 19041.928.2104091205
     service:
       publish:
         vm: Iaas-Test-Vm2
@@ -137,12 +137,12 @@ groups:
     size: Standard_B1s
     updateGroup: Critical
     updateFrequency: Daily
-    availabilitySet: set2
+    availabilitySet: Iaas-Test-Vm-ASet2
     imageReference:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
-      sku: rs5-pro
-      version: latest
+      sku: 20h1-ent
+      version: 19041.928.2104091205
     location: UK South
     service:
       publish:
@@ -171,8 +171,8 @@ groups:
     imageReference:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
-      sku: rs5-pro
-      version: latest
+      sku: 20h1-ent
+      version: 19041.928.2104091205
     location: UK South
     service:
       publish:
@@ -200,8 +200,8 @@ groups:
     imageReference:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
-      sku: rs5-pro
-      version: latest
+      sku: 20h1-ent
+      version: 19041.928.2104091205
     location: UK South
     service:
       publish:
@@ -235,8 +235,8 @@ groups:
     imageReference:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
-      sku: rs5-pro
-      version: latest
+      sku: 20h1-ent
+      version: 19041.928.2104091205
     location: UK West
     service:
       publish:
@@ -264,8 +264,8 @@ groups:
     imageReference:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
-      sku: rs5-pro
-      version: latest
+      sku: 20h1-ent
+      version: 19041.928.2104091205
     location: UK West
     service:
       publish:
@@ -289,8 +289,8 @@ groups:
     imageReference:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
-      sku: rs5-pro
-      version: latest
+      sku: 20h1-ent
+      version: 19041.928.2104091205
     location: UK West
     service:
       publish:
@@ -314,8 +314,8 @@ groups:
     imageReference:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
-      sku: rs5-pro
-      version: latest
+      sku: 20h1-ent
+      version: 19041.928.2104091205
     location: East US
     service:
       publish:

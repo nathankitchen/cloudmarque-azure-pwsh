@@ -43,7 +43,7 @@
                             "type": "Microsoft.Web/serverfarms",
                             "apiVersion": "2018-02-01",
                             "name": "[parameters('appServiceObject').name]",
-                            "location": "[parameters('appServiceObject').region]",
+                            "location": "[parameters('appServiceObject').location]",
                             "sku": {
                                 "name": "[parameters('appServiceObject').sku]"
                             },
@@ -96,7 +96,7 @@
                                             "type": "Microsoft.Web/sites",
                                             "apiVersion": "2019-08-01",
                                             "name": "[parameters('webAppObject').webAppGeneratedName]",
-                                            "location": "[parameters('webAppObject').region]",
+                                            "location": "[parameters('webAppObject').location]",
                                             "kind": "app",
                                             "tags": {
                                                 "cm-service": "[parameters('webAppObject').service.publish.webapp]"
@@ -130,7 +130,7 @@
                                             "tags": {
                                                 "cm-service": "[parameters('webAppObject').slotsObject[copyIndex('SlotsCopy')].service.publish.slot]"
                                             },
-                                            "location": "[parameters('webAppObject').region]",
+                                            "location": "[parameters('webAppObject').location]",
                                             "dependsOn": [
                                                 "[parameters('webAppObject').webAppGeneratedName]"
                                             ],
@@ -144,7 +144,7 @@
                                             "condition": "[not(equals(parameters('webAppObject').contentDeliveryNetwork.name, 'none'))]",
                                             "name": "[parameters('webAppObject').contentDeliveryNetwork.name]",
                                             "type": "Microsoft.Cdn/profiles",
-                                            "location": "[parameters('webAppObject').contentDeliveryNetwork.region]",
+                                            "location": "[parameters('webAppObject').contentDeliveryNetwork.location]",
                                             "apiVersion": "2020-04-15",
                                             "tags": {
                                                 "cm-service": "[parameters('webAppObject').contentDeliveryNetwork.service.publish.cdn]"
@@ -158,7 +158,7 @@
                                                     "condition": "[not(equals(parameters('webAppObject').contentDeliveryNetwork.name, 'none'))]",
                                                     "name": "[concat('endpoint-cdn-', parameters('webAppObject').webAppGeneratedName)]",
                                                     "type": "endpoints",
-                                                    "location": "[parameters('webAppObject').contentDeliveryNetwork.region]",
+                                                    "location": "[parameters('webAppObject').contentDeliveryNetwork.location]",
                                                     "apiVersion": "2020-04-15",
                                                     "dependsOn": [
                                                         "[parameters('webAppObject').contentDeliveryNetwork.name]",

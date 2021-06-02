@@ -113,9 +113,8 @@
 
 					# This approach is because Vpn Gw expects Raw certificate data
 					$keyVaultCertificateObject = Get-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $vpnGw.P2s.RootCertificateName
-					$clientRootCertData = $keyVaultCertificateObject.Certificate.GetRawCertData()
-					
-					if (!$clientRootCertData) {
+
+					if (!$keyVaultCertificateObject) {
 
 						Write-Verbose "Certificate Not Found! P2s will not be configured."
 						$vpnGw.P2s = @{}
@@ -125,6 +124,7 @@
 					}
 					else {
 						Write-Verbose "Certificate $($vpnGw.P2s.RootCertificateName) found, p2s will be configured."
+						$clientRootCertData = $keyVaultCertificateObject.Certificate.GetRawCertData()
 						$vpnGw.P2s.ClientRootCertData = [Convert]::ToBase64String($clientRootCertData)
 					}
 				}
@@ -139,7 +139,7 @@
 						$vpnGw.S2s.localGatewayName = "none"
 				}
 				else {
-					
+
 					# This apporach is because Key vault reference cannot be used directly in Arm template because of conflict with copy
 					# SharedKeyObject is created to resolve with CLIXML type of object created when you run Az commands.
 					$keyVaultService = Get-CmAzService -Service $vpnGw.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple

@@ -44,6 +44,18 @@
                             "type": ["string", "null"],
                             "title": "ResourceGroup",
                             "description": "Dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "privateZones": {
+                            "$id": "#/service/dependencies/privateZones",
+                            "type": ["array", "null"],
+                            "title": "PrivateZones",
+                            "description": "Dependency value to fetch existing resource type. Enables private zone integration."
                         }
                     },
                     "additionalProperties": false
@@ -65,6 +77,12 @@
                             "type": ["string", "null"],
                             "title": "ResourceGroup",
                             "description": "Value to publish on existing resource type."
+                        },
+                        "privateEndpoint": {
+                            "$id": "#/service/publish/privateEndpoint",
+                            "type": ["string", "null"],
+                            "title": "PrivateEndpoint",
+                            "description": "Global default value to publish on deployed resource type."
                         }
                     },
                     "additionalProperties": false
@@ -94,6 +112,95 @@
                                 "type": "string",
                                 "title": "StorageAccountName",
                                 "description": "Becomes part of the generated storage account's name."
+                            },
+                            "privateEndpoints": {
+                                "$id": "#/storageAccounts/items/allOf/privateEndpoints",
+                                "type": ["array", "null"],
+                                "title": "PrivateEndpoints",
+                                "description": "Container for private endpoint details.",
+                                "items": {
+                                    "$id": "#/storageAccounts/items/allOf/privateEndpoints/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf",
+                                            "type": "object",
+                                            "required": [
+                                                "subnetName",
+                                                "subResourceName"
+                                            ],
+                                            "properties": {
+                                                "subnetName": {
+                                                    "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf/subnetName",
+                                                    "type": "string",
+                                                    "title": "SubnetName",
+                                                    "description": "Names of underlying sub-resources to create private connection with."
+                                                },
+                                                "subResourceName": {
+                                                    "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf/subResourceNames",
+                                                    "type": "string",
+                                                    "title": "SubResourceName",
+                                                    "enum": ["blob", "blob_secondary", "table", "table_secondary", "queue", "queue_secondary", "file", "file_secondary", "web", "web_secondary"],
+                                                    "description": "Names of underlying sub-resources to create private connection with."
+                                                },
+                                                "name": {
+                                                    "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf/name",
+                                                    "type": ["string", "null"],
+                                                    "title": "Name",
+                                                    "description": "Becomes part of private endpoint name."
+                                                },
+                                                "service": {
+                                                    "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf/service",
+                                                    "type": ["object", "null"],
+                                                    "title": "Service",
+                                                    "description": "Contains dependency and publish details for service location.",
+                                                    "properties": {
+                                                        "dependencies": {
+                                                            "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf/service/dependencies",
+                                                            "type": ["object", "null"],
+                                                            "title": "Dependencies",
+                                                            "description": "Contains dependency details for service location.",
+                                                            "properties": {
+                                                                "vnet": {
+                                                                    "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf/service/dependencies/vnet",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "Vnet",
+                                                                    "description": "Local overriding dependency value to fetch existing resource type."
+                                                                },
+                                                                "privateZones": {
+                                                                    "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf/service/dependencies/privateZones",
+                                                                    "type": ["array", "null"],
+                                                                    "title": "PrivateZones",
+                                                                    "description": "Dependency value to fetch existing resource type. Enables private zone integration."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        },
+                                                        "publish": {
+                                                            "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf/service/publish",
+                                                            "type": ["object", "null"],
+                                                            "title": "Publish",
+                                                            "required": [
+                                                                "privateEndpoint"
+                                                            ],
+                                                            "description": "Contains publish details for service location.",
+                                                            "properties": {
+                                                                "privateEndpoint": {
+                                                                    "$id": "#/storageAccounts/items/allOf/privateEndpoints/items/allOf/service/publish/privateEndpoint",
+                                                                    "type": ["string", "null"],
+                                                                    "title": "privateEndpoint",
+                                                                    "description": "Local overriding value to publish on deployed resource type."
+                                                                }
+                                                            },
+                                                            "additionalProperties": false
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
                             },
                             "location": {
                                 "$id": "#/storageAccounts/items/allOf/location",

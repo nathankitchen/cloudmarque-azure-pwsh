@@ -46,7 +46,7 @@
 
 	try {
 
-        Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
 		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
@@ -92,19 +92,19 @@
 
 			foreach ($webSolution in $SettingsObject.WebSolutions) {
 
-				if ($webSolution.AppServicePlans.Region.count -gt 1) {
-					$region = $webSolution.AppServicePlans[0].Region
+				if ($webSolution.AppServicePlans.location.count -gt 1) {
+					$location = $webSolution.AppServicePlans[0].location
 				}
 				else {
-					$region = $webSolution.AppServicePlans.Region
+					$location = $webSolution.AppServicePlans.location
 				}
 
-				if (!$region) {
-					if ($webSolution.apiManagementServices.Region.count -gt 1) {
-						$region = $webSolution.apiManagementServices[0].Region
+				if (!$location) {
+					if ($webSolution.apiManagementServices.location.count -gt 1) {
+						$location = $webSolution.apiManagementServices[0].location
 					}
 					else {
-						$region = $webSolution.apiManagementServices.Region
+						$location = $webSolution.apiManagementServices.location
 					}
 				}
 
@@ -112,7 +112,7 @@
 					-ResourceGroupName $webSolution.Name `
 					-GlobalServiceContainer $SettingsObject `
 					-ResourceServiceContainer $webSolution `
-					-Region $region `
+					-Region $location `
 					-ServiceKey "resourceGroup"
 
 				if ($webSolution.AppServicePlans) {
@@ -120,7 +120,7 @@
 					foreach ($appServicePlan in $webSolution.AppServicePlans) {
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "appServicePlan" -ResourceServiceContainer $appServicePlan
-						$appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $appServicePlan.region -Name $appServicePlan.name
+						$appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $appServicePlan.location -Name $appServicePlan.name
 
 						if (!$appServicePlan.kind) {
 							$appServicePlan.kind = "linux"
@@ -132,18 +132,18 @@
 
 							$functionAppSolutions.add(
 								@{
-									name = $webSolution.Name
-									service = $webSolution.service
-									transFrmWeb = $true
+									name            = $webSolution.Name
+									service         = $webSolution.service
+									transFrmWeb     = $true
 									appServicePlans = @(
 										@{
 											resourceGroupName = $webSolution.generatedResourceGroupName
-											name = $appServicePlan.name
-											functions = $appServicePlan.functions
-											sku = $appServicePlan.sku
-											region = $appServicePlan.region
-											kind = $appServicePlan.kind
-											service = $appServicePlan.service
+											name              = $appServicePlan.name
+											functions         = $appServicePlan.functions
+											sku               = $appServicePlan.sku
+											location          = $appServicePlan.location
+											kind              = $appServicePlan.kind
+											service           = $appServicePlan.service
 										}
 									)
 								}
@@ -154,11 +154,11 @@
 
 							Write-Verbose "Generating Object for deployment of webapp : $($webapp.name)..."
 
-							if (!$webapp.region) {
-								$webapp.region = $appServicePlan.region
+							if (!$webapp.location) {
+								$webapp.location = $appServicePlan.location
 							}
 
-							$webapp.webAppGeneratedName = Get-CmAzResourceName -Resource "WebApp" -Architecture "PaaS" -Region $webapp.region -Name $webapp.name
+							$webapp.webAppGeneratedName = Get-CmAzResourceName -Resource "WebApp" -Architecture "PaaS" -Region $webapp.location -Name $webapp.name
 
 							Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "webapp" -ResourceServiceContainer $webapp
 
@@ -177,26 +177,39 @@
 										$slotObject = $slot
 									}
 
+									if ($slotObject.name -eq "production" -and $slot.privateEndpoints) {
+
+										Write-Error "Production is reserved slot name and cannot be used with private endpoints" -Category InvalidData -TargetObject $slotObject.name
+									}
+
+									foreach ($endpoint in $slot.privateEndpoints) {
+
+										$endpoint.subResourceName = "sites-$($slotObject.name)"
+										$endpoint.location = $webapp.location
+										$endpoint.service ??= @{ dependencies = @{ resource = $webapp.service.publish.webapp } }
+										$endpoint.service.dependencies.resource ??= $webapp.service.publish.webapp
+									}
+
 									Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "slot" -ResourceServiceContainer $slotObject
 
-									Write-Verbose "Adding slot: $($slotObject.name) to webapp : $($webapp.Name)..."
+									Write-Verbose "Adding slot $($slotObject.name) to webapp $($webapp.Name)..."
 									$webapp.slotsObject.Add($slotObject) > $null
 								}
 							}
 
 							if ($webapp.contentDeliveryNetwork.Name) {
 
-								$webapp.contentDeliveryNetwork.Name = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Region $webapp.contentDeliveryNetwork.region -Name $webapp.contentDeliveryNetwork.Name
+								$webapp.contentDeliveryNetwork.Name = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Region $webapp.contentDeliveryNetwork.location -Name $webapp.contentDeliveryNetwork.Name
 
 								Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "cdn" -ResourceServiceContainer $webapp.contentDeliveryNetwork
 								Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "endpoint" -ResourceServiceContainer $webapp.contentDeliveryNetwork
 							}
 							else {
 								$webapp.contentDeliveryNetwork = @{
-									name    = "none";
-									sku     = "standard_microsoft";
-									region  = "global";
-									service = @{
+									name     = "none";
+									sku      = "standard_microsoft";
+									location = "global";
+									service  = @{
 										publish = @{
 											cdn      = $null;
 											endpoint = $null
@@ -227,18 +240,18 @@
 							$_.skucount = 1
 						}
 
-						$_.generatedName = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Region $_.Region -Name $_.Name
+						$_.generatedName = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Region $_.location -Name $_.Name
 					}
 				}
 			}
 
 			if ($SettingsObject.WebSolutions.appServicePlans) {
 
-				if ($SettingsObject.WebSolutions.AppServicePlans.Region.count -gt 1) {
-					$region = $SettingsObject.WebSolutions.AppServicePlans[0].Region
+				if ($SettingsObject.WebSolutions.AppServicePlans.location.count -gt 1) {
+					$location = $SettingsObject.WebSolutions.AppServicePlans[0].location
 				}
 				else {
-					$region = $SettingsObject.WebSolutions.AppServicePlans.Region
+					$location = $SettingsObject.WebSolutions.AppServicePlans.location
 				}
 
 				[System.Collections.ArrayList]$AppServiceDetails = @()
@@ -246,26 +259,26 @@
 
 				Write-Verbose "Deploying Webapps..."
 
-				$deploymentNameWeb = Get-CmAzResourceName -Resource "Deployment" -Region $region -Architecture "PaaS" -Name "New-CmAzPaasWeb-WebApp"
+				$deploymentNameWeb = Get-CmAzResourceName -Resource "Deployment" -Region $location -Architecture "PaaS" -Name "New-CmAzPaasWeb-WebApp"
 
 				New-AzDeployment  `
 					-Name $deploymentNameWeb `
-					-Location $region `
+					-Location $location `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-Webapp.json" `
 					-AppServiceDetails $AppServiceDetails
 
 				if ($SettingsObject.WebSolutions.appServicePlans.functions) {
 
 					$functionSettingsObject = @{
-						service = @{
-							publish = @{
-								resourceGroup = $SettingsObject.service.publish.resourceGroup
-								appServicePlan =  $SettingsObject.service.publish.appServicePlan
-								function = $SettingsObject.service.publish.function
+						service              = @{
+							publish      = @{
+								resourceGroup  = $SettingsObject.service.publish.resourceGroup
+								appServicePlan = $SettingsObject.service.publish.appServicePlan
+								function       = $SettingsObject.service.publish.function
 							}
 							dependencies = @{
 								appInsights = $SettingsObject.service.dependencies.appInsights
-								storage = $SettingsObject.service.dependencies.storage
+								storage     = $SettingsObject.service.dependencies.storage
 							}
 						}
 						functionAppSolutions = $functionAppSolutions
@@ -273,15 +286,36 @@
 
 					New-CmAzPaasFunction -SettingsObject $functionSettingsObject -OmitTags
 				}
+
+				if ($SettingsObject.WebSolutions.appServicePlans.webapps.privateEndpoints) {
+
+					Write-Verbose "Building private endpoints for webapps..."
+					Build-PrivateEndpoints -SettingsObject @{ webapps = $SettingsObject.WebSolutions.appServicePlans.Webapps } `
+						-LookupProperty "webapps" `
+						-ResourceName "webapp" `
+						-GlobalServiceContainer $SettingsObject.service `
+						-GlobalSubResourceName "sites" `
+						-GlobalResourceNameSpace "Microsoft.Web/sites"
+				}
+
+				if ($SettingsObject.WebSolutions.appServicePlans.webapps.slots.privateEndpoints) {
+
+					Write-Verbose "Building private endpoints for webapp slots..."
+					Build-PrivateEndpoints -SettingsObject @{ slots = $SettingsObject.WebSolutions.appServicePlans.Webapps.Slots } `
+						-LookupProperty "slots" `
+						-ResourceName "slot" `
+						-GlobalServiceContainer $SettingsObject.service `
+						-GlobalResourceNameSpace "Microsoft.Web/sites"
+				}
 			}
 
 			if ($SettingsObject.WebSolutions.ApiManagementServices) {
 
-				if ($SettingsObject.WebSolutions.ApiManagementServices.Region.count -gt 1) {
-					$region = $SettingsObject.WebSolutions.ApiManagementServices[0].Region
+				if ($SettingsObject.WebSolutions.ApiManagementServices.location.count -gt 1) {
+					$location = $SettingsObject.WebSolutions.ApiManagementServices[0].location
 				}
 				else {
-					$region = $SettingsObject.WebSolutions.ApiManagementServices.Region
+					$location = $SettingsObject.WebSolutions.ApiManagementServices.location
 				}
 
 				[System.Collections.ArrayList]$ApiManagementServices = @()
@@ -289,11 +323,11 @@
 
 				Write-Verbose "Deploying api management services..."
 
-				$deploymentNameApim = Get-CmAzResourceName -Resource "Deployment" -Region $region -Architecture "PaaS" -Name "New-CmAzPaasWeb-ApiMs"
+				$deploymentNameApim = Get-CmAzResourceName -Resource "Deployment" -Region $location -Architecture "PaaS" -Name "New-CmAzPaasWeb-ApiMs"
 
 				New-AzDeployment `
 					-Name $deploymentNameApim `
-					-Location $region `
+					-Location $location `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-ApiManagementServices.json" `
 					-ApiManagementServices $ApiManagementServices
 			}
@@ -308,13 +342,13 @@
 					-ResourceGroupName $SettingsObject.frontdoor.name `
 					-GlobalServiceContainer $SettingsObject `
 					-ResourceServiceContainer $SettingsObject.frontdoor `
-					-Region $SettingsObject.frontdoor.region `
+					-Region $SettingsObject.frontdoor.location `
 					-ServiceKey "frontDoorResourceGroup"
 
 				Write-Verbose "Initiating compilation of Frontends..."
 
 				$frontdoorSuppliedHostName = $SettingsObject.frontdoor.name
-				$SettingsObject.frontdoor.name = Get-CmAzResourceName -Resource "FrontDoor" -Architecture "PaaS" -Region $SettingsObject.frontdoor.region -Name $SettingsObject.frontdoor.name
+				$SettingsObject.frontdoor.name = Get-CmAzResourceName -Resource "FrontDoor" -Architecture "PaaS" -Region $SettingsObject.frontdoor.location -Name $SettingsObject.frontdoor.name
 
 				# Frontdoor Front endpoints configuration
 
@@ -456,7 +490,7 @@
 
 					$routingRule.frontendEndpoints = [System.Collections.ArrayList]@()
 
-					if (!$routingRule.endpoints){
+					if (!$routingRule.endpoints) {
 						$routingRule.endpoints = @($frontdoorSuppliedHostName)
 					}
 
@@ -485,14 +519,15 @@
 							queryParameterStripDirective = "StripNone";
 							dynamicCompression           = "Enabled"
 						}
-					} else {
+					}
+					else {
 						$routingRule.cacheConfiguration = $null
 					}
 				}
 
 				Write-Verbose "Deploying Frontdoor..."
 
-				$deploymentNameFd =  Get-CmAzResourceName -Resource "Deployment" -Region "Global" -Architecture "PaaS" -Name "New-CmAzPaasWeb-Fd"
+				$deploymentNameFd = Get-CmAzResourceName -Resource "Deployment" -Region "Global" -Architecture "PaaS" -Name "New-CmAzPaasWeb-Fd"
 
 				New-AzResourceGroupDeployment  `
 					-Name $deploymentNameFd `
@@ -563,8 +598,6 @@
 			}
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
-
-			Write-Verbose "Finished!"
 		}
 	}
 	catch {

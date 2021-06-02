@@ -5,8 +5,11 @@ location: UK South
 service:
   dependencies:
     resourceGroup: Web-Test-Rg
-    workpace: Core-Test-Ws
+    workspace: Core-Test-Ws
     keyvault: Core-Test-Kv                # Can be overwritten with local service settings
+    vnet:
+    privateZones: []
+
   publish:                                # (Optional and can be overwritten with local service settings)
     server: Paas-Test-Sv
     database: Paas-Test-Db
@@ -15,78 +18,97 @@ service:
 logRetentionPeriodInDays: 30
 
 sqlConfig:
-- family: azureSql                        # azureSql, postgres, mariaDb, mysql
-  type: single                            # single, elasticPool, managed (only required if azureSql is used)
-  serverName: Paas-Test-Sv1
-  elasticPoolName:                        # Required if type is elasticPool
-  service:                                # (Overwrites global service settings)
-    publish:
-      server:
-      elasticPool:
-    dependencies:
-      keyvault:                           # Key Vault cm-service tag value
-  version:                                # (Optional)
-  databases:
-  - name: Paas-Test-Db1                   # (Optional) Uses server name if not databaseNames
-    service:                              # (Overwrites global service settings) Database service is only available for family: azureSql
-      publish:
-        database:
-  - name: Paas-Test-Db2                   # (Optional) Uses server name if not databaseNames
-    service:                              # (Overwrites global service settings) Database service is only available for family: azureSql
-      publish:
-        database:
-  administratorLogin: PaasTestSvUser1
-  passwordsecretName: Paas-Test-Sv-Pass1
-  sku:                                    # Database / Elastic Pool SKU
-    name: Basic                           # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
-    capacity: 5                           # In Vcores for GP, BC, HS. In DTU for others.
-  firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
-  - startIpAddress: "0.0.0.2"
-    endIpAddress: "0.0.0.3"
+# - family: azureSql                        # azureSql, postgres, mariaDb, mysql
+#   type: single                            # single, elasticPool, managed (only required if azureSql is used)
+#   serverName: Paas-Test-Sv1
+#   elasticPoolName:                        # Required if type is elasticPool
+#   service:                                # (Overwrites global service settings)
+#     publish:
+#       server: Paas-Test-Sv1
+#       elasticPool:
+#     dependencies:
+#       keyvault:                           # Key Vault cm-service tag value
+#   version:                                # (Optional)
+#   databases:
+#   - name: Paas-Test-Db1                   # (Optional) Uses server name if not databaseNames
+#     service:                              # (Overwrites global service settings) Database service is only available for family: azureSql
+#       publish:
+#         database:
+#   - name: Paas-Test-Db2                   # (Optional) Uses server name if not databaseNames
+#     service:                              # (Overwrites global service settings) Database service is only available for family: azureSql
+#       publish:
+#         database:
+#   administratorLogin: PaasTestSvUser1
+#   passwordsecretName: Paas-Test-Sv-Pass1
+#   sku:                                    # Database / Elastic Pool SKU
+#     name: Basic                           # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
+#     capacity: 5                           # In Vcores for GP, BC, HS. In DTU for others.
+#   firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
+#   - startIpAddress: "0.0.0.2"
+#     endIpAddress: "0.0.0.3"
+#   privateEndpoints:
+#   - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+#     service:
+#       dependencies:
+#         vnet: Iaas-Test-Hub1-Vnet1
+#         privateZones:
+#         - privatelink-azuresql
+#       publish:
+#         privateEndpoint: Paas-AzureSql-Sv1-Endpoint
 
-- family: azureSql                        # azureSql, postgressql, mariaDb, mysql
-  type: elasticPool                       # single, elasticPool, managed (only required if azureSql is used)
-  serverName: Paas-Test-Sv1
-  elasticPoolName: Paas-Test-Epshr1       # Required if type is elasticPool
-  service:                                # (Overwrites global service settings)
-    publish:
-      server:
-      elasticPool:
-    dependencies:
-      keyvault:                           # Key Vault cm-service tag value
-  version:                                # (Optional)
-  databases:
-  administratorLogin: PaasTestSvUser6
-  passwordsecretName: Paas-Test-Sv-Pass6
-  sku:                                    # Database / Elastic Pool SKU
-    name: BasicPool                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
-    capacity: 50                          # In Vcores for GP, BC, HS. In DTU for others.
-  firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
 
-- family: postgressql                     # azureSql, postgressql, mariaDb, mysql
-  type:                                   # single, elasticPool, managed (only required if azureSql is used)
-  serverName: Paas-Test-Sv2
-  elasticPoolName:                        # Required if type is elasticPool
-  service:                                # (Overwrites global service settings)
-    publish:
-      server:
-      elasticPool:
-    dependencies:
-      keyvault:                           # Key Vault cm-service tag value
-  version:                                # (Optional)
-  databases:
-  - name: Paas-Test-Db3                   # (Optional) Uses server name if not databaseNames
-    service:                              # (Overwrites global service settings) Database service is only available for family: azureSql
-      publish:
-        database:
-  administratorLogin: PaasTestSvUser2
-  passwordsecretName: Paas-Test-Sv-Pass2
-  sku:                                    # Database / Elastic Pool SKU
-    name: GP_Gen5_2                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
-    capacity: 2                           # In Vcores for GP, BC, HS. In DTU for others.
-  firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
-  - startIpAddress: "0.0.0.3"
-    endIpAddress: "0.0.0.4"
+# - family: azureSql                        # azureSql, postgressql, mariaDb, mysql
+#   type: elasticPool                       # single, elasticPool, managed (only required if azureSql is used)
+#   serverName: Paas-Test-Sv1
+#   elasticPoolName: Paas-Test-Epshr1       # Required if type is elasticPool
+#   service:                                # (Overwrites global service settings)
+#     publish:
+#       server: Paas-Test-Sv1
+#       elasticPool:
+#     dependencies:
+#       keyvault:                           # Key Vault cm-service tag value
+#   version:                                # (Optional)
+#   databases:
+#   administratorLogin: PaasTestSvUser6
+#   passwordsecretName: Paas-Test-Sv-Pass6
+#   sku:                                    # Database / Elastic Pool SKU
+#     name: BasicPool                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
+#     capacity: 50                          # In Vcores for GP, BC, HS. In DTU for others.
+#   firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
+
+# - family: postgressql                     # azureSql, postgressql, mariaDb, mysql
+#   type:                                   # single, elasticPool, managed (only required if azureSql is used)
+#   serverName: Paas-Test-Sv2
+#   elasticPoolName:                        # Required if type is elasticPool
+#   service:                                # (Overwrites global service settings)
+#     publish:
+#       server: Paas-Test-Sv2
+#       elasticPool:
+#     dependencies:
+#       keyvault:                           # Key Vault cm-service tag value
+#   version:                                # (Optional)
+#   databases:
+#   - name: Paas-Test-Db3                   # (Optional) Uses server name if not databaseNames
+#     service:                              # (Overwrites global service settings) Database service is only available for family: azureSql
+#       publish:
+#         database:
+#   administratorLogin: PaasTestSvUser2
+#   passwordsecretName: Paas-Test-Sv-Pass2
+#   sku:                                    # Database / Elastic Pool SKU
+#     name: GP_Gen5_2                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
+#     capacity: 2                           # In Vcores for GP, BC, HS. In DTU for others.
+#   firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
+#   - startIpAddress: "0.0.0.3"
+#     endIpAddress: "0.0.0.4"
+#   privateEndpoints:
+#   - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+#     service:
+#       dependencies:
+#         vnet: Iaas-Test-Hub1-Vnet1
+#         privateZones:
+#         - privatelink-postgres
+#       publish:
+#         privateEndpoint: Paas-Postgressql-Sv2-Endpoint
 
 - family: mariaDb                         # azureSql, postgres, mariaDb, mysql
   type:                                   # single, elasticPool, managed (only required if azureSql is used)
@@ -94,7 +116,7 @@ sqlConfig:
   elasticPoolName:                        # Required if type is elasticPool
   service:                                # (Overwrites global service settings)
     publish:
-      server:
+      server: Paas-Test-Sv3
       elasticPool:
     dependencies:
       keyvault:                           # Key Vault cm-service tag value
@@ -107,11 +129,20 @@ sqlConfig:
   administratorLogin: PaasTestSvUser3
   passwordsecretName: Paas-Test-Sv-Pass3
   sku:                                    # Database / Elastic Pool SKU
-    name: B_Gen5_1                        # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
-    capacity: 1                           # In Vcores for GP, BC, HS. In DTU for others.
+    name: GP_Gen5_2                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
+    capacity: 2                           # In Vcores for GP, BC, HS. In DTU for others.
   firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
   - startIpAddress: "0.0.0.5"
     endIpAddress: "0.0.0.6"
+  privateEndpoints:
+  - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+    service:
+      dependencies:
+        vnet: Iaas-Test-Hub1-Vnet1
+        privateZones:
+        - privatelink-mariadb
+      publish:
+        privateEndpoint: Paas-MariaDb-Sv3-Endpoint
 
 - family: mySql                           # azureSql, postgres, mariaDb, mysql
   type:                                   # single, elasticPool, managed (only required if azureSql is used)
@@ -119,7 +150,7 @@ sqlConfig:
   elasticPoolName:                        # Required if type is elasticPool
   service:                                # (Overwrites global service settings)
     publish:
-      server:
+      server: Paas-Test-Sv4
       elasticPool:
     dependencies:
       keyvault:                           # Key Vault cm-service tag value
@@ -131,22 +162,31 @@ sqlConfig:
     name: GP_Gen5_2                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
     capacity: 2                           # In Vcores for GP, BC, HS. In DTU for others.
   firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
+  privateEndpoints:
+  - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+    service:
+      dependencies:
+        vnet: Iaas-Test-Hub1-Vnet1
+        privateZones:
+        - privatelink-mysql
+      publish:
+        privateEndpoint: Paas-MySql-Sv4-Endpoint
 
-- family: azureSql                        # azureSql, postgres, mariaDb, mysql
-  type: elasticPool                       # single, elasticPool, managed (only required if azureSql is used)
-  serverName: Paas-Test-Sv5
-  elasticPoolName: Paas-Test-Ep1          # Required if type is elasticPool
-  service:                                # (Overwrites global service settings)
-    publish:
-      server:
-      elasticPool:
-    dependencies:
-      keyvault:                           # Key Vault cm-service tag value
-  version:                                # (Optional)
-  databases:
-  administratorLogin: PaasTestSvUser5
-  passwordsecretName: Paas-Test-Sv-Pass5
-  sku:                                    # Database / Elastic Pool SKU
-    name: BasicPool                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
-    capacity: 50                          # In Vcores for GP, BC, HS. In DTU for others.
-  firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255
+# - family: azureSql                        # azureSql, postgres, mariaDb, mysql
+#   type: elasticPool                       # single, elasticPool, managed (only required if azureSql is used)
+#   serverName: Paas-Test-Sv5
+#   elasticPoolName: Paas-Test-Ep1          # Required if type is elasticPool
+#   service:                                # (Overwrites global service settings)
+#     publish:
+#       server:
+#       elasticPool:
+#     dependencies:
+#       keyvault:                           # Key Vault cm-service tag value
+#   version:                                # (Optional)
+#   databases:
+#   administratorLogin: PaasTestSvUser5
+#   passwordsecretName: Paas-Test-Sv-Pass5
+#   sku:                                    # Database / Elastic Pool SKU
+#     name: BasicPool                       # ServiceObjectiveName - Get-AzSqlServerServiceObjective -Location <location>
+#     capacity: 50                          # In Vcores for GP, BC, HS. In DTU for others.
+#   firewallRules:                          # (Optional) Default range: 0.0.0.0 - 255.255.255.255

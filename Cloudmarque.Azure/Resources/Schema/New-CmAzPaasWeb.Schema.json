@@ -5,7 +5,7 @@
     "title": "New-CmAzPaasWeb",
     "description": "Settings Root.",
     "required": [
-        "service"
+        "webSolutions"
     ],
     "properties": {
         "component": {
@@ -16,7 +16,7 @@
         },
         "service": {
             "$id": "#/service",
-            "type": "object",
+            "type": ["object", "null"],
             "title": "Service",
             "required": [
                 "publish"
@@ -25,12 +25,8 @@
             "properties": {
                 "publish": {
                     "$id": "#/service/publish",
-                    "type": "object",
+                    "type": ["object", "null"],
                     "title": "Publish",
-                    "required": [
-                        "frontdoor",
-                        "frontdoorResourceGroup"
-                    ],
                     "description": "Contains publish details for service location.",
                     "properties": {
                         "resourceGroup": {
@@ -59,13 +55,13 @@
                         },
                         "frontdoor": {
                             "$id": "#/service/publish/frontdoor",
-                            "type": "string",
+                            "type": ["string", "null"],
                             "title": "FrontDoor",
                             "description": "Dependency value to fetch existing resource type."
                         },
                         "frontdoorResourceGroup": {
                             "$id": "#/service/publish/frontdoorResourceGroup",
-                            "type": "string",
+                            "type": ["string", "null"],
                             "title": "FrontdoorResourceGroup",
                             "description": "Dependency value to fetch existing resource type."
                         },
@@ -91,6 +87,12 @@
                             "$id": "#/service/publish/function",
                             "type": ["string", "null"],
                             "title": "Function",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "privateEndpoint": {
+                            "$id": "#/service/publish/privateEndpoint",
+                            "type": ["string", "null"],
+                            "title": "PrivateEndpoint",
                             "description": "Global default value to publish on deployed resource type."
                         }
                     },
@@ -125,6 +127,12 @@
                             "type": ["string", "null"],
                             "title": "storage",
                             "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
                         }
                     },
                     "additionalProperties": false
@@ -191,7 +199,7 @@
                                             "required": [
                                                 "name",
                                                 "sku",
-                                                "region"
+                                                "location"
                                             ],
                                             "properties": {
                                                 "name": {
@@ -230,10 +238,10 @@
                                                     "title": "Sku",
                                                     "description": "Sku of the app service plan. This defines the capacity of the resources."
                                                 },
-                                                "region": {
-                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/region",
+                                                "location": {
+                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/location",
                                                     "type": "string",
-                                                    "title": "Region",
+                                                    "title": "location",
                                                     "description": "Location for app service plan, default location for webapps that share the plan."
                                                 },
                                                 "functions": {
@@ -263,6 +271,84 @@
                                                                         "description": "Enables application insights for the web app.",
                                                                         "default": false
                                                                     },
+                                                                    "privateEndpoints": {
+																		"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints",
+																		"type": ["array", "null"],
+																		"title": "PrivateEndpoints",
+																		"description": "Container for private endpoint details.",
+																		"items": {
+																			"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items",
+																			"allOf": [
+																				{
+																					"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items/allOf",
+																					"type": "object",
+																					"required": [
+																						"subnetName"
+																					],
+																					"properties": {
+																						"subnetName": {
+																							"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items/allOf/subnetName",
+																							"type": "string",
+																							"title": "SubnetName",
+																							"description": "Names of underlying sub-resources to create private connection with."
+																						},
+																						"name": {
+																							"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items/allOf/name",
+																							"type": ["string", "null"],
+																							"title": "Name",
+																							"description": "Becomes part of private endpoint name."
+																						},
+																						"service": {
+																							"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items/allOf/service",
+																							"type": "object",
+																							"title": "Service",
+																							"description": "Contains dependency and publish details for service location.",
+																							"properties": {
+																								"dependencies": {
+																									"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items/allOf/service/dependencies",
+																									"type": "object",
+																									"title": "Dependencies",
+																									"description": "Contains dependency details for service location.",
+																									"properties": {
+																										"vnet": {
+																											"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items/allOf/service/dependencies/vnet",
+																											"type": "string",
+																											"title": "Vnet",
+																											"description": "Local overriding dependency value to fetch existing resource type."
+																										},
+																										"privateZones": {
+																											"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items/allOf/service/dependencies/privateZones",
+																											"type": "array",
+																											"title": "PrivateZones",
+																											"description": "Dependency value to fetch existing resource type. Enables private zone integration."
+																										}
+																									},
+																									"additionalProperties": false
+																								},
+																								"publish": {
+																									"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items/allOf/service/publish",
+																									"type": "object",
+																									"title": "Publish",
+																									"description": "Contains publish details for service location.",
+																									"properties": {
+																										"privateEndpoint": {
+																											"$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/privateEndpoints/items/allOf/service/publish/privateEndpoint",
+																											"type": "string",
+																											"title": "privateEndpoint",
+																											"description": "Local overriding value to publish on deployed existing resource type."
+																										}
+																									},
+																									"additionalProperties": false
+																								}
+																							},
+																							"additionalProperties": false
+																						}
+																					},
+																					"additionalProperties": false
+																				}
+																			]
+																		}
+																	},
                                                                     "runtime": {
                                                                         "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/functions/items/allOf/runtime",
                                                                         "type": "string",
@@ -402,41 +488,71 @@
                                                                         },
                                                                         "additionalProperties": false
                                                                     },
-                                                                    "slots": {
-                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots",
+                                                                    "privateEndpoints": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints",
                                                                         "type": ["array", "null"],
-                                                                        "title": "Slots",
-                                                                        "description": "Defines the names and service location details of the staging slots for the web app.",
-                                                                        "default": [{ "name": "none", "service": { "publish": { "slot": null } } }],
+                                                                        "title": "PrivateEndpoints",
+                                                                        "description": "Container for private endpoint details.",
                                                                         "items": {
-                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/object",
-                                                                            "anyOf": [
+                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items",
+                                                                            "allOf": [
                                                                                 {
-                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/anyOf",
+                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items/allOf",
                                                                                     "type": "object",
+                                                                                    "required": [
+                                                                                        "service",
+                                                                                        "subnetName"
+                                                                                    ],
                                                                                     "properties": {
+                                                                                        "subnetName": {
+                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items/allOf/subnetName",
+                                                                                            "type": "string",
+                                                                                            "title": "SubnetName",
+                                                                                            "description": "Names of underlying sub-resources to create private connection with."
+                                                                                        },
                                                                                         "name": {
-                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/anyOf/name",
+                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items/allOf/name",
                                                                                             "type": ["string", "null"],
                                                                                             "title": "Name",
-                                                                                            "description": "Becomes part of the generated web app slot's name."
+                                                                                            "description": "Becomes part of private endpoint name."
                                                                                         },
                                                                                         "service": {
-                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/anyOf/service",
-                                                                                            "type": ["object", "null"],
+                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items/allOf/service",
+                                                                                            "type": "object",
                                                                                             "title": "Service",
                                                                                             "description": "Contains dependency and publish details for service location.",
                                                                                             "properties": {
+                                                                                                "dependencies": {
+                                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items/allOf/service/dependencies",
+                                                                                                    "type": "object",
+                                                                                                    "title": "Dependencies",
+                                                                                                    "description": "Contains dependency details for service location.",
+                                                                                                    "properties": {
+                                                                                                        "vnet": {
+                                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items/allOf/service/dependencies/vnet",
+                                                                                                            "type": "string",
+                                                                                                            "title": "Vnet",
+                                                                                                            "description": "Local overriding dependency value to fetch existing resource type."
+                                                                                                        },
+                                                                                                        "privateZones": {
+                                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items/allOf/service/dependencies/privateZones",
+                                                                                                            "type": "array",
+                                                                                                            "title": "PrivateZones",
+                                                                                                            "description": "Dependency value to fetch existing resource type. Enables private zone integration."
+                                                                                                        }
+                                                                                                    },
+                                                                                                    "additionalProperties": false
+                                                                                                },
                                                                                                 "publish": {
-                                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/service/publish",
-                                                                                                    "type": ["object", "null"],
+                                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items/allOf/service/publish",
+                                                                                                    "type": "object",
                                                                                                     "title": "Publish",
                                                                                                     "description": "Contains publish details for service location.",
                                                                                                     "properties": {
-                                                                                                        "slot": {
-                                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/service/publish/slot",
-                                                                                                            "type": ["string", "null"],
-                                                                                                            "title": "Slot",
+                                                                                                        "privateEndpoint": {
+                                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/privateEndpoints/items/allOf/service/publish/privateEndpoint",
+                                                                                                            "type": "string",
+                                                                                                            "title": "privateEndpoint",
                                                                                                             "description": "Local overriding value to publish on deployed existing resource type."
                                                                                                         }
                                                                                                     },
@@ -447,9 +563,139 @@
                                                                                         }
                                                                                     },
                                                                                     "additionalProperties": false
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "slots": {
+                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "Slots",
+                                                                        "description": "Defines the names and service location details of the staging slots for the web app.",
+                                                                        "items": {
+                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items",
+                                                                            "oneOf": [
+                                                                                {
+                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object",
+                                                                                    "type": "object",
+                                                                                    "required": [
+                                                                                        "name"
+                                                                                    ],
+                                                                                    "properties": {
+                                                                                        "name": {
+                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/name",
+                                                                                            "type": ["string", "null"],
+                                                                                            "title": "Name",
+                                                                                            "description": "Becomes part of private endpoint name."
+                                                                                        },
+                                                                                        "service": {
+                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/service",
+                                                                                            "type": "object",
+                                                                                            "title": "Service",
+                                                                                            "description": "Contains dependency and publish details for service location.",
+                                                                                            "properties": {
+                                                                                                "publish": {
+                                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/service/publish",
+                                                                                                    "type": "object",
+                                                                                                    "title": "Publish",
+                                                                                                    "description": "Contains publish details for service location.",
+                                                                                                    "properties": {
+                                                                                                        "slot": {
+                                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/service/publish/slot",
+                                                                                                            "type": "string",
+                                                                                                            "title": "Slot",
+                                                                                                            "description": "Local overriding value to publish on deployed existing resource type."
+                                                                                                        }
+                                                                                                    },
+                                                                                                    "additionalProperties": false
+                                                                                                }
+                                                                                            },
+                                                                                            "additionalProperties": false
+                                                                                        },
+                                                                                        "privateEndpoints": {
+                                                                                            "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "PrivateEndpoints",
+                                                                                            "description": "Container for private endpoint details.",
+                                                                                            "items": {
+                                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items",
+                                                                                                "allOf": [
+                                                                                                    {
+                                                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items/allOf",
+                                                                                                        "type": "object",
+                                                                                                        "required": [
+                                                                                                            "service",
+                                                                                                            "subnetName"
+                                                                                                        ],
+                                                                                                        "properties": {
+                                                                                                            "subnetName": {
+                                                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items/allOf/subnetName",
+                                                                                                                "type": "string",
+                                                                                                                "title": "SubnetName",
+                                                                                                                "description": "Names of underlying sub-resources to create private connection with."
+                                                                                                            },
+                                                                                                            "name": {
+                                                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items/allOf/name",
+                                                                                                                "type": ["string", "null"],
+                                                                                                                "title": "Name",
+                                                                                                                "description": "Becomes part of private endpoint name."
+                                                                                                            },
+                                                                                                            "service": {
+                                                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items/allOf/service",
+                                                                                                                "type": "object",
+                                                                                                                "title": "Service",
+                                                                                                                "description": "Contains dependency and publish details for service location.",
+                                                                                                                "properties": {
+                                                                                                                    "dependencies": {
+                                                                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items/allOf/service/dependencies",
+                                                                                                                        "type": "object",
+                                                                                                                        "title": "Dependencies",
+                                                                                                                        "description": "Contains dependency details for service location.",
+                                                                                                                        "properties": {
+                                                                                                                            "vnet": {
+                                                                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items/allOf/service/dependencies/vnet",
+                                                                                                                                "type": "string",
+                                                                                                                                "title": "Vnet",
+                                                                                                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                                                                                                            },
+                                                                                                                            "privateZones": {
+                                                                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items/allOf/service/dependencies/privateZones",
+                                                                                                                                "type": "array",
+                                                                                                                                "title": "PrivateZones",
+                                                                                                                                "description": "Dependency value to fetch existing resource type. Enables private zone integration."
+                                                                                                                            }
+                                                                                                                        },
+                                                                                                                        "additionalProperties": false
+                                                                                                                    },
+                                                                                                                    "publish": {
+                                                                                                                        "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items/allOf/service/publish",
+                                                                                                                        "type": "object",
+                                                                                                                        "title": "Publish",
+                                                                                                                        "description": "Contains publish details for service location.",
+                                                                                                                        "properties": {
+                                                                                                                            "privateEndpoint": {
+                                                                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/Object/privateEndpoints/items/allOf/service/publish/privateEndpoint",
+                                                                                                                                "type": "string",
+                                                                                                                                "title": "privateEndpoint",
+                                                                                                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                                                                                                            }
+                                                                                                                        },
+                                                                                                                        "additionalProperties": false
+                                                                                                                    }
+                                                                                                                },
+                                                                                                                "additionalProperties": false
+                                                                                                            }
+                                                                                                        },
+                                                                                                        "additionalProperties": false
+                                                                                                    }
+                                                                                                ]
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    "additionalProperties": false
                                                                                 },
                                                                                 {
-                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/string",
+                                                                                    "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/slots/items/oneOf/string",
                                                                                     "type": "string"
                                                                                 }
                                                                             ]
@@ -463,7 +709,7 @@
                                                                         "default": {
                                                                             "name": "none",
                                                                             "sku": "standard_microsoft",
-                                                                            "region": "global",
+                                                                            "location": "global",
                                                                             "service": {
                                                                                 "publish": {
                                                                                     "cdn": null,
@@ -474,7 +720,7 @@
                                                                         "required": [
                                                                             "name",
                                                                             "sku",
-                                                                            "region"
+                                                                            "location"
                                                                         ],
                                                                         "properties": {
                                                                             "name": {
@@ -489,10 +735,10 @@
                                                                                 "title": "Sku",
                                                                                 "description": "Defines SKU which is loosely mapped to the cdn vendor."
                                                                             },
-                                                                            "region": {
-                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/contentDeliveryNetwork/region",
+                                                                            "location": {
+                                                                                "$id": "#/webSolutions/items/allOf/appserviceplans/items/allOf/webapps/items/allOf/contentDeliveryNetwork/location",
                                                                                 "type": "string",
-                                                                                "title": "Region",
+                                                                                "title": "location",
                                                                                 "description": "Location to deploy the Azure cdn. Cdns use a different location schema than other resources E.g. Instead of EU West its westeurope."
                                                                             },
                                                                             "service": {
@@ -558,7 +804,7 @@
                                                 "publisherName",
                                                 "publisherEmail",
                                                 "sku",
-                                                "region"
+                                                "location"
                                             ],
                                             "properties": {
                                                 "name": {
@@ -567,10 +813,10 @@
                                                     "title": "Name",
                                                     "description": "Becomes part of the generated api management service's name."
                                                 },
-                                                "region": {
-                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/region",
+                                                "location": {
+                                                    "$id": "#/webSolutions/items/allOf/apiManagementServices/items/allOf/location",
                                                     "type": "string",
-                                                    "title": "region",
+                                                    "title": "location",
                                                     "description": "Deployment location"
                                                 },
                                                 "publisherName": {
@@ -670,7 +916,7 @@
             "required": [
                 "name",
                 "sessionAffinity",
-                "region",
+                "location",
                 "rules",
                 "backEndPools"
             ],
@@ -687,11 +933,11 @@
                     "title": "SessionAffinity",
                     "description": "Enable to send subsequent traffic from the same user session to the same backend."
                 },
-                "region": {
-                    "$id": "#/frontdoor/region",
+                "location": {
+                    "$id": "#/frontdoor/location",
                     "type": "string",
-                    "title": "Region",
-                    "description": "Deployment region of front door."
+                    "title": "location",
+                    "description": "Deployment location of front door."
                 },
                 "customDomains": {
                     "$id": "#/frontdoor/customDomains",

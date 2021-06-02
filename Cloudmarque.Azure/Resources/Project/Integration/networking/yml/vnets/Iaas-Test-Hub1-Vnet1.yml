@@ -18,11 +18,11 @@ subnets:
   routeTable:
   serviceEndpoints: []
   subnetName: GatewaySubnet
-- cidr: 192.168.0.192/27
+- cidr: 192.168.1.128/25
   networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-dc1
   routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-dc1
   serviceEndpoints: []
-  subnetName: Iaas-Test-Hub1-Vnet1-Snet-dc1
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
 - cidr: 192.168.0.80/28
   networkSecurityGroup: Iaas-Test-Hub1-Vnet1-Snet-Nsg-fwha1
   routeTable: Iaas-Test-Hub1-Vnet1-Snet-Udr-fwha1

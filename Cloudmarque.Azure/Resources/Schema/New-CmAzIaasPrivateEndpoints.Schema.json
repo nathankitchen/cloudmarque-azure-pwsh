@@ -1,0 +1,191 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzIaasPrivateEndpoints",
+    "type": "object",
+    "title": "New-CmAzIaasPrivateEndpoints",
+    "description": "Settings Root.",
+    "required": [
+        "privateEndpoints"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": ["object", "null"],
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": ["object", "null"],
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/dependencies/resourceGroup",
+                            "type": ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "privateZones": {
+                            "$id": "#/service/dependencies/privateZones",
+                            "type": ["array", "null"],
+                            "title": "PrivateZones",
+                            "description": "Dependency value to fetch existing resource type. Enables private zone integration."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": ["object", "null"],
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "properties": {
+                        "privateEndpoint": {
+                            "$id": "#/service/publish/privateEndpoint",
+                            "type": ["string", "null"],
+                            "title": "PrivateEndpoint",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "globalSubResourceName": {
+            "$id": "#/privateEndpoints/globalSubResourceName",
+            "type": ["string", "null"],
+            "title": "GlobalSubResourceName",
+            "description": "Global subresource name which will be used if local subresources are not provided."
+        },
+        "privateEndpoints": {
+            "$id": "#/privateEndpoints",
+            "type": "array",
+            "title": "privateEndpoints",
+            "description": "Container for private DNS zone details.",
+            "minItems": 1,
+            "items": {
+                "$id": "#/privateEndpoints/items",
+                "allOf": [
+                    {
+                        "$id": "#/privateEndpoints/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "service",
+                            "subnetName"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/privateEndpoints/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of private endpoint name."
+                            },
+                            "location": {
+                                "$id": "#/privateEndpoints/items/allOf/location",
+                                "type": ["string", "null"],
+                                "title": "Location",
+                                "description": "Location to create private endpoint"
+                            },
+                            "resourceNameSpace": {
+                                "$id": "#/privateEndpoints/items/allOf/resourceNameSpace",
+                                "type": ["string", "null"],
+                                "title": "ResourceNameSpace",
+                                "description": "Azure resource namespace."
+                            },
+                            "subResourceName": {
+                                "$id": "#/privateEndpoints/items/allOf/subResourceNames",
+                                "type": ["string", "null"],
+                                "title": "SubResourceName",
+                                "description": "Names of underlying sub-resources to create private connection with."
+                            },
+                            "subnetName": {
+                                "$id": "#/privateEndpoints/items/allOf/subnetName",
+                                "type": "string",
+                                "title": "SubnetName",
+                                "description": "Names of underlying sub-resources to create private connection with."
+                            },
+                            "service": {
+                                "$id": "#/privateEndpoints/items/allOf/service",
+                                "type": "object",
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "dependencies": {
+                                        "$id": "#/privateEndpoints/items/allOf/service/dependencies",
+                                        "type": "object",
+                                        "title": "Dependencies",
+                                        "description": "Contains dependency details for service location.",
+                                        "required": [
+                                            "resource"
+                                        ],
+                                        "properties": {
+                                            "vnet": {
+                                                "$id": "#/privateEndpoints/items/allOf/service/dependencies/vnet",
+                                                "type": ["string", "null"],
+                                                "title": "Vnet",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            },
+                                            "resourceGroup": {
+                                                "$id": "#/privateEndpoints/items/allOf/service/dependencies/resourceGroup",
+                                                "type": ["string", "null"],
+                                                "title": "ResourceGroup",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            },
+                                            "resource": {
+                                                "$id": "#/privateEndpoints/items/allOf/service/dependencies/resource",
+                                                "type": "string",
+                                                "title": "Resource",
+                                                "description": "Dependency value to fetch existing resource type."
+                                            },
+                                            "privateZones": {
+                                                "$id": "#/privateEndpoints/items/allOf/service/dependencies/privateZones",
+                                                "type": ["array", "null"],
+                                                "title": "PrivateZones",
+                                                "description": "Dependency value to fetch existing resource type. Enables private zone integration."
+                                            }
+
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "publish": {
+                                        "$id": "#/privateEndpoints/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "privateEndpoint": {
+                                                "$id": "#/privateEndpoints/items/allOf/service/publish/privateEndpoint",
+                                                "type": ["string", "null"],
+                                                "title": "privateEndpoint",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

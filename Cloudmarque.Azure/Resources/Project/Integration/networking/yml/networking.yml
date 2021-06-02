@@ -26,6 +26,16 @@ networking:
   - Iaas-Test-Hub1-Vnet1-Snet-Udr-gatewaysubnet
   - Iaas-Test-Hub1-Vnet1-Snet-Udr-management1
   - Iaas-Test-Hub1-Vnet1-Snet-Udr-servers1
+  zones:
+  - example.zone
+
+- ResourceGroupName: Iaas-Test-Zones-Rg
+  service:
+    publish:
+      resourceGroup: Iaas-Test-Zones-Rg
+  location: uksouth
+  zones:
+  - azure.privatezones
 
 - ResourceGroupName: Iaas-Test-Hub2-Rg
   service:

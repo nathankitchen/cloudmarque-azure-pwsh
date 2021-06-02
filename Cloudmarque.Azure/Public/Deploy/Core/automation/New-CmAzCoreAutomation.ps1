@@ -11,6 +11,7 @@
 			* Creates Key vault certificate if not available.
 			* Create RunAsAccount and RunAsCertificate for Automation accounts.
 			* Optionally sync code repository (tvfc | git | github).
+			* Optionally create private endpoint integrated with private zone.
 
 		.Parameter SettingsFile
 		 File path for the settings file to be converted into a settings object.
@@ -155,7 +156,7 @@
 					-CertificatePolicy $policy `
 					-Name $CertificateName
 
-				while( $keyVaultCertificate.Status -ne "completed") {
+				while ( $keyVaultCertificate.Status -ne "completed") {
 					Start-Sleep -Seconds 1
 					$keyVaultCertificate = Get-AzKeyVaultCertificateOperation -VaultName $keyVault -Name $CertificateName
 				}
@@ -190,7 +191,7 @@
 				Write-Verbose "Checking for existing service principal..."
 				$servicePrincipal = Get-AzADServicePrincipal -ApplicationId $application.ApplicationId
 
-				if(!$servicePrincipal)	{
+				if (!$servicePrincipal)	{
 					Write-Verbose "Trying to create new service principal..."
 					New-AzADServicePrincipal -ApplicationId $application.ApplicationId
 					$servicePrincipal = Get-AzADServicePrincipal -ApplicationId $application.ApplicationId
@@ -309,10 +310,10 @@
 
 			Write-Verbose "Populating ConnectionFieldValues..."
 			$connectionFieldValues = @{
-				"ApplicationId" = $servicePrincipal.ApplicationId.ToString();
-				"TenantId" = $azSubscription.Subscription.TenantId;
+				"ApplicationId"         = $servicePrincipal.ApplicationId.ToString();
+				"TenantId"              = $azSubscription.Subscription.TenantId;
 				"CertificateThumbprint" = $keyVaultSelfSignedPfxCert.Thumbprint;
-				"SubscriptionId" = $azSubscription.Subscription.id
+				"SubscriptionId"        = $azSubscription.Subscription.id
 			}
 
 			Write-Verbose "Create an Automation connection asset named AzureRunAsConnection in the Automation account. This connection uses the service principal."
@@ -354,9 +355,15 @@
 				}
 			}
 
-			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $nameResourceGroup
+			if ($SettingsObject.automation.privateEndpoints) {
 
-			Write-Verbose "Finished!"
+				$endpointName = "automation"
+
+				Write-Verbose "Building private endpoints..."
+				Build-PrivateEndpoints -SettingsObject $SettingsObject -LookupProperty $endpointName -ResourceName $endpointName
+			}
+
+			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $nameResourceGroup
 		}
 	}
 	catch {

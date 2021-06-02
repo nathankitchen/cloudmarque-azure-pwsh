@@ -12,11 +12,14 @@ service:
     endpoint: Web-test-Endpoint
     slot: Web-Test-Slot
     function: Web-Test-Func
+    privateEndpoint: Web-Test-Webapp-Endpoint
   dependencies:
     appInsights: Core-Test-Ai                                 # Required to enable app insights on webapp
     keyvault: Core-Test-Kv
     webApplicationFirewallPolicy:                             # Optional - Provide cm-service tag of frontdoor firewall policy
-    storage: Iaas-Test-Function                               # For function apps
+    storage: Core-Test-St                                     # For function apps
+    vnet: Iaas-Test-Hub1-Vnet1
+    privateZones: []
 
 webSolutions:
 - name: Web-Test-Rg1
@@ -28,10 +31,10 @@ webSolutions:
     service:
       publish:
         appServicePlan:
-    sku: S1
-    region: UK South
+    sku: P1V2
+    location: UK South
     webapps:
-    - name: Web-Test-Webapp1                                  # Default to app serviceplan region
+    - name: Web-Test-Webapp1                                  # Default to app serviceplan location
       backendpool: Web-Test-Be1
       enableAppInsight: true                                  # Optional - Default is false. True requires service dependency - appInsights
       backendHostHeader: true                                 # Optional - Default is true. Required for easy auth scenarios
@@ -40,20 +43,52 @@ webSolutions:
       runTime: TOMCAT|9.0-jre8                                # Only Linux supported
       service:
         publish:
-          webapp:
+          webapp: Web-Test-Webapp1
+      privateEndpoints:
+      - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+        service:
+          dependencies:
+            vnet: Iaas-Test-Hub1-Vnet1
+            privateZones:
+            - privatelink-webapp
+          publish:
+            privateEndpoint: Web-Test-Webapp1-Endpoint
       slots:
-        - name: Production
+      - name: Alpha
+        service:
+          publish:
+            slot: Web-Test-Webapp1-Alpha
+        privateEndpoints:
+        - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
           service:
+            dependencies:
+              vnet: Iaas-Test-Hub1-Vnet1
+              privateZones:
+              - privatelink-webapp
             publish:
-              slot:
+              privateEndpoint: Web-Test-Webapp1-Production-Endpoint
+      - name: Beta
+        service:
+          publish:
+            slot: Web-Test-Webapp1-Beta
+        privateEndpoints:
+        - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+          service:
+            dependencies:
+              vnet: Iaas-Test-Hub1-Vnet1
+              privateZones:
+              - privatelink-webapp
+            publish:
+              privateEndpoint: Web-Test-Webapp1-Production-Endpoint
       contentDeliveryNetwork:
         name: Web-Test-Cdn1
         sku: Standard_Microsoft                               # Standard_microsoft
-        region: westeurope                                    # Cdns use a different location schema than other resources E.g. Instead of EU West its westeurope.
+        location: westeurope                                    # Cdns use a different location schema than other resources E.g. Instead of EU West its westeurope.
         service:
           publish:
             cdn:
             endpoint:
+
     functions:                                                # Pass functions
     - name: Web-Test-Func1
       runtime: python|3.7
@@ -63,15 +98,24 @@ webSolutions:
           function:
         dependencies:
           storage:
+      privateEndpoints:
+      - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+        service:
+          dependencies:
+            vnet: Iaas-Test-Hub1-Vnet1
+            privateZones:
+            - privatelink-webapp
+          publish:
+            privateEndpoint: Web-Test-Func1-Endpoint
 
   - name: Web-Test-Asp2
     service:
       publish:
         appServicePlan:
     sku: F1
-    region: UK South
+    location: UK South
     webapps:
-    - name: Web-Test-Webapp2                                  # Default to app serviceplan region
+    - name: Web-Test-Webapp2                                  # Default to app serviceplan location
       runTime: PHP|7.3                                        # Only Linux supported
       backendpool: Web-Test-Be2
       enableAppInsight: false                                 # Optional - Default is false. True requires service dependency - appInsights
@@ -86,7 +130,7 @@ webSolutions:
 
   apiManagementServices:
     - name: Web-Test-Api1
-      region: UK South                                        # Optional - Defaults to global location
+      location: UK South                                        # Optional - Defaults to global location
       publisherName: Cloudmarque
       publisherEmail: testAdminEmail@Cloudmarque.com
       sku: Basic
@@ -102,7 +146,7 @@ webSolutions:
 frontdoor:
   name: Web-Test-Fd
   sessionAffinity: Enabled                                    # Optional - Enabled / Disabled - Disabled is Default
-  region: WestEurope                                          # Sets the region of the containing resource group, frontdoors are always global.
+  location: WestEurope                                          # Sets the location of the containing resource group, frontdoors are always global.
   customDomains:
 
   - domainName: int02.cloudmarque.com

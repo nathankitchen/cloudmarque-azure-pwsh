@@ -92,20 +92,20 @@ function New-CmAzPaasFunction {
 
             foreach ($functionAppSolution in $SettingsObject.functionAppSolutions) {
 
-                if ($functionAppSolution.AppServicePlans.Region.count -gt 1) {
-                    $region = $functionAppSolution.AppServicePlans[0].Region
+                if ($functionAppSolution.AppServicePlans.location.count -gt 1) {
+                    $location = $functionAppSolution.AppServicePlans[0].location
                 }
                 else {
-                    $region = $functionAppSolution.AppServicePlans.Region
+                    $location = $functionAppSolution.AppServicePlans.location
                 }
 
-                if (!$region) {
+                if (!$location) {
 
-                    if ($functionAppSolution.ConsumptionPlans.Region.count -gt 1) {
-                        $region = $functionAppSolution.ConsumptionPlans[0].Region
+                    if ($functionAppSolution.ConsumptionPlans.location.count -gt 1) {
+                        $location = $functionAppSolution.ConsumptionPlans[0].location
                     }
                     else {
-                        $region = $functionAppSolution.ConsumptionPlans.Region
+                        $location = $functionAppSolution.ConsumptionPlans.location
                     }
                 }
 
@@ -117,7 +117,7 @@ function New-CmAzPaasFunction {
                         -ResourceGroupName $functionAppSolution.Name `
                         -GlobalServiceContainer $SettingsObject `
                         -ResourceServiceContainer $functionAppSolution `
-                        -Region $region `
+                        -Region $location `
                         -ServiceKey "resourceGroup"
                 }
 
@@ -131,7 +131,7 @@ function New-CmAzPaasFunction {
 
                         if (!$functionAppSolution.transFrmWeb) {
 
-                            $appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $appServicePlan.region -Name $appServicePlan.name
+                            $appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $appServicePlan.location -Name $appServicePlan.name
                             $appServicePlan.resourceGroupName = $functionAppSolution.generatedResourceGroupName
                         }
 
@@ -142,20 +142,23 @@ function New-CmAzPaasFunction {
 
                             Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "storage" -ResourceServiceContainer $function -IsDependency
 
-                            $function.region ??= $appServicePlan.region
-                            $function.storageAccount = Get-CmAzService -Service $function.service.dependencies.storage -Region $function.region -ThrowIfUnavailable -ThrowIfMultiple
+                            $function.location ??= $appServicePlan.location
+                            $function.storageAccount = Get-CmAzService -Service $function.service.dependencies.storage -Region $function.location -ThrowIfUnavailable -ThrowIfMultiple
 
                             Write-Verbose "$($function.name): Generating Object for deployment of function"
 
                             $function.linuxFxVersion = $appServicePlan.kind -eq 'linux' ? $function.runtime : ""
 
                             $function.kind = "functionapp"
-                            $function.name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "PaaS" -Region $function.region -Name $function.name
+                            $function.name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "PaaS" -Region $function.location -Name $function.name
                             $function.functionsWorker = $function.runtime.split('|')
 
                             $function.applicationInstrumentationKey = $function.enableAppInsight ? $applicationInstrumentationKey : ''
 
                             Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "function" -ResourceServiceContainer $function
+
+                            # Required to support private endpoints
+                            $function.service.publish.resourceGroup = $functionAppSolution.service.publish.resourceGroup
                         }
                     }
                 }
@@ -168,14 +171,14 @@ function New-CmAzPaasFunction {
 
                         Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "storage" -ResourceServiceContainer $function -IsDependency
 
-                        $function.storageAccount = Get-CmAzService -Service $function.service.dependencies.storage -Region $function.region -ThrowIfUnavailable -ThrowIfMultiple
+                        $function.storageAccount = Get-CmAzService -Service $function.service.dependencies.storage -Region $function.location -ThrowIfUnavailable -ThrowIfMultiple
                         $function.storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $function.storageAccount.resourceGroupName -Name $function.storageAccount.Name).Value[0]
 
                         Write-Verbose "$($function.name): Generating Object for deployment of function"
 
                         $function.resourceGroupName = $functionAppSolution.generatedResourceGroupName
-                        $function.planName = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $function.region -Name $function.name
-                        $function.name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "PaaS" -Region $function.region -Name $function.name
+                        $function.planName = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $function.location -Name $function.name
+                        $function.name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "PaaS" -Region $function.location -Name $function.name
                         $function.functionsWorker = $function.runtime.split('|')
 
                         if ($function.kind -eq "linux") {
@@ -189,37 +192,47 @@ function New-CmAzPaasFunction {
 
                         Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "appServicePlan" -ResourceServiceContainer $function
                         Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "function" -ResourceServiceContainer $function
-                       $function.applicationInstrumentationKey = $function.enableAppInsight ? $applicationInstrumentationKey : ''
+                        $function.applicationInstrumentationKey = $function.enableAppInsight ? $applicationInstrumentationKey : ''
                     }
                 }
             }
 
             if ($SettingsObject.functionAppSolutions.AppServicePlans) {
 
-                $region = $SettingsObject.functionAppSolutions.AppServicePlans.Region.count -gt 1 ? $SettingsObject.functionAppSolutions.AppServicePlans[0].Region : $SettingsObject.functionAppSolutions.AppServicePlans.Region
+                $location = $SettingsObject.functionAppSolutions.AppServicePlans.location.count -gt 1 ? $SettingsObject.functionAppSolutions.AppServicePlans[0].location : $SettingsObject.functionAppSolutions.AppServicePlans.location
 
                 Write-Verbose "Deploying functions on app service plans..."
 
-                $deploymentNameAsp = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $region -Name "New-CmAzPaasFunction"
+                $deploymentNameAsp = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $location -Name "New-CmAzPaasFunction"
 
                 New-AzDeployment `
                     -Name $deploymentNameAsp `
-                    -Location $region `
+                    -Location $location `
                     -TemplateFile "$PSScriptRoot\New-CmAzPaasFunction.AppServicePlan.json" `
                     -AppServicePlans $SettingsObject.functionAppSolutions.AppServicePlans
+
+                if ($SettingsObject.functionAppSolutions.appServicePlans.functions.privateEndpoints) {
+
+                    Write-Verbose "Building private endpoints for function in appservice plan..."
+                    Build-PrivateEndpoints -SettingsObject @{ functions = $SettingsObject.functionAppSolutions.appServicePlans.functions } `
+                        -LookupProperty "functions" `
+                        -ResourceName "function" `
+                        -GlobalServiceContainer $SettingsObject.service `
+                        -GlobalSubResourceName "sites"
+                }
             }
 
             if ($SettingsObject.functionAppSolutions.ConsumptionPlans) {
 
-                $region = $SettingsObject.functionAppSolutions.ConsumptionPlans.Region.count -gt 1 ? $SettingsObject.functionAppSolutions.ConsumptionPlans[0].Region : $SettingsObject.functionAppSolutions.ConsumptionPlans.Region
+                $location = $SettingsObject.functionAppSolutions.ConsumptionPlans.location.count -gt 1 ? $SettingsObject.functionAppSolutions.ConsumptionPlans[0].location : $SettingsObject.functionAppSolutions.ConsumptionPlans.location
 
                 Write-Verbose "Deploying functions on consumption plans..."
 
-                $deploymentNameCon = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $region -Name "New-CmAzPaasFunction"
+                $deploymentNameCon = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $location -Name "New-CmAzPaasFunction"
 
                 New-AzDeployment `
                     -Name $deploymentNameCon `
-                    -Location $region `
+                    -Location $location `
                     -TemplateFile "$PSScriptRoot\New-CmAzPaasFunction.Consumption.json" `
                     -ConsumptionPlans $SettingsObject.functionAppSolutions.ConsumptionPlans
             }
@@ -228,8 +241,6 @@ function New-CmAzPaasFunction {
 
                 Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
             }
-
-            Write-Verbose "Finished!"
         }
     }
     catch {

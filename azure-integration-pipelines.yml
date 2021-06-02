@@ -2,6 +2,9 @@ parameters:
 - name: Iaas
   type: boolean
   default: true
+- name: IaasNSP
+  type: boolean
+  default: true
 - name: Paas
   type: boolean
   default: true
@@ -20,7 +23,6 @@ variables:
   environment: Integration
 
 stages:
-
 - stage: Core
   jobs:
   - job:
@@ -47,9 +49,95 @@ stages:
 
           New-CmazCore -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/core.yml" -Verbose
 
+- stage: Iaas_NSP
+  displayName: Iaas - Network, Storage and Private Endpoints
+  condition: and(succeeded(), eq('${{ parameters.IaasNSP }}', true))
+  dependsOn: Core
+  jobs:
+  - job: IaasStorage
+    displayName: Iaas - Storage
+    steps:
+    - task: AzurePowerShell@5
+      inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
+
+          New-CmazDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/storage.yml" -Verbose
+
+  - job: IaasNetwork
+    displayName: Iaas - Networking
+    dependsOn: IaasStorage
+    steps:
+    - task: AzurePowerShell@5
+      inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
+
+          New-CmAzIaasNetworking `
+            -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/yml/networking.yml" `
+            -Verbose `
+            -Confirm:$false
+
+
+  - job: IaasPrivateEndpoint
+    displayName: Iaas - Private Endpoints
+    dependsOn: IaasNetwork
+    steps:
+    - task: AzurePowerShell@5
+      inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
+
+          New-CmAzIaasPrivateEndpoints -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/privateendpoints.yml" -Verbose
+
 - stage: Paas
   condition: and(succeeded(), eq('${{ parameters.Paas }}', true))
-  dependsOn: Core
+  dependsOn: Iaas_NSP
   jobs:
   - job:
     steps:
@@ -81,43 +169,9 @@ stages:
 
 - stage: Iaas
   condition: and(succeeded(), eq('${{ parameters.Iaas }}', true))
-  dependsOn: Core
+  dependsOn: Iaas_NSP
   jobs:
-  - job: IaasNetwork
-    displayName: Iaas - Networking
-    steps:
-    - task: AzurePowerShell@5
-      inputs:
-        azureSubscription: $(ServiceConnection)
-        workingDirectory: $(Build.SourcesDirectory)
-        pwsh: true
-        errorActionPreference: Stop
-        ScriptType: InlineScript
-        FailOnStandardError: true
-        azurePowerShellVersion: 'LatestVersion'
-        Inline: |
-
-          ./Initialise-Cloudmarque.ps1 `
-            -ProjectDirectory "$(Build.SourcesDirectory)" `
-            -Environment "$(environment)" `
-            -BuildNumber "$(Build.BuildNumber)" `
-            -RepositoryName "$(Build.Repository.Name)" `
-            -DefinitionName "$(Build.DefinitionName)" `
-            -DefinitionVersion "$(Build.DefinitionVersion)" `
-            -Verbose
-
-          New-CmAzIaasStorage -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/storage.yml" -Verbose
-
-          Write-Host "Testing the CSV deployment..."
-          New-CmAzIaasNetworking `
-            -VnetsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/csv/vnet.csv" `
-            -RouteTablesCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/csv/udr.csv" `
-            -NsgsCsvFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/csv/nsg.csv" `
-            -Verbose `
-            -Confirm:$false
-
   - job: IaasVmPatchVault
-    dependsOn: IaasNetwork
     displayName: Iaas - Vms, Recovery Vaults and Patching
     steps:
     - task: AzurePowerShell@5
@@ -154,7 +208,6 @@ stages:
           Set-CmAzIaasUpdateManagement -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/updateManagement.yml" -Verbose
 
   - job: IaasBastionVPN
-    dependsOn: IaasNetwork
     displayName: Iaas - Bastion Host and VPN Gateway
     steps:
     - task: AzurePowerShell@5
@@ -182,7 +235,7 @@ stages:
 
 - stage: Security
   condition: and(succeeded(), eq('${{ parameters.Security }}', true))
-  dependsOn: Core
+  dependsOn: Iaas_NSP
   jobs:
   - job:
     steps:
@@ -213,7 +266,7 @@ stages:
     "Iaas",
     "Paas"
   ]
-  condition: and(eq('${{ parameters.Monitor }}', true), in(dependencies.Iaas.result, 'Succeeded', 'Skipped'), in(dependencies.Paas.result, 'Succeeded', 'Skipped'))
+  condition: and(eq('${{ parameters.Monitor }}', true), in(dependencies.Iaas.result, 'Succeeded'), in(dependencies.Paas.result, 'Succeeded'))
   jobs:
   - job:
     steps:
@@ -242,6 +295,7 @@ stages:
 
 - stage: TearDown
   dependsOn: [
+    "Iaas_NSP",
     "Iaas",
     "Paas",
     "Security",
@@ -276,7 +330,7 @@ stages:
           $resourceTypes = @("VirtualMachines", "AppServices", "SqlServers", "SqlServerVirtualMachines", "StorageAccounts", "KubernetesService", "ContainerRegistry", "KeyVaults")
 
           forEach ($resourceType in $resourceTypes) {
-              Set-AzSecurityPricing -Name $resourceType -PricingTier "Free"
+            Set-AzSecurityPricing -Name $resourceType -PricingTier "Free"
           }
 
           do {

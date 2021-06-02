@@ -1,4 +1,4 @@
-component: keyvaults                      # Required to use settings with New-CmAzDeployment
+component: keyvaults                                            # Required to use settings with New-CmAzDeployment
 
 resourceGroupName: Core-Test-Kv
 location: UK South
@@ -6,13 +6,16 @@ location: UK South
 service:
   dependencies:
     workspace: Core-Test-Ws
+    vnet: Iaas-Test-Hub1-Vnet1
+    privateZones: []
   publish:
     resourceGroup: Core-Test-Kv-Rg
     keyvault: Core-Test-Kv
+    privateEndpoint: Core-Private-Endpoint
 
 keyVaults:
 - name: Core-Test-Kv
-  type: ServicePrincipal                    # User or ServicePrincipal
+  type: ServicePrincipal                                        # User or ServicePrincipal
   location: UK South
   service:
     publish:
@@ -21,7 +24,7 @@ keyVaults:
   enablePurgeProtection: true
   softDeleteRetentionInDays: 30
   secretNames: [
-    "Core-Test-Auto-Pass1",                 # Names of secrets to store in keyvault
+    "Core-Test-Auto-Pass1",                                     # Names of secrets to store in keyvault
     "Iaas-Test-Vpn-Scrt",
     "Paas-Test-Sv-Pass1",
     "Paas-Test-Sv-Pass2",
@@ -35,3 +38,16 @@ keyVaults:
     "Iaas-Test-Key-Enc-Key2",
     "Iaas-Test-Key-Enc-Key3"
   ]
+  # privateEndpoints:
+  # - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  #   name:                                                       # Defaults to resource name.
+  #   service:
+  #     dependencies:
+  #       vnet: Iaas-Test-Hub1-Vnet1
+  #       privateZones:
+  #       - privatelink-vaultcore
+  #     publish:
+  #       privateEndpoint: core-vault-endpoint
+
+# Note - As vault is deployed with core, private endpoints are deployed with privateendpoints.yml once IaaS dependencies are resolved.
+# Note - Above option is available to be deployed after dependencies are deployed.

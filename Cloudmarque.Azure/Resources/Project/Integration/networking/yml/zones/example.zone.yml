@@ -1,0 +1,9 @@
+- DNS: example.zone.link
+  type: private
+  service:
+    publish:
+      zone: Iaas-Test-PrivateDNS
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1

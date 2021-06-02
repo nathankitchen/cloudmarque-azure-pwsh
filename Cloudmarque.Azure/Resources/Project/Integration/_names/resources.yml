@@ -482,3 +482,8 @@ resources:
   minLength: 1
   maxLength: 64
   generator: deployment
+- name: PrivateEndpoint
+  shortname: ped
+  minLength: 1
+  maxLength: 64
+  generator: standard

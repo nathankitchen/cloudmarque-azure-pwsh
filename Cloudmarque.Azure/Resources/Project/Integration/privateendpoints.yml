@@ -1,0 +1,123 @@
+component: privateEndpoints
+
+service:
+  dependencies:
+    resourceGroup: Iaas-Test-Zones-Rg
+    vnet: Iaas-Test-Hub1-Vnet1
+    privateZones: []
+  publish:
+    privateEndpoint: Iaas-Private-Endpoint
+
+globalSubResourceName:                                     # Becomes default sub resource
+
+privateEndpoints:
+- name: Core-Test-Auto042021-1
+  location: UK South
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  subResourceName: Webhook
+  service:
+    dependencies:
+      resourceGroup: Core-Test-Auto-Rg
+      resource: Core-Test-Auto
+      vnet: Iaas-Test-Hub1-Vnet1
+      privateZones: ['privatelink-automation']
+    publish:
+      privateEndpoint: Auto-endpoint
+- name: Core-Test-Auto042021-2
+  location: UK South
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  subResourceName: DSCAndHybridWorker
+  service:
+    dependencies:
+      resourceGroup: Core-Test-Auto-Rg
+      resource: Core-Test-Auto
+      vnet: Iaas-Test-Hub1-Vnet1
+      privateZones: ['privatelink-automation']
+    publish:
+      privateEndpoint: Auto-endpoint
+- name: Core-Test-Kv
+  location: UK South
+  subResourceName: vault
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  service:
+    dependencies:
+      resourceGroup: Core-Test-Kv-Rg
+      resource: Core-Test-Kv
+      vnet: Iaas-Test-Hub1-Vnet1
+      privateZones:
+      - privatelink-vaultcore
+    publish:
+      privateEndpoint: Core-Vault-Endpoint
+- name: Iaas-Test-St8-1
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  subResourceName: blob
+  service:
+    dependencies:
+      resourceGroup: Iaas-Test-Rg
+      resource: Iaas-Test-Stg-Function
+      vnet: Iaas-Test-Hub1-Vnet1
+      privateZones:
+      - privatelink-storage-blob
+    publish:
+      privateEndpoint: Iaas-Test-St8-Blob-Endpoint
+- name: Iaas-Test-St8-2
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  subResourceName: file
+  service:
+    dependencies:
+      resourceGroup: Iaas-Test-Rg
+      resource: Iaas-Test-Stg-Function
+      vnet: Iaas-Test-Hub1-Vnet1
+      privateZones:
+      - privatelink-storage-file
+    publish:
+      privateEndpoint: Iaas-Test-St8-File-Endpoint
+- name: Iaas-Test-St8-3
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  subResourceName: table
+  service:
+    dependencies:
+      resourceGroup: Iaas-Test-Rg
+      resource: Iaas-Test-Stg-Function
+      vnet: Iaas-Test-Hub1-Vnet1
+      privateZones:
+      - privatelink-storage-table
+    publish:
+      privateEndpoint: Iaas-Test-St8-Table-Endpoint
+- name: Iaas-Test-St8-4
+  subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  subResourceName: queue
+  service:
+    dependencies:
+      resourceGroup: Iaas-Test-Rg
+      resource: Iaas-Test-Stg-Function
+      vnet: Iaas-Test-Hub1-Vnet1
+      privateZones:
+      - privatelink-storage-queue
+    publish:
+      privateEndpoint: Iaas-Test-St8-Queue-Endpoint
+- name: Iaas-Test-St4
+  subnetName: Iaas-Test-Hub2-Vnet1-Snet-dc1
+  subResourceName: web
+  service:
+    dependencies:
+      resourceGroup: Iaas-Test-Rg
+      resource: Iaas-Test-St4
+      vnet: Iaas-Test-Hub2-Vnet1
+      privateZones:
+      - privatelink-storage-web
+    publish:
+      privateEndpoint: Iaas-Test-St4-Web-Endpoint
+- name: Iaas-Test-St4-wz
+  subnetName: Iaas-Test-Hub2-Vnet1-Snet-dc1
+  subResourceName: web
+  service:
+    dependencies:
+      resourceGroup: Iaas-Test-Rg
+      resource: Iaas-Test-St4
+      vnet: Iaas-Test-Hub2-Vnet1
+    publish:
+      privateEndpoint: Iaas-Test-St4-Web-Endpoint
+
+# Note: Deployed as per Azure guidelines - https://docs.microsoft.com/en-us/azure/private-link/private-endpoint-dns#azure-services-dns-zone-configuration
+# Using these private zone auto adds service private inteface mapping to private DNS.

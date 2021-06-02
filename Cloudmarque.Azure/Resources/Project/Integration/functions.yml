@@ -8,21 +8,23 @@ service:
   dependencies:
     appInsights: Core-Test-Ai                                 # Required to enable app insights on function
     storage: Core-Test-St
+    vnets:
+    privateZones: []
 
 functionAppSolutions:
   - name: Paas-Test-Func-Rg1
     service:
       publish:
-        resourceGroup:
+        resourceGroup: Paas-Test-Func-Rg1
     consumptionPlans:                                         # Consumption plan has predefined type - each fuction will have its own service plan.
       - name: Paas-Test-Func-Con1
         runtime: python|3.7                                   # Accepts in format: runtime|runtimeVersion
         kind: windows                                         # windows | linux
-        region: uksouth
+        location: uksouth
         enableAppInsight: true
         service:
           publish:
-            function:
+            function: Paas-Test-Func-Con1
             appServicePlan:
           dependencies:
             storage:
@@ -35,7 +37,7 @@ functionAppSolutions:
       - name: Paas-Test-Func-Con2
         runtime: python|3.7                                   # Accepts in format: runtime|runtimeVersion
         kind: linux                                           # windows | linux
-        region: uksouth
+        location: uksouth
         enableAppInsight: false
         service:
           publish:
@@ -51,7 +53,7 @@ functionAppSolutions:
     appServicePlans:
       - name: Paas-Test-Func-Asp1
         sku: S1
-        region: uksouth
+        location: uksouth
         kind: windows
         service:
           publish:
@@ -69,11 +71,11 @@ functionAppSolutions:
   - name: Paas-Test-Func-Rg4
     service:
       publish:
-        resourceGroup:
+        resourceGroup: Paas-Test-Func-Rg4
     appServicePlans:
       - name: Paas-Test-Func-Asp2
-        sku: S1
-        region: uksouth
+        sku: P1V2
+        location: uksouth
         kind: linux
         service:
           publish:
@@ -82,9 +84,18 @@ functionAppSolutions:
           - name: Paas-Test-Func4
             runtime: python|3.7
             enableAppInsight: true
+            privateEndpoints:
+            - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+              service:
+                dependencies:
+                  vnet: Iaas-Test-Hub1-Vnet1
+                  privateZones:
+                  - privatelink-webapp
+                publish:
+                  privateEndpoint: Paas-Test-Func4-Endpoint
             service:
               publish:
-                function:
+                function: Paas-Test-Func4
               dependencies:
                 storage:
 

@@ -114,7 +114,7 @@
 
 				if (!$_.blobContainer) {
 					$_.blobContainer = @(@{
-							"name" = "none"
+							"name"         = "none"
 							"publicAccess" = "None"
 						}
 					)
@@ -192,6 +192,12 @@
 				-StorageSettingsArray $SettingsObject.storageAccounts `
 				-Force
 
+			if ($SettingsObject.storageAccounts.privateEndpoints) {
+
+				Write-Verbose "Building private endpoints..."
+				Build-PrivateEndpoints -SettingsObject $SettingsObject -LookupProperty "storageAccounts" -ResourceName "storage" -NameProperty "storageAccountName"
+			}
+
 			if ($OmitTags) {
 				Write-Warning "Storage tagging omitted.."
 			}
@@ -203,8 +209,6 @@
 				$resourcesToSet += $SettingsObject.storageAccounts.storageAccountName
 				Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
 			}
-
-			Write-Verbose "Finished."
 		}
 	}
 	catch {

@@ -60,6 +60,18 @@
                             "type": "string",
                             "title": "Workspace",
                             "description": "Dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "privateZones": {
+                            "$id": "#/service/dependencies/privateZones",
+                            "type": ["array", "null"],
+                            "title": "PrivateZones",
+                            "description": "Dependency value to fetch existing resource type. Enables private zone integration."
                         }
                     },
                     "additionalProperties": false
@@ -85,6 +97,12 @@
                             "type": "string",
                             "title": "Automation",
                             "description": "Value to publish on deployed resource type."
+                        },
+                        "privateEndpoint": {
+                            "$id": "#/service/publish/privateEndpoint",
+                            "type": ["string", "null"],
+                            "title": "PrivateEndpoint",
+                            "description": "Global default value to publish on deployed resource type."
                         }
                     },
                     "additionalProperties": false
@@ -154,6 +172,92 @@
                         }
                     },
                     "additionalProperties": false
+                },
+                "privateEndpoints": {
+                    "$id": "#/automation/privateEndpoints",
+                    "type": ["array", "null"],
+                    "title": "PrivateEndpoints",
+                    "description": "Container for private endpoint details.",
+                    "items": {
+                        "$id": "#/automation/privateEndpoints/items",
+                        "allOf": [
+                            {
+                                "$id": "#/automation/privateEndpoints/items/allOf",
+                                "type": "object",
+                                "required": [
+                                    "subnetName",
+                                    "subResourceName"
+                                ],
+                                "properties": {
+                                    "subnetName": {
+                                        "$id": "#/automation/privateEndpoints/items/allOf/subnetName",
+                                        "type": "string",
+                                        "title": "SubnetName",
+                                        "description": "Names of underlying sub-resources to create private connection with."
+                                    },
+                                    "name": {
+                                        "$id": "#/automation/privateEndpoints/items/allOf/name",
+                                        "type": ["string", "null"],
+                                        "title": "Name",
+                                        "description": "Becomes part of private endpoint name."
+                                    },
+                                    "subResourceName": {
+                                        "$id": "#/automation/privateEndpoints/items/allOf/subResourceNames",
+                                        "type": "string",
+                                        "title": "SubResourceName",
+                                        "enum": ["Webhook", "DSCAndHybridWorker"],
+                                        "description": "Names of underlying sub-resources to create private connection with."
+                                    },
+                                    "service": {
+                                        "$id": "#/automation/privateEndpoints/items/allOf/service",
+                                        "type": ["object", "null"],
+                                        "title": "Service",
+                                        "description": "Contains dependency and publish details for service location.",
+                                        "properties": {
+                                            "dependencies": {
+                                                "$id": "#/automation/privateEndpoints/items/allOf/service/dependencies",
+                                                "type": ["object", "null"],
+                                                "title": "Dependencies",
+                                                "description": "Contains dependency details for service location.",
+                                                "properties": {
+                                                    "vnet": {
+                                                        "$id": "#/automation/privateEndpoints/items/allOf/service/dependencies/vnet",
+                                                        "type": ["string", "null"],
+                                                        "title": "Vnet",
+                                                        "description": "Local overriding dependency value to fetch existing resource type."
+                                                    },
+                                                    "privateZones": {
+                                                        "$id": "#/automation/privateEndpoints/items/allOf/service/dependencies/privateZones",
+                                                        "type": ["array", "null"],
+                                                        "title": "PrivateZones",
+                                                        "description": "Dependency value to fetch existing resource type. Enables private zone integration."
+                                                    }
+                                                },
+                                                "additionalProperties": false
+                                            },
+                                            "publish": {
+                                                "$id": "#/automation/privateEndpoints/items/allOf/service/publish",
+                                                "type": "object",
+                                                "title": "Publish",
+                                                "description": "Contains publish details for service location.",
+                                                "properties": {
+                                                    "privateEndpoint": {
+                                                        "$id": "#/automation/privateEndpoints/items/allOf/service/publish/privateEndpoint",
+                                                        "type": "string",
+                                                        "title": "PrivateEndpoint",
+                                                        "description": "Local overriding value to publish on deployed resource type."
+                                                    }
+                                                },
+                                                "additionalProperties": false
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        ]
+                    }
                 }
             },
             "additionalProperties": false

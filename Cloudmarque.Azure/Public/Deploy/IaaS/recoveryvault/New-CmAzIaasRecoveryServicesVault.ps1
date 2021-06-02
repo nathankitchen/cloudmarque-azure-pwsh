@@ -84,6 +84,8 @@ function New-CmAzIaasRecoveryServicesVault {
 
         Write-Verbose "Generating standardised Recovery Services Vault names."
         Foreach ($vault in $SettingsObject.recoveryServicesVaults) {
+
+            $vault.managedIdentity = $vault.managedIdentity ? "SystemAssigned" : "None"
             $vault.name = Get-CmAzResourceName -Resource "recoveryservicesvault" -Architecture "IaaS" -Region $vault.location -Name $vault.name
             Write-Verbose "Generated standardised Key Vault name: $($vault.name)"
 
@@ -133,6 +135,12 @@ function New-CmAzIaasRecoveryServicesVault {
             }
         }
 
+        if ($SettingsObject.recoveryServicesVaults.privateEndpoints){
+
+            Write-Verbose "Building private endpoints..."
+            Build-PrivateEndpoints -SettingsObject $SettingsObject -LookupProperty "recoveryServicesVaults" -ResourceName "recoveryVault" -GlobalSubResourceName "vault"
+        }
+
         if ($existingResourceGroup) {
             Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $SettingsObject.recoveryServicesVaults.name
         }
@@ -140,6 +148,4 @@ function New-CmAzIaasRecoveryServicesVault {
             Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupName
         }
     }
-
-    Write-Verbose "Finished!"
 }

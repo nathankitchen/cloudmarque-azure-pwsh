@@ -44,7 +44,7 @@
 
 	try {
 
-        Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
 		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
@@ -112,6 +112,7 @@
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $_ -IsDependency
 				$keyVault = Get-CmAzService -Service $_.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 
+				$preserveName = $_.serverName
 				$serverName = Get-CmAzResourceName -Resource "AzureSQLDatabaseserver" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.serverName
 
 				if ($UniqueSqlServerNames -contains $_.serverName) {
@@ -143,17 +144,17 @@
 
 				if (!$_.firewallRules) {
 					$_.firewallRules = @(@{
-						"startIpAddress" = "0.0.0.0";
-						"endIpAddress"   = "255.255.255.255"
-					})
+							"startIpAddress" = "0.0.0.0";
+							"endIpAddress"   = "255.255.255.255"
+						})
 				}
 
 				$elasticPool = "none"
 
 				if ($_.type -eq "elasticPool") {
 
-					if($_.elasticPoolName) {
-						$elasticPool = 	Get-CmAzResourceName -Resource "AzureSQLElasticPool" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.elasticPoolName
+					if ($_.elasticPoolName) {
+						$elasticPool = Get-CmAzResourceName -Resource "AzureSQLElasticPool" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.elasticPoolName
 					}
 					else {
 						Write-Error "Please provide an elastic pool name for the elastic pool type deployment."
@@ -161,12 +162,13 @@
 				}
 
 				$server = @{
-					"resourceDetails"                       = @{
+					"resourceDetails"    = @{
 						"family"                = $dbFamily
 						"sharedServer"          = $sharedServer
 						"type"                  = ($_.type ?? "").Tolower()
+						"name"                  = $preserveName
 						"serverName"            = $serverName;
-						"service"				= $_.service;
+						"service"               = $_.service;
 						"databases"             = $databaseCollection;
 						"sku"                   = $_.sku;
 						"version"               = $_version;
@@ -185,6 +187,11 @@
 						"keyVaultid" = $keyVault.resourceId;
 						"secretName" = $_.passwordSecretName
 					}
+				}
+
+				if ($_.privateEndpoints) {
+
+					$server.resourceDetails.privateEndpoints = $_.privateEndpoints
 				}
 
 				if ($sharedServer) {
@@ -215,6 +222,33 @@
 				}
 			}
 
+			if ($joinedSqlServers.resourceDetails | Where-Object { $_.privateEndpoints }) {
+
+				foreach ($serverType in (($joinedSqlServers.resourceDetails | Where-Object { $_.privateEndpoints }).family | Get-Unique)) {
+
+					$SettingsObject.servers = $joinedSqlServers.resourceDetails | Where-Object { $_.family -eq $serverType -and $_.privateEndpoints }
+
+					$globalSubResourceName = switch ($serverType) {
+
+						Microsoft.Sql {
+							"sqlServer"
+						}
+						Microsoft.DBforPostgreSQL {
+							"postgresqlServer"
+						}
+						Microsoft.DBforMariaDB {
+							"mariadbServer"
+						}
+						Microsoft.DBforMySQL {
+							"mysqlServer"
+						}
+					}
+
+					Write-Verbose "Building private endpoints for $globalSubResourceName..."
+					Build-PrivateEndpoints -SettingsObject $SettingsObject -LookupProperty "servers" -ResourceName "server" -GlobalSubResourceName $globalSubResourceName
+				}
+			}
+
 			[system.Collections.ArrayList]$resourcesToSet = @()
 
 			$resourcesToSet += ($joinedSqlServers.resourceDetails | where-object -Property family -eq 'Microsoft.Sql').databases.name
@@ -222,9 +256,7 @@
 			$resourcesToSet += $joinedSqlServers.resourceDetails.serverName
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
-
-			Write-Verbose "Finished."
-	    }
+		}
 	}
 	catch {
 		$PSCmdlet.ThrowTerminatingError($PSitem);

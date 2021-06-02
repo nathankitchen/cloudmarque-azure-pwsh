@@ -70,12 +70,24 @@
                             },
                             "resources": [
                                 {
-                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.Sql'), not(empty(parameters('SqlObject').workSpace.Name)))]",
+                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.Sql'), not(parameters('sqlObject').sharedServer))]",
+                                    "type": "databases",
+                                    "apiVersion": "2019-06-01-preview",
+                                    "location": "[parameters('Location')]",
+                                    "dependsOn": [
+                                        "[parameters('sqlObject').serverName]"
+                                    ],
+                                    "name": "master",
+                                    "properties": {}
+                                },
+                                {
+                                    "condition": "[and(equals(parameters('SqlObject').family, 'Microsoft.Sql'), not(parameters('sqlObject').sharedServer), not(empty(parameters('SqlObject').workSpace.Name)))]",
                                     "type": "databases/Providers/DiagnosticSettings",
                                     "name": "master/Microsoft.Insights/security",
                                     "apiVersion": "2017-05-01-preview",
                                     "dependsOn": [
-                                        "[concat('Microsoft.Sql/servers/', parameters('sqlObject').serverName)]"
+                                        "[parameters('sqlObject').serverName]",
+                                        "[resourceId('Microsoft.Sql/servers/databases', parameters('sqlObject').serverName, 'master')]"
                                     ],
                                     "properties": {
                                         "WorkspaceId": "[parameters('SqlObject').workSpace.ResourceId]",
@@ -97,7 +109,8 @@
                                     "name": "DefaultAuditingSettings",
                                     "apiVersion": "2017-03-01-preview",
                                     "dependsOn": [
-                                        "[concat('Microsoft.Sql/servers/', parameters('sqlObject').serverName)]"
+                                        "[parameters('sqlObject').serverName]",
+                                        "[resourceId('Microsoft.Sql/servers/databases', parameters('sqlObject').serverName, 'master')]"
                                     ],
                                     "properties": {
                                         "State": "Enabled",

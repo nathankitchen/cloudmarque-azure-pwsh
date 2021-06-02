@@ -7,6 +7,8 @@ service:
   dependencies:
     keyvault: Core-Test-Kv
     workspace: Core-Test-Ws
+    vnet:
+    privateZones: []
   publish:
     resourceGroup: Core-Test-Auto-Rg
     automation: Core-Test-Auto
@@ -20,3 +22,26 @@ automation:
     type:                                                       # Optional: (only if repoURL): github | git | tvfc.
     branch:                                                     # Optional: Branch to pull from. Not required for tvfc. Default is master.
     folderPath:                                                 # Optional: (only if repoURL): Path to folder which contains runbook or DSC files.
+  # privateEndpoints:
+  # - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  #   name:                                                       # Defaults to resource name.
+  #   subResourceName: Webhook
+  #   service:
+  #     dependencies:
+  #       vnet: Iaas-Test-Hub1-Vnet1
+  #       privateZones:
+  #       - privatelink-automation
+  #     publish:
+  #       privateEndpoint: Auto-endpoint
+  # - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+  #   subResourceName: DSCAndHybridWorker
+  #   service:
+  #     dependencies:
+  #       vnet: Iaas-Test-Hub1-Vnet1
+  #       privateZones:
+  #       - privatelink-automation
+  #     publish:
+  #       privateEndpoint: Auto-endpoint
+
+# Note - As automation account is deployed with core, private endpoints are deployed with privateendpoints.yml once IaaS dependencies are resolved.
+# Note - Above option is available to be deployed after dependencies are deployed.

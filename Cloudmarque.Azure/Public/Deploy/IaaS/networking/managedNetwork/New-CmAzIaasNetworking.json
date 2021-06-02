@@ -78,7 +78,8 @@
                                                 "addressPrefix": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].cidr]",
                                                 "serviceEndpoints": "[parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].serviceEndpoints]",
                                                 "networkSecurityGroup": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].networkSecurityGroup)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/networkSecurityGroups', parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].networkSecurityGroup), '\"}')), json('null'))]",
-                                                "routeTable": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/routeTables', parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable), '\"}')), json('null'))]"
+                                                "routeTable": "[if(not(empty(parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable)), json(concat('{\"id\": \"', resourceId('Microsoft.Network/routeTables', parameters('VnetArmObject')[copyIndex('vnetCopy')].subnets[copyIndex('subnets')].routeTable), '\"}')), json('null'))]",
+                                                "privateEndpointNetworkPolicies": "Disabled"
                                             }
                                         }
                                     }

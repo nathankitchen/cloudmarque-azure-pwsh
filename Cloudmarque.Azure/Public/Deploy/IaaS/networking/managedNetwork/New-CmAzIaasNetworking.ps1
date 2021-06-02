@@ -20,15 +20,19 @@
 
 		.Parameter VnetsCsvFile
 		 File path for the csv containing virtual network configurations.
-		 Required headers: resourceGroupName|location(optional)|vnetName|addressSpace|subnetName|cidr|networkSecurityGroup|routeTable.
+		 Required headers: resourceGroupName|location(optional)|vnetName|addressSpace|subnetName|cidr|networkSecurityGroup|routeTable
 
 		.Parameter RouteTablesCsvFile
 		 File path for the csv containing route table configurations.
-		 Required headers: resourceGroupName|location(optional)|tableName|routeName|cidr|nextHopType|nextHopIpAddress|notes
+		 Required headers: resourceGroupName|location(optional)|tableName|routeName|cidr|nextHopType|nextHopIpAddress|notes|servicePublish|resourceGroupservicePublish
 
 		.Parameter NsgsCsvFile
 		 File path for the csv containing virtual network security group configurations.
-		 Required headers: resourceGroupName|location(optional)|nsgName|ruleName|priority|direction|sourceIp|sourcePort|destinationIp|destinationPort|protocol|Access|Description
+		 Required headers: resourceGroupName|location(optional)|nsgName|ruleName|priority|direction|sourceIp|sourcePort|destinationIp|destinationPort|protocol|Access|DescriptionservicePublish|resourceGroupservicePublish|storageServiceDependency|workspaceServiceDependency
+
+		.Parameter ZonesCsvFile
+		 File path for the csv containing zone configurations.
+		 Required headers: resourceGroupName|location(optional)|DNS|type|servicePublish|vnetsServiceDependency|resourceGroupServicePublish
 
 		.Parameter ResourceGroupsCsvFile
 		 File path for the csv containing resource Group and location mapping. By default location of first vnet is used to create resource group.
@@ -44,10 +48,10 @@
 		 New-CmAzIaasNetworking -settingsFile "networking.yml"
 
 		.Example
-		 New-CmAzIaasNetworking -VnetsCsvFile "vnet.csv" -RouteTablesCsvFile "routeTable.csv" -NsgsCsvFile "nsg.csv" -ResourceGroupCsvFile resourceGroup.csv -Confirm:$false
+		 New-CmAzIaasNetworking -VnetsCsvFile "vnet.csv" -RouteTablesCsvFile "routeTable.csv" -NsgsCsvFile "nsg.csv" -ResourceGroupCsvFile resourceGroup.csv -ZoneCsvFile "zone.csv" -Confirm:$false
 
 		.Example
-		 New-CmAzIaasNetworking -VnetsCsvFile "vnet.csv" -RouteTablesCsvFile "routeTable.csv" -NsgsCsvFile "nsg.csv" -Confirm:$false
+		 New-CmAzIaasNetworking -VnetsCsvFile "vnet.csv" -RouteTablesCsvFile "routeTable.csv" -NsgsCsvFile "nsg.csv" -ZoneCsvFile "zone.csv" -Confirm:$false
 
 		.Example
 		 New-CmAzIaasNetworking -RouteTablesCsvFile "routeTable.csv" -Confirm:$false
@@ -65,6 +69,8 @@
 		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
 		[String]$NsgsCsvFile,
 		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
+		[String]$ZonesCsvFile,
+		[parameter(Mandatory = $false, ParameterSetName = "Settings CSV File")]
 		[String]$ResourceGroupsCsvFile,
 		[String]$TagSettingsFile
 	)
@@ -77,11 +83,11 @@
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create networking solution")) {
 
-			if ($SettingsFile -and !$SettingsObject -and !$VnetsCsvFile -and !$RouteTablesCsvFile -and !$NsgsCsvFile ) {
+			if ($SettingsFile -and !$SettingsObject -and !$VnetsCsvFile -and !$RouteTablesCsvFile -and !$NsgsCsvFile -and !$ZonesCsvFile ) {
 				Write-Verbose "Importing setting from Yml file"
 				$SettingsObject = Get-CmAzSettingsFile -Path $SettingsFile
 			}
-			elseif (!$SettingsFile -and !$SettingsObject -and !$VnetsCsvFile -and !$RouteTablesCsvFile -and !$NsgsCsvFile ) {
+			elseif (!$SettingsFile -and !$SettingsObject -and !$VnetsCsvFile -and !$RouteTablesCsvFile -and !$NsgsCsvFile -and !$ZonesCsvFile ) {
 				Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
 			}
 
@@ -93,7 +99,7 @@
 
 			# Code to Create Object from CSV
 
-			if ($VnetsCsvFile -or $RouteTablesCsvFile -or $NsgsCsvFile -and !$SettingsObject)	{
+			if ($VnetsCsvFile -or $RouteTablesCsvFile -or $NsgsCsvFile -or $ZonesCsvFile -and !$SettingsObject)	{
 
 				if ($VnetsCsvFile) {
 					Write-Verbose "Vnet CSV Found."
@@ -132,6 +138,16 @@
 					$nsgFile = @()
 				}
 
+				if ($ZonesCsvFile) {
+					Write-Verbose "Zone CSV Found."
+					$ZonesCsvFile = Resolve-FilePath -NestedFile $ZonesCsvFile
+					$ZonesFile = Import-Csv -Path $ZonesCsvFile
+				}
+				else {
+					Write-Verbose "Zone CSV Not Found."
+					$ZonesFile = @()
+				}
+
 				if ($ResourceGroupsCsvFile) {
 					Write-Verbose "Resource Group CSV Found."
 					$ResourceGroupsCsvFile = Resolve-FilePath -NestedFile $ResourceGroupsCsvFile
@@ -139,7 +155,7 @@
 				}
 
 				Write-Verbose "Starting file merge."
-				[System.Collections.ArrayList]$mergedFile = $vnetFile + $nsgFile + $routeTablesFile
+				[System.Collections.ArrayList]$mergedFile = $vnetFile + $nsgFile + $routeTablesFile + $ZonesFile
 
 				if ($nsgFile) {
 
@@ -483,6 +499,34 @@
 					$nsgObject
 				}
 
+				function zoneObject {
+					param(
+						[Object]$zoneGroup,
+						[String]$DNS
+					)
+
+					if ($zoneGroup -is [array]) {
+						Write-Error "DNS must be unique" -Category InvalidArgument -CategoryTargetName "ZoneGroup"
+					}
+
+					$zoneObject = @{
+						DNS      = $DNS;
+						type     = $zoneGroup.type;
+						location = $zoneGroup.location;
+						service  = @{
+							publish      = @{
+								zone          = $zoneGroup.servicePublish;
+								resourceGroup = $zoneGroup.resourceGroupServicePublish
+							};
+							dependencies = @{
+								vnets = $zoneGroup.vnetsServiceDependency.split('|');
+							}
+						}
+					}
+
+					$zoneObject
+				}
+
 				# Create a unified Resource Group collection
 				foreach ($ResourceGroup in ($resourceGroupsFile | Where-Object { $_.Name -notlike '' })) {
 
@@ -562,6 +606,28 @@
 							}
 						}
 
+						if ($ZonesCsvFile) {
+
+							$ZoneGroup = $ResourceGroup.Group | Group-Object DNS | Where-Object { $_.Name }
+
+							$zoneObjectArray = [System.Collections.ArrayList]@()
+
+							if (!$ZoneGroup.Name) {
+								Write-Warning "No DNS found for $($ResourceGroup.Name)."
+							}
+							else {
+								Write-Verbose "'$($ResourceGroup.Name)' has DNSs = '$($($ZoneGroup.Name).count)'"
+
+								foreach ($zone in $ZoneGroup) {
+
+									$zoneObject = zoneObject -zoneGroup $zone.Group -DNS $zone.Name
+									Write-Verbose "Adding DNS = '$($zone.Name)' to RG = '$($ResourceGroup.Name)'"
+									$zoneObjectArray.Add($zoneObject) > $Null
+
+								}
+							}
+						}
+
 						# Default values if required for ARM template sanity checks
 						if (!$vnetObjectArray) {
 							$vnetObjectArray = @(@{vnetName = "none"; vnetPeerings = @(); location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0"; serviceEndpoints = @() }); service = @{publish = @{vnet = "" } } })
@@ -583,40 +649,38 @@
 							$RGlocation = ($resourceGroupslocation | Where-Object { $_.resourceGroupName -like $ResourceGroup.Name }).location
 							$resourceGroupServicePublish = ($resourceGroupslocation | Where-Object { $_.resourceGroupName -like $ResourceGroup.Name }).resourceGroupServicePublish
 
-							if (!$RGlocation -and $vnetObjectArray[0].location ) {
-								$RGlocation = $vnetObjectArray[0].location
+							if (!$RGlocation -or !$resourceGroupServicePublish) {
+
+								$resources = @($vnetObjectArray, $routeTableObjectArray, $nsgObjectArray, $zoneObjectArray)
+
+								foreach ($resource in $resources) {
+
+									if ($RGlocation -and $resourceGroupServicePublish ) {
+										break
+									}
+
+									$resourceGroupServicePublish = $resource.service.publish.resourceGroup | Where-Object { $_ }
+									$RGlocation = $resource.location | Where-Object { $_ }
+								}
 							}
 
-							if (!$RGlocation) {
-								Write-Error "Resource Group $($ResourceGroup.Name) doesnt exist and a location is also not provided to create one."
+							if (!$RGlocation -or !$resourceGroupServicePublish) {
+								Write-Error "Resource Group $($ResourceGroup.Name) doesnt exist. Please provide location and service tag to create resourcegroup."
 							}
 
-							if (!$resourceGroupServicePublish) {
-								$resourceGroupServicePublish = $vnetObjectArray.service.publish.resourceGroup | Where-Object { $_ -notlike '' }
-							}
-							if (!$resourceGroupServicePublish) {
-								$resourceGroupServicePublish = $routeTableObjectArray.service.publish.resourceGroup | Where-Object { $_ -notlike '' }
-							}
-							if (!$resourceGroupServicePublish) {
-								$resourceGroupServicePublish = $nsgObjectArray.service.publish.resourceGroup | Where-Object { $_ -notlike '' }
-							}
-
-							if (!$resourceGroupServicePublish) {
-								Write-Error "Resource Group $($ResourceGroup.Name) doesn't exist and need to be created. Please provide Resource Group Service to Publish."
+							if ($RGlocation -is [array] ) {
+								$RGlocation = $RGlocation[0]
 							}
 
 							if ($resourceGroupServicePublish -is [array]) {
-								[String]$resourceGroupServicePublishString = $resourceGroupServicePublish[0]
-							}
-							else {
-								[String]$resourceGroupServicePublishString = $resourceGroupServicePublish
+								$resourceGroupServicePublish = $resourceGroupServicePublish[0]
 							}
 
 							$createRG = $true
 
 							$service = @{
 								publish = @{
-									resourceGroup = $resourceGroupServicePublishString
+									resourceGroup = $resourceGroupServicePublish
 								}
 							}
 						}
@@ -644,6 +708,7 @@
 							vnets                 = $vnetObjectArray;
 							routeTables           = $routeTableObjectArray;
 							networkSecurityGroups = $nsgObjectArray
+							zones                 = $zoneObjectArray
 						}
 
 						$resourceGroupObjectArray.Add($ResourceGroupObject) > $Null
@@ -744,6 +809,7 @@
 					$vnetObjectArray = [System.Collections.ArrayList]@()
 					$routeTableObjectArray = [System.Collections.ArrayList]@()
 					$nsgObjectArray = [System.Collections.ArrayList]@()
+					$ZonesObjectArray = [System.Collections.ArrayList]@()
 
 					$ResourceGroup = $_.ResourceGroupName
 
@@ -860,6 +926,25 @@
 						}
 					}
 
+					# Set network Security group Object
+					if ($_.Zones) {
+
+						Write-Verbose "Importing Zones..."
+
+						$_.Zones | ForEach-Object {
+
+							$ZonesObjectYml = createNetworkObjectFromYml -YmlFilePath $_ -ObjectType "zones" -hasGroups $false
+
+							$ZonesObjectYml | ForEach-Object {
+
+								Set-GlobalServiceValues -GlobalServiceContainer $GlobalServiceContainer  -ServiceKey "zone" -ResourceServiceContainer $_
+							}
+
+							$ZonesObjectArray += $ZonesObjectYml
+							Write-Verbose "Zone $_ added to '$ResourceGroup'"
+						}
+					}
+
 					# Default values if required for ARM template sanity checks
 					if (!$vnetObjectArray) {
 						$vnetObjectArray = @(@{vnetName = "none"; vnetPeerings = @(); location = ""; dnsServers = ""; addressSpace = @("10.10.0.0/24"); subnets = @(@{subnetName = "none"; cidr = "0.0.0.0/0"; serviceEndpoints = @() }); service = @{publish = @{vnet = "" } } })
@@ -879,16 +964,12 @@
 					if (!$ifResourceGroupExists) {
 						$RGlocation = $_.location
 
-						if (!$RGlocation -and $vnetObjectArray[0].location ) {
-							$RGlocation = $vnetObjectArray[0].location
-						}
-
 						if (!$RGlocation) {
 							Write-Error "Resource Group $($_.resourceGroupName) doesnt exist and a location is also not provided to create one."
 						}
 
 						if (!$_.service.publish.resourceGroup) {
-							Write-Error "Resource Group doesn't exist and need to be created. Please provide Resource Group Service to Publish."
+							Write-Error "Resource Group $($_.resourceGroupName) doesnt exist and need to be created. Please provide Resource Group Service to Publish."
 						}
 
 						$createRG = $true
@@ -922,7 +1003,8 @@
 
 						vnets                 = $vnetObjectArray;
 						routeTables           = $routeTableObjectArray;
-						networkSecurityGroups = $nsgObjectArray
+						networkSecurityGroups = $nsgObjectArray;
+						zones                 = $ZonesObjectArray
 					}
 
 					$resourceGroupObjectArray.Add($ResourceGroupObject) > $Null
@@ -931,15 +1013,19 @@
 			}
 
 			# Arm Deployment
-			Write-Verbose "Deploying resource groups..."
 
-			$deploymentNameRg = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-RGs"
+			if (($resourceGroupObjectArray.resourceGroup | Where-Object -Property createRG -eq $true).count -gt 0) {
 
-			New-AzDeployment `
-				-Name $deploymentNameRg `
-				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.ResourceGroups.json `
-				-Location $resourceGroupObjectArray[0].resourceGroup.location `
-				-NetworkingArrayObject $resourceGroupObjectArray
+				Write-Verbose "Deploying resource groups..."
+
+				$deploymentNameRg = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-RGs"
+
+				New-AzDeployment `
+					-Name $deploymentNameRg `
+					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.ResourceGroups.json `
+					-Location $resourceGroupObjectArray[0].resourceGroup.location `
+					-NetworkingArrayObject $resourceGroupObjectArray
+			}
 
 			if ($resourceGroupObjectArray.networkSecurityGroups.nsgName[0] -ne 'none' -and $resourceGroupObjectArray.networkSecurityGroups.nsgName -ne 'none') {
 
@@ -1026,17 +1112,21 @@
 					-Workspace $workspace
 			}
 
-			Write-Verbose "Deploying vnets and udrs..."
+			if (($resourceGroupObjectArray.vnets.vnetName | Where-Object { $_ -ne "none" }) -or ($resourceGroupObjectArray.routeTables.tableName | Where-Object { $_ -ne "none" })) {
 
-			$deploymentNameVu = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-VUs"
+				Write-Verbose "Deploying Vnet and Udrs..."
 
-			New-AzDeployment `
-				-Name $deploymentNameVu `
-				-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.json `
-				-Location $resourceGroupObjectArray[0].resourceGroup.location `
-				-NetworkingArrayObject $resourceGroupObjectArray
+				$deploymentNameVu = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-VUs"
+
+				New-AzDeployment `
+					-Name $deploymentNameVu `
+					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.json `
+					-Location $resourceGroupObjectArray[0].resourceGroup.location `
+					-NetworkingArrayObject $resourceGroupObjectArray
+			}
 
 			if ($resourceGroupObjectArray.vnets.virtualnetworkpeers) {
+
 				$filteredVnetObject = $resourceGroupObjectArray.vnets | Where-Object { $_.virtualnetworkpeers }
 				$vnetPeeringsObjectArray = [System.Collections.ArrayList]@()
 
@@ -1061,7 +1151,6 @@
 				}
 
 				Write-Verbose "Configuring vnet peerings..."
-
 				$deploymentNamePeerings = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-Vps"
 
 				New-AzDeployment `
@@ -1071,11 +1160,64 @@
 					-VnetPeeringsObjectArray $vnetPeeringsObjectArray
 			}
 
+			if ( $resourceGroupObjectArray | Where-Object { $_.zones.DNS } ) {
+
+				$filteredResourceGroupObject = $resourceGroupObjectArray | Where-Object { $_.zones.DNS }
+
+				foreach ($resourceGroupObject in $filteredResourceGroupObject) {
+
+					foreach ($zone in $resourceGroupObject.zones) {
+
+						$zone.resourceGroupName = $resourceGroupObject.resourceGroup.name
+
+						$zone.location ??= $resourceGroupObject.resourceGroup.location
+
+						$zone.virtualNetworkLinks = @()
+
+						foreach ($service in $zone.service.dependencies.vnets) {
+
+							$currentVnetObject = $resourceGroupObjectArray | Where-Object { $_.vnets.service.publish.vnet -eq $service }
+
+							if ($currentVnetObject -is [array]) {
+								Write-Error "Error with service $service. vnet service must be unique."
+							}
+
+							if ($currentVnetObject) {
+
+								$zone.virtualNetworkLinks += @{
+									vnetName 			  =	$currentVnetObject.vnets.vnetName
+									vnetResourceGroupName = $currentVnetObject.resourceGroup.name
+								}
+							}
+							else {
+
+								$vnetService = Get-CmAzService -Service $service -ThrowIfUnavailable -ThrowIfMultiple
+
+								$zone.virtualNetworkLinks += @{
+									vnetName 			  = $vnetService.resourceName
+									vnetResourceGroupName = $vnetService.resourceGroupName
+								}
+							}
+						}
+					}
+				}
+
+				$deploymentLocationZone = $filteredResourceGroupObject.resourceGroup.location -is [array] ? $filteredResourceGroupObject[0].resourceGroup.location : $filteredResourceGroupObject.resourceGroup.location
+
+				$deploymentNameZones = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $deploymentLocationZone -Name "New-CmAzIaasNetworking-Zones"
+
+				New-AzDeployment `
+					-Name $deploymentNameZones `
+					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.Zones.json `
+					-Location $deploymentLocationZone `
+					-privateDnsZones $filteredResourceGroupObject.zones
+			}
+
 			$resourceGroupsToSet = @()
 			$resourceGroupsToSet += $networkWatcherResourceGroupName
 			$resourceGroupsToSet += ($resourceGroupObjectArray.resourceGroup | Where-Object -Property createRG -eq $true).name
 
-			if ($resourceGroupsToSet) {
+			if ($resourceGroupsToSet | Where-Object { $_ }) {
 
 				Write-Verbose "Started tagging for resourcegroups..."
 				Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
@@ -1086,11 +1228,10 @@
 			$resourcesToSet += $resourceGroupObjectArray.vnets.vnetName | Where-Object { $_ -ne "none" }
 			$resourcesToSet += $resourceGroupObjectArray.networkSecurityGroups.nsgName | Where-Object { $_ -ne "none" }
 			$resourcesToSet += $resourceGroupObjectArray.routeTables.tableName | Where-Object { $_ -ne "none" }
+			$resourcesToSet += $resourceGroupObjectArray.zones.DNS
 
 			Write-Verbose "Started tagging for resources..."
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
-
-			Write-Verbose "Finished."
 		}
 	}
 	catch {

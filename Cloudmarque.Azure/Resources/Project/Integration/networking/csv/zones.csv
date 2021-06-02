@@ -1,0 +1,17 @@
+resourceGroupName,location,DNS,type,servicePublish,vnetsServiceDependency,resourceGroupServicePublish
+Iaas-Test-Zones-Rg,uksouth,privatelink.vaultcore.azure.net,private,privatelink-vaultcore,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.azure-automation.net,private,privatelink-automation,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.database.windows.net,private,privatelink-azuresql,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.postgres.database.azure.com,private,privatelink-postgres,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.mysql.database.azure.com,private,privatelink-mysql,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.mariadb.database.azure.com,private,privatelink-mariadb,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.blob.core.windows.net,private,privatelink-storage-blob,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.table.core.windows.net,private,privatelink-storage-table,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.file.core.windows.net,private,privatelink-storage-file,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.queue.core.windows.net,private,privatelink-storage-queue,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.queue.core.windows.net,private,privatelink-storage-queue,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.web.core.windows.net,private,privatelink-storage-web,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.azurewebsites.net,private,privatelink-webapp,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,privatelink.uksouth.backup.windowsazure.com,private,privatelink-recoveryvault,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Zones-Rg,uksouth,uksouth.privatelink.siterecovery.windowsazure.com,private,privatelink-backup,Iaas-Test-Hub1-Vnet1|Iaas-Test-Hub2-Vnet1,Iaas-Test-Zones-Rg
+Iaas-Test-Hub1-Rg,uksouth,example.zone.link,private,Iaas-Test-PrivateDNS,Iaas-Test-Hub1-Vnet1,Iaas-Test-Hub1-Rg

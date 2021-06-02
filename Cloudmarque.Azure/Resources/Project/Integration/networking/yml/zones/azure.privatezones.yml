@@ -1,0 +1,143 @@
+- DNS: privatelink.vaultcore.azure.net
+  type: private
+  service:
+    publish:
+      zone: privatelink-vaultcore
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.azure-automation.net
+  type: private
+  service:
+    publish:
+      zone: privatelink-automation
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.database.windows.net
+  type: private
+  service:
+    publish:
+      zone: privatelink-azuresql
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.postgres.database.azure.com
+  type: private
+  service:
+    publish:
+      zone: privatelink-postgres
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.mysql.database.azure.com
+  type: private
+  service:
+    publish:
+      zone: privatelink-mysql
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.mariadb.database.azure.com
+  type: private
+  service:
+    publish:
+      zone: privatelink-mariadb
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.blob.core.windows.net
+  type: private
+  service:
+    publish:
+      zone: privatelink-storage-blob
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.table.core.windows.net
+  type: private
+  service:
+    publish:
+      zone: privatelink-storage-table
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.file.core.windows.net
+  type: private
+  service:
+    publish:
+      zone: privatelink-storage-file
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.queue.core.windows.net
+  type: private
+  service:
+    publish:
+      zone: privatelink-storage-queue
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.web.core.windows.net
+  type: private
+  service:
+    publish:
+      zone: privatelink-storage-web
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.azurewebsites.net
+  type: private
+  service:
+    publish:
+      zone: privatelink-webapp
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.uks.backup.windowsazure.com
+  type: private
+  service:
+    publish:
+      zone: privatelink-recoveryvault
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+- DNS: privatelink.siterecovery.windowsazure.com
+  type: private
+  service:
+    publish:
+      zone: privatelink-backup
+    dependencies:
+      vnets:
+      - Iaas-Test-Hub1-Vnet1
+      - Iaas-Test-Hub2-Vnet1
+
+
+# Note: Deployed as per Azure guidelines - https://docs.microsoft.com/en-us/azure/private-link/private-endpoint-dns#azure-services-dns-zone-configuration
+# Using these private zone auto adds service private inteface mapping to private DNS.

@@ -8,6 +8,7 @@ function New-CmAzCoreKeyVault {
 		 Completes the following:
 			* Deploys multiple keyvaults in multiple locations to a specified resource group.
 			* Adds diagnostic settings linking the keyvaults to the core workspace.
+			* Optionally create private endpoints.
 
 		.Parameter SettingsFile
 		 File path for the settings file to be converted into a settings object.
@@ -40,26 +41,25 @@ function New-CmAzCoreKeyVault {
 
 	$ErrorActionPreference = "Stop"
 
-    try {
+	try {
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
 		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
-		if($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Keyvault")) {
+		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Keyvault")) {
 
 			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
 
 			Write-Verbose "Generating standardised Key Vault names..."
 			ForEach ($keyVault in $SettingsObject.keyVaults) {
-
 				$keyVault.name = Get-CmAzResourceName -Resource "KeyVault" -Architecture "Core" -Region $keyVault.location -Name $keyVault.name -MaxLength 24
 
-				if($null -eq $keyVault.enableSoftDelete) {
+				if ($null -eq $keyVault.enableSoftDelete) {
 					$keyVault.enableSoftDelete = $true;
 				}
 
-				if($null -eq $keyVault.enablePurgeProtection) {
+				if ($null -eq $keyVault.enablePurgeProtection) {
 					$keyVault.enablePurgeProtection = $true;
 				}
 
@@ -87,8 +87,7 @@ function New-CmAzCoreKeyVault {
 
 			$azCtx = (Get-AzContext).account
 
-			switch ($azCtx.type)
-			{
+			switch ($azCtx.type) {
 				"ServicePrincipal" {
 					$objectId = (Get-AzADServicePrincipal -ApplicationId $azCtx.Id).id
 				}
@@ -115,7 +114,7 @@ function New-CmAzCoreKeyVault {
 
 				$keyvault = $_
 
-				if(!$keyvault.encryptionKeyNames) {
+				if (!$keyvault.encryptionKeyNames) {
 					$keyvault.encryptionKeyNames = @()
 				}
 
@@ -124,12 +123,16 @@ function New-CmAzCoreKeyVault {
 				}
 			}
 
-			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $keyVaultResourceGroup
+			if ($SettingsObject.keyvaults.privateEndpoints) {
 
-			Write-Verbose "Finished!"
+				Write-Verbose "Building private endpoints..."
+				Build-PrivateEndpoints -SettingsObject $SettingsObject -LookupProperty "keyvaults" -ResourceName "keyvault" -GlobalSubResourceName "vault"
+			}
+
+			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $keyVaultResourceGroup
 		}
-    }
-    catch {
-        $PSCmdlet.ThrowTerminatingError($PSItem);
-    }
+	}
+	catch {
+		$PSCmdlet.ThrowTerminatingError($PSItem);
+	}
 }
