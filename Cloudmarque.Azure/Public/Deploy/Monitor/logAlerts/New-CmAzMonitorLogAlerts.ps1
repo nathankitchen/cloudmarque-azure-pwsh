@@ -93,11 +93,10 @@ function New-CmAzMonitorLogAlerts {
 
 						$alert.schedule ??= $definition.schedule
 
-						if (!$alert.suppress.enable) {
+						$alert.suppress ??= $definition.suppress
+
+						if (!$alert.suppress -or !$alert.suppress.enabled) {
 							$alert.suppress = ""
-						}
-						else {
-							$alert.suppress ??= $definition.suppress
 						}
 
 						$alert.threshold ??= $definition.threshold

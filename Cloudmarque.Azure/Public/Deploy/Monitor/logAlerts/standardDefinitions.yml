@@ -13,7 +13,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 10
@@ -35,7 +36,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 10
@@ -58,7 +60,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 10
@@ -85,7 +88,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 10
@@ -109,7 +113,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 10
@@ -134,7 +139,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 60
@@ -151,7 +157,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 60
@@ -168,7 +175,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 5
@@ -187,7 +195,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 1440
@@ -205,7 +214,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 1440
@@ -222,7 +232,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 360
@@ -239,7 +250,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -257,7 +269,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -276,7 +289,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -295,7 +309,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -314,7 +329,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -333,7 +349,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -352,7 +369,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -371,7 +389,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -390,7 +409,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -409,7 +429,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -428,7 +449,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -447,7 +469,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -466,7 +489,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -485,7 +509,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -505,7 +530,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -524,7 +550,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -544,7 +571,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -564,7 +592,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -584,7 +613,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -604,7 +634,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -623,7 +654,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -642,7 +674,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -661,7 +694,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -681,7 +715,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true   
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -700,7 +735,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -720,7 +756,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
@@ -739,7 +776,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      mins: 30
+      enabled: true
+      mins: 10000
       windows: 0
     schedule:
       frequencyInMinutes: 30
