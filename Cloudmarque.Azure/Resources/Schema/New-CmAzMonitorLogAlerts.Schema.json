@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "New-CmAzCoreKeyvault",
+    "$id": "New-CmAzMonitorLogAlerts",
     "type": "object",
     "title": "New-CmAzMonitorLogAlerts",
     "description": "Settings Root.",
@@ -112,6 +112,12 @@
                                                     "title": "Type",
                                                     "description": "The type of resource the collection of alerts is grouped against."
                                                 },
+                                                "name": {
+                                                    "$id": "#/groups/items/allOf/alertSets/items/allOf/name",
+                                                    "type": ["string", "null"],
+                                                    "title": "Name",
+                                                    "description": "Becomes part of log alert rule generated name."
+                                                },
                                                 "alerts": {
                                                     "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts",
                                                     "type": "array",
@@ -124,18 +130,57 @@
                                                             {
                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf",
                                                                 "type": "object",
+                                                                "required": [
+                                                                    "definition"
+                                                                ],
                                                                 "properties": {
-                                                                    "type": {
+                                                                    "definition": {
+                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/definition",
+                                                                        "type": "string",
+                                                                        "title": "Definition",
+                                                                        "description": "Name of a pre-existing definition of a log alert."
+                                                                    },
+                                                                    "name": {
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/name",
                                                                         "type": ["string", "null"],
                                                                         "title": "Name",
-                                                                        "description": "The name of the log alert rule."
+                                                                        "description": "Becomes part of log alert rule generated name."
                                                                     },
                                                                     "description": {
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/description",
                                                                         "type": ["string", "null"],
                                                                         "title": "Description",
                                                                         "description": "Description of the log alert."
+                                                                    },
+                                                                    "suppress": {
+                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/suppress",
+                                                                        "type": ["object", "null"],
+                                                                        "title": "Suppress",
+                                                                        "description": "Set the suppression time on a triggered alert.",
+                                                                        "required": [
+                                                                            "enable"
+                                                                        ],
+                                                                        "properties": {
+                                                                            "enable": {
+                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold/enable",
+                                                                                "type": "boolean",
+                                                                                "title": "Enable",
+                                                                                "description": "Time (in minutes) for which Alerts should be throttled or suppressed."
+                                                                            },
+                                                                            "mins": {
+                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold/mins",
+                                                                                "type": ["integer", "null"],
+                                                                                "title": "mins",
+                                                                                "description": "Time (in minutes) for which Alerts should be throttled or suppressed."
+                                                                            },
+                                                                            "windows": {
+                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold/windows",
+                                                                                "type": ["integer", "null"],
+                                                                                "title": "windows",
+                                                                                "description": "Consecutive periods to continue suppressing the alert."
+                                                                            }
+                                                                        },
+                                                                        "additonalProperties": false
                                                                     },
                                                                     "threshold": {
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold",
@@ -277,6 +322,7 @@
                                                                 },
                                                                 "additonalProperties": false
                                                             }
+
                                                         ]
                                                     }
                                                 }

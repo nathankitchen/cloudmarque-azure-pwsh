@@ -6,7 +6,7 @@ function New-CmAzMonitorMetricAlerts {
 
 		.Description
 		 Deploys multi-resource single-metric alert rules at either a resource group or resource scope, which in turn are linked to specified action groups.
-		 The metric name is used to specify the metric rule used, all rules specified can have a customisable threshold, comparison operator, 
+		 The metric name is used to specify the metric rule used, all rules specified can have a customisable threshold, comparison operator,
 		 time aggregation, severity and schedule values. Metric alerts are only available if the resources/resources groups specified in the scope share the same location.
 
 		.Parameter SettingsFile
@@ -111,8 +111,18 @@ function New-CmAzMonitorMetricAlerts {
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "metricAlert" -ResourceServiceContainer $alert
 
+						$name = $group.name
+
+						if($alertSet.name) {
+							$name += "-$($alertSet.name)"
+						}
+
+						if($alert.name) {
+							$name += "-$($alert.name)"
+						}
+
 						$alerts += @{
-							name = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $alert.targetResourceLocation -Name "$($group.name)-$i-$($alert.threshold.value)";
+							name = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $alert.targetResourceLocation -Name "mtr-$name-$i";
 							metricName = $alert.metricName;
 							resourceType = $alertSet.resourceType;
 							targetResourceLocation = $alert.targetResourceLocation;

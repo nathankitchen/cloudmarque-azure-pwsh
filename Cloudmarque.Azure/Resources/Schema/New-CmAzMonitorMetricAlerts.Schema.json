@@ -109,6 +109,12 @@
                                                     "title": "Resource Type",
                                                     "description": "The resource Type as defined in the Azure namespace."
                                                 },
+                                                "name": {
+                                                    "$id": "#/groups/items/allOf/alertSets/items/allOf/name",
+                                                    "name": "string",
+                                                    "title": "Name",
+                                                    "description": "Becomes part of metric alert rule generated name."
+                                                },
                                                 "alerts": {
                                                     "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts",
                                                     "type": "array",
@@ -128,6 +134,12 @@
                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf",
                                                                 "type": "object",
                                                                 "properties": {
+                                                                    "name": {
+                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/name",
+                                                                        "name": "string",
+                                                                        "title": "Name",
+                                                                        "description": "Becomes part of log alert rule generated name."
+                                                                    },
                                                                     "metricName": {
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/metricName",
                                                                         "name": "string",
@@ -272,7 +284,6 @@
                                                                                             "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/dependencies/targetResourceGroups/items"
                                                                                         }
                                                                                     }
-                                                                                    
                                                                                 },
                                                                                 "additonalProperties": false
                                                                             }

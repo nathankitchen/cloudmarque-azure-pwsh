@@ -11,11 +11,16 @@ groups:
   ## DEFAULT VM ALERT RULE SET ##
 - name: VMStandard
   alertSets:
-  - type: VirtualMachines
+  - name:                                                                                             # Optional - It is recommended to use name when using multiple sets of alerts.
+    type: VirtualMachines
     alerts:
-    - name: High_CPU_Usage_Percent
-    - name: High_CPU_Usage_Percent_Range
-    - name: Low_Disk_Space
+    - name: high-cpu-crt                                                                              # Optional - It is recommended to use name for more understandable alert names.
+      definition: High_CPU_Usage_Percent
+      severity: Critical
+    - name: high-cpu-wrn
+      definition: High_CPU_Usage_Percent_Range
+    - name: low-dsk-crt
+      definition: Low_Disk_Space
       description: Critically low available disk space percentage and MB value.
       severity: Critical
       enabled: true
@@ -26,53 +31,63 @@ groups:
         _maxPercentage: 5
         _maxValueMB: 102400
         _timeWindow: 5m
-    - name: Low_Disk_Space
-    - name: High_Memory_Usage_Percent
-    - name: High_Memory_Usage_Percent_Range
-    - name: VM_NonResponsive
-    - name: VM_Missing_Backup
-    - name: VM_Antimalware_Not_Up_To_Date
-    - name: VM_Critical_Or_Security_Updates_Missing
-    - name: VM_Reboot
+    - name: low-dsk-wrn
+      definition: Low_Disk_Space
+    - name: high-memory-crt
+      definition: High_Memory_Usage_Percent
+    - name: high-memory-wrn
+      definition: High_Memory_Usage_Percent_Range
+    - name: non-responsive
+      definition: VM_NonResponsive
+    - name: missing-backup
+      definition: VM_Missing_Backup
+    - name: ood-antimalware
+      definition: VM_Antimalware_Not_Up_To_Date
+    - name: missing-updates
+      definition: VM_Critical_Or_Security_Updates_Missing
+    - name: reboot
+      definition: VM_Reboot
+      suppress:
+        enable: false                                                                                 # Defaults to true
 
 ## DEFAULT SQL ALERT RULE SET ##
 # - name: SQLStandard
 #   alertSets:
 #   - type: SQL
 #     alerts:
-  #   - name: Failed_Recovery
-  #   - name: nFgs_In_System_FGs
-  #   - name: nMark_Suspect_Db
-  #   - name: nRvr_DB_UnRs_Txn
-  #   - name: Low_Memory_Or_Disk
-  #   - name: Low_Memory_CLR
-  #   - name: Failed_DB_Recovery
-  #   - name: Max_User_Connection
-  #   - name: Failed_Backup
-  #   - name: nCleanup
-  #   - name: nForeign_Key
-  #   - name: nSpace_For_Logfile
-  #   - name: Exceeded_Capacity
-  #   - name: Failed_MSDTC_Txn
-  #   - name: Exceeded_Log_Capacity
-  #   - name: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_DatabaseConsistencyErrors
-  #   - name: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_SQLOpsJobExecutionfailures
-  #   - name: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Custom_Error_60200
-  #   - name: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Event14151_ExpiredSubscription
-  #   - name: Failed_SQL_Server_Agent
-  #   - name: Unavailable_DB_Log
-  #   - name: Exceeded_Txn_Repxn_Thd
-  #   - name: Failed_Service_Broker
-  #   - name: Exceeded_Blocking_Thd
-  #   - name: nPage_Available_FG
-  #   - name: fileGroupFull
+  #   - definition: Failed_Recovery
+  #   - definition: nFgs_In_System_FGs
+  #   - definition: nMark_Suspect_Db
+  #   - definition: nRvr_DB_UnRs_Txn
+  #   - definition: Low_Memory_Or_Disk
+  #   - definition: Low_Memory_CLR
+  #   - definition: Failed_DB_Recovery
+  #   - definition: Max_User_Connection
+  #   - definition: Failed_Backup
+  #   - definition: nCleanup
+  #   - definition: nForeign_Key
+  #   - definition: nSpace_For_Logfile
+  #   - definition: Exceeded_Capacity
+  #   - definition: Failed_MSDTC_Txn
+  #   - definition: Exceeded_Log_Capacity
+  #   - definition: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_DatabaseConsistencyErrors
+  #   - definition: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_SQLOpsJobExecutionfailures
+  #   - definition: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Custom_Error_60200
+  #   - definition: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Event14151_ExpiredSubscription
+  #   - definition: Failed_SQL_Server_Agent
+  #   - definition: Unavailable_DB_Log
+  #   - definition: Exceeded_Txn_Repxn_Thd
+  #   - definition: Failed_Service_Broker
+  #   - definition: Exceeded_Blocking_Thd
+  #   - definition: nPage_Available_FG
+  #   - definition: fileGroupFull
 
 ## CUSTOM EXAMPLE ##
 # - name: VMStandard
 #   alertSets:
 #   - type: virtualMachines
 #     alerts:
-#     - name: HighCpuAll
+#     - definition: HighCpuAll
 #       enabled: true                                                                                         # optional
 #       description:                                                                                          # optional
 #       threshold:

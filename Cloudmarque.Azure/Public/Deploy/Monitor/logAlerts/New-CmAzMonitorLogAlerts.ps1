@@ -59,48 +59,49 @@ function New-CmAzMonitorLogAlerts {
 				foreach ($alertSet in $SettingsObject.groups.alertSets) {
 
 					for ($i = 0; $i -lt $alertSet.alerts.count; $i++) {
-	
+
 						$alert = $alertSet.alerts[$i]
-	
+
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actionGroups" -ResourceServiceContainer $alert -IsDependency
-	
-						$definition = $standardDefinitions.Queries.$($alertSet.type) | Where-Object { $_.name -eq $alert.name }
-	
+
+						$definition = $standardDefinitions.Queries.$($alertSet.type) | Where-Object { $_.definition -eq $alert.definition }
+
 						if (!$definition) {
-							Write-Error "$($alert.name) is not a valid definition..." -Category InvalidArgument -CategoryTargetName "name"
+							Write-Error "$($alert.definition) is not a valid definition..." -Category InvalidArgument -CategoryTargetName "definition"
 						}
-	
+
 						if ($definition.defaults) {
-	
+
 							foreach ($default in $definition.defaults.GetEnumerator()) {
-	
+
 								$placeHolder = "@@@$($default.name)@@@"
-	
+
 								if (!$alert.parameters.$($default.name)) {
-	
+
 									Write-Verbose "$($default.name): No parameter found. Setting default value..."
 									$value = $default.value
 								}
-								else{
+								else {
 									$value = $alert.parameters.$($default.name)
 								}
-	
+
 								$definition.query = $definition.query.replace($placeHolder, $value)
 							}
 						}
-	
+
 						$alert.enabled ??= $true
-	
-						$alert.schedule ??= @{
-							frequencyInMinutes = $definition.schedule.frequencyInMinutes;
-							timeWindowInMinutes = $definition.schedule.timeWindowInMinutes;
+
+						$alert.schedule ??= $definition.schedule
+
+						if (!$alert.suppress.enable) {
+							$alert.suppress = ""
 						}
-	
-						$alert.threshold ??= @{
-							Operator = $definition.threshold.Operator;
-							value = $definition.threshold.value;
+						else {
+							$alert.suppress ??= $definition.suppress
 						}
-	
+
+						$alert.threshold ??= $definition.threshold
+
 						if ($standardDefinitions.Severity.GetEnumerator().Name -contains $alert.severity) {
 							$alert.severity = $standardDefinitions.Severity.$($alert.severity)
 						}
@@ -108,35 +109,46 @@ function New-CmAzMonitorLogAlerts {
 							Write-Verbose "Setting default severity..."
 							$alert.severity = $definition.severity
 						}
-	
+
 						$alert.description ??= $definition.description
-	
+
 						$alert.actionGroupInfo = @{ actionGroup = @(); }
-	
+
 						foreach ($actionGroup in $alert.service.dependencies.actionGroups) {
 							$alert.actionGroupInfo.actionGroup += (Get-CmAzService -Service $actionGroup -ThrowIfUnavailable -ThrowIfMultiple).resourceId
 						}
-	
-						if($alert.customisedActions) {
-	
+
+						if ($alert.customisedActions) {
+
 							$alert.actionGroupInfo.emailSubject = $alert.customisedActions.emailSubject
 							$alert.actionGroupInfo.customWebhookPayload = $alert.customisedActions.webhookJsonPayload
 						}
-	
-						$alertName = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $workspace.location -Name "$($group.name)-$($alertSet.type)-$i"
-	
+
+						$name = $group.name
+
+						if ($alertSet.name) {
+							$name += "-$($alertSet.name)"
+						}
+
+						if ($alert.name) {
+							$name += "-$($alert.name)"
+						}
+
+						$alertName = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $workspace.location -Name "log-$name-$i"
+
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "logAlert" -ResourceServiceContainer $alert
-	
+
 						$alerts += @{
-							name = $alertName;
-							enabled = $alert.enabled;
-							query = $definition.query;
-							schedule = $alert.schedule;
-							aznsAction = $alert.actionGroupInfo;
-							threshold = $alert.threshold;
+							name        = $alertName;
+							enabled     = $alert.enabled;
+							query       = $definition.query;
+							suppress    = $alert.suppress;
+							schedule    = $alert.schedule;
+							aznsAction  = $alert.actionGroupInfo;
+							threshold   = $alert.threshold;
 							description = $alert.description;
-							severity = $alert.severity;
-							service = $alert.service;
+							severity    = $alert.severity;
+							service     = $alert.service;
 						}
 					}
 				}

@@ -37,6 +37,8 @@
                         "thresholdOperator": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.Operator]",
                         "threshold": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.value]"
                     },
+                    "throttlingInMin": "[if(empty(parameters('Alerts')[copyIndex('AlertCopy')].suppress), json('null'), parameters('Alerts')[copyIndex('AlertCopy')].suppress.mins)]",
+                    "throttleConsecutiveWindowCount": "[if(empty(parameters('Alerts')[copyIndex('AlertCopy')].suppress), json('null'), parameters('Alerts')[copyIndex('AlertCopy')].suppress.windows)]",
                     "aznsAction": "[parameters('Alerts')[copyIndex('AlertCopy')].aznsAction]"
                 }
             },

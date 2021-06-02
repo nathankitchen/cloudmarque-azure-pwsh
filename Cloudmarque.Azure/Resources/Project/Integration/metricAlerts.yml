@@ -10,9 +10,11 @@ service:
 groups:
 - name: VMStandard
   alertSets:
-  - resourceType: Microsoft.Compute/virtualMachines
+  - name:                                                                             # Optional - It is recommended to use name when using multiple sets of alerts.
+    resourceType: Microsoft.Compute/virtualMachines
     alerts:
-    - metricName: OS Disk Used Burst BPS Credits Percentage
+    - name: used-osDskBurst-wrn                                                   # Optional - It is recommended to use name for more understandable alert names.
+      metricName: OS Disk Used Burst BPS Credits Percentage
       targetResourceLocation: East US
       severity: Warning
       threshold:
@@ -29,7 +31,8 @@ groups:
         frequencyInMinutes: 15                                # evaluationFrequency
         timeWindowInMinutes: 60                               # windowSize
 
-    - metricName: OS Disk Used Burst BPS Credits Percentage
+    - name: used-osDskBurst-crt
+      metricName: OS Disk Used Burst BPS Credits Percentage
       targetResourceLocation: East US
       severity: Critical
       threshold:
@@ -46,7 +49,8 @@ groups:
         frequencyInMinutes: 15                                # evaluationFrequency
         timeWindowInMinutes: 60                               # windowSize
 
-    - metricName: Data Disk Used Burst BPS Credits Percentage
+    - name: used-dataDskBurst-wrn
+      metricName: Data Disk Used Burst BPS Credits Percentage
       targetResourceLocation: East US
       severity: Warning
       threshold:
@@ -63,7 +67,8 @@ groups:
         frequencyInMinutes: 15                                # evaluationFrequency
         timeWindowInMinutes: 60                               # windowSize
 
-    - metricName: Data Disk Used Burst BPS Credits Percentage
+    - name: used-dataDskBurst-crt
+      metricName: Data Disk Used Burst BPS Credits Percentage
       targetResourceLocation: East US
       severity: Critical
       threshold:
@@ -80,7 +85,8 @@ groups:
         frequencyInMinutes: 15                                # evaluationFrequency
         timeWindowInMinutes: 60                               # windowSize
 
-    - metricName: OS Disk IOPS Consumed Percentage
+    - name: used-osDskIops-wrn
+      metricName: OS Disk IOPS Consumed Percentage
       targetResourceLocation: East US
       severity: Warning
       threshold:
@@ -97,7 +103,8 @@ groups:
         frequencyInMinutes: 15                                # evaluationFrequency
         timeWindowInMinutes: 60                               # windowSize
 
-    - metricName: OS Disk IOPS Consumed Percentage
+    - name: used-osDskIops-crt
+      metricName: OS Disk IOPS Consumed Percentage
       targetResourceLocation: East US
       severity: Critical
       threshold:
@@ -114,7 +121,8 @@ groups:
         frequencyInMinutes: 15                                # evaluationFrequency
         timeWindowInMinutes: 60                               # windowSize
 
-    - metricName: Data Disk IOPS Consumed Percentage
+    - name: used-dataDskIops-wrn
+      metricName: Data Disk IOPS Consumed Percentage
       targetResourceLocation: East US
       severity: Warning
       threshold:
@@ -131,7 +139,8 @@ groups:
         frequencyInMinutes: 15                                # evaluationFrequency
         timeWindowInMinutes: 60                               # windowSize
 
-    - metricName: Data Disk IOPS Consumed Percentage
+    - name: used-dataDskIops-crt
+      metricName: Data Disk IOPS Consumed Percentage
       targetResourceLocation: East US
       severity: Critical
       threshold:
