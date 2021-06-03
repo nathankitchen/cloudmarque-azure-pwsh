@@ -44,6 +44,12 @@
                             "title": "Function",
                             "description": "Global default value to publish on deployed resource type."
                         },
+						"function": {
+                            "$id": "#/service/publish/function",
+                            "type": ["string", "null"],
+                            "title": "Function",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
                         "privateEndpoint": {
                             "$id": "#/service/publish/privateEndpoint",
                             "type": ["string", "null"],

@@ -21,7 +21,7 @@ function New-CmAzPaasFunction {
          File path for the tag settings file to be converted into a tag settings object.
 
         .Parameter OmitTags
-		 Parmeter to specify if the cmdlet should handle its own tagging.
+		 Parameter to specify if the cmdlet should handle its own tagging.
 
 		.Component
 		 PaaS

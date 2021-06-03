@@ -82,11 +82,11 @@ function New-CmAzDeployment {
             }
 
             logAlerts {
-                New-CmAzMonitorLogAlerts -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
+                New-CmAzMonitorLogAlerts -SettingsObject $SettingsObject
             }
 
             metricAlerts {
-                New-CmAzMonitorMetricAlerts -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
+                New-CmAzMonitorMetricAlerts -SettingsObject $SettingsObject
             }
 
             deleteservice {

@@ -15,9 +15,6 @@ function New-CmAzMonitorMetricAlerts {
 		.Parameter SettingsObject
 		 Object containing the configuration values required to run this cmdlet.
 
-		.Parameter TagSettingsFile
-         File path for settings containing tags definition.
-
 		.Component
 		 Monitor
 

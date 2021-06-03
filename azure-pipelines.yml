@@ -55,7 +55,7 @@ stages:
       displayName: Publish Tests
       inputs:
         testResultsFormat: NUnit
-        testResultsFiles: $(moduleName)/publish/Tests/*.xml
+        testResultsFiles: '**/$(moduleName)/publish/Tests/nunit-results.xml'
         failTaskOnFailedTests: true
 
 - stage: CreateCloudmarqueDocumentationArtifact
