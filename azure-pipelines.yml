@@ -28,7 +28,7 @@ stages:
         errorActionPreference: Stop
         targetType: Inline
         script: |
-          . .\$(moduleName)\install-dependencies.ps1
+          . .\$(moduleName)\Install-dependencies.ps1
           . .\init.ps1
           Sync-CloudmarqueAzure
 
@@ -55,7 +55,7 @@ stages:
       displayName: Publish Tests
       inputs:
         testResultsFormat: NUnit
-        testResultsFiles: './$(moduleName)/Publish/Tests/nunit-results.xml'
+        testResultsFiles: '**/Publish/Tests/nunit-results.xml'
         failTaskOnFailedTests: true
 
 - stage: CreateCloudmarqueDocumentationArtifact
