@@ -11,7 +11,7 @@
 RootModule = 'Cloudmarque.Azure.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.12'
+ModuleVersion = '1.0.13'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Core'
@@ -135,10 +135,16 @@ PrivateData = @{
         IconUri = 'https://github.com/Trustmarque/cloudmarque-azure-pwsh/blob/master/Cloudmarque.Azure/icon.png?raw=true'
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Added Timezone config support for VMs.
-* Added AntiMalware and vulnerability scanning support for VMs.
-* Added design changes in order to support choosing from a range of pre-defined configurations in New-CmAzProject.
-* Inital implementation of support for deploying multi resource, single metric alerts and log alerts.'
+        ReleaseNotes = '* Added new cmdlet for deploying private endpoints - New-CmAzIaasPrivateEndpoints.
+* Added support for setting private endpoints on applicable resources.
+* Added support for cognitive services in networking service endpoints.
+* Added support for private DNS.
+* Added support for subnet delegation.
+* Added support for log alert suppression settings in the form of windows and minutes.
+* Added support for optional frontdoor deployment.
+* Added support for identity management in recovery service vaults.
+* Added supported skus for webpps and sql resources.
+* Amended how alert names are generated.'
 
         # Prerelease string of this module
         # Prerelease = ''
