@@ -235,7 +235,7 @@ stages:
 
 - stage: Security
   condition: and(succeeded(), eq('${{ parameters.Security }}', true))
-  dependsOn: Iaas_NSP
+  dependsOn: Core
   jobs:
   - job:
     steps:
