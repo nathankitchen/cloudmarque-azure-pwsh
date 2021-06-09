@@ -5,6 +5,33 @@ Severity:
   Informational: 3
   Verbose: 4
 
+timeWindowInMinutes:
+  5: PT5M
+  10: PT10M
+  15: PT15M
+  45: PT45M
+  60: PT1H
+  120: PT2H
+  180: PT3H
+  240: PT4H
+  300: PT5H
+  360: PT6H
+  1440: P1D
+  2880: P2D
+
+frequencyInMinutes:
+  5: PT5M
+  10: PT10M
+  15: PT15M
+  45: PT45M
+  60: PT1H
+  120: PT2H
+  180: PT3H
+  240: PT4H
+  300: PT5H
+  360: PT6H
+  1440: PT24H
+
 Queries:
 - virtualMachines:
   - definition: High_CPU_Usage_Percent
@@ -15,7 +42,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 10
       timeWindowInMinutes: 60
@@ -38,7 +64,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 10
       timeWindowInMinutes: 60
@@ -62,7 +87,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 10
       timeWindowInMinutes: 60
@@ -90,7 +114,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 10
       timeWindowInMinutes: 60
@@ -115,7 +138,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 10
       timeWindowInMinutes: 60
@@ -141,7 +163,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 60
       timeWindowInMinutes: 120
@@ -159,7 +180,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 60
       timeWindowInMinutes: 120
@@ -177,7 +197,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 5
       timeWindowInMinutes: 15
@@ -197,7 +216,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 1440
       timeWindowInMinutes: 1440
@@ -216,7 +234,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 1440
       timeWindowInMinutes: 1440
@@ -234,7 +251,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 360
       timeWindowInMinutes: 360
@@ -252,7 +268,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 45
@@ -271,7 +286,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -291,7 +305,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -311,7 +324,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -331,7 +343,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -351,7 +362,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -371,7 +381,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -391,7 +400,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -411,7 +419,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -431,7 +438,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -451,7 +457,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -471,7 +476,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -491,7 +495,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -511,7 +514,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -532,7 +534,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -552,7 +553,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -573,7 +573,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -594,7 +593,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -615,7 +613,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -636,7 +633,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -656,7 +652,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -676,7 +671,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -696,7 +690,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -715,9 +708,8 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true   
+      enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -737,7 +729,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -758,7 +749,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240
@@ -778,7 +768,6 @@ Queries:
     suppress:
       enabled: true
       mins: 10000
-      windows: 0
     schedule:
       frequencyInMinutes: 30
       timeWindowInMinutes: 240

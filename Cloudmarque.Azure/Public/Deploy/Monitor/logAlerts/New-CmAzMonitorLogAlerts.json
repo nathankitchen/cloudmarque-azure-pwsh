@@ -11,40 +11,41 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Insights/scheduledQueryRules",
+            "type": "microsoft.insights/scheduledqueryrules",
+            "apiVersion": "2021-02-01-preview",
             "name": "[parameters('Alerts')[copyIndex('AlertCopy')].name]",
-            "apiVersion": "2018-04-16",
             "location": "[parameters('Workspace').location]",
+             "copy": {
+                "name": "AlertCopy",
+                "count": "[length(parameters('Alerts'))]"
+            },
             "tags": {
                 "cm-service": "[parameters('Alerts')[copyIndex('AlertCopy')].service.publish.logAlert]"
             },
             "properties": {
+                "displayName": "[parameters('Alerts')[copyIndex('AlertCopy')].name]",
                 "description": "[parameters('Alerts')[copyIndex('AlertCopy')].description]",
+                "severity": "[parameters('Alerts')[copyIndex('AlertCopy')].severity]",
                 "enabled": "[parameters('Alerts')[copyIndex('AlertCopy')].enabled]",
-                "source": {
-                    "query": "[parameters('Alerts')[copyIndex('AlertCopy')].query]",
-                    "dataSourceId": "[parameters('Workspace').resourceId]",
-                    "queryType": "ResultCount"
+                "evaluationFrequency": "[parameters('Alerts')[copyIndex('AlertCopy')].schedule.frequencyInMinutes]",
+                "scopes": [
+                    "[parameters('Workspace').resourceId]"
+                ],
+                "windowSize": "[parameters('Alerts')[copyIndex('AlertCopy')].schedule.timeWindowInMinutes]",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "query": "[parameters('Alerts')[copyIndex('AlertCopy')].query]",
+                            "timeAggregation": "Count",
+                            "operator": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.Operator]",
+                            "threshold": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.value]"
+
+                        }
+                    ]
                 },
-                "schedule": {
-                    "frequencyInMinutes": "[parameters('Alerts')[copyIndex('AlertCopy')].schedule.frequencyInMinutes]",
-                    "timeWindowInMinutes": "[parameters('Alerts')[copyIndex('AlertCopy')].schedule.timeWindowInMinutes]"
-                },
-                "action": {
-                    "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction",
-                    "severity": "[parameters('Alerts')[copyIndex('AlertCopy')].severity]",
-                    "trigger": {
-                        "thresholdOperator": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.Operator]",
-                        "threshold": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.value]"
-                    },
-                    "throttlingInMin": "[if(empty(parameters('Alerts')[copyIndex('AlertCopy')].suppress), json('null'), parameters('Alerts')[copyIndex('AlertCopy')].suppress.mins)]",
-                    "throttleConsecutiveWindowCount": "[if(empty(parameters('Alerts')[copyIndex('AlertCopy')].suppress), json('null'), parameters('Alerts')[copyIndex('AlertCopy')].suppress.windows)]",
-                    "aznsAction": "[parameters('Alerts')[copyIndex('AlertCopy')].aznsAction]"
-                }
-            },
-            "copy": {
-                "name": "AlertCopy",
-                "count": "[length(parameters('Alerts'))]"
+                "autoMitigate": "[parameters('Alerts')[copyIndex('AlertCopy')].autoMitigation]",
+                "muteActionsDuration": "[if(empty(parameters('Alerts')[copyIndex('AlertCopy')].suppress), json('null'), parameters('Alerts')[copyIndex('AlertCopy')].suppress.mins)]",
+                "actions": "[parameters('Alerts')[copyIndex('AlertCopy')].actions]"
             }
         }
     ]

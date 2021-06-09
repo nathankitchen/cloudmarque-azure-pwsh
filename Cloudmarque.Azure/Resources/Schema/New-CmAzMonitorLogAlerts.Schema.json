@@ -172,12 +172,6 @@
                                                                                 "type": ["integer", "null"],
                                                                                 "title": "mins",
                                                                                 "description": "Time (in minutes) for which Alerts should be throttled or suppressed."
-                                                                            },
-                                                                            "windows": {
-                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold/windows",
-                                                                                "type": ["integer", "null"],
-                                                                                "title": "windows",
-                                                                                "description": "Consecutive periods to continue suppressing the alert."
                                                                             }
                                                                         },
                                                                         "additonalProperties": false
@@ -214,6 +208,12 @@
                                                                         "title": "Enabled",
                                                                         "description": "If the alert rule is enabled or not.",
                                                                         "default": true
+                                                                    },
+                                                                    "autoMitigation": {
+                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/autoMitigation",
+                                                                        "type": ["boolean", "null"],
+                                                                        "title": "AutoMitigation",
+                                                                        "description": "Indicates whether the alert should be auto resolved or not."
                                                                     },
                                                                     "severity": {
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/severity",
@@ -287,27 +287,6 @@
                                                                                     }
                                                                                 },
                                                                                 "additionalProperties": false
-                                                                            }
-                                                                        },
-                                                                        "additonalProperties": false
-                                                                    },
-                                                                    "customisedActions": {
-                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/customisedActions",
-                                                                        "type": ["object", "null"],
-                                                                        "title": "Customised Actions",
-                                                                        "description": "Container of additonal custom actions for when an alert is triggered.",
-                                                                        "properties": {
-                                                                            "emailSubject": {
-                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/customisedActions/emailSubject",
-                                                                                "type": "string",
-                                                                                "title": "Email Subject",
-                                                                                "description": "Subject of email sent from action group."
-                                                                            },
-                                                                            "webhookJsonPayload": {
-                                                                                "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/customisedActions/webhookJsonPayload",
-                                                                                "type": "string",
-                                                                                "title": "Webhook Json Payload",
-                                                                                "description": "Specify a custom json payload that gets sent to the webhook instead of the default alert payload."
                                                                             }
                                                                         },
                                                                         "additonalProperties": false

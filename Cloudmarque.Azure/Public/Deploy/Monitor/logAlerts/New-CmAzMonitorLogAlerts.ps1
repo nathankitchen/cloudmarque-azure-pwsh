@@ -59,6 +59,18 @@ function New-CmAzMonitorLogAlerts {
 
 						$alert = $alertSet.alerts[$i]
 
+						$name = $group.name
+
+						if ($alertSet.name) {
+							$name += "-$($alertSet.name)"
+						}
+
+						if ($alert.name) {
+							$name += "-$($alert.name)"
+						}
+
+						$alertName = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $workspace.location -Name "log-$name-$i"
+
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actionGroups" -ResourceServiceContainer $alert -IsDependency
 
 						$definition = $standardDefinitions.Queries.$($alertSet.type) | Where-Object { $_.definition -eq $alert.definition }
@@ -88,11 +100,33 @@ function New-CmAzMonitorLogAlerts {
 
 						$alert.enabled ??= $true
 
-						$alert.schedule ??= $definition.schedule
+						if ($alert.schedule) {
 
-						$alert.suppress ??= $definition.suppress
+							$alert.schedule.frequencyInMinutes = $standardDefinitions.frequencyInMinutes[$alert.schedule.frequencyInMinutes.ToString()]
+							$alert.schedule.timeWindowInMinutes = $standardDefinitions.timeWindowInMinutes[$alert.schedule.timeWindowInMinutes.ToString()]
+						}
+						else {
 
-						if (!$alert.suppress -or !$alert.suppress.enabled) {
+							Write-Verbose "Setting default schedule..."
+							$alert.schedule = @{
+								frequencyInMinutes  = "PT30M"
+								timeWindowInMinutes = "PT45M"
+							}
+						}
+
+						if ($alert.suppress.enable -and $alert.autoMitigation) {
+							Write-Error "Cannot enable both alarm suppression and automitigation" -CategoryReason InvalidData -CategoryTargetName $alertName
+						}
+						elseif ($alert.suppress.enable) {
+
+							$alert.suppress.mins ??= $definition.suppress.mins
+							$timespan = New-TimeSpan -minutes $alert.suppress.mins
+							$alert.suppress.mins = [System.Xml.XmlConvert]::ToString($timespan)
+
+							$alert.autoMitigation = $false
+						}
+						else {
+							$alert.autoMitigation  = $true
 							$alert.suppress = ""
 						}
 
@@ -108,43 +142,26 @@ function New-CmAzMonitorLogAlerts {
 
 						$alert.description ??= $definition.description
 
-						$alert.actionGroupInfo = @{ actionGroup = @(); }
+						$alert.actions = @();
 
 						foreach ($actionGroup in $alert.service.dependencies.actionGroups) {
-							$alert.actionGroupInfo.actionGroup += (Get-CmAzService -Service $actionGroup -ThrowIfUnavailable -ThrowIfMultiple).resourceId
+							$alert.actions += @{ actionGroupId = (Get-CmAzService -Service $actionGroup -ThrowIfUnavailable -ThrowIfMultiple).resourceId; webHookProperties = {} }
 						}
-
-						if ($alert.customisedActions) {
-
-							$alert.actionGroupInfo.emailSubject = $alert.customisedActions.emailSubject
-							$alert.actionGroupInfo.customWebhookPayload = $alert.customisedActions.webhookJsonPayload
-						}
-
-						$name = $group.name
-
-						if ($alertSet.name) {
-							$name += "-$($alertSet.name)"
-						}
-
-						if ($alert.name) {
-							$name += "-$($alert.name)"
-						}
-
-						$alertName = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $workspace.location -Name "log-$name-$i"
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "logAlert" -ResourceServiceContainer $alert
 
 						$alerts += @{
-							name        = $alertName;
-							enabled     = $alert.enabled;
-							query       = $definition.query;
-							suppress    = $alert.suppress;
-							schedule    = $alert.schedule;
-							aznsAction  = $alert.actionGroupInfo;
-							threshold   = $alert.threshold;
-							description = $alert.description;
-							severity    = $alert.severity;
-							service     = $alert.service;
+							name           = $alertName;
+							enabled        = $alert.enabled;
+							query          = $definition.query;
+							suppress       = $alert.suppress;
+							schedule       = $alert.schedule;
+							actions        = $alert.actions;
+							threshold      = $alert.threshold;
+							description    = $alert.description;
+							severity       = $alert.severity;
+							service        = $alert.service;
+							autoMitigation = $alert.autoMitigation;
 						}
 					}
 				}

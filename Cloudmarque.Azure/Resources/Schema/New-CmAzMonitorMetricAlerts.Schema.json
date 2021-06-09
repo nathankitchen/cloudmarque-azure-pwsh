@@ -223,7 +223,7 @@
                                                                                 "description": "The frequency in which the metric alert rule is run.",
                                                                                 "enum": [1, 2, 15, 30, 60]
                                                                             },
-                                                                            "aggregationGranulat": {
+                                                                            "timeWindowInMinutes": {
                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/schedule/timeWindowInMinutes",
                                                                                 "type": "integer",
                                                                                 "title": "Time Window In Minutes",
