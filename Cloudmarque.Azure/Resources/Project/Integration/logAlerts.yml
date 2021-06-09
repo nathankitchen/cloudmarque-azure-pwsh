@@ -14,36 +14,36 @@ groups:
   - name:                                                                                             # Optional - It is recommended to use name when using multiple sets of alerts.
     type: VirtualMachines
     alerts:
-    # - name: High-CPU-Crt                                                                              # Optional - It is recommended to use name for more understandable alert names.
-    #   definition: High_CPU_Usage_Percent
-    #   severity: Critical
-    # - name: High-CPU-Wrn
-    #   definition: High_CPU_Usage_Percent_Range
-    # - name: Low-Dsk-Crt
-    #   definition: Low_Disk_Space
-    #   description: Critically low available disk space percentage and MB value.
-    #   severity: Critical
-    #   schedule:
-    #     frequencyInMinutes: 10
-    #     timeWindowInMinutes: 60
-    #   parameters:
-    #     _maxPercentage: 5
-    #     _maxValueMB: 102400
-    #     _timeWindow: 5m
-    # - name: Low-Dsk-Wrn
-    #   definition: Low_Disk_Space
-    # - name: High-Memory-Crt
-    #   definition: High_Memory_Usage_Percent
-    # - name: High-Memory-Wrn
-    #   definition: High_Memory_Usage_Percent_Range
-    # - name: Non-Responsive
-    #   definition: VM_NonResponsive
-    # - name: Missing-Backup
-    #   definition: VM_Missing_Backup
-    # - name: OOD-Antimalware
-    #   definition: VM_Antimalware_Not_Up_To_Date
-    # - name: Missing-Updates
-    #   definition: VM_Critical_Or_Security_Updates_Missing
+    - name: High-CPU-Crt                                                                              # Optional - It is recommended to use name for more understandable alert names.
+      definition: High_CPU_Usage_Percent
+      severity: Critical
+    - name: High-CPU-Wrn
+      definition: High_CPU_Usage_Percent_Range
+    - name: Low-Dsk-Crt
+      definition: Low_Disk_Space
+      description: Critically low available disk space percentage and MB value.
+      severity: Critical
+      schedule:
+        frequencyInMinutes: 10
+        timeWindowInMinutes: 60
+      parameters:
+        _maxPercentage: 5
+        _maxValueMB: 102400
+        _timeWindow: 5m
+    - name: Low-Dsk-Wrn
+      definition: Low_Disk_Space
+    - name: High-Memory-Crt
+      definition: High_Memory_Usage_Percent
+    - name: High-Memory-Wrn
+      definition: High_Memory_Usage_Percent_Range
+    - name: Non-Responsive
+      definition: VM_NonResponsive
+    - name: Missing-Backup
+      definition: VM_Missing_Backup
+    - name: OOD-Antimalware
+      definition: VM_Antimalware_Not_Up_To_Date
+    - name: Missing-Updates
+      definition: VM_Critical_Or_Security_Updates_Missing
     - name: Reboot
       definition: VM_Reboot
       suppress:
