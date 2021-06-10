@@ -98,7 +98,7 @@ function Set-CmAzIaasUpdateManagement {
 					"expiryTime"       = $scheduleSetting.expiryTime;
 					"frequency"        = $frequency;
 					"interval"         = 1;
-					"name"             = Get-CmAzResourceName -Resource "AutomationSchedule" -Architecture "IaaS" -Region $scheduleSetting.Location -Name $scheduleSetting.Name;
+					"name"             = Get-CmAzResourceName -Resource "AutomationSchedule" -Architecture "IaaS" -Location $scheduleSetting.Location -Name $scheduleSetting.Name;
 					"startTime"        = $scheduleSetting.startTime;
 					"timeZone"         = "Europe/London";
 					"advancedSchedule" = @{
@@ -127,7 +127,7 @@ function Set-CmAzIaasUpdateManagement {
 
 		Write-Verbose "Deploying Schedule Management..."
 
-		$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region "Global" -Name "Set-CmAzIaasUpdateManagement"
+		$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location "Global" -Name "Set-CmAzIaasUpdateManagement"
 
 		New-AzResourceGroupDeployment `
 			-Name $deploymentName `

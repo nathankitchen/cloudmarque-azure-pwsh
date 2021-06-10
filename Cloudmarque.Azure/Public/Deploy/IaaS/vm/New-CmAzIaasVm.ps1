@@ -127,14 +127,14 @@
 					$resourceGroup.location = $SettingsObject.location
 				}
 
-				$resourceGroup.name = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Region $resourceGroup.location -Name $resourceGroup.name
+				$resourceGroup.name = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Location $resourceGroup.location -Name $resourceGroup.name
 
 				if ($resourceGroup.proximityPlacementGroups) {
 
 					foreach ($placementGroup in $resourceGroup.proximityPlacementGroups) {
 						$placementGroup.location ??= $resourceGroup.location
 
-						$placementGroup.generatedName = Get-CmAzResourceName -Resource "ProximityPlacementGroup" -Architecture "IaaS" -Region $placementGroup.location -Name $placementGroup.name
+						$placementGroup.generatedName = Get-CmAzResourceName -Resource "ProximityPlacementGroup" -Architecture "IaaS" -Location $placementGroup.location -Name $placementGroup.name
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "ProximityPlacementGroup" -ResourceServiceContainer $placementGroup
 
 						$placementGroup.resourceGroupName = $resourceGroup.name
@@ -161,7 +161,7 @@
 				if ($resourceGroup.availabilitySets) {
 
 					foreach ($set in $resourceGroup.availabilitySets) {
-						$set.generatedName = Get-CmAzResourceName -Resource "AvailabilitySet" -Architecture "IaaS" -Region $set.location -Name $set.name
+						$set.generatedName = Get-CmAzResourceName -Resource "AvailabilitySet" -Architecture "IaaS" -Location $set.location -Name $set.name
 
 						if ($set.proximityPlacementGroup) {
 							$set.proximityPlacementGroup = ($resourceGroup.proximityPlacementGroups | Where-Object { $_.name -eq $set.proximityPlacementGroup }).generatedName
@@ -229,15 +229,15 @@
 
 					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $virtualMachine.networking -IsDependency
 
-					$virtualNetwork = Get-CmAzService -Service $virtualMachine.networking.service.dependencies.vnet -Region $virtualMachine.location -ThrowIfUnavailable -ThrowIfMultiple
+					$virtualNetwork = Get-CmAzService -Service $virtualMachine.networking.service.dependencies.vnet -Location $virtualMachine.location -ThrowIfUnavailable -ThrowIfMultiple
 
 					$virtualMachine.networking.virtualNetworkId = $virtualNetwork.resourceId
 
 					Write-Verbose "Generating standardised resource names..."
-					$virtualMachine.computerName = Get-CmAzResourceName -Resource "ComputerName" -Architecture "Core" -Region $virtualMachine.location -Name $virtualMachine.name -MaxLength 15
-					$virtualMachine.fullName = Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.name
-					$virtualMachine.nicName = Get-CmAzResourceName -Resource "NetworkInterfaceCard" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.fullName
-					$virtualMachine.osDisk.Name = Get-CmAzResourceName -Resource "OSDisk" -Architecture "IaaS" -Region $virtualMachine.location -Name $virtualMachine.fullName
+					$virtualMachine.computerName = Get-CmAzResourceName -Resource "ComputerName" -Architecture "Core" -Location $virtualMachine.location -Name $virtualMachine.name -MaxLength 15
+					$virtualMachine.fullName = Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "IaaS" -Location $virtualMachine.location -Name $virtualMachine.name
+					$virtualMachine.nicName = Get-CmAzResourceName -Resource "NetworkInterfaceCard" -Architecture "IaaS" -Location $virtualMachine.location -Name $virtualMachine.fullName
+					$virtualMachine.osDisk.Name = Get-CmAzResourceName -Resource "OSDisk" -Architecture "IaaS" -Location $virtualMachine.location -Name $virtualMachine.fullName
 
 					$virtualMachine.osDisk.caching ??= "None"
 					$virtualMachine.zone ??= "none"
@@ -303,7 +303,7 @@
 					if ($virtualMachine.dataDisks) {
 
 						for ($i = 0; $i -lt $virtualMachine.dataDisks.Count; $i++) {
-							$virtualMachine.dataDisks[$i].name = Get-CmAzResourceName -Resource "DataDisk" -Architecture "IaaS" -Region $virtualMachine.location -Name "$($virtualMachine.name)$($i + 1)";
+							$virtualMachine.dataDisks[$i].name = Get-CmAzResourceName -Resource "DataDisk" -Architecture "IaaS" -Location $virtualMachine.location -Name "$($virtualMachine.name)$($i + 1)";
 							$virtualMachine.dataDisks[$i].Lun = $i + 1;
 							$virtualMachine.dataDisks[$i].CreateOption = "Empty";
 							$virtualMachine.dataDisks[$i].caching ??= "None"
@@ -347,7 +347,7 @@
 			}
 			else {
 
-				$deploymentNameRgs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasVm-Rgs"
+				$deploymentNameRgs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasVm-Rgs"
 
 				New-AzDeployment `
 					-Name $deploymentNameRgs `
@@ -364,7 +364,7 @@
 					"LocalAdminPassword" = ConvertFrom-SecureString $LocalAdminPassword -AsPlainText;
 				}
 
-				$deploymentNameVm = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasVm"
+				$deploymentNameVm = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasVm"
 
 				New-AzResourceGroupDeployment `
 					-Name $deploymentNameVm  `

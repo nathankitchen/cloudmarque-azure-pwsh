@@ -59,7 +59,7 @@ function New-CmAzCoreBillingRule {
 				}
 
 				Write-Verbose "Generating budget name..."
-				$budget.name = Get-CmAzResourceName -Resource "Budget" -Architecture "Core" -Region $SettingsObject.location -Name $budget.name
+				$budget.name = Get-CmAzResourceName -Resource "Budget" -Architecture "Core" -Location $SettingsObject.location -Name $budget.name
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actiongroup" -ResourceServiceContainer $budget -IsDependency
 
@@ -91,7 +91,7 @@ function New-CmAzCoreBillingRule {
 
 			Write-Verbose "Deploying budgets..."
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.location -Name "New-CmAzCoreBillingRule"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Location $SettingsObject.location -Name "New-CmAzCoreBillingRule"
 
 			New-AzDeployment `
 				-Name $deploymentName `

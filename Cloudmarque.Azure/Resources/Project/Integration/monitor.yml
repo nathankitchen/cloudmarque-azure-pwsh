@@ -27,7 +27,7 @@ alerts:
     actionGroupName: Core-Test-Ag5
     enabled: true
   serviceHealth:
-    actionGroupName: Core-Test-Ag6                                    # Service health alerts for all services in specified regions
+    actionGroupName: Core-Test-Ag6                                    # Service health alerts for all services in specified locations
     impactedLocations: [UK South, UK West, West Europe, Global]
     enabled: true
 
@@ -155,7 +155,7 @@ actionGroups:
 # - connectionId:                       Unique id of ITSM connection in workspace
 #   ticketConfiguration:                JSON specifying the ITSM action configuration
 #   workspaceId:                        Log analytics workspace
-#   region:                             Central India, Japan East, South East Asia, Australia South East, UK South, West Central US, Canada Central, East US, West Europe
+#   location:                           Central India, Japan East, South East Asia, Australia South East, UK South, West Central US, Canada Central, East US, West Europe
 
 # logicApps:
 # - resourceId:

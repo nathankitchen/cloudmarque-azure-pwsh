@@ -50,16 +50,16 @@ function New-CmAzIaasWvd {
 			Write-Verbose "Beginning WVD infrastructure object creation."
 			foreach ($wvdEnvironment in $SettingsObject.wvdEnvironments) {
 
-				$wvdEnvironment.resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Region $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
+				$wvdEnvironment.resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Location $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
 				Write-Verbose "Generated resource group name: $($wvdEnvironment.resourceGroupName)"
 
-				$wvdEnvironment.workspaceName = Get-CmAzResourceName -Resource "WVDWorkspace" -Architecture "IaaS" -Region $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
+				$wvdEnvironment.workspaceName = Get-CmAzResourceName -Resource "WVDWorkspace" -Architecture "IaaS" -Location $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
 				Write-Verbose "Generated Workspace name: $($wvdEnvironment.workspaceName)"
 
-				$wvdEnvironment.hostpool.hostpoolName = Get-CmAzResourceName -Resource "WVDHostpool" -Architecture "IaaS" -Region $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
+				$wvdEnvironment.hostpool.hostpoolName = Get-CmAzResourceName -Resource "WVDHostpool" -Architecture "IaaS" -Location $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
 				Write-Verbose "Generated Hostpool name: $($wvdEnvironment.hostpool.hostpoolName)"
 
-				$wvdEnvironment.desktopGroupName = Get-CmAzResourceName -Resource "WVDDesktopGroup" -Architecture "IaaS" -Region $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
+				$wvdEnvironment.desktopGroupName = Get-CmAzResourceName -Resource "WVDDesktopGroup" -Architecture "IaaS" -Location $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
 				Write-Verbose "Generated Desktop Application Group name: $($wvdEnvironment.desktopGroupName)"
 
 				if (!$wvdEnvironment.hostVm.hostVmLocation) {
@@ -182,7 +182,7 @@ function New-CmAzIaasWvd {
 
 			Write-Verbose "Deploying WVD infrastructure..."
 
-			$deploymentNameEnv = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Env"
+			$deploymentNameEnv = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Env"
 
 			New-AzDeployment `
 				-Name $deploymentNameEnv `
@@ -235,7 +235,7 @@ function New-CmAzIaasWvd {
 
 			Write-Verbose "Deploying WVD hosts."
 
-			$deploymentNameHosts = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Hosts"
+			$deploymentNameHosts = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Hosts"
 
 			New-AzDeployment `
 				-Name $deploymentNameHosts `
@@ -245,7 +245,7 @@ function New-CmAzIaasWvd {
 
 			Write-Verbose "Deploying WVD host post setup."
 
-			$deploymentNamePs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Ps"
+			$deploymentNamePs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Ps"
 
 			New-AzDeployment `
 				-Name $deploymentNamePs `

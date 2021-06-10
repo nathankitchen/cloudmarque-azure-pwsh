@@ -57,7 +57,7 @@
 
 			$randomValue = Get-Random -Minimum 1001 -Maximum 9999
 
-			$keyVault = Get-CmAzService -Service $SettingsObject.service.dependencies.keyvault -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
+			$keyVault = Get-CmAzService -Service $SettingsObject.service.dependencies.keyvault -Location $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
 			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
 
 			$certificateName = $SettingsObject.automation.CertificateName
@@ -101,16 +101,16 @@
 			}
 
 			Write-Verbose "Creating Resource Group..."
-			$nameResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.location -Name $SettingsObject.name
+			$nameResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
 
 			$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.resourceGroup }
 			$resourceGroup = New-AzResourceGroup -ResourceGroupName $nameResourceGroup -Location $SettingsObject.location -Tag $resourceGroupServiceTag -Force
 
 			Write-Verbose "Creating Automation Account..."
-			$automationAccountName = Get-CmAzResourceName -Resource "Automation" -Architecture "Core" -Region $SettingsObject.location -Name $SettingsObject.name
+			$automationAccountName = Get-CmAzResourceName -Resource "Automation" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
 
 			# Create Automation account
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.location -Name "New-CmAzCoreAutomation"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Location $SettingsObject.location -Name "New-CmAzCoreAutomation"
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
@@ -122,7 +122,7 @@
 				-Force > $Null
 
 			# Create Linked Services
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.location -Name "New-CmAzCoreAutomation.ls"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Location $SettingsObject.location -Name "New-CmAzCoreAutomation.ls"
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `

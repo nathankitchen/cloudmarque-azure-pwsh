@@ -84,13 +84,13 @@
 				$vpnGw.GatewayPublicIpName = Get-CmAzResourceName `
 					-Resource "PublicIPAddress" `
 					-Architecture "IaaS" `
-					-Region $SettingsObject.location `
+					-Location $SettingsObject.location `
 					-Name $vpnGw.GatewayName
 
 				$vpnGw.GatewayName = Get-CmAzResourceName `
 					-Resource "VirtualNetworkGateway" `
 					-Architecture "IaaS" `
-					-Region $SettingsObject.location `
+					-Location $SettingsObject.location `
 					-Name $vpnGw.GatewayName
 
 
@@ -161,7 +161,7 @@
 						$vpnGw.S2s.localGatewayName = Get-CmAzResourceName `
 							-Resource "LocalNetworkGateway" `
 							-Architecture "IaaS" `
-							-Region $SettingsObject.location `
+							-Location $SettingsObject.location `
 							-Name $vpnGw.GatewayName
 
 						$resourcesToBeSet += $vpnGw.S2s.localGatewayName
@@ -175,7 +175,7 @@
 			}
 			Write-Verbose "Deploying Vpn Gateways..."
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasVpnGw"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasVpnGw"
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `

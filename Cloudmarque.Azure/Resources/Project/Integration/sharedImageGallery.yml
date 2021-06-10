@@ -2,7 +2,7 @@ component: sharedImageGallery                           # Required to use settin
 
 resourceGroupServiceTag:                                # For deployment to existing resource group | cm-service tag value for new resource group
 resourceGroupName: Paas-Test-Sig-Rg                     # For creating new resource groups
-location: Uk South                                      # Shared Image gallery region
+location: Uk South                                      # Shared Image gallery location
 
 galleryName: Paas-Test-Sig1                             # Shared Image gallery name
 
@@ -26,7 +26,7 @@ imageDefinitions:
     imageServiceTag: Paas-Test-Sig
     endOfLifeDate: "2025-06-15T13:45:30"    #optional
     replicaCount: 3                         #optional
-    targetRegions: [EU West]
+    targetLocations: [EU West]
 
 - definitionName: Paas-Test-Sig-Def2
   publisher: Paas-Test-Sig-Pub2
@@ -35,4 +35,4 @@ imageDefinitions:
   versions:
   - version: Paas-Test-Sig-V2
     imageServiceTag: Paas-Test-Sig
-    targetRegions: [EU West]
+    targetLocations: [EU West]

@@ -64,12 +64,12 @@
 
 				$bastionHost.bastionPublicIPName = Get-CmAzResourceName -Resource "PublicIPAddress" `
 					-Architecture "IaaS" `
-					-Region $SettingsObject.location `
+					-Location $SettingsObject.location `
 					-Name $bastionHost.bastionHostName
 
 				$bastionHost.bastionHostName = Get-CmAzResourceName -Resource "BastionHost" `
 					-Architecture "IaaS" `
-					-Region $SettingsObject.location `
+					-Location $SettingsObject.location `
 					-Name $bastionHost.bastionHostName
 
 				Write-Verbose "Checking if subnet 'AzureBastionSubnet' exists in Vnet"
@@ -94,7 +94,7 @@
 
 			Write-Verbose "Deploying Bastion Hosts.."
 
-			$deploymentName = Get-CmAzResourceName 	-Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasBastionHost"
+			$deploymentName = Get-CmAzResourceName 	-Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasBastionHost"
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `

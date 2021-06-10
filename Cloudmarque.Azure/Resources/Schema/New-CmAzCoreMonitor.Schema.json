@@ -417,7 +417,7 @@
                                                 "workspaceId",
                                                 "connectionId",
                                                 "ticketConfiguration",
-                                                "region"
+                                                "location"
                                             ],
                                             "properties": {
                                                 "workspaceId": {
@@ -438,10 +438,10 @@
                                                     "title": "TicketConfiguration",
                                                     "description": "JSON blob for configuring the action of the ITSM."
                                                 },
-                                                "region": {
-                                                    "$id": "#/actionGroups/items/allOf/itsm/items/allOf/region",
+                                                "location": {
+                                                    "$id": "#/actionGroups/items/allOf/itsm/items/allOf/location",
                                                     "type": "string",
-                                                    "title": "Region",
+                                                    "title": "Location",
                                                     "description": "Log analytics workspace location."
                                                 }
                                             },

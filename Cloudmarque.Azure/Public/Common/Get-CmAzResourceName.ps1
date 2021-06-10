@@ -16,7 +16,7 @@
 		.Parameter Architecture
 		 Infrastructure the resource is used for.
 
-		.Parameter Region
+		.Parameter Location
 		 Where the resource will be located.
 
 		.Parameter Name
@@ -32,19 +32,19 @@
 		 Max length of the name to be generated.
 
 		.Example
-		 Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region "UK South" -Name "DocsWebsite"
+		 Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Location "UK South" -Name "DocsWebsite"
 		 Output: rg-docswebsite-core-97547bfe
 
 		.Example
-		 Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "Core" -Region "UK South" -Name "NewWebsite" -IncludeBuild
+		 Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "Core" -Location "UK South" -Name "NewWebsite" -IncludeBuild
 		 Output: rg-newwebsite-core-2a04bdf4-001
 
 		.Example
-		 Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "Core" -Region "UK South" -Name "mywindows" -IncludeBuild
+		 Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "Core" -Location "UK South" -Name "mywindows" -IncludeBuild
 		 Output: vmmywindows001
 
 		.Example
-		 Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "Core" -Region "UK South" -Name "mywindows"
+		 Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "Core" -Location "UK South" -Name "mywindows"
 		 Output: vmmywindowsa941
 	#>
 
@@ -61,7 +61,7 @@
 
 		[Parameter(Mandatory = $true)]
 		[String]
-		$Region,
+		$Location,
 
 		[Parameter(Mandatory = $true)]
 		[String]
@@ -82,17 +82,17 @@
 
 			$generators = Get-CmAzSettingsFile -Path "$($ctx.ProjectRoot)\_names\generators.yml";
 			$tokens = Get-CmAzSettingsFile -Path "$($ctx.ProjectRoot)\_names\tokens.yml";
-			$regions = Get-CmAzSettingsFile -Path "$($ctx.ProjectRoot)\_names\regions.yml";
+			$locations = Get-CmAzSettingsFile -Path "$($ctx.ProjectRoot)\_names\locations.yml";
 			$resources = Get-CmAzSettingsFile -Path "$($ctx.ProjectRoot)\_names\resources.yml";
 			$buildId = (Get-CmAzContext).BuildId
 
 			$generatedName = "";
 			$nameSegments = @();
 
-			$regionConvention = $regions.regions | Where-Object { $_.name -Eq $Region -or $_.alias -Eq $Region }
+			$locationConvention = $locations.locations | Where-Object { $_.name -Eq $Location -or $_.alias -Eq $Location }
 
-			if (!$regionConvention) {
-				throw "No regional naming convention found in _names\regions.yml for '$Region'"
+			if (!$locationConvention) {
+				throw "No location naming convention found in _names\locations.yml for '$Location'"
 			}
 
 			$resourceConvention = $resources.resources | Where-Object { $_.name -Eq $Resource }
@@ -129,7 +129,7 @@
 					"architecture" { $nameSegments += $tokens.architecture[$Architecture.ToLower()] }
 					"environment" { $nameSegments += $tokens.environments[$ctx.Environment.ToLower()] }
 					"resource" { $nameSegments += $resourceShortname }
-					"region" { $nameSegments += $regionConvention.shortname }
+					"location" { $nameSegments += $locationConvention.shortname }
 					"name" { $nameSegments += $Name.ToLower() }
 					"subscriptionName" { $nameSegments += $SubscriptionName[0..3] }
 					"packageVersion" { $nameSegments += $ctx.packageVersion }

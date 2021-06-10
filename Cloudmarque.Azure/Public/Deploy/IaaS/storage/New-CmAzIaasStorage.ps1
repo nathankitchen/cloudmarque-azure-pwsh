@@ -158,7 +158,7 @@
 					Write-Verbose "$($_.storageAccountName): Table configuration found."
 				}
 
-				$_.storageAccountName = Get-CmAzResourceName -Resource "Storageaccount" -Architecture "IaaS" -Region $_.location -Name $_.storageAccountName
+				$_.storageAccountName = Get-CmAzResourceName -Resource "Storageaccount" -Architecture "IaaS" -Location $_.location -Name $_.storageAccountName
 			}
 
 			Write-Verbose "Settings verified successfully. Initiating deployment."
@@ -170,7 +170,7 @@
 			elseif ($SettingsObject.resourceGroupName) {
 
 				Write-Verbose "A new resource group will be created with the provided name."
-				$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Name $SettingsObject.resourceGroupName -Region $SettingsObject.Location
+				$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Name $SettingsObject.resourceGroupName -Location $SettingsObject.Location
 
 				$resourceGroup = New-AzResourceGroup -ResourceGroupName $resourceGroupName -Tag @{"cm-service" = $SettingsObject.service.publish.resourceGroup } -Location $SettingsObject.Location -Force
 				Write-Verbose "Resource Group created: $($resourceGroup.ResourceGroupName)"
@@ -183,7 +183,7 @@
 
 			Write-Verbose "Deploying Storage Accounts..."
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Region $SettingsObject.Location -Architecture "IaaS" -Name "New-CmAzIaasStorage"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Location $SettingsObject.Location -Architecture "IaaS" -Name "New-CmAzIaasStorage"
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `

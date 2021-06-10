@@ -130,7 +130,7 @@ function New-CmAzMonitorLogAlerts {
 							$name += "-$($alert.name)"
 						}
 
-						$alertName = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $workspace.location -Name "log-$name-$i"
+						$alertName = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Location $workspace.location -Name "log-$name-$i"
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "logAlert" -ResourceServiceContainer $alert
 
@@ -150,7 +150,7 @@ function New-CmAzMonitorLogAlerts {
 				}
 			}
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Monitor" -Region $workspace.location -Name $MyInvocation.MyCommand.Name
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Monitor" -Location $workspace.location -Name $MyInvocation.MyCommand.Name
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `

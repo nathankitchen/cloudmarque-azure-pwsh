@@ -53,7 +53,7 @@ function New-CmAzCoreKeyVault {
 
 			Write-Verbose "Generating standardised Key Vault names..."
 			ForEach ($keyVault in $SettingsObject.keyVaults) {
-				$keyVault.name = Get-CmAzResourceName -Resource "KeyVault" -Architecture "Core" -Region $keyVault.location -Name $keyVault.name -MaxLength 24
+				$keyVault.name = Get-CmAzResourceName -Resource "KeyVault" -Architecture "Core" -Location $keyVault.location -Name $keyVault.name -MaxLength 24
 
 				if ($null -eq $keyVault.enableSoftDelete) {
 					$keyVault.enableSoftDelete = $true;
@@ -80,7 +80,7 @@ function New-CmAzCoreKeyVault {
 			}
 
 			Write-Verbose "Generating keyvault resource group name..."
-			$keyVaultResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName
+			$keyVaultResourceGroup = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.resourceGroupName
 
 			Write-Verbose "Deploying keyvault resource group..."
 			New-AzResourceGroup -Location $SettingsObject.location -Name $keyVaultResourceGroup -Tag @{ "cm-service" = $SettingsObject.service.publish.resourceGroup } -Force
@@ -98,7 +98,7 @@ function New-CmAzCoreKeyVault {
 
 			Write-Verbose "Deploying Keyvaults..."
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.location -Name "New-CmAzCoreKeyVault"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Location $SettingsObject.location -Name "New-CmAzCoreKeyVault"
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `

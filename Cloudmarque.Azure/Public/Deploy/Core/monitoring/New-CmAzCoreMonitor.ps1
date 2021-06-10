@@ -58,8 +58,8 @@ function New-CmAzCoreMonitor {
 				}
 			}
 
-			$appInsights = Get-CmAzResourceName -Resource "ApplicationInsights" -Architecture "Core" -Region $SettingsObject.location -Name $SettingsObject.name
-			$workspace = Get-CmAzResourceName -Resource "LogAnalyticsWorkspace" -Architecture "Core" -Region $SettingsObject.location -Name $SettingsObject.name
+			$appInsights = Get-CmAzResourceName -Resource "ApplicationInsights" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
+			$workspace = Get-CmAzResourceName -Resource "LogAnalyticsWorkspace" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
 
 			Write-Verbose "Formatting action group receivers..."
 			$receiverTypes = @("armRoles", "emails", "functions", "itsm", "logicApps", "notifications", "runbooks", "sms", "voice", "webhooks")
@@ -85,7 +85,7 @@ function New-CmAzCoreMonitor {
 					for ($j = 0; $j -lt $receivers.count; $j++) {
 
 						$receiver = $receivers[$j]
-						$receiver[$nameKey] = Get-CmAzResourceName -Resource "ActionGroupReceiver" -Architecture "Core" -Region "Global" -Name "$($actionGroup[$nameKey])$($receiverType)-$($j)"
+						$receiver[$nameKey] = Get-CmAzResourceName -Resource "ActionGroupReceiver" -Architecture "Core" -Location "Global" -Name "$($actionGroup[$nameKey])$($receiverType)-$($j)"
 
 						if ($receiverTypesWithCommonSchema -Contains $receiverType) {
 							$receiver.useCommonAlertSchema = $true
@@ -93,15 +93,15 @@ function New-CmAzCoreMonitor {
 					}
 				}
 
-				$actionGroup[$nameKey] = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region "Global" -Name $actionGroup[$nameKey]
+				$actionGroup[$nameKey] = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Location "Global" -Name $actionGroup[$nameKey]
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actionGroup" -ResourceServiceContainer $actiongroup
 			}
 
 			Write-Verbose "Setting alerts..."
 			$keyvaultAdminAlert = @{
-				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Region "Global"-Name "$($SettingsObject.name)-KeyvaultAdmin";
-				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region "Global" -Name $SettingsObject.alerts.keyvaultAdmin.actionGroupName;
+				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Location "Global"-Name "$($SettingsObject.name)-KeyvaultAdmin";
+				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Location "Global" -Name $SettingsObject.alerts.keyvaultAdmin.actionGroupName;
 				"enabled" = $SettingsObject.alerts.keyvaultAdmin.enabled ??= $false;
 				"servicePublish" = $SettingsObject.service.publish.keyvaultAdminAlert;
 				"conditions" = @(
@@ -117,8 +117,8 @@ function New-CmAzCoreMonitor {
 			}
 
 			$resourceHealthAlert = @{
-				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Region "Global"-Name "$($SettingsObject.name)-ResourceHealth";
-				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region "Global" -Name $SettingsObject.alerts.resourceHealth.actionGroupName;
+				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Location "Global"-Name "$($SettingsObject.name)-ResourceHealth";
+				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Location "Global" -Name $SettingsObject.alerts.resourceHealth.actionGroupName;
 				"enabled" = $SettingsObject.alerts.resourceHealth.enabled ??= $false;
 				"servicePublish" = $SettingsObject.service.publish.resourceHealthAlert;
 				"conditions" = @(
@@ -142,8 +142,8 @@ function New-CmAzCoreMonitor {
 			}
 
 			$serviceHealthAlert = @{
-				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Region "Global"-Name "$($SettingsObject.name)-ServiceHealth";
-				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Region "Global" -Name $SettingsObject.alerts.serviceHealth.actionGroupName;
+				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Location "Global"-Name "$($SettingsObject.name)-ServiceHealth";
+				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Location "Global" -Name $SettingsObject.alerts.serviceHealth.actionGroupName;
 				"enabled" = $SettingsObject.alerts.serviceHealth.enabled ??= $false;
 				"servicePublish" = $SettingsObject.service.publish.serviceHealthAlert;
 				"conditions" = @(
@@ -162,7 +162,7 @@ function New-CmAzCoreMonitor {
 			$SettingsObject.workspaceDataRetentionInDays ??= 90
 
 			Write-Verbose "Generating resource names..."
-			$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Region $SettingsObject.Location -Name $SettingsObject.name
+			$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Location $SettingsObject.Location -Name $SettingsObject.name
 
 			Write-Verbose "Deploying resource group ($resourceGroupName)..."
 			New-AzResourceGroup `
@@ -199,7 +199,7 @@ function New-CmAzCoreMonitor {
 
 			Write-Verbose "Deploying monitor resources..."
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Region $SettingsObject.Location -Name "New-CmAzCoreMonitor"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Location $SettingsObject.Location -Name "New-CmAzCoreMonitor"
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `

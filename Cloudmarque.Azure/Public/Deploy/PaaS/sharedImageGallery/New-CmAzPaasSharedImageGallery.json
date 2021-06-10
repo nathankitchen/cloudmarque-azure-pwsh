@@ -108,10 +108,10 @@
                                     "endOfLifeDate": "[parameters('ImageDefinition').versions[copyIndex('imageVersion')].endOfLifeDate]",
                                     "copy": [
                                         {
-                                            "name": "targetRegions",
-                                            "count": "[length(parameters('ImageDefinition').versions[copyIndex('imageVersion')].targetRegions)]",
+                                            "name": "targetLocations",
+                                            "count": "[length(parameters('ImageDefinition').versions[copyIndex('imageVersion')].targetLocations)]",
                                             "input": {
-                                                "name": "[parameters('ImageDefinition').versions[copyIndex('imageVersion')].targetRegions[copyIndex('targetRegions')]]"
+                                                "name": "[parameters('ImageDefinition').versions[copyIndex('imageVersion')].targetLocations[copyIndex('targetLocations')]]"
                                             }
                                         }
                                     ]
