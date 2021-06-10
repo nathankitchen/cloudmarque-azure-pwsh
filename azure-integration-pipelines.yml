@@ -169,7 +169,7 @@ stages:
 
 - stage: Iaas
   condition: and(succeeded(), eq('${{ parameters.Iaas }}', true))
-  dependsOn: Iaas_NSP
+  dependsOn: [Iaas_NSP, Security]
   jobs:
   - job: IaasVmPatchVault
     displayName: Iaas - Vms, Recovery Vaults and Patching
