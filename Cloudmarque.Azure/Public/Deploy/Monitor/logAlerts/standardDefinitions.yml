@@ -47,8 +47,8 @@ Queries:
       timeWindowInMinutes: 60
     severity: 0
     defaults:
-      _minPercentage: 100
-      _timeWindow: 1h
+      _minPercentage: 0
+      _timeWindow: 5m
     query: |-
       InsightsMetrics
       | where Origin == "vm.azm.ms"
@@ -69,9 +69,9 @@ Queries:
       timeWindowInMinutes: 60
     severity: 2
     defaults:
-      _minPercentage: 95
-      _maxPercentage: 99
-      _timeWindow: 30m
+      _minPercentage: 0
+      _maxPercentage: 2
+      _timeWindow: 5m
     query: |-
       InsightsMetrics
       | where Origin == "vm.azm.ms"
@@ -92,9 +92,9 @@ Queries:
       timeWindowInMinutes: 60
     severity: 2
     defaults:
-      _maxValueMB: 153600
-      _maxPercentage: 15
-      _timeWindow: 1h
+      _maxValueMB: 15360
+      _maxPercentage: 100
+      _timeWindow: 5m
     query: |-
       InsightsMetrics
       | where Origin == "vm.azm.ms"
@@ -119,8 +119,8 @@ Queries:
       timeWindowInMinutes: 60
     severity: 0
     defaults:
-      _minPercentage: 1
-      _timeWindow: 1h
+      _minPercentage: 99
+      _timeWindow: 5m
     query: |-
       InsightsMetrics
       | where Origin == "vm.azm.ms"
@@ -143,8 +143,8 @@ Queries:
       timeWindowInMinutes: 60
     severity: 2
     defaults:
-      _minPercentage: 1
-      _maxPercentage: 5
+      _minPercentage: 95
+      _maxPercentage: 100
       _timeWindow: 30m
     query: |-
       InsightsMetrics
