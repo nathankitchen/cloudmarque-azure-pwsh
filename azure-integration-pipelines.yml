@@ -162,8 +162,8 @@ stages:
             -Verbose
 
           # Below resources are not being deployed because of known cdn api issue with Set-AzResource in Set-CmAzTag
-          # New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/web.yml" -Verbose
-          # New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/webstatic.yml" -Verbose
+          New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/web.yml" -Verbose
+          New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/webstatic.yml" -Verbose
           New-AzResourceGroup -Name "Web-Test-Rg" -location uksouth -tag @{'cm-service' = "Web-Test-Rg"; 'cm-integration-test-delete' = "true" } -Force
           New-CmazPaasSql -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/sql.yml" -Verbose
 
