@@ -198,7 +198,9 @@ stages:
             -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/virtualmachines.yml" `
             -LocalAdminUsername (ConvertTo-SecureString $(AdminUsername) -AsPlainText -Force) `
             -LocalAdminPassword (ConvertTo-SecureString $(AdminPassword) -AsPlainText -Force) `
-            -Verbose
+            -Verbose `
+            -Debug `
+            -Confirm: $false
 
           New-CmAzIaasRecoveryServicesVault `
             -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/recoveryvault.yml" `
