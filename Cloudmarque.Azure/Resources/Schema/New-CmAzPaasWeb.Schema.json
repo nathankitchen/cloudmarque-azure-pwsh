@@ -128,17 +128,17 @@
                             "title": "Storage",
                             "description": "Global default dependency value to fetch existing resource type."
                         },
-                        "vnet": {
-                            "$id": "#/service/dependencies/vnet",
-                            "type": ["string", "null"],
-                            "title": "Vnet",
-                            "description": "Global default dependency value to fetch existing resource type."
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
                         },
-                        "privateZones": {
-                            "$id": "#/service/dependencies/vnet",
-                            "type": ["array", "null"],
-                            "title": "Private Zones",
-                            "description": "Global default dependency value to fetch existing resource type."
+                        "privateZones": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["array", "null"],
+                            "title": "Private Zones",
+                            "description": "Global default dependency value to fetch existing resource type."
                         }
                     },
                     "additionalProperties": false
