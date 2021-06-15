@@ -129,19 +129,6 @@ webSolutions:
         - Production
 
   apiManagementServices:
-    - name: Web-Test-Api1
-      location: UK South                                        # Optional - Defaults to global location
-      publisherName: Cloudmarque
-      publisherEmail: testAdminEmail@Cloudmarque.com
-      sku: Basic
-      skuCount:                                               # Optional - Default is 1
-      backendpool: Web-Test-Be2
-      backendHostHeader: false                                # Optional - Default is true. Required for easy auth scenarios
-      weight:                                                 # Optional
-      priority:                                               # Optional
-      service:
-        publish:
-          apiManagement:
 
 frontdoor:
   name: Web-Test-Fd
