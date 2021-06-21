@@ -586,15 +586,6 @@
 
 						$domainName = $_.domainName
 
-						$dnsRecordType = "CNAME"
-						$dnsRecordName = "$domainName-$dnsRecordType"
-
-						$existingRecord = Get-AzDnsRecordSet -ResourceGroupName $resourceGroupName -ZoneName $domainName -Name $dnsRecordName -RecordType $dnsRecordType
-						
-						if ($existingRecord) {
-							New-AzDnsRecordSet -Name $dnsRecordName -RecordType $dnsRecordType -ZoneName $domainName -ResourceGroupName $resourceGroupName -Ttl 3600 -DnsRecords (New-AzDnsRecordConfig -Cname $domainName) 
-						}
-
 						if (($customDomainStatus | Where-Object { $_.Hostname -eq $domainName }).CustomHttpsProvisioningState -eq "Disabled") {
 							CustomDomainOnFrontDoorEnableHttps -CustomDomainsObject $_
 						}
