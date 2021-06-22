@@ -85,7 +85,7 @@
 						if ($database -is [string]) {
 
 							$databaseObject = @{
-								"name" = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Region $SettingsObject.Location -Name $database
+								"name" = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Location $SettingsObject.Location -Name $database
 							}
 
 							Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "database" -ResourceServiceContainer $databaseObject
@@ -94,7 +94,7 @@
 
 						if ($database -is [Hashtable]) {
 
-							$database.name = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Region $SettingsObject.Location -Name $database.name
+							$database.name = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Location $SettingsObject.Location -Name $database.name
 							Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "database" -ResourceServiceContainer $database
 							$databaseCollection.Add($database) > $Null
 						}
@@ -102,7 +102,7 @@
 				}
 				else {
 					$databaseObject = @{
-						"name" = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.serverName;
+						"name" = Get-CmAzResourceName -Resource "AzureSQLDatabase" -Architecture "PaaS" -Location $SettingsObject.Location -Name $_.serverName;
 					}
 
 					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "database" -ResourceServiceContainer $databaseObject
@@ -113,7 +113,7 @@
 				$keyVault = Get-CmAzService -Service $_.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 
 				$preserveName = $_.serverName
-				$serverName = Get-CmAzResourceName -Resource "AzureSQLDatabaseserver" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.serverName
+				$serverName = Get-CmAzResourceName -Resource "AzureSQLDatabaseserver" -Architecture "PaaS" -Location $SettingsObject.Location -Name $_.serverName
 
 				if ($UniqueSqlServerNames -contains $_.serverName) {
 					$sharedServer = $true
@@ -154,7 +154,7 @@
 				if ($_.type -eq "elasticPool") {
 
 					if ($_.elasticPoolName) {
-						$elasticPool = Get-CmAzResourceName -Resource "AzureSQLElasticPool" -Architecture "PaaS" -Region $SettingsObject.Location -Name $_.elasticPoolName
+						$elasticPool = Get-CmAzResourceName -Resource "AzureSQLElasticPool" -Architecture "PaaS" -Location $SettingsObject.Location -Name $_.elasticPoolName
 					}
 					else {
 						Write-Error "Please provide an elastic pool name for the elastic pool type deployment."
@@ -210,7 +210,7 @@
 
 				if ($_) {
 
-					$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $SettingsObject.Location -Name "New-CmAzPaasSql"
+					$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Location $SettingsObject.Location -Name "New-CmAzPaasSql"
 
 					New-AzResourceGroupDeployment `
 						-Name $deploymentName `

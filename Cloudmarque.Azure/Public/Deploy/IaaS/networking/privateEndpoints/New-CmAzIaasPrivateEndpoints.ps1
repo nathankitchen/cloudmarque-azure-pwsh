@@ -105,7 +105,7 @@ function New-CmAzIaasPrivateEndpoints {
 
 				$endpoint.name = Get-CmAzResourceName -Resource "PrivateEndpoint" `
 					-Architecture "IaaS" `
-					-Region $endpoint.location `
+					-Location $endpoint.location `
 					-Name $endpoint.name
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "privateEndpoint" -ResourceServiceContainer $endpoint
@@ -114,7 +114,7 @@ function New-CmAzIaasPrivateEndpoints {
 			Write-Verbose "Configuring Private endpoints..."
 
 			$location = $SettingsObject.privateEndpoints[0].location
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $location -Name "New-CmAzIaasPrivateEndpoints"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasPrivateEndpoints"
 
 			New-AzDeployment `
 				-Name $deploymentName `

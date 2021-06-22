@@ -74,14 +74,14 @@
 					$resourceGroupName,
 					$ResourceServiceContainer,
 					$GlobalServiceContainer,
-					$Region,
+					$Location,
 					$ServiceKey
 				)
 
-				$generatedResourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $Region -Name $resourceGroupName
+				$generatedResourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Location $Location -Name $resourceGroupName
 
 				Set-GlobalServiceValues -GlobalServiceContainer $GlobalServiceContainer -ServiceKey $serviceKey -ResourceServiceContainer $ResourceServiceContainer > $null
-				New-AzResourceGroup -ResourceGroupName $generatedResourceGroupName -Location $Region -Tag @{ "cm-service" = $ResourceServiceContainer.service.publish.resourceGroup } -Force > $null
+				New-AzResourceGroup -ResourceGroupName $generatedResourceGroupName -Location $Location -Tag @{ "cm-service" = $ResourceServiceContainer.service.publish.resourceGroup } -Force > $null
 
 				$resourceGroupsToSet.Add($generatedResourceGroupName) > $Null
 
@@ -112,7 +112,7 @@
 					-ResourceGroupName $webSolution.Name `
 					-GlobalServiceContainer $SettingsObject `
 					-ResourceServiceContainer $webSolution `
-					-Region $location `
+					-Location $location `
 					-ServiceKey "resourceGroup"
 
 				if ($webSolution.AppServicePlans) {
@@ -120,7 +120,7 @@
 					foreach ($appServicePlan in $webSolution.AppServicePlans) {
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "appServicePlan" -ResourceServiceContainer $appServicePlan
-						$appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $appServicePlan.location -Name $appServicePlan.name
+						$appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Location $appServicePlan.location -Name $appServicePlan.name
 
 						if (!$appServicePlan.kind) {
 							$appServicePlan.kind = "linux"
@@ -158,7 +158,7 @@
 								$webapp.location = $appServicePlan.location
 							}
 
-							$webapp.webAppGeneratedName = Get-CmAzResourceName -Resource "WebApp" -Architecture "PaaS" -Region $webapp.location -Name $webapp.name
+							$webapp.webAppGeneratedName = Get-CmAzResourceName -Resource "WebApp" -Architecture "PaaS" -Location $webapp.location -Name $webapp.name
 
 							Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "webapp" -ResourceServiceContainer $webapp
 
@@ -199,7 +199,7 @@
 
 							if ($webapp.contentDeliveryNetwork.Name) {
 
-								$webapp.contentDeliveryNetwork.Name = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Region $webapp.contentDeliveryNetwork.location -Name $webapp.contentDeliveryNetwork.Name
+								$webapp.contentDeliveryNetwork.Name = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Location $webapp.contentDeliveryNetwork.location -Name $webapp.contentDeliveryNetwork.Name
 
 								Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "cdn" -ResourceServiceContainer $webapp.contentDeliveryNetwork
 								Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "endpoint" -ResourceServiceContainer $webapp.contentDeliveryNetwork
@@ -240,7 +240,7 @@
 							$_.skucount = 1
 						}
 
-						$_.generatedName = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Region $_.location -Name $_.Name
+						$_.generatedName = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Location $_.location -Name $_.Name
 					}
 				}
 			}
@@ -259,7 +259,7 @@
 
 				Write-Verbose "Deploying Webapps..."
 
-				$deploymentNameWeb = Get-CmAzResourceName -Resource "Deployment" -Region $location -Architecture "PaaS" -Name "New-CmAzPaasWeb-WebApp"
+				$deploymentNameWeb = Get-CmAzResourceName -Resource "Deployment" -Location $location -Architecture "PaaS" -Name "New-CmAzPaasWeb-WebApp"
 
 				New-AzDeployment  `
 					-Name $deploymentNameWeb `
@@ -323,7 +323,7 @@
 
 				Write-Verbose "Deploying api management services..."
 
-				$deploymentNameApim = Get-CmAzResourceName -Resource "Deployment" -Region $location -Architecture "PaaS" -Name "New-CmAzPaasWeb-ApiMs"
+				$deploymentNameApim = Get-CmAzResourceName -Resource "Deployment" -Location $location -Architecture "PaaS" -Name "New-CmAzPaasWeb-ApiMs"
 
 				New-AzDeployment `
 					-Name $deploymentNameApim `
@@ -342,13 +342,13 @@
 					-ResourceGroupName $SettingsObject.frontdoor.name `
 					-GlobalServiceContainer $SettingsObject `
 					-ResourceServiceContainer $SettingsObject.frontdoor `
-					-Region $SettingsObject.frontdoor.location `
+					-Location $SettingsObject.frontdoor.location `
 					-ServiceKey "frontDoorResourceGroup"
 
 				Write-Verbose "Initiating compilation of Frontends..."
 
 				$frontdoorSuppliedHostName = $SettingsObject.frontdoor.name
-				$SettingsObject.frontdoor.name = Get-CmAzResourceName -Resource "FrontDoor" -Architecture "PaaS" -Region $SettingsObject.frontdoor.location -Name $SettingsObject.frontdoor.name
+				$SettingsObject.frontdoor.name = Get-CmAzResourceName -Resource "FrontDoor" -Architecture "PaaS" -Location $SettingsObject.frontdoor.location -Name $SettingsObject.frontdoor.name
 
 				# Frontdoor Front endpoints configuration
 
@@ -527,7 +527,7 @@
 
 				Write-Verbose "Deploying Frontdoor..."
 
-				$deploymentNameFd = Get-CmAzResourceName -Resource "Deployment" -Region "Global" -Architecture "PaaS" -Name "New-CmAzPaasWeb-Fd"
+				$deploymentNameFd = Get-CmAzResourceName -Resource "Deployment" -Location "Global" -Architecture "PaaS" -Name "New-CmAzPaasWeb-Fd"
 
 				New-AzResourceGroupDeployment  `
 					-Name $deploymentNameFd `

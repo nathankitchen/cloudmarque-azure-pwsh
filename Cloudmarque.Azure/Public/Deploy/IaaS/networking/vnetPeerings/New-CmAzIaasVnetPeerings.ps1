@@ -66,7 +66,7 @@ function New-CmAzIaasVnetPeerings {
             Write-Verbose "Configuring vnet peerings..."
 
             $location = (Get-AzResourceGroup -Name $vnetPeerings[0].source.resourceGroup).location
-            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $location -Name "New-CmAzIaasVnetPeerings"
+            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasVnetPeerings"
 
             New-AzDeployment `
                 -Name $deploymentName `

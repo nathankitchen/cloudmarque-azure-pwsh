@@ -54,9 +54,9 @@
 	if($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy infrastructure for a static website")) {
 
 		Write-Verbose "Generating resource names..."
-		$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
-		$profileName = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
-		$endpointName = Get-CmAzResourceName -Resource "Endpoint" -Architecture "PaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
+		$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Location $SettingsObject.Location -Name $SettingsObject.Name
+		$profileName = Get-CmAzResourceName -Resource "CdnProfile" -Architecture "PaaS" -Location $SettingsObject.Location -Name $SettingsObject.Name
+		$endpointName = Get-CmAzResourceName -Resource "Endpoint" -Architecture "PaaS" -Location $SettingsObject.Location -Name $SettingsObject.Name
 
 		Write-Verbose "Deploying resource group: $resourceGroupName..."
 		$resourceGroupServiceTag = @{ "cm-service" = $SettingsObject.service.publish.resourceGroup }
@@ -94,11 +94,11 @@
 		Write-Verbose "Creating storage account..."
 		New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags > $null
 
-		$storageName = Get-CmAzResourceName -Resource "Storageaccount" -Architecture "IaaS" -Region $SettingsObject.Location -Name $SettingsObject.Name
+		$storageName = Get-CmAzResourceName -Resource "StorageAccount" -Architecture "IaaS" -Location $SettingsObject.Location -Name $SettingsObject.Name
 
 		Write-Verbose "Deploying cdn: $profileName..."
 
-		$deploymentNameCdn = Get-CmAzResourceName -Resource "Deployment" -Region $SettingsObject.Location -Architecture "PaaS" -Name "New-CmAzPaasWebStatic-cdn"
+		$deploymentNameCdn = Get-CmAzResourceName -Resource "Deployment" -Location $SettingsObject.Location -Architecture "PaaS" -Name "New-CmAzPaasWebStatic-cdn"
 
 		New-AzResourceGroupDeployment `
 			-Name $deploymentNameCdn `

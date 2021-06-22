@@ -51,7 +51,7 @@
                 $rgCheck = Get-AzResourceGroup -Name $SettingsObject.resourceGroupName -ErrorAction SilentlyContinue
 
                 if (!$rgCheck) {
-                    $generatedRG = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Name $SettingsObject.resourceGroupName -Region $SettingsObject.Location
+                    $generatedRG = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Name $SettingsObject.resourceGroupName -Location $SettingsObject.Location
                     New-AzResourceGroup -ResourceGroupName $generatedRG -Tag @{"cm-service" = $SettingsObject.resourceGroupServiceTag } -Location $SettingsObject.Location
                 }
                 else {
@@ -62,7 +62,7 @@
                 Write-Error "Please provide appropriate service tag for existing resource group or provide unique name to create new."
             }
 
-            $SettingsObject.galleryName = Get-CmAzResourceName -Resource "SharedImageGallery" -Architecture "Paas" -Region $SettingsObject.location -Name $SettingsObject.galleryName
+            $SettingsObject.galleryName = Get-CmAzResourceName -Resource "SharedImageGallery" -Architecture "Paas" -Location $SettingsObject.location -Name $SettingsObject.galleryName
 
             $SettingsObject.imageDefinitions | ForEach-Object {
 
@@ -103,8 +103,8 @@
 
                 $_.versions | ForEach-Object {
 
-                    if (!$_.version -or !$_.imageServiceTag -or !$_.targetRegions) {
-                        Write-Error "Settings file is missing required parameters. Please check if version, imageServiceTag and targetRegions are defined."
+                    if (!$_.version -or !$_.imageServiceTag -or !$_.targetLocations) {
+                        Write-Error "Settings file is missing required parameters. Please check if version, imageServiceTag and targetLocations are defined."
                     }
 
                     if ($_.endOfLifeDate) {
@@ -122,9 +122,9 @@
 
                     $_.image = Get-CmAzService -Service $_.imageServiceTag -ThrowIfUnavailable
 
-                    if ($_.targetRegions -notcontains $_.image.location) {
-                        $_.targetRegions.add($_.image.location)
-                        Write-Verbose "Default: A copy of image version is always required in managed image region. $($_.image.location) will be added to target regions."
+                    if ($_.targetLocations -notcontains $_.image.location) {
+                        $_.targetLocations.add($_.image.location)
+                        Write-Verbose "Default: A copy of image version is always required in managed image location. $($_.image.location) will be added to target locations."
                     }
 
                 }
@@ -133,7 +133,7 @@
 
             Write-Verbose "Deploying Shared Image Gallery..."
 
-            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Paas" -Region $SettingsObject.location -Name "New-CmAzPaasSharedImageGallery"
+            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Paas" -Location $SettingsObject.location -Name "New-CmAzPaasSharedImageGallery"
 
             New-AzResourceGroupDeployment `
                 -Name $deploymentName `

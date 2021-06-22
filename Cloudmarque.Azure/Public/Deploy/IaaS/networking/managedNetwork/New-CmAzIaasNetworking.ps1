@@ -1018,7 +1018,7 @@
 
 				Write-Verbose "Deploying resource groups..."
 
-				$deploymentNameRg = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-RGs"
+				$deploymentNameRg = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-RGs"
 
 				New-AzDeployment `
 					-Name $deploymentNameRg `
@@ -1100,7 +1100,7 @@
 
 				Write-Verbose "Deploying nsgs..."
 
-				$deploymentNameNsg = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $workspace.location -Name "New-CmAzIaasNetworking-Nsgs"
+				$deploymentNameNsg = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $workspace.location -Name "New-CmAzIaasNetworking-Nsgs"
 
 				New-AzDeployment `
 					-Name $deploymentNameNsg `
@@ -1116,7 +1116,7 @@
 
 				Write-Verbose "Deploying Vnet and Udrs..."
 
-				$deploymentNameVu = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-VUs"
+				$deploymentNameVu = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-VUs"
 
 				New-AzDeployment `
 					-Name $deploymentNameVu `
@@ -1151,7 +1151,7 @@
 				}
 
 				Write-Verbose "Configuring vnet peerings..."
-				$deploymentNamePeerings = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-Vps"
+				$deploymentNamePeerings = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $resourceGroupObjectArray[0].resourceGroup.location -Name "New-CmAzIaasNetworking-Vps"
 
 				New-AzDeployment `
 					-Name $deploymentNamePeerings `
@@ -1204,7 +1204,7 @@
 
 				$deploymentLocationZone = $filteredResourceGroupObject.resourceGroup.location -is [array] ? $filteredResourceGroupObject[0].resourceGroup.location : $filteredResourceGroupObject.resourceGroup.location
 
-				$deploymentNameZones = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $deploymentLocationZone -Name "New-CmAzIaasNetworking-Zones"
+				$deploymentNameZones = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $deploymentLocationZone -Name "New-CmAzIaasNetworking-Zones"
 
 				New-AzDeployment `
 					-Name $deploymentNameZones `

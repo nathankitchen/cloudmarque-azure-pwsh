@@ -119,7 +119,7 @@ function New-CmAzMonitorMetricAlerts {
 						}
 
 						$alerts += @{
-							name = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Region $alert.targetResourceLocation -Name "mtr-$name-$i";
+							name = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Location $alert.targetResourceLocation -Name "mtr-$name-$i";
 							metricName = $alert.metricName;
 							resourceType = $alertSet.resourceType;
 							targetResourceLocation = $alert.targetResourceLocation;
@@ -136,7 +136,7 @@ function New-CmAzMonitorMetricAlerts {
 				}
 			}
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Monitor" -Region $resourceGroup.location -Name "New-CmAzMonitorMetricAlerts"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Monitor" -Location $resourceGroup.location -Name "New-CmAzMonitorMetricAlerts"
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `

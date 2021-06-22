@@ -76,14 +76,14 @@ function New-CmAzPaasFunction {
                     $resourceGroupName,
                     $ResourceServiceContainer,
                     $GlobalServiceContainer,
-                    $Region,
+                    $Location,
                     $ServiceKey
                 )
 
-                $generatedResourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Region $Region -Name $resourceGroupName
+                $generatedResourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Location $Location -Name $resourceGroupName
 
                 Set-GlobalServiceValues -GlobalServiceContainer $GlobalServiceContainer -ServiceKey $serviceKey -ResourceServiceContainer $ResourceServiceContainer > $null
-                New-AzResourceGroup -ResourceGroupName $generatedResourceGroupName -Location $Region -Tag @{ "cm-service" = $ResourceServiceContainer.service.publish.resourceGroup } -Force > $null
+                New-AzResourceGroup -ResourceGroupName $generatedResourceGroupName -Location $Location -Tag @{ "cm-service" = $ResourceServiceContainer.service.publish.resourceGroup } -Force > $null
 
                 $resourceGroupsToSet.Add($generatedResourceGroupName) > $Null
 
@@ -117,7 +117,7 @@ function New-CmAzPaasFunction {
                         -ResourceGroupName $functionAppSolution.Name `
                         -GlobalServiceContainer $SettingsObject `
                         -ResourceServiceContainer $functionAppSolution `
-                        -Region $location `
+                        -Location $location `
                         -ServiceKey "resourceGroup"
                 }
 
@@ -131,7 +131,7 @@ function New-CmAzPaasFunction {
 
                         if (!$functionAppSolution.transFrmWeb) {
 
-                            $appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $appServicePlan.location -Name $appServicePlan.name
+                            $appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Location $appServicePlan.location -Name $appServicePlan.name
                             $appServicePlan.resourceGroupName = $functionAppSolution.generatedResourceGroupName
                         }
 
@@ -143,14 +143,14 @@ function New-CmAzPaasFunction {
                             Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "storage" -ResourceServiceContainer $function -IsDependency
 
                             $function.location ??= $appServicePlan.location
-                            $function.storageAccount = Get-CmAzService -Service $function.service.dependencies.storage -Region $function.location -ThrowIfUnavailable -ThrowIfMultiple
+                            $function.storageAccount = Get-CmAzService -Service $function.service.dependencies.storage -Location $function.location -ThrowIfUnavailable -ThrowIfMultiple
 
                             Write-Verbose "$($function.name): Generating Object for deployment of function"
 
                             $function.linuxFxVersion = $appServicePlan.kind -eq 'linux' ? $function.runtime : ""
 
                             $function.kind = "functionapp"
-                            $function.name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "PaaS" -Region $function.location -Name $function.name
+                            $function.name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "PaaS" -Location $function.location -Name $function.name
                             $function.functionsWorker = $function.runtime.split('|')
 
                             $function.applicationInstrumentationKey = $function.enableAppInsight ? $applicationInstrumentationKey : ''
@@ -171,14 +171,14 @@ function New-CmAzPaasFunction {
 
                         Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "storage" -ResourceServiceContainer $function -IsDependency
 
-                        $function.storageAccount = Get-CmAzService -Service $function.service.dependencies.storage -Region $function.location -ThrowIfUnavailable -ThrowIfMultiple
+                        $function.storageAccount = Get-CmAzService -Service $function.service.dependencies.storage -Location $function.location -ThrowIfUnavailable -ThrowIfMultiple
                         $function.storageAccountKey = (Get-AzStorageAccountKey -ResourceGroupName $function.storageAccount.resourceGroupName -Name $function.storageAccount.Name).Value[0]
 
                         Write-Verbose "$($function.name): Generating Object for deployment of function"
 
                         $function.resourceGroupName = $functionAppSolution.generatedResourceGroupName
-                        $function.planName = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Region $function.location -Name $function.name
-                        $function.name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "PaaS" -Region $function.location -Name $function.name
+                        $function.planName = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Location $function.location -Name $function.name
+                        $function.name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "PaaS" -Location $function.location -Name $function.name
                         $function.functionsWorker = $function.runtime.split('|')
 
                         if ($function.kind -eq "linux") {
@@ -203,7 +203,7 @@ function New-CmAzPaasFunction {
 
                 Write-Verbose "Deploying functions on app service plans..."
 
-                $deploymentNameAsp = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $location -Name "New-CmAzPaasFunction"
+                $deploymentNameAsp = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Location $location -Name "New-CmAzPaasFunction"
 
                 New-AzDeployment `
                     -Name $deploymentNameAsp `
@@ -228,7 +228,7 @@ function New-CmAzPaasFunction {
 
                 Write-Verbose "Deploying functions on consumption plans..."
 
-                $deploymentNameCon = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Region $location -Name "New-CmAzPaasFunction"
+                $deploymentNameCon = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Location $location -Name "New-CmAzPaasFunction"
 
                 New-AzDeployment `
                     -Name $deploymentNameCon `

@@ -67,7 +67,7 @@ groups:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
       sku: 20h1-ent
-      version: 19041.928.2104091205
+      version: latest
     zone:                                                     # Availability Zone. Cannot be used with availability set.
     location: UK South                                        # Optional - default to resource group location.
     service:
@@ -113,7 +113,7 @@ groups:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
       sku: 20h1-ent
-      version: 19041.928.2104091205
+      version: latest
     service:
       publish:
         vm: Iaas-Test-Vm2
@@ -142,7 +142,7 @@ groups:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
       sku: 20h1-ent
-      version: 19041.928.2104091205
+      version: latest
     location: UK South
     service:
       publish:
@@ -172,7 +172,7 @@ groups:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
       sku: 20h1-ent
-      version: 19041.928.2104091205
+      version: latest
     location: UK South
     service:
       publish:
@@ -201,7 +201,7 @@ groups:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
       sku: 20h1-ent
-      version: 19041.928.2104091205
+      version: latest
     location: UK South
     service:
       publish:
@@ -236,7 +236,7 @@ groups:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
       sku: 20h1-ent
-      version: 19041.928.2104091205
+      version: latest
     location: UK West
     service:
       publish:
@@ -265,7 +265,7 @@ groups:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
       sku: 20h1-ent
-      version: 19041.928.2104091205
+      version: latest
     location: UK West
     service:
       publish:
@@ -290,7 +290,7 @@ groups:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
       sku: 20h1-ent
-      version: 19041.928.2104091205
+      version: latest
     location: UK West
     service:
       publish:
@@ -315,7 +315,7 @@ groups:
       publisher: MicrosoftWindowsDesktop
       offer: Windows-10
       sku: 20h1-ent
-      version: 19041.928.2104091205
+      version: latest
     location: East US
     service:
       publish:

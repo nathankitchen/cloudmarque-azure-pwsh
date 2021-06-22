@@ -1,4 +1,4 @@
-regions:
+locations:
 - name: Global
   shortname: gbl
 - name: EU North

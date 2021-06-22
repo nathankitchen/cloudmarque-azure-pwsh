@@ -167,7 +167,7 @@
                                             "required": [
                                                 "version",
                                                 "imageServiceTag",
-                                                "targetRegions"
+                                                "targetLocations"
                                             ],
                                             "properties": {
                                                 "version": {
@@ -193,13 +193,13 @@
                                                     "$id": "#/imageDefinitions/items/allOf/versions/items/allOf/replicaCount",
                                                     "type": ["integer", "null"],
                                                     "title": "ReplicaCount",
-                                                    "description": "Copies of the image per location, when the regionalReplica count isn't specified.",
+                                                    "description": "Copies of the image per location, when the location replica count isn't specified.",
                                                     "default": 1
                                                 },
-                                                "targetRegions": {
-                                                    "$id": "#/imageDefinitions/items/allOf/versions/items/allOf/targetRegions",
+                                                "targetLocations": {
+                                                    "$id": "#/imageDefinitions/items/allOf/versions/items/allOf/targetLocations",
                                                     "type": "array",
-                                                    "title": "TargetRegions",
+                                                    "title": "TargetLocations",
                                                     "description": "All locations that the image will be copied to.",
                                                     "items": {
                                                         "$id": "#/imageDefinitions/items/allOf/versions/items",

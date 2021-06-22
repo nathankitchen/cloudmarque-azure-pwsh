@@ -44,7 +44,7 @@
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Enable delete resource of tagged date feature using automation account")) {
 
-			$automationService = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
+			$automationService = Get-CmAzService -Service $SettingsObject.service.dependencies.automation -Location $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
 			$cmDeleteRunbook = "Delete-TaggedResource.Runbook"
 
 			# Check Modules and install them if not available
@@ -107,7 +107,7 @@
 				"expiryTime"       = $expiryTime;
 				"frequency"        = $frequency;
 				"interval"         = 1;
-				"name"             = Get-CmAzResourceName -Resource "AutomationSchedule" -Architecture "Core" -Region $SettingsObject.location -Name delete-tagged-resource;
+				"name"             = Get-CmAzResourceName -Resource "AutomationSchedule" -Architecture "Core" -Location $SettingsObject.location -Name delete-tagged-resource;
 				"startTime"        = $startTime;
 				"timeZone"         = "Europe/London";
 				"advancedSchedule" = @{

@@ -57,7 +57,7 @@ function Set-CmAzSecurityCentre {
 
             Write-Verbose "Deploying security centre settings..."
 
-            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Region $SettingsObject.Location -Architecture "SaaS" -Name "Set-CmAzSecurityCentre"
+            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Location $SettingsObject.Location -Architecture "SaaS" -Name "Set-CmAzSecurityCentre"
 
             New-AzDeployment `
                 -Name $deploymentName `

@@ -69,7 +69,7 @@ function New-CmAzIaasRecoveryServicesVault {
 
 
         Write-Verbose "Generating standardised Resource Group Name from input: $($SettingsObject.resourceGroupName)"
-        $resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Region $SettingsObject.location -Name $SettingsObject.resourceGroupName
+        $resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Location $SettingsObject.location -Name $SettingsObject.resourceGroupName
 
         Write-Verbose "Generated standardised Resource Group Name: $resourceGroupName"
         Write-Verbose "Checking if Resource Group exists."
@@ -86,17 +86,17 @@ function New-CmAzIaasRecoveryServicesVault {
         Foreach ($vault in $SettingsObject.recoveryServicesVaults) {
 
             $vault.managedIdentity = $vault.managedIdentity ? "SystemAssigned" : "None"
-            $vault.name = Get-CmAzResourceName -Resource "recoveryservicesvault" -Architecture "IaaS" -Region $vault.location -Name $vault.name
+            $vault.name = Get-CmAzResourceName -Resource "recoveryservicesvault" -Architecture "IaaS" -Location $vault.location -Name $vault.name
             Write-Verbose "Generated standardised Key Vault name: $($vault.name)"
 
             Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "recoveryVault" -ResourceServiceContainer $vault
         }
 
-        $workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -Region $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
+        $workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -Location $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple
 
         Write-Verbose "Deploying Azure ARM template for Recovery Services Vaults..."
 
-        $deploymentNameRv = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasRecoveryServicesVault"
+        $deploymentNameRv = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasRecoveryServicesVault"
 
         New-AzResourceGroupDeployment `
             -Name $deploymentNameRv `
@@ -108,7 +108,7 @@ function New-CmAzIaasRecoveryServicesVault {
         Write-Verbose "Deploying Recovery Services Diagnostics..."
         Foreach ($vault in $SettingsObject.recoveryServicesVaults) {
 
-            $deploymentNameRvSd = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasRecoveryServicesVault-Sd"
+            $deploymentNameRvSd = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasRecoveryServicesVault-Sd"
 
             New-AzResourceGroupDeployment `
                 -Name $deploymentNameRvSd `
@@ -124,7 +124,7 @@ function New-CmAzIaasRecoveryServicesVault {
             Write-Verbose "Deploying Recovery Services Policies..."
             Foreach ($vault in $SettingsObject.recoveryServicesVaults) {
 
-                $deploymentNameRvSp = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Region $SettingsObject.location -Name "New-CmAzIaasRecoveryServicesVault-Sp"
+                $deploymentNameRvSp = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasRecoveryServicesVault-Sp"
 
                 New-AzResourceGroupDeployment `
                     -Name $deploymentNameRvSp `

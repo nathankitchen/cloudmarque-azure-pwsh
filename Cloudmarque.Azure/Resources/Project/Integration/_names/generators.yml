@@ -6,7 +6,7 @@ formats:
       - source: resource
       - source: name
       - source: environment
-      - source: region
+      - source: location
       - source: hash
   - name: default
     separator: "-"
@@ -15,7 +15,7 @@ formats:
       - source: organisation
       - source: project
       - source: environment
-      - source: region
+      - source: location
       - source: resource
       - source: name
       - source: hash
@@ -93,7 +93,7 @@ formats:
     components:
       - source: resource
       - source: name
-      - source: region
+      - source: location
       - source: hash
   - name: recoveryservicesvault
     separator: "-"
@@ -101,7 +101,7 @@ formats:
     components:
       - source: resource
       - source: name
-      - source: region
+      - source: location
       - source: hash
   - name: uniquename
     separator: "-"

@@ -6,7 +6,7 @@
 
 		.Description
 		 Finds Azure Resources based on the tag value of "cm-service", alongside additional filters for service type and
-		 region. Service names can be anything, and can therefore be shaped to a specific organisation's context and uses.
+		 location. Service names can be anything, and can therefore be shaped to a specific organisation's context and uses.
 
 		 The service locator pattern provides a canonical naming mechanism for Azure Resources which allows a component-based
 		 deployments, where each component is responsible for locating its own dependencies. A deployment may then fail if its
@@ -22,9 +22,9 @@
 		.Parameter Service
 		 Represents the service name to search for.
 
-		.Parameter Region
-		 A region to search within - allows the same service to be deployed in multiple regions, or other commands to
-		 validate that the service is available in the specified region.
+		.Parameter Location
+		 A location to search within - allows the same service to be deployed in multiple locations, or other commands to
+		 validate that the service is available in the specified location.
 
 		.Parameter IsResourceGroup
 		 Indicates whether the resource to be located is a resource group.
@@ -39,15 +39,15 @@
 
 		.Example
 		 Find a single keyvault
-		 $keyVault = Get-CmAzService -Service "core-keys" -Region "USEast" -ThrowIfMultiple
+		 $keyVault = Get-CmAzService -Service "core-keys" -Location "USEast" -ThrowIfMultiple
 
 		.Example
 		 Find a single storage account for NSG logs
-		 $storageAccount = Get-CmAzService -Service "core-monitoring-logs-nsg" -Region "USEast" -ThrowIfMultiple
+		 $storageAccount = Get-CmAzService -Service "core-monitoring-logs-nsg" -Location "USEast" -ThrowIfMultiple
 
 		.Example
 		 Find a set of vms
-		 $vms = Get-CmAzService -Service "core.mySetOfVms" -Region "UKSouth"
+		 $vms = Get-CmAzService -Service "core.mySetOfVms" -Location "UKSouth"
 	#>
 
 	[CmdletBinding()]
@@ -61,7 +61,7 @@
 		$ServiceKey = "cm-service",
 
 		[String]
-		$Region,
+		$Location,
 
 		[Switch]
 		$IsResourceGroup,
@@ -91,10 +91,10 @@
 		$existingResources = Get-AzResource -TagName $ServiceKey -TagValue $Service
 	}
 
-	if ($existingResources -is [system.array] -and $Region) {
+	if ($existingResources -is [array] -and $Location) {
 
-		$Region = $Region.replace(" ", "")
-		$existingResources = $existingResources | Where-Object { $_.location -Eq $Region }
+		$Location = $Location.replace(" ", "")
+		$existingResources = $existingResources | Where-Object { $_.location -Eq $Location }
 	}
 
 	if($existingResources.length -gt 1) {
