@@ -13,7 +13,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -36,7 +36,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -60,7 +60,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -88,7 +88,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -113,7 +113,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -139,7 +139,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -157,7 +157,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -175,7 +175,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -195,7 +195,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -214,7 +214,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -232,7 +232,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -250,7 +250,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -269,7 +269,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -289,7 +289,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -309,7 +309,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -329,7 +329,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -349,7 +349,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -369,7 +369,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -389,7 +389,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -409,7 +409,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -429,7 +429,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -449,7 +449,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -469,7 +469,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -489,7 +489,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -509,7 +509,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -530,7 +530,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -550,7 +550,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -571,7 +571,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -592,7 +592,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -613,7 +613,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -634,7 +634,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -654,7 +654,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -674,7 +674,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -694,7 +694,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -715,7 +715,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true   
+      enabled: false   
       mins: 10000
       windows: 0
     schedule:
@@ -735,7 +735,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -756,7 +756,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -776,7 +776,7 @@ Queries:
       operator: greaterThan
       value: 0
     suppress:
-      enabled: true
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
