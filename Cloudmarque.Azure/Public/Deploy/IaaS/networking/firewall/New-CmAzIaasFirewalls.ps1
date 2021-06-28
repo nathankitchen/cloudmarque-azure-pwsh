@@ -139,6 +139,7 @@ function New-CmAzIaasFirewalls {
    			}
 
 			$resourcesToSet += $SettingsObject.firewallPolicies.name
+			$resourcesToSet += $SettingsObject.firewalls.name
 
 			Write-Verbose "Started tagging for resources..."
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet

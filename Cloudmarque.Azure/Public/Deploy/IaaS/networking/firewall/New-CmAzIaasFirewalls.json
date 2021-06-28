@@ -69,6 +69,9 @@
                             "dependsOn": [
                                 "[resourceId(parameters('Firewall').resourceGroupName, 'Microsoft.Network/publicIpAddresses', parameters('Firewall').publicIpAddressName)]"
                             ],
+                            "tags": {
+                                "cm-sevice": "[parameters('Firewall').service.publish.firewall]"
+                            },
                             "properties": {
                                 "ipConfigurations": [
                                     {

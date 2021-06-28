@@ -5,8 +5,8 @@ service:
     resourceGroup: Iaas-Firewall-Rg
     vnet: Iaas-Firewall-Vnet
   publish:
-    firewallPolicy:
-    firewall:
+    firewallPolicy: Iaas-Firewall-Policy
+    firewall: Iaas-Firewall
 
 firewallPolicies:
 - name: Iaas-Firewall-Policy-1
