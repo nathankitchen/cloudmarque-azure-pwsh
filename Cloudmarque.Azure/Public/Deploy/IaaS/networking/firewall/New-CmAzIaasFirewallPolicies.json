@@ -1,0 +1,58 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "FirewallPolicies": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[take(concat('cm_fw_policy', parameters('FirewallPolicies')[copyIndex('FirewallPoliciesCopy')].name, copyIndex('FirewallPoliciesCopy')), 64)]",
+            "resourceGroup": "[parameters('FirewallPolicies')[copyIndex('FirewallPoliciesCopy')].resourceGroupName]",
+            "copy": {
+                "name": "FirewallPoliciesCopy",
+                "count": "[length(parameters('FirewallPolicies'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "FirewallPolicy": {
+                        "value": "[parameters('FirewallPolicies')[copyIndex('FirewallPoliciesCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "FirewallPolicy": {
+                            "type": "Object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "apiVersion": "2020-07-01",
+                            "type": "Microsoft.Network/firewallPolicies",
+                            "properties": {
+                                "sku": {
+                                    "tier": "[parameters('FirewallPolicy').sku]"
+                                }
+                            },
+                            "name": "[parameters('FirewallPolicy').name]",
+                            "location": "[parameters('FirewallPolicy').location]",
+                            "tags": {
+                                "cm-service": "[parameters('FirewallPolicy').service.publish.firewallPolicy]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

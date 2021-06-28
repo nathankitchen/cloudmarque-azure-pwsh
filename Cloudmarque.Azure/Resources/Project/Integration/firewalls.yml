@@ -1,0 +1,46 @@
+component: firewalls
+
+service:
+  dependencies:
+    resourceGroup: Iaas-Firewall-Rg
+    vnet: Iaas-Firewall-Vnet
+  publish:
+    firewallPolicy:
+    firewall:
+
+firewallPolicies:
+- name: Iaas-Firewall-Policy-1
+  sku: Standard                                         # Standard / Premium
+  location: UK South
+  service:
+    dependencies:
+      resourceGroup: Iaas-Firewall-Rg
+      vnet:                                             # Optional - provide this to deploy policy in same rg.
+    publish:
+      firewallPolicy: Iaas-Firewall-Policy-1
+- name: Iaas-Firewall-Policy-2
+  sku: Standard                                         # Standard / Premium
+  location: UK South
+  service:
+    dependencies:
+      resourceGroup: Iaas-Firewall-Rg
+      vnet:                                             # Optional - provide this to deploy policy in same rg.
+    publish:
+      firewallPolicy: Iaas-Firewall-Policy-2
+
+firewalls:
+- name: Iaas-Firewall-1
+  zones:
+  sku: Standard
+  firewallSubnetPrefix: 174.10.1.0/24
+  service:
+    dependencies:
+      vnet:
+      firewallPolicy: Iaas-Firewall-Policy-1
+    publish:
+      firewall:
+
+# Notes:
+# 1. Firewall and vnets needs to be in same resource group and location.
+# 2. Firewall policy and firewall needs to have same sku.
+

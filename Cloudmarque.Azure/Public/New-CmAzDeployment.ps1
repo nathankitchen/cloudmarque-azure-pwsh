@@ -121,6 +121,10 @@ function New-CmAzDeployment {
                 New-CmAzIaasVnetPeerings -SettingsObject $SettingsObject
             }
 
+            firewalls {
+                New-CmAzIaasFirewalls -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
+            }
+
             recoveryvault {
 
                 if ($PolicySettingsFile -and !$PolicySettingsObject) {

@@ -1,0 +1,248 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzIaasFirewalls",
+    "type": "object",
+    "title": "New-CmAzIaasFirewalls",
+    "description": "Settings Root.",
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": ["object", "null"],
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": ["object", "null"],
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/dependencies/resourceGroup",
+                            "type": ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": ["object", "null"],
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "properties": {
+                        "firewall": {
+                            "$id": "#/service/publish/firewall",
+                            "type": ["string", "null"],
+                            "title": "Firewall",
+                            "descrip,tion": "Global default value to publish on deployed resource type."
+                        },
+                        "firewallPolicy": {
+                            "$id": "#/service/publish/firewallPolicy",
+                            "type": ["string", "null"],
+                            "title": "FirewallPolicy",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "firewalls": {
+            "$id": "#/firewalls",
+            "type": ["array", "null"],
+            "title": "Firewalls",
+            "description": "Container for Firewalls configuration details.",
+            "minItems": 1,
+            "items": {
+                "$id": "#/firewalls/items",
+                "allOf": [
+                    {
+                        "$id": "#/firewalls/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "sku"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/firewalls/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of private endpoint name."
+                            },
+                            "zones": {
+                                "$id": "#/firewalls/items/allOf/zones",
+                                "type": ["array", "null"],
+                                "title": "zones",
+                                "description": "A list of availability zones."
+                            },
+                            "firewallSubnetPrefix": {
+                                "$id": "#/firewalls/items/allOf/firewallSubnetPrefix",
+                                "type": ["string", "null"],
+                                "title": "FirewallSubnetPrefix",
+                                "description": "Becomes AzureFirewallSubnet cidr"
+                            },
+                            "sku": {
+                                "$id": "#/firewalls/items/allOf/sku",
+                                "type": "string",
+                                "title": "sku",
+                                "enum": ["Standard", "Premium"],
+                                "description": "Firewall Sku"
+                            },
+                            "service": {
+                                "$id": "#/firewalls/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "dependencies": {
+                                        "$id": "#/firewalls/items/allOf/service/dependencies",
+                                        "type": ["object", "null"],
+                                        "title": "Dependencies",
+                                        "description": "Contains dependency details for service location.",
+                                        "properties": {
+                                            "vnet": {
+                                                "$id": "#/firewalls/items/allOf/service/dependencies/vnet",
+                                                "type": ["string", "null"],
+                                                "title": "Vnet",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            },
+                                            "firewallPolicy": {
+                                                "$id": "#/firewalls/items/allOf/service/dependencies/firewallPolicy",
+                                                "type": ["string", "null"],
+                                                "title": "FirewallPolicy",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "publish": {
+                                        "$id": "#/firewalls/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "firewall": {
+                                                "$id": "#/firewalls/items/allOf/service/publish/firewall",
+                                                "type": ["string", "null"],
+                                                "title": "Firewall",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        },
+        "firewallPolicies": {
+            "$id": "#/firewallPolicies",
+            "type": ["array", "null"],
+            "title": "FirewallPolicies",
+            "description": "Container for configuration details of Firewall Policies.",
+            "minItems": 1,
+            "items": {
+                "$id": "#/firewallPolicies/items",
+                "allOf": [
+                    {
+                        "$id": "#/firewallPolicies/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "location",
+                            "sku"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/firewallPolicies/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of private endpoint name."
+                            },
+                            "location": {
+                                "$id": "#/firewallPolicies/items/allOf/location",
+                                "type": ["string", "null"],
+                                "title": "Location",
+                                "description": "Location to deploy resource."
+                            },
+                            "sku": {
+                                "$id": "#/firewallPolicies/items/allOf/sku",
+                                "type": "string",
+                                "title": "sku",
+                                "enum": ["Standard", "Premium"],
+                                "description": "Firewall Sku"
+                            },
+                            "service": {
+                                "$id": "#/firewallPolicies/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "dependencies": {
+                                        "$id": "#/firewallPolicies/items/allOf/service/dependencies",
+                                        "type": ["object", "null"],
+                                        "title": "Dependencies",
+                                        "description": "Contains dependency details for service location.",
+                                        "properties": {
+                                            "vnet": {
+                                                "$id": "#/firewallPolicies/items/allOf/service/dependencies/vnet",
+                                                "type": ["string", "null"],
+                                                "title": "Vnet",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            },
+                                            "resourceGroup": {
+                                                "$id": "#/firewallPolicies/items/allOf/service/dependencies/resourceGroup",
+                                                "type": ["string", "null"],
+                                                "title": "ResourceGroup",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "publish": {
+                                        "$id": "#/firewallPolicies/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "firewallPolicy": {
+                                                "$id": "#/firewallPolicies/items/allOf/service/publish/firewallPolicy",
+                                                "type": ["string", "null"],
+                                                "title": "FirewallPolicy",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}
