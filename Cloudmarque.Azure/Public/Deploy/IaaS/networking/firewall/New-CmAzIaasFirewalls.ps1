@@ -2,7 +2,7 @@ function New-CmAzIaasFirewalls {
 
 	<#
 		.Synopsis
-		 Creates Private Networking components.
+		 Creates Firewall and Firewall policies.
 
 		.Description
 		 Completes following:
