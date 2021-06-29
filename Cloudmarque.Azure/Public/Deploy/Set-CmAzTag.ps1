@@ -139,9 +139,11 @@
 					}
 
 					'Microsoft.Network/azureFirewalls' {
-						$firewall = Get-AzFirewall -Name $resource.Name -ResourceGroupName $resource.ResourceGroupName
-						$firewall.tag += $tagsToSet
-						Set-AzFirewall -AzureFirewall $firewall  > $null
+						Update-AzTag -ResourceId $resource.Id -Tag $tagsToSet -Operation Merge > $null
+					}
+
+					'Microsoft.Network/FirewallPolicies' {
+						Set-AzFirewallPolicy -ResourceId $resource.Id -Location $resource.location -Tag $tagsToSet > $null
 					}
 
 					Default {

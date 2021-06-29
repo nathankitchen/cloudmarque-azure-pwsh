@@ -77,11 +77,11 @@ function New-CmAzIaasFirewalls {
 				$location = $SettingsObject.firewallPolicies[0].location
 				$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasFirewalls-Policies"
 
-				New-AzDeployment `
-					-Name $deploymentName `
-					-TemplateFile $PSScriptRoot\New-CmAzIaasFirewallPolicies.json `
-					-Location $location `
-					-firewallPolicies $SettingsObject.firewallPolicies
+				# New-AzDeployment `
+				# 	-Name $deploymentName `
+				# 	-TemplateFile $PSScriptRoot\New-CmAzIaasFirewallPolicies.json `
+				# 	-Location $location `
+				# 	-firewallPolicies $SettingsObject.firewallPolicies
 			}
 
 			if ($SettingsObject.firewalls) {
@@ -131,11 +131,11 @@ function New-CmAzIaasFirewalls {
 				$location = $SettingsObject.firewalls[0].location
 				$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasFirewalls"
 
-				New-AzDeployment `
-					-Name $deploymentName `
-					-TemplateFile $PSScriptRoot\New-CmAzIaasFirewalls.json `
-					-Location $location `
-					-firewalls $SettingsObject.firewalls
+				# New-AzDeployment `
+				# 	-Name $deploymentName `
+				# 	-TemplateFile $PSScriptRoot\New-CmAzIaasFirewalls.json `
+				# 	-Location $location `
+				# 	-firewalls $SettingsObject.firewalls
    			}
 
 			$resourcesToSet += $SettingsObject.firewallPolicies.name
