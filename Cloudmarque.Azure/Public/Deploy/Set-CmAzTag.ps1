@@ -140,8 +140,8 @@
 
 					'Microsoft.Network/azureFirewalls' {
 						$firewall = Get-AzFirewall -Name $resource.Name -ResourceGroupName $resource.ResourceGroupName
-						$firewall.tag = $tagsToSet
-						Set-AzFirewall -AzureFirewall  $firewall  > $null
+						$firewall.tag += $tagsToSet
+						Set-AzFirewall -AzureFirewall $firewall  > $null
 					}
 
 					Default {
