@@ -102,11 +102,6 @@ resources:
   minLength: 1
   maxLength: 64
   generator: standard
-- name: RouteTable
-  shortname: route
-  minLength: 1
-  maxLength: 64
-  generator: routeTable
 - name: TrafficManagerProfile
   shortname: traf
   minLength: 1

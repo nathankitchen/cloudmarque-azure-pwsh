@@ -138,7 +138,7 @@
 						Set-AzFrontDoor -ResourceGroupName $resource.ResourceGroupName -Name $resource.Name -Tag $tagsToSet > $null
 					}
 
-					'Microsoft.Network/azureFirewalls' {
+					'Microsoft.Network/AzureFirewalls' {
 						Update-AzTag -ResourceId $resource.Id -Tag $tagsToSet -Operation Merge > $null
 					}
 

@@ -83,7 +83,7 @@
                                 "$id": "#/firewalls/items/allOf/name",
                                 "type": "string",
                                 "title": "Name",
-                                "description": "Becomes part of private endpoint name."
+                                "description": "Becomes part of firewall name."
                             },
                             "zones": {
                                 "$id": "#/firewalls/items/allOf/zones",
@@ -95,14 +95,14 @@
                                 "$id": "#/firewalls/items/allOf/firewallSubnetPrefix",
                                 "type": ["string", "null"],
                                 "title": "FirewallSubnetPrefix",
-                                "description": "Becomes AzureFirewallSubnet cidr"
+                                "description": "Used to populate AzureFirewallSubnet cidr value."
                             },
                             "sku": {
                                 "$id": "#/firewalls/items/allOf/sku",
                                 "type": "string",
                                 "title": "sku",
                                 "enum": ["Standard", "Premium"],
-                                "description": "Firewall Sku"
+                                "description": "Firewall Sku."
                             },
                             "service": {
                                 "$id": "#/firewalls/items/allOf/service",

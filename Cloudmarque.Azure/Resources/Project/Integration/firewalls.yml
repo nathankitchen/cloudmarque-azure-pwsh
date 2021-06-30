@@ -2,41 +2,41 @@ component: firewalls
 
 service:
   dependencies:
-    resourceGroup: Iaas-Firewall-Rg
-    vnet: Iaas-Firewall-Vnet
+    resourceGroup: Iaas-Test-Firewall-Rg
+    vnet: Iaas-Test-Firewall-Vnet
   publish:
-    firewallPolicy: Iaas-Firewall-Policy
-    firewall: Iaas-Firewall
+    firewallPolicy: Iaas-Test-Firewall-Policy
+    firewall: Iaas-Test-Firewall
 
 firewallPolicies:
-- name: Iaas-Firewall-Policy-1
+- name: Iaas-Test-Firewall-Policy1
   sku: Standard                                         # Standard / Premium
   location: UK South
   service:
     dependencies:
-      resourceGroup: Iaas-Firewall-Rg
+      resourceGroup: Iaas-Test-Firewall-Rg
       vnet:                                             # Optional - provide this to deploy policy in same rg.
     publish:
-      firewallPolicy: Iaas-Firewall-Policy-1
-- name: Iaas-Firewall-Policy-2
+      firewallPolicy: Iaas-Test-Firewall-Policy1
+- name: Iaas-Test-Firewall-Policy2
   sku: Standard                                         # Standard / Premium
   location: UK South
   service:
     dependencies:
-      resourceGroup: Iaas-Firewall-Rg
+      resourceGroup: Iaas-Test-Firewall-Rg
       vnet:                                             # Optional - provide this to deploy policy in same rg.
     publish:
-      firewallPolicy: Iaas-Firewall-Policy-2
+      firewallPolicy: Iaas-Test-Firewall-Policy2
 
 firewalls:
-- name: Iaas-Firewall-1
+- name: Iaas-Test-Firewall-1
   zones:
   sku: Standard
   firewallSubnetPrefix: 174.10.1.0/24
   service:
     dependencies:
       vnet:
-      firewallPolicy: Iaas-Firewall-Policy-1
+      firewallPolicy: Iaas-Test-Firewall-Policy1
     publish:
       firewall:
 

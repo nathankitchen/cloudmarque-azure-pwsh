@@ -2,10 +2,10 @@ function New-CmAzIaasFirewalls {
 
 	<#
 		.Synopsis
-		 Creates Firewall and Firewall policies.
+		 Creates multiple firewalls and policies
 
 		.Description
-		 Completes following:
+		 Completes the following:
 			* Creates firewall polices.
 			* Creates firewalls.
 			* Creates firewall subnet.
@@ -51,26 +51,27 @@ function New-CmAzIaasFirewalls {
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create firewalls")) {
 
+
+			foreach ($firewallPolicy in $SettingsObject.firewallPolicies) {
+
+				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "resourceGroup" -ResourceServiceContainer $firewallPolicy -IsDependency
+				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $firewallPolicy -IsDependency
+
+				$resourceGroup = Get-CmAzService -Service $firewallPolicy.service.dependencies.resourceGroup -ThrowIfMultiple -IsResourceGroup
+				$vnet = Get-CmAzService -Service $firewallPolicy.service.dependencies.vnet -ThrowIfMultiple
+
+				$firewallPolicy.resourceGroupName = $resourceGroup.resourceGroupName ? $resourceGroup.resourceGroupName : $vnet.resourceGroupName
+				$firewallPolicy.location ??= $vnet.location ? $vnet.location : $resourceGroup.location
+
+				$firewallPolicy.name = Get-CmAzResourceName -Resource "firewallPolicy" `
+					-Architecture "IaaS" `
+					-Location $firewallPolicy.location `
+					-Name $firewallPolicy.name
+
+				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "firewallPolicy" -ResourceServiceContainer $firewallPolicy
+			}
+
 			if ($SettingsObject.firewallPolicies) {
-
-				foreach ($firewallPolicy in $SettingsObject.firewallPolicies) {
-
-					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "resourceGroup" -ResourceServiceContainer $firewallPolicy -IsDependency
-					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $firewallPolicy -IsDependency
-
-					$resourceGroup = Get-CmAzService -Service $firewallPolicy.service.dependencies.resourceGroup -ThrowIfMultiple -IsResourceGroup
-					$vnet = Get-CmAzService -Service $firewallPolicy.service.dependencies.vnet -ThrowIfMultiple
-
-					$firewallPolicy.resourceGroupName = $resourceGroup.resourceGroupName ? $resourceGroup.resourceGroupName : $vnet.resourceGroupName
-					$firewallPolicy.location ??= $vnet.location ? $vnet.location : $resourceGroup.location
-
-					$firewallPolicy.name = Get-CmAzResourceName -Resource "firewallPolicy" `
-						-Architecture "IaaS" `
-						-Location $firewallPolicy.location `
-						-Name $firewallPolicy.name
-
-					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "firewallPolicy" -ResourceServiceContainer $firewallPolicy
-				}
 
 				Write-Verbose "Configuring firewall policies..."
 
@@ -84,65 +85,63 @@ function New-CmAzIaasFirewalls {
 					-firewallPolicies $SettingsObject.firewallPolicies
 			}
 
-			if ($SettingsObject.firewalls) {
 
-				foreach ($firewall in $SettingsObject.firewalls) {
+			foreach ($firewall in $SettingsObject.firewalls) {
 
-					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $firewall -IsDependency
-					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "firewallPolicy" -ResourceServiceContainer $firewall -IsDependency
+				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $firewall -IsDependency
+				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "firewallPolicy" -ResourceServiceContainer $firewall -IsDependency
 
-					$vnet = Get-CmAzService -Service $firewall.service.dependencies.vnet -ThrowIfUnavailable -ThrowIfMultiple
+				$vnet = Get-CmAzService -Service $firewall.service.dependencies.vnet -ThrowIfUnavailable -ThrowIfMultiple
 
-					if ($SettingsObject.firewallPolicies.service.publish.firewallPolicy.contains($firewall.service.dependencies.firewallPolicy)){
+				$firewall.firewallPolicyService = $SettingsObject.firewallPolicies | Where-Object { $_.service.publish.firewallPolicy -eq $firewall.service.dependencies.firewallPolicy }
 
-						$firewall.firewallPolicyService = $SettingsObject.firewallPolicies | Where-Object { $_.service.publish.firewallPolicy -eq $firewall.service.dependencies.firewallPolicy }
-
-						if ($firewall.firewallPolicyService -is [array]){
-							Write-Error "Multiple firewall policies have same tags. Please provide unique service tag."
-						}
-					}
-
-					$firewall.firewallPolicyService ??= Get-CmAzService -Service $firewall.service.dependencies.firewallPolicy -ThrowIfUnavailable -ThrowIfMultiple
-
-					$firewall.firewallPolicy = @{
-						resourceGroupName = $firewall.firewallPolicyService.resourceGroupName
-						name = $firewall.firewallPolicyService.name ?  $firewall.firewallPolicyService.name  : $firewall.firewallPolicyService.resourceName
-					}
-
-					$firewall.location = $vnet.location
-					$firewall.resourceGroupName = $vnet.resourceGroupName
-					$firewall.vnetName = $vnet.resourceName
-
-					$firewall.name = Get-CmAzResourceName -Resource "firewall" `
-						-Architecture "IaaS" `
-						-Location $firewall.location `
-						-Name $firewall.name
-
-					$firewall.publicIpAddressName = Get-CmAzResourceName -Resource "PublicIPAddress" `
-						-Architecture "IaaS" `
-						-Location $firewall.location `
-						-Name $firewall.name
-
-					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "firewall" -ResourceServiceContainer $firewall
+				if ($firewall.firewallPolicyService -is [array]) {
+					Write-Error "Multiple firewall policies have same tags. Please provide unique service tag." -Category InvalidData -TargetObject $firewall.firewallPolicyService
 				}
 
-				Write-Verbose "Configuring firewalls..."
+				$firewall.firewallPolicyService ??= Get-CmAzService -Service $firewall.service.dependencies.firewallPolicy -ThrowIfUnavailable -ThrowIfMultiple
 
-				$location = $SettingsObject.firewalls[0].location
-				$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasFirewalls"
+				$firewall.firewallPolicy = @{
+					resourceGroupName = $firewall.firewallPolicyService.resourceGroupName
+					name              = $firewall.firewallPolicyService.name ?  $firewall.firewallPolicyService.name  : $firewall.firewallPolicyService.resourceName
+				}
 
-				New-AzDeployment `
-					-Name $deploymentName `
-					-TemplateFile $PSScriptRoot\New-CmAzIaasFirewalls.json `
-					-Location $location `
-					-firewalls $SettingsObject.firewalls
-   			}
+				$firewall.location = $vnet.location
+				$firewall.resourceGroupName = $vnet.resourceGroupName
+				$firewall.vnetName = $vnet.resourceName
 
-			$resourcesToSet += $SettingsObject.firewallPolicies.name
-			$resourcesToSet += $SettingsObject.firewalls.name
+				$firewall.name = Get-CmAzResourceName -Resource "firewall" `
+					-Architecture "IaaS" `
+					-Location $firewall.location `
+					-Name $firewall.name
 
-			Write-Verbose "Started tagging for resources..."
-			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
+				$firewall.publicIpAddressName = Get-CmAzResourceName -Resource "PublicIPAddress" `
+					-Architecture "IaaS" `
+					-Location $firewall.location `
+					-Name $firewall.name
+
+				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "firewall" -ResourceServiceContainer $firewall
+			}
+
+			Write-Verbose "Configuring firewalls..."
+
+			$location = $SettingsObject.firewalls[0].location
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasFirewalls"
+
+			New-AzDeployment `
+				-Name $deploymentName `
+				-TemplateFile $PSScriptRoot\New-CmAzIaasFirewalls.json `
+				-Location $location `
+				-firewalls $SettingsObject.firewalls
+		}
+
+		if ($SettingsObject.firewalls) {
+
+			Write-Verbose "Started tagging for firewall policies..."
+			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $SettingsObject.firewallPolicies.name
+
+			Write-Verbose "Started tagging for firewall..."
+			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $SettingsObject.firewalls.name
 		}
 	}
 	catch {
