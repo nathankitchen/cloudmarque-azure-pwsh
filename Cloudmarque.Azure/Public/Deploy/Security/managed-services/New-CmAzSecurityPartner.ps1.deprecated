@@ -31,7 +31,7 @@
 	)
 	try {
 
-		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy managed service security groups.")) {
 
@@ -53,6 +53,8 @@
 						-customerGroupId $CustomerGroupId
 				}
 			}
+
+			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}
 	}
 	catch {

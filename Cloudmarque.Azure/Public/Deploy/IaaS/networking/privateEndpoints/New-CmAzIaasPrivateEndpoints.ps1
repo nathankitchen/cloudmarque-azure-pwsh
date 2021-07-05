@@ -47,7 +47,7 @@ function New-CmAzIaasPrivateEndpoints {
 
 	try {
 
-		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
 
 		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
@@ -128,7 +128,10 @@ function New-CmAzIaasPrivateEndpoints {
 				$resourcesToSet += $SettingsObject.privateEndpoints.name
 
 				Write-Verbose "Started tagging for resources..."
+				
 				Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
+			
+				Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 			}
 		}
 	}

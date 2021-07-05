@@ -35,7 +35,7 @@ function Set-CmAzIaasUpdateManagement {
 
 	$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
-	Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+	Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
 
 	if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy VM Update Management")) {
 
@@ -136,5 +136,7 @@ function Set-CmAzIaasUpdateManagement {
 			-AutomationAccountName $automationAccount.name `
 			-UpdateSchedules $schedules `
 			-Force
+
+		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 	}
 }

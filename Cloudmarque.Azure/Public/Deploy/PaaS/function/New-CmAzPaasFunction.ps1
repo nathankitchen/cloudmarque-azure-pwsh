@@ -51,7 +51,7 @@ function New-CmAzPaasFunction {
 
     try {
 
-        Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+        Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
 
         $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
@@ -238,9 +238,10 @@ function New-CmAzPaasFunction {
             }
 
             if (!$OmitTags) {
-
                 Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
             }
+
+            Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
         }
     }
     catch {

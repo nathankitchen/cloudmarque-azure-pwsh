@@ -27,7 +27,7 @@ function Set-BlobStorageContentType {
         [String]$StorageName
     )
 
-    Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+    Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
 
     if($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Set content in $Storage")) {
 
@@ -63,7 +63,7 @@ function Set-BlobStorageContentType {
             }
         }
 
-        Write-Verbose "Finished!"
+        Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
     }
 }
 
