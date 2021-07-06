@@ -37,17 +37,38 @@
                     },
                     "resources": [
                         {
-                            "apiVersion": "2020-07-01",
+                            "apiVersion": "2020-11-01",
                             "type": "Microsoft.Network/firewallPolicies",
-                            "properties": {
-                                "sku": {
-                                    "tier": "[parameters('FirewallPolicy').sku]"
-                                }
-                            },
                             "name": "[parameters('FirewallPolicy').name]",
                             "location": "[parameters('FirewallPolicy').location]",
                             "tags": {
                                 "cm-service": "[parameters('FirewallPolicy').service.publish.firewallPolicy]"
+                            },
+                            "properties": {
+                                "sku": {
+                                    "tier": "[parameters('FirewallPolicy').sku]"
+                                },
+                                "threatIntelMode": "[parameters('FirewallPolicy').threatIntelMode]",
+                                "threatIntelWhitelist": "[parameters('FirewallPolicy').threatIntelWhitelist]",
+                                "basePolicy": "[parameters('FirewallPolicy').basePolicy]",
+                                "dnsSettings": "[parameters('FirewallPolicy').dnsSettings]"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
+                            "apiVersion": "2020-11-01",
+                            "name": "[concat(parameters('FirewallPolicy'), '/', parameters('FirewallPolicy').ruleCollectionGroups['RuleCollectionGroupsCopy'].name)]",
+                            "location": "uksouth",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/firewallPolicies', parameters('FirewallPolicy').name)]"
+                            ],
+                            "copy": {
+                                "count": "[length(parameters('FirewallPolicy').ruleCollectionGroups)]",
+                                "name": "RuleCollectionGroupsCopy"
+                            },
+                            "properties": {
+                                "priority": "[parameters('FirewallPolicy').ruleCollectionGroups['RuleCollectionGroupsCopy'].priority]",
+                                "ruleCollections": "[parameters('FirewallPolicy').ruleCollectionGroups['RuleCollectionGroupsCopy'].ruleCollections]"
                             }
                         }
                     ]

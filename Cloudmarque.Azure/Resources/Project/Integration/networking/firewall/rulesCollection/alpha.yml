@@ -1,0 +1,61 @@
+ruleCollectionGroup:
+- name: alpha
+  priority: 100
+  ruleCollections:
+  - name: alpha-DNAT
+    type: dnat
+    priority: 101
+    rules:
+    - name: alpha-dnat-1
+      translatedAddress: 192.168.10.0
+      translatedPort: 8080
+      ipProtocols:
+        - TCP
+      sourceAddresses:
+        -  '*'
+      destinationAddresses:
+        -  0.0.0.0
+      destinationPorts:
+        -  8080
+      sourceIpGroups: []
+
+  - name: alpha-net
+    type: network
+    priority: 102
+    rules:
+    - name: alpha-net-2
+      ipProtocols:
+        -  Any
+      sourceAddresses:
+        -  '*'
+      destinationAddresses:
+        -  '*'
+      destinationPorts:
+        -  80
+      sourceIpGroups: []
+      destinationIpGroups: []
+      destinationFqdns: []
+
+  - name: alpha-application
+    type: application
+    priority: 103
+    rules:
+    - name: alpha-app1
+      protocols:
+      - protocolType: Http
+        port: 80
+      targetFqdns:
+      - '*'
+      terminateTLS: false
+      sourceAddresses:
+      - 192.168.0.1
+      destinationAddresses: []
+      sourceIpGroups: []
+      targetUrls: []
+      fqdnTags: []
+      webCategories: []
+
+
+
+
+

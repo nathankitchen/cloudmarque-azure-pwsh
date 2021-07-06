@@ -92,6 +92,7 @@ function New-CmAzIaasFirewalls {
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "firewallPolicy" -ResourceServiceContainer $firewall -IsDependency
 
 				$vnet = Get-CmAzService -Service $firewall.service.dependencies.vnet -ThrowIfUnavailable -ThrowIfMultiple
+				$basePolicy = Get-CmAzService -Service $firewall.service.dependencies.baseFirewallPolicy -ThrowIfUnavailable -ThrowIfMultiple
 
 				$firewall.firewallPolicyService = $SettingsObject.firewallPolicies | Where-Object { $_.service.publish.firewallPolicy -eq $firewall.service.dependencies.firewallPolicy }
 
@@ -109,6 +110,47 @@ function New-CmAzIaasFirewalls {
 				$firewall.location = $vnet.location
 				$firewall.resourceGroupName = $vnet.resourceGroupName
 				$firewall.vnetName = $vnet.resourceName
+
+				$firewall.basePolicy = @{ id = $basePolicy.ResourceId }
+
+				$firewall.basePolicy ??= @{}
+				$firewall.threatIntelMode ??= "Alert"
+				$firewall.threatIntelWhitelist ??= @{ipAddresses = @(); fqdns = @()}
+				$firewall.dnsSettings ??= @{}
+				$firewall.ruleCollectionGroup ??= @()
+
+				foreach ($SettingsFile in $firewall.ruleCollectionGroupsSettingFiles) {
+					$firewall.ruleCollectionGroups += (Get-CmAzSettingsFile -Path $SettingsFile -Verbose).ruleCollectionGroup
+				}
+
+				foreach ($ruleCollection in $firewall.ruleCollectionGroup.ruleCollections) {
+
+					switch ($ruleCollection.type) {
+
+						dnat {
+							$ruleCollection.ruleCollectionType = "FirewallPolicyNatRuleCollection"
+							$ruleType = "NatRule"
+							$ruleCollection.actionType ??= "Dnat"
+						}
+
+						network {
+							$ruleCollection.ruleCollectionType = "FirewallPolicyFilterRuleCollection"
+							$ruleType = "NetworkRule"
+							$ruleCollection.actionType ??= "allow"
+						}
+
+						application {
+							$ruleCollection.ruleCollectionType = "FirewallPolicyFilterRuleCollection"
+							$ruleType = "ApplicationRule"
+							$ruleCollection.actionType ??= "allow"
+						}
+					}
+
+					foreach ($rule in $ruleCollection.rules ){
+
+						$rule.ruleType = $ruleType
+					}
+				}
 
 				$firewall.name = Get-CmAzResourceName -Resource "firewall" `
 					-Architecture "IaaS" `

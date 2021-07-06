@@ -12,12 +12,24 @@ firewallPolicies:
 - name: Iaas-Test-Firewall-Policy1
   sku: Standard                                         # Standard / Premium
   location: UK South
+  threatIntelMode:                                      # Optional - Alert, Deny, Off. Default - Alert
+  threatIntelWhitelist:                                 # Optional
+    ipAddresses: []
+    fqdns: []
+  dnsSettings:                                          # Optional
+    servers: []
+    enableProxy: false                                  # true/ false
+    requireProxyForNetworkRules: false                  # true/ false
   service:
     dependencies:
       resourceGroup: Iaas-Test-Firewall-Rg
       vnet:                                             # Optional - provide this to deploy policy in same rg.
+      baseFirewallPolicy:
     publish:
       firewallPolicy: Iaas-Test-Firewall-Policy1
+  ruleCollectionGroupsSettingFiles:
+  - ./networking/firewall/rulesCollection/alpha.yml
+
 - name: Iaas-Test-Firewall-Policy2
   sku: Standard                                         # Standard / Premium
   location: UK South
