@@ -2,22 +2,22 @@ ruleCollectionGroup:
 - name: alpha
   priority: 100
   ruleCollections:
-  - name: alpha-DNAT
-    type: dnat
-    priority: 101
-    rules:
-    - name: alpha-dnat-1
-      translatedAddress: 192.168.10.0
-      translatedPort: 8080
-      ipProtocols:
-        - TCP
-      sourceAddresses:
-        -  '*'
-      destinationAddresses:
-        -  0.0.0.0
-      destinationPorts:
-        -  8080
-      sourceIpGroups: []
+  # - name: alpha-DNAT
+  #   type: dnat
+  #   priority: 101
+  #   rules:
+  #   - name: alpha-dnat-1
+  #     translatedAddress: 192.168.10.0
+  #     translatedPort: 8080
+  #     ipProtocols:
+  #       - TCP
+  #     sourceAddresses:
+  #       -  '*'
+  #     destinationAddresses:
+  #       -  0.0.0.0
+  #     destinationPorts:
+  #       -  8080
+      # sourceIpGroups: []
 
   - name: alpha-net
     type: network

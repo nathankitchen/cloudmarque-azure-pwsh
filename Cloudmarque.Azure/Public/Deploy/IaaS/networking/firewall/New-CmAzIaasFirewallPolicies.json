@@ -54,10 +54,10 @@
                                 "dnsSettings": "[parameters('FirewallPolicy').dnsSettings]"
                             }
                         },
-                        {
+                        {   "condition": "[not(empty(parameters('FirewallPolicy').ruleCollectionGroups))]",
                             "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
                             "apiVersion": "2020-11-01",
-                            "name": "[concat(parameters('FirewallPolicy'), '/', parameters('FirewallPolicy').ruleCollectionGroups['RuleCollectionGroupsCopy'].name)]",
+                            "name": "[concat(parameters('FirewallPolicy').name, '/', parameters('FirewallPolicy').ruleCollectionGroups[copyIndex('RuleCollectionGroupsCopy')].name)]",
                             "location": "uksouth",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Network/firewallPolicies', parameters('FirewallPolicy').name)]"
@@ -67,8 +67,22 @@
                                 "name": "RuleCollectionGroupsCopy"
                             },
                             "properties": {
-                                "priority": "[parameters('FirewallPolicy').ruleCollectionGroups['RuleCollectionGroupsCopy'].priority]",
-                                "ruleCollections": "[parameters('FirewallPolicy').ruleCollectionGroups['RuleCollectionGroupsCopy'].ruleCollections]"
+                                "priority": "[parameters('FirewallPolicy').ruleCollectionGroups[copyIndex('RuleCollectionGroupsCopy')].priority]",
+                                "copy": [
+                                    {
+                                        "name": "ruleCollections",
+                                        "count": "[length(parameters('FirewallPolicy').ruleCollectionGroups[copyIndex('RuleCollectionGroupsCopy')].ruleCollections)]",
+                                        "input": {
+                                                "ruleCollectionType": "[parameters('FirewallPolicy').ruleCollectionGroups[copyIndex('RuleCollectionGroupsCopy')].ruleCollections[copyIndex('ruleCollections')].ruleCollectionType]",
+                                                "action": {
+                                                    "type": "[parameters('FirewallPolicy').ruleCollectionGroups[copyIndex('RuleCollectionGroupsCopy')].ruleCollections[copyIndex('ruleCollections')].actionType]"
+                                                },
+                                                "rules": "[parameters('FirewallPolicy').ruleCollectionGroups[copyIndex('RuleCollectionGroupsCopy')].ruleCollections[copyIndex('ruleCollections')].rules]",
+                                                "name": "[parameters('FirewallPolicy').ruleCollectionGroups[copyIndex('RuleCollectionGroupsCopy')].ruleCollections[copyIndex('ruleCollections')].name]",
+                                                "priority": "[parameters('FirewallPolicy').ruleCollectionGroups[copyIndex('RuleCollectionGroupsCopy')].ruleCollections[copyIndex('ruleCollections')].priority]"
+                                            }
+                                    }
+                                ]
                             }
                         }
                     ]

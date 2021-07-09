@@ -19,7 +19,6 @@ firewallPolicies:
   dnsSettings:                                          # Optional
     servers: []
     enableProxy: false                                  # true/ false
-    requireProxyForNetworkRules: false                  # true/ false
   service:
     dependencies:
       resourceGroup: Iaas-Test-Firewall-Rg
@@ -30,15 +29,15 @@ firewallPolicies:
   ruleCollectionGroupsSettingFiles:
   - ./networking/firewall/rulesCollection/alpha.yml
 
-- name: Iaas-Test-Firewall-Policy2
-  sku: Standard                                         # Standard / Premium
-  location: UK South
-  service:
-    dependencies:
-      resourceGroup: Iaas-Test-Firewall-Rg
-      vnet:                                             # Optional - provide this to deploy policy in same rg.
-    publish:
-      firewallPolicy: Iaas-Test-Firewall-Policy2
+# - name: Iaas-Test-Firewall-Policy2
+#   sku: Standard                                         # Standard / Premium
+#   location: UK South
+#   service:
+#     dependencies:
+#       resourceGroup: Iaas-Test-Firewall-Rg
+#       vnet:                                             # Optional - provide this to deploy policy in same rg.
+#     publish:
+#       firewallPolicy: Iaas-Test-Firewall-Policy2
 
 firewalls:
 - name: Iaas-Test-Firewall-1

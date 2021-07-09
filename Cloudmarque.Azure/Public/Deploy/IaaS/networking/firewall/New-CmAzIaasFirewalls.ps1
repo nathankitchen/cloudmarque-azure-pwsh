@@ -47,7 +47,8 @@ function New-CmAzIaasFirewalls {
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		# $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		$SettingsObject = Get-CmAzSettingsFile -path $SettingsFile
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create firewalls")) {
 
@@ -58,10 +59,59 @@ function New-CmAzIaasFirewalls {
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $firewallPolicy -IsDependency
 
 				$resourceGroup = Get-CmAzService -Service $firewallPolicy.service.dependencies.resourceGroup -ThrowIfMultiple -IsResourceGroup
-				$vnet = Get-CmAzService -Service $firewallPolicy.service.dependencies.vnet -ThrowIfMultiple
+				$vnet = Get-CmAzService -Service $firewallPolicy.service.dependencies.vnet -ThrowIfMultiple -ThrowIfUnavailable
+
+				if ($firewallPolicy.service.dependencies.baseFirewallPolicy) {
+					$basePolicy = Get-CmAzService -Service $firewallPolicy.service.dependencies.baseFirewallPolicy -ThrowIfUnavailable -ThrowIfMultiple
+					$firewallPolicy.basePolicy = @{ id = $basePolicy.ResourceId }
+				}
+				else {
+					$firewallPolicy.basePolicy = @{}
+				}
 
 				$firewallPolicy.resourceGroupName = $resourceGroup.resourceGroupName ? $resourceGroup.resourceGroupName : $vnet.resourceGroupName
 				$firewallPolicy.location ??= $vnet.location ? $vnet.location : $resourceGroup.location
+				$firewallPolicy.threatIntelMode ??= "Alert"
+				$firewallPolicy.threatIntelWhitelist ??= @{ipAddresses = @(); fqdns = @()}
+				$firewallPolicy.dnsSettings ??= @{}
+				$firewallPolicy.ruleCollectionGroups ??= @()
+
+				foreach ($SettingsFile in $firewallPolicy.ruleCollectionGroupsSettingFiles) {
+					$firewallPolicy.ruleCollectionGroups += (Get-CmAzSettingsFile -Path $SettingsFile -Verbose).ruleCollectionGroup
+				}
+
+				foreach ($ruleCollection in $firewallPolicy.ruleCollectionGroups.ruleCollections) {
+
+					switch ($ruleCollection.type) {
+
+						dnat {
+							$ruleCollection.ruleCollectionType = "FirewallPolicyNatRuleCollection"
+							$ruleType = "NatRule"
+							$ruleCollection.actionType ??= "Dnat"
+						}
+
+						network {
+							$ruleCollection.ruleCollectionType = "FirewallPolicyFilterRuleCollection"
+							$ruleType = "NetworkRule"
+							$ruleCollection.actionType ??= "allow"
+						}
+
+						application {
+							$ruleCollection.ruleCollectionType = "FirewallPolicyFilterRuleCollection"
+							$ruleType = "ApplicationRule"
+							$ruleCollection.actionType ??= "allow"
+						}
+					}
+
+					foreach ($rule in $ruleCollection.rules ){
+
+						$rule.ruleType = $ruleType
+					}
+				}
+
+				if (!($firewallPolicy.ruleCollectionGroups -is [array])) {
+					$firewallPolicy.ruleCollectionGroups = @($firewallPolicy.ruleCollectionGroups)
+				}
 
 				$firewallPolicy.name = Get-CmAzResourceName -Resource "firewallPolicy" `
 					-Architecture "IaaS" `
@@ -92,65 +142,23 @@ function New-CmAzIaasFirewalls {
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "firewallPolicy" -ResourceServiceContainer $firewall -IsDependency
 
 				$vnet = Get-CmAzService -Service $firewall.service.dependencies.vnet -ThrowIfUnavailable -ThrowIfMultiple
-				$basePolicy = Get-CmAzService -Service $firewall.service.dependencies.baseFirewallPolicy -ThrowIfUnavailable -ThrowIfMultiple
 
-				$firewall.firewallPolicyService = $SettingsObject.firewallPolicies | Where-Object { $_.service.publish.firewallPolicy -eq $firewall.service.dependencies.firewallPolicy }
+				$firewallPolicyService = $SettingsObject.firewallPolicies | Where-Object { $_.service.publish.firewallPolicy -eq $firewall.service.dependencies.firewallPolicy }
 
-				if ($firewall.firewallPolicyService -is [array]) {
-					Write-Error "Multiple firewall policies have same tags. Please provide unique service tag." -Category InvalidData -TargetObject $firewall.firewallPolicyService
+				if ($firewallPolicyService -is [array]) {
+					Write-Error "Multiple firewall policies have same tags. Please provide unique service tag." -Category InvalidData -TargetObject $firewallPolicyService
 				}
 
-				$firewall.firewallPolicyService ??= Get-CmAzService -Service $firewall.service.dependencies.firewallPolicy -ThrowIfUnavailable -ThrowIfMultiple
+				$firewallPolicyService ??= Get-CmAzService -Service $firewall.service.dependencies.firewallPolicy -ThrowIfUnavailable -ThrowIfMultiple
 
 				$firewall.firewallPolicy = @{
-					resourceGroupName = $firewall.firewallPolicyService.resourceGroupName
-					name              = $firewall.firewallPolicyService.name ?  $firewall.firewallPolicyService.name  : $firewall.firewallPolicyService.resourceName
+					resourceGroupName = $firewallPolicyService.resourceGroupName
+					name              = $firewallPolicyService.name ?  $firewallPolicyService.name  : $firewallPolicyService.resourceName
 				}
 
 				$firewall.location = $vnet.location
 				$firewall.resourceGroupName = $vnet.resourceGroupName
 				$firewall.vnetName = $vnet.resourceName
-
-				$firewall.basePolicy = @{ id = $basePolicy.ResourceId }
-
-				$firewall.basePolicy ??= @{}
-				$firewall.threatIntelMode ??= "Alert"
-				$firewall.threatIntelWhitelist ??= @{ipAddresses = @(); fqdns = @()}
-				$firewall.dnsSettings ??= @{}
-				$firewall.ruleCollectionGroup ??= @()
-
-				foreach ($SettingsFile in $firewall.ruleCollectionGroupsSettingFiles) {
-					$firewall.ruleCollectionGroups += (Get-CmAzSettingsFile -Path $SettingsFile -Verbose).ruleCollectionGroup
-				}
-
-				foreach ($ruleCollection in $firewall.ruleCollectionGroup.ruleCollections) {
-
-					switch ($ruleCollection.type) {
-
-						dnat {
-							$ruleCollection.ruleCollectionType = "FirewallPolicyNatRuleCollection"
-							$ruleType = "NatRule"
-							$ruleCollection.actionType ??= "Dnat"
-						}
-
-						network {
-							$ruleCollection.ruleCollectionType = "FirewallPolicyFilterRuleCollection"
-							$ruleType = "NetworkRule"
-							$ruleCollection.actionType ??= "allow"
-						}
-
-						application {
-							$ruleCollection.ruleCollectionType = "FirewallPolicyFilterRuleCollection"
-							$ruleType = "ApplicationRule"
-							$ruleCollection.actionType ??= "allow"
-						}
-					}
-
-					foreach ($rule in $ruleCollection.rules ){
-
-						$rule.ruleType = $ruleType
-					}
-				}
 
 				$firewall.name = Get-CmAzResourceName -Resource "firewall" `
 					-Architecture "IaaS" `
