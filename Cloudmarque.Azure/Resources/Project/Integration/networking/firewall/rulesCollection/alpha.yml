@@ -1,12 +1,12 @@
 ruleCollectionGroups:
-- name: alpha
+- name: Iaas-RuleCollection-Group
   priority: 100
   ruleCollections:
-  # - name: alpha-DNAT
+  # - name: Iaas-RuleCollection-Dnat
   #   type: dnat
   #   priority: 101
   #   rules:
-  #   - name: alpha-dnat-1
+  #   - name: Iaas-RuleCollection-Dnat-1
   #     translatedAddress: 192.168.10.0
   #     translatedPort: 8080
   #     ipProtocols:
@@ -19,11 +19,11 @@ ruleCollectionGroups:
   #       -  8080
   #     sourceIpGroups: []
 
-  - name: alpha-net
+  - name: Iaas-RuleCollection-Net
     type: network
     priority: 102
     rules:
-    - name: alpha-net-2
+    - name: Iaas-RuleCollection-Net-1
       ipProtocols:
         -  Any
       sourceAddresses:
@@ -36,11 +36,11 @@ ruleCollectionGroups:
       destinationIpGroups: []
       destinationFqdns: []
 
-  - name: alpha-application
+  - name: Iaas-RuleCollection-Application
     type: application
     priority: 103
     rules:
-    - name: alpha-app1
+    - name: Iaas-RuleCollection-App-1
       protocols:
       - protocolType: Http
         port: 80
