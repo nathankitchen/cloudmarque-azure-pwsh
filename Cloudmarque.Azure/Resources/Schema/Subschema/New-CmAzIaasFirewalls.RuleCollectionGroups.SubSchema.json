@@ -1,0 +1,217 @@
+{
+    "": "http://json.org/draft-07",
+    "$id": "New-CmAzIaasFirewalls.RulesCollectionGroups",
+    "type": "object",
+    "title": "New-CmAzIaasFirewalls.RulesCollectionGroups",
+    "description": "Settings for RulesCollectionGroups.",
+    "properties": {
+        "rulesCollectionGroups": {
+            "$id": "#/rulesCollectionGroups",
+            "type": ["array", "null"],
+            "title": "rulesCollectionGroups",
+            "description": "Container for configuration details of rules to added to Firewall Policy.",
+            "minItems": 1,
+            "items": {
+                "$id": "#/rulesCollectionGroups/items",
+                "allOf": [
+                    {
+                        "$id": "#/rulesCollectionGroups/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "priority"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/rulesCollectionGroups/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Name of rule collection group."
+                            },
+                            "priority": {
+                                "$id": "#/rulesCollectionGroups/items/allOf/priority",
+                                "type": ["number"],
+                                "title": "priority",
+                                "minimum": 100,
+                                "maximum": 1000,
+                                "description": "Priority of rule collection."
+                            },
+                            "ruleCollections": {
+                                "$id": "#/rulesCollectionGroups/items/allOf/ruleCollections",
+                                "type":  ["array", "null"],
+                                "title": "ruleCollections",
+                                "description": "Collection of firewall rules.",
+                                "items": {
+                                    "$id": "#/rulesCollectionGroups/items/allOf/ruleCollections/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/",
+                                            "type": "object",
+                                            "title": "first allOf",
+                                            "description": "An explanation about purpose of this instance.",
+                                            "required": [
+                                                "priority",
+                                                "rules",
+                                                "name",
+                                                "type"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "name",
+                                                    "description": "Name of rule collection."
+                                                },
+                                                "type": {
+                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/type",
+                                                    "type": "string",
+                                                    "title": "type",
+                                                    "enum": ["dnat", "network", "application"],
+                                                    "description": "Type of rule collection."
+                                                },
+                                                "priority": {
+                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/priority",
+                                                    "type": "integer",
+                                                    "title": "priority",
+                                                    "description": "Priority of rule collection."
+                                                },
+                                                "rules": {
+                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules",
+                                                    "type": "array",
+                                                    "title": "rules",
+                                                    "additionalItems": false,
+                                                    "items": {
+                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items",
+                                                        "oneOf": [
+                                                            {
+                                                                "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/",
+                                                                "type": "object",
+                                                                "title": "first allOf",
+                                                                "required": [
+                                                                    "destinationPorts",
+                                                                    "ipProtocols",
+                                                                    "name",
+                                                                    "sourceAddresses",
+                                                                    "translatedAddress",
+                                                                    "destinationAddresses",
+                                                                    "translatedPort"
+                                                                ],
+                                                                "properties": {
+                                                                    "sourceIpGroups": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/sourceIpGroups",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "sourceIpGroups",
+                                                                        "description": "An explanation about purpose of this instance."
+                                                                    },
+                                                                    "destinationPorts": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/destinationPorts",
+                                                                        "type": "array",
+                                                                        "title": "destinationPorts",
+                                                                        "description": "An explanation about purpose of this instance.",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/destinationPorts/items",
+                                                                            "allOf": [
+                                                                                {
+                                                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/destinationPorts/items/allOf/",
+                                                                                    "type": "integer",
+                                                                                    "title": "first allOf",
+                                                                                    "description": "An explanation about purpose of this instance."
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "ipProtocols": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/ipProtocols",
+                                                                        "type": "array",
+                                                                        "title": "ipProtocols",
+                                                                        "description": "An explanation about purpose of this instance.",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/ipProtocols/items",
+                                                                            "allOf": [
+                                                                                {
+                                                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/ipProtocols/items/allOf/",
+                                                                                    "type": "string",
+                                                                                    "title": "first allOf",
+                                                                                    "description": "An explanation about purpose of this instance."
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "name": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/name",
+                                                                        "type": "string",
+                                                                        "title": "name",
+                                                                        "description": "An explanation about purpose of this instance."
+                                                                    },
+                                                                    "sourceAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/sourceAddresses",
+                                                                        "type": "array",
+                                                                        "title": "sourceAddresses",
+                                                                        "description": "An explanation about purpose of this instance.",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/sourceAddresses/items",
+                                                                            "allOf": [
+                                                                                {
+                                                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/sourceAddresses/items/allOf/",
+                                                                                    "type": "string",
+                                                                                    "title": "first allOf",
+                                                                                    "description": "An explanation about purpose of this instance."
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "translatedAddress": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/translatedAddress",
+                                                                        "type": "string",
+                                                                        "title": "translatedAddress",
+                                                                        "description": "An explanation about purpose of this instance."
+                                                                    },
+                                                                    "destinationAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/destinationAddresses",
+                                                                        "type": "array",
+                                                                        "title": "destinationAddresses",
+                                                                        "description": "An explanation about purpose of this instance.",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/destinationAddresses/items",
+                                                                            "allOf": [
+                                                                                {
+                                                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/destinationAddresses/items/allOf/",
+                                                                                    "type": "string",
+                                                                                    "title": "first allOf",
+                                                                                    "description": "An explanation about purpose of this instance."
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "translatedPort": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/allOf/translatedPort",
+                                                                        "type": "integer",
+                                                                        "title": "translatedPort",
+                                                                        "description": "An explanation about purpose of this instance."
+                                                                    }
+                                                                },
+                                                                "additionalProperties": false
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            }
+
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

@@ -1,0 +1,227 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "#",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "required": [
+        "ruleCollectionGroups"
+    ],
+    "properties": {
+        "ruleCollectionGroups": {
+            "$id": "#/ruleCollectionGroups",
+            "type": "array",
+            "title": "The ruleCollectionGroups schema",
+            "description": "An explanation about the purpose of this instance.",
+            "additionalItems": false,
+            "items": {
+                "$id": "#/ruleCollectionGroups/items",
+                "anyOf": [
+                    {
+                        "$id": "#/ruleCollectionGroups/items/anyOf/0",
+                        "type": "object",
+                        "title": "The first anyOf schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "required": [
+                            "priority",
+                            "name",
+                            "ruleCollections"
+                        ],
+                        "properties": {
+                            "priority": {
+                                "$id": "#/ruleCollectionGroups/items/anyOf/priority",
+                                "type": "integer",
+                                "title": "The priority schema",
+                                "description": "An explanation about the purpose of this instance."
+                            },
+                            "name": {
+                                "$id": "#/ruleCollectionGroups/items/anyOf/name",
+                                "type": "string",
+                                "title": "The name schema",
+                                "description": "An explanation about the purpose of this instance."
+                            },
+                            "ruleCollections": {
+                                "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections",
+                                "type": "array",
+                                "title": "The ruleCollections schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "additionalItems": false,
+                                "items": {
+                                    "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items",
+                                    "anyOf": [
+                                        {
+                                            "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/0",
+                                            "type": "object",
+                                            "title": "The first anyOf schema",
+                                            "description": "An explanation about the purpose of this instance.",
+                                            "required": [
+                                                "priority",
+                                                "rules",
+                                                "name",
+                                                "type"
+                                            ],
+                                            "properties": {
+                                                "priority": {
+                                                    "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/priority",
+                                                    "type": "integer",
+                                                    "title": "The priority schema",
+                                                    "description": "An explanation about the purpose of this instance."
+                                                },
+                                                "rules": {
+                                                    "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules",
+                                                    "type": "array",
+                                                    "title": "The rules schema",
+                                                    "description": "An explanation about the purpose of this instance.",
+                                                    "additionalItems": false,
+                                                    "items": {
+                                                        "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items",
+                                                        "anyOf": [
+                                                            {
+                                                                "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/0",
+                                                                "type": "object",
+                                                                "title": "The first anyOf schema",
+                                                                "description": "An explanation about the purpose of this instance.",
+                                                                "required": [
+                                                                    "sourceIpGroups",
+                                                                    "destinationPorts",
+                                                                    "ipProtocols",
+                                                                    "name",
+                                                                    "sourceAddresses",
+                                                                    "translatedAddress",
+                                                                    "destinationAddresses",
+                                                                    "translatedPort"
+                                                                ],
+                                                                "properties": {
+                                                                    "sourceIpGroups": {
+                                                                        "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/sourceIpGroups",
+                                                                        "type": "array",
+                                                                        "title": "The sourceIpGroups schema",
+                                                                        "description": "An explanation about the purpose of this instance.",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/sourceIpGroups/items"
+                                                                        }
+                                                                    },
+                                                                    "destinationPorts": {
+                                                                        "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/destinationPorts",
+                                                                        "type": "array",
+                                                                        "title": "The destinationPorts schema",
+                                                                        "description": "An explanation about the purpose of this instance.",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/destinationPorts/items",
+                                                                            "anyOf": [
+                                                                                {
+                                                                                    "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/destinationPorts/items/anyOf/0",
+                                                                                    "type": "integer",
+                                                                                    "title": "The first anyOf schema",
+                                                                                    "description": "An explanation about the purpose of this instance."
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "ipProtocols": {
+                                                                        "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/ipProtocols",
+                                                                        "type": "array",
+                                                                        "title": "The ipProtocols schema",
+                                                                        "description": "An explanation about the purpose of this instance.",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/ipProtocols/items",
+                                                                            "anyOf": [
+                                                                                {
+                                                                                    "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/ipProtocols/items/anyOf/0",
+                                                                                    "type": "string",
+                                                                                    "title": "The first anyOf schema",
+                                                                                    "description": "An explanation about the purpose of this instance."
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "name": {
+                                                                        "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/name",
+                                                                        "type": "string",
+                                                                        "title": "The name schema",
+                                                                        "description": "An explanation about the purpose of this instance."
+                                                                    },
+                                                                    "sourceAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/sourceAddresses",
+                                                                        "type": "array",
+                                                                        "title": "The sourceAddresses schema",
+                                                                        "description": "An explanation about the purpose of this instance.",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/sourceAddresses/items",
+                                                                            "anyOf": [
+                                                                                {
+                                                                                    "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/sourceAddresses/items/anyOf/0",
+                                                                                    "type": "string",
+                                                                                    "title": "The first anyOf schema",
+                                                                                    "description": "An explanation about the purpose of this instance."
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "translatedAddress": {
+                                                                        "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/translatedAddress",
+                                                                        "type": "string",
+                                                                        "title": "The translatedAddress schema",
+                                                                        "description": "An explanation about the purpose of this instance."
+                                                                    },
+                                                                    "destinationAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/destinationAddresses",
+                                                                        "type": "array",
+                                                                        "title": "The destinationAddresses schema",
+                                                                        "description": "An explanation about the purpose of this instance.",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/destinationAddresses/items",
+                                                                            "anyOf": [
+                                                                                {
+                                                                                    "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/destinationAddresses/items/anyOf/0",
+                                                                                    "type": "string",
+                                                                                    "title": "The first anyOf schema",
+                                                                                    "description": "An explanation about the purpose of this instance."
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "translatedPort": {
+                                                                        "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/rules/items/anyOf/translatedPort",
+                                                                        "type": "integer",
+                                                                        "title": "The translatedPort schema",
+                                                                        "description": "An explanation about the purpose of this instance."
+                                                                    }
+                                                                },
+                                                                "additionalProperties": false
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                "name": {
+                                                    "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/name",
+                                                    "type": "string",
+                                                    "title": "The name schema",
+                                                    "description": "An explanation about the purpose of this instance."
+                                                },
+                                                "type": {
+                                                    "$id": "#/ruleCollectionGroups/items/anyOf/ruleCollections/items/anyOf/type",
+                                                    "type": "string",
+                                                    "title": "The type schema",
+                                                    "description": "An explanation about the purpose of this instance."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

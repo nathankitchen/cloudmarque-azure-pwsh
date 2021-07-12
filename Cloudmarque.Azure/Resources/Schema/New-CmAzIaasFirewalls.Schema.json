@@ -192,6 +192,60 @@
                                 "enum": ["Standard", "Premium"],
                                 "description": "Firewall Sku"
                             },
+                            "ruleCollectionGroupsSettingFiles": {
+                                "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroupsSettingFiles",
+                                "type": ["array", "null"],
+                                "title": "RuleCollectionGroupsSettingFiles",
+                                "description": "Path to files containing firewall rules."
+                            },
+                            "threatIntelMode": {
+                                "$id": "#/firewallPolicies/items/allOf/threatIntelMode",
+                                "type": ["string", "null"],
+                                "title": "ThreatIntelMode",
+                                "enum": ["Alert", "Deny", "Off", null],
+                                "description": "Operation mode for Threat Intelligence."
+                            },
+                            "threatIntelWhitelist": {
+                                "$id": "#/firewallPolicies/items/allOf/threatIntelWhitelist",
+                                "type": ["object", "null"],
+                                "title": "threatIntelWhitelist",
+                                "properties": {
+                                    "ipAddresses": {
+                                        "$id": "#/firewallPolicies/items/allOf/threatIntelWhitelist/ipAddresses",
+                                        "type": ["array", "null"],
+                                        "title": "IpAddresses",
+                                        "description": "Contains white listed Ip addresses."
+                                    },
+                                    "fqdns": {
+                                        "$id": "#/firewallPolicies/items/allOf/threatIntelWhitelist/fqdns",
+                                        "type": ["array", "null"],
+                                        "title": "Fqdns",
+                                        "description": "Contains white listed Fqdns."
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "dnsSettings": {
+                                "$id": "#/firewallPolicies/items/allOf/dnsSettings",
+                                "type": ["object", "null"],
+                                "title": "dnsSettings",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "servers": {
+                                        "$id": "#/firewallPolicies/items/allOf/dnsSettings/servers",
+                                        "type": ["array", "null"],
+                                        "title": "Servers",
+                                        "description": "Contains list of DNS servers."
+                                    },
+                                    "enableProxy": {
+                                        "$id": "#/firewallPolicies/items/allOf/dnsSettings/enableProxy",
+                                        "type": ["boolean", "null"],
+                                        "title": "EnableProxy",
+                                        "description": "Configurs Azure Firewall to act as a DNS proxy."
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
                             "service": {
                                 "$id": "#/firewallPolicies/items/allOf/service",
                                 "type": ["object", "null"],
@@ -214,6 +268,12 @@
                                                 "$id": "#/firewallPolicies/items/allOf/service/dependencies/resourceGroup",
                                                 "type": ["string", "null"],
                                                 "title": "ResourceGroup",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            },
+                                            "baseFirewallPolicy": {
+                                                "$id": "#/firewallPolicies/items/allOf/service/dependencies/baseFirewallPolicy",
+                                                "type": ["string", "null"],
+                                                "title": "BaseFirewallPolicy",
                                                 "description": "Local overriding dependency value to fetch existing resource type."
                                             }
                                         },

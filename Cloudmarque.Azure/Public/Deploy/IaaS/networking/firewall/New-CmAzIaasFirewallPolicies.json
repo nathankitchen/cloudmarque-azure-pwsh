@@ -54,7 +54,7 @@
                                 "dnsSettings": "[parameters('FirewallPolicy').dnsSettings]"
                             }
                         },
-                        {   "condition": "[not(empty(parameters('FirewallPolicy').ruleCollectionGroups))]",
+                        {   "condition": "[not(equals(parameters('FirewallPolicy').ruleCollectionGroups[0].name, 'none'))]",
                             "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
                             "apiVersion": "2020-11-01",
                             "name": "[concat(parameters('FirewallPolicy').name, '/', parameters('FirewallPolicy').ruleCollectionGroups[copyIndex('RuleCollectionGroupsCopy')].name)]",

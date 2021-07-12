@@ -28,16 +28,17 @@ firewallPolicies:
       firewallPolicy: Iaas-Test-Firewall-Policy1
   ruleCollectionGroupsSettingFiles:
   - ./networking/firewall/rulesCollection/alpha.yml
+  # ruleCollectionGroups:
 
-# - name: Iaas-Test-Firewall-Policy2
-#   sku: Standard                                         # Standard / Premium
-#   location: UK South
-#   service:
-#     dependencies:
-#       resourceGroup: Iaas-Test-Firewall-Rg
-#       vnet:                                             # Optional - provide this to deploy policy in same rg.
-#     publish:
-#       firewallPolicy: Iaas-Test-Firewall-Policy2
+- name: Iaas-Test-Firewall-Policy2
+  sku: Standard                                         # Standard / Premium
+  location: UK South
+  service:
+    dependencies:
+      resourceGroup: Iaas-Test-Firewall-Rg
+      vnet:                                             # Optional - provide this to deploy policy in same rg.
+    publish:
+      firewallPolicy: Iaas-Test-Firewall-Policy2
 
 firewalls:
 - name: Iaas-Test-Firewall-1
@@ -54,4 +55,5 @@ firewalls:
 # Notes:
 # 1. Firewall and vnets needs to be in same resource group and location.
 # 2. Firewall policy and firewall needs to have same sku.
+# 3. Firewall policy containing DNAT rules cannot be attached to new firewall.
 

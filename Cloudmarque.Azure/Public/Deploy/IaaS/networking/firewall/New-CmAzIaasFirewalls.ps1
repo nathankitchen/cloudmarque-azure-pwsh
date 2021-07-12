@@ -47,11 +47,9 @@ function New-CmAzIaasFirewalls {
 
 		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
 
-		# $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
-		$SettingsObject = Get-CmAzSettingsFile -path $SettingsFile
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create firewalls")) {
-
 
 			foreach ($firewallPolicy in $SettingsObject.firewallPolicies) {
 
@@ -72,12 +70,12 @@ function New-CmAzIaasFirewalls {
 				$firewallPolicy.resourceGroupName = $resourceGroup.resourceGroupName ? $resourceGroup.resourceGroupName : $vnet.resourceGroupName
 				$firewallPolicy.location ??= $vnet.location ? $vnet.location : $resourceGroup.location
 				$firewallPolicy.threatIntelMode ??= "Alert"
-				$firewallPolicy.threatIntelWhitelist ??= @{ipAddresses = @(); fqdns = @()}
+				$firewallPolicy.threatIntelWhitelist ??= @{ipAddresses = @(); fqdns = @() }
 				$firewallPolicy.dnsSettings ??= @{}
 				$firewallPolicy.ruleCollectionGroups ??= @()
 
 				foreach ($SettingsFile in $firewallPolicy.ruleCollectionGroupsSettingFiles) {
-					$firewallPolicy.ruleCollectionGroups += (Get-CmAzSettingsFile -Path $SettingsFile -Verbose).ruleCollectionGroup
+					$firewallPolicy.ruleCollectionGroups += (Get-CmAzSettingsFile -Path $SettingsFile -Verbose).ruleCollectionGroups
 				}
 
 				foreach ($ruleCollection in $firewallPolicy.ruleCollectionGroups.ruleCollections) {
@@ -103,8 +101,7 @@ function New-CmAzIaasFirewalls {
 						}
 					}
 
-					foreach ($rule in $ruleCollection.rules ){
-
+					foreach ($rule in $ruleCollection.rules ) {
 						$rule.ruleType = $ruleType
 					}
 				}
@@ -113,6 +110,10 @@ function New-CmAzIaasFirewalls {
 					$firewallPolicy.ruleCollectionGroups = @($firewallPolicy.ruleCollectionGroups)
 				}
 
+				if (!$firewallPolicy.ruleCollectionGroups) {
+					$firewallPolicy.ruleCollectionGroups = @(@{name = 'none'; ruleCollections = @() })
+
+				}
 				$firewallPolicy.name = Get-CmAzResourceName -Resource "firewallPolicy" `
 					-Architecture "IaaS" `
 					-Location $firewallPolicy.location `
@@ -173,26 +174,27 @@ function New-CmAzIaasFirewalls {
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "firewall" -ResourceServiceContainer $firewall
 			}
 
-			Write-Verbose "Configuring firewalls..."
+			if ($SettingsObject.firewalls) {
 
-			$location = $SettingsObject.firewalls[0].location
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasFirewalls"
+				Write-Verbose "Configuring firewalls..."
 
-			New-AzDeployment `
-				-Name $deploymentName `
-				-TemplateFile $PSScriptRoot\New-CmAzIaasFirewalls.json `
-				-Location $location `
-				-firewalls $SettingsObject.firewalls
+				$location = $SettingsObject.firewalls[0].location
+				$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasFirewalls"
+
+				New-AzDeployment `
+					-Name $deploymentName `
+					-TemplateFile $PSScriptRoot\New-CmAzIaasFirewalls.json `
+					-Location $location `
+					-firewalls $SettingsObject.firewalls
+			}
 		}
 
-		if ($SettingsObject.firewalls) {
+		Write-Verbose "Started tagging for firewall policies..."
+		Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $SettingsObject.firewallPolicies.name
 
-			Write-Verbose "Started tagging for firewall policies..."
-			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $SettingsObject.firewallPolicies.name
+		Write-Verbose "Started tagging for firewall..."
+		Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $SettingsObject.firewalls.name
 
-			Write-Verbose "Started tagging for firewall..."
-			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $SettingsObject.firewalls.name
-		}
 	}
 	catch {
 		$PSCmdlet.ThrowTerminatingError($PSItem)
