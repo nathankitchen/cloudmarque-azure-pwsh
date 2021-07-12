@@ -28,7 +28,7 @@ firewallPolicies:
       firewallPolicy: Iaas-Test-Firewall-Policy1
   ruleCollectionGroupsSettingFiles:
   - ./networking/firewall/rulesCollection/alpha.yml
-  # ruleCollectionGroups:
+  ruleCollectionGroups:
 
 - name: Iaas-Test-Firewall-Policy2
   sku: Standard                                         # Standard / Premium

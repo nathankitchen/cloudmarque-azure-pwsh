@@ -2,22 +2,22 @@ ruleCollectionGroups:
 - name: Iaas-RuleCollection-Group
   priority: 100
   ruleCollections:
-  # - name: Iaas-RuleCollection-Dnat
-  #   type: dnat
-  #   priority: 101
-  #   rules:
-  #   - name: Iaas-RuleCollection-Dnat-1
-  #     translatedAddress: 192.168.10.0
-  #     translatedPort: 8080
-  #     ipProtocols:
-  #       - TCP
-  #     sourceAddresses:
-  #       -  '*'
-  #     destinationAddresses:
-  #       -  0.0.0.0
-  #     destinationPorts:
-  #       -  8080
-  #     sourceIpGroups: []
+  - name: Iaas-RuleCollection-Dnat
+    type: dnat
+    priority: 101
+    rules:
+    - name: Iaas-RuleCollection-Dnat-1
+      translatedAddress: 192.168.10.0
+      translatedPort: 8080
+      ipProtocols:
+        - TCP
+      sourceAddresses:
+        -  '*'
+      destinationAddresses:
+        -  0.0.0.0
+      destinationPorts:
+        -  8080
+      sourceIpGroups: []
 
   - name: Iaas-RuleCollection-Net
     type: network

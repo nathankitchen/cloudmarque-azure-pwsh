@@ -74,8 +74,10 @@ function New-CmAzIaasFirewalls {
 				$firewallPolicy.dnsSettings ??= @{}
 				$firewallPolicy.ruleCollectionGroups ??= @()
 
-				foreach ($SettingsFile in $firewallPolicy.ruleCollectionGroupsSettingFiles) {
-					$firewallPolicy.ruleCollectionGroups += (Get-CmAzSettingsFile -Path $SettingsFile -Verbose).ruleCollectionGroups
+				foreach ($ruleCollectionGroupsSettingFile in $firewallPolicy.ruleCollectionGroupsSettingFiles) {
+					$firewallPolicy.ruleCollectionGroups += (Get-Settings -SettingsFile $ruleCollectionGroupsSettingFile `
+																 -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath) `
+																 -SubSchema 'New-CmAzIaasFirewalls.RuleCollectionGroups.SubSchema.json' ).ruleCollectionGroups
 				}
 
 				foreach ($ruleCollection in $firewallPolicy.ruleCollectionGroups.ruleCollections) {

@@ -198,6 +198,9 @@
                                 "title": "RuleCollectionGroupsSettingFiles",
                                 "description": "Path to files containing firewall rules."
                             },
+                            "ruleCollectionGroups": {
+                                "ref": "Subschema/New-CmAzIaasFirewalls.RuleCollectionGroups.SubSchema.json#/New-CmAzIaasFirewalls.RulesCollectionGroups"
+                            },
                             "threatIntelMode": {
                                 "$id": "#/firewallPolicies/items/allOf/threatIntelMode",
                                 "type": ["string", "null"],
