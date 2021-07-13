@@ -17,6 +17,7 @@ groups:
     - name: High-CPU-Crt                                                                              # Optional - It is recommended to use name for more understandable alert names.
       definition: High_CPU_Usage_Percent
       severity: Critical
+      monitorOnPrem: false
     - name: High-CPU-Wrn
       definition: High_CPU_Usage_Percent_Range
     - name: Low-Dsk-Crt
@@ -43,6 +44,22 @@ groups:
       definition: VM_Critical_Or_Security_Updates_Missing
     - name: Reboot
       definition: VM_Reboot
+
+    # - name: CustomAlertExample
+    #   description: Critically high average CPU percentage usage.
+    #   threshold:
+    #     operator: greaterThan
+    #     value: 0
+    #   suppress:
+    #     enabled: false
+    #     mins: 10000
+    #     windows: 0
+    #   schedule:
+    #     frequencyInMinutes: 10
+    #     timeWindowInMinutes: 60
+    #   severity: Critical
+    #   query: |-
+    #     InsightsMetrics
 
 ## DEFAULT SQL ALERT RULE SET ##
 # - name: SQLStandard

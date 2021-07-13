@@ -130,13 +130,10 @@
                                                             {
                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf",
                                                                 "type": "object",
-                                                                "required": [
-                                                                    "definition"
-                                                                ],
                                                                 "properties": {
                                                                     "definition": {
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/definition",
-                                                                        "type": "string",
+                                                                        "type": ["string", "null"],
                                                                         "title": "Definition",
                                                                         "description": "Name of a pre-existing definition of a log alert."
                                                                     },
@@ -158,14 +155,14 @@
                                                                         "title": "Suppress",
                                                                         "description": "Set the suppression time on a triggered alert.",
                                                                         "required": [
-                                                                            "enable"
+                                                                            "enabled"
                                                                         ],
                                                                         "properties": {
-                                                                            "enable": {
+                                                                            "enabled": {
                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold/enable",
                                                                                 "type": "boolean",
-                                                                                "title": "Enable",
-                                                                                "description": "Time (in minutes) for which Alerts should be throttled or suppressed."
+                                                                                "title": "Enabled",
+                                                                                "description": "If alert suppression is enabled or not."
                                                                             },
                                                                             "mins": {
                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/threshold/mins",

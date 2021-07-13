@@ -55,59 +55,106 @@ function New-CmAzMonitorLogAlerts {
 
 				foreach ($alertSet in $SettingsObject.groups.alertSets) {
 
+					$query = $standardDefinitions.Queries.($alertSet.type)
+
 					for ($i = 0; $i -lt $alertSet.alerts.count; $i++) {
 
 						$alert = $alertSet.alerts[$i]
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actionGroups" -ResourceServiceContainer $alert -IsDependency
 
-						$definition = $standardDefinitions.Queries.$($alertSet.type) | Where-Object { $_.definition -eq $alert.definition }
+						if ($alert.definition) {
 
-						if (!$definition) {
-							Write-Error "$($alert.definition) is not a valid definition..." -Category InvalidArgument -CategoryTargetName "definition"
-						}
+    						$definition = $query | Where-Object { $_.definition -eq $alert.definition }
 
-						if ($definition.defaults) {
+							if (!$definition) {
+								Write-Error "$($alert.definition) is not a valid definition..." -Category InvalidArgument -CategoryTargetName "definition"
+							}
 
-							foreach ($default in $definition.defaults.GetEnumerator()) {
+							if (!$alert.schedule) {
+								$alert.schedule = $definition.schedule
+							}
 
-								$placeHolder = "@@@$($default.name)@@@"
+							if (!$alert.severity) {
+								$alert.severity = $definition.severity
+							} 
 
-								if (!$alert.parameters.$($default.name)) {
+							if (!$alert.suppress) {
+								$alert.suppress = $definition.suppress
+							}
 
-									Write-Verbose "$($default.name): No parameter found. Setting default value..."
-									$value = $default.value
+							if (!$alert.threshold) {
+								$alert.threshold = $definition.threshold
+							}
+
+							if (!$alert.description) {
+								$alert.description = $definition.description
+							}
+
+							if (!$alert.description) {
+								$alert.description = $definition.description
+							}
+
+							if (!$alert.query) {
+
+								foreach ($default in $definition.defaults?.GetEnumerator()) {
+
+									$placeHolder = "@@@$($default.name)@@@"
+	
+									if (!$alert.parameters.$($default.name)) {
+										$value = $default.value
+									}
+									else {
+										$value = $alert.parameters.$($default.name)
+									}
+	
+									$definition.query = $definition.query.replace($placeHolder, $value)
 								}
-								else {
-									$value = $alert.parameters.$($default.name)
-								}
 
-								$definition.query = $definition.query.replace($placeHolder, $value)
+								$alert.query = $definition.query
 							}
 						}
 
-						$alert.enabled ??= $true
 
-						$alert.schedule ??= $definition.schedule
+						$errorMessage = "Please provide a valid {0} for alert {1}"
 
-						$alert.suppress ??= $definition.suppress
+						if (!$alert.schedule) {
+							Write-Error ($errorMessage -f "schedule", $alert.name) -Category InvalidArgument -CategoryTargetName "schedule"
+						}
 
+						if ($null -eq $alert.severity) {
+							Write-Error ($errorMessage -f "severity", $alert.name) -Category InvalidArgument -CategoryTargetName "severity"
+						}
+						elseif (!$standardDefinitions.Severity.GetEnumerator().name -contains $alert.severity) {
+							Write-Error "Please use an existing severity definition for alert $($alert.name)" -Category InvalidArgument -CategoryTargetName "severity"
+						}
+
+						if (!$alert.suppress) {
+							Write-Error ($errorMessage -f "suppress", $alert.name) -Category InvalidArgument -CategoryTargetName "supress"
+						}
+
+						if (!$alert.threshold) {
+							Write-Error ($errorMessage -f "threshold", $alert.name) -Category InvalidArgument -CategoryTargetName "threshold"
+						}
+
+						if (!$alert.description) {
+							Write-Error ($errorMessage -f "description", $alert.name) -Category InvalidArgument -CategoryTargetName "description"
+						}
+
+						if (!$alert.query) {
+							Write-Error ($errorMessage -f "query", $alert.name) -Category InvalidArgument -CategoryTargetName "query"
+						}
+						
 						if (!$alert.suppress -or !$alert.suppress.enabled) {
 							$alert.suppress = ""
 						}
 
-						$alert.threshold ??= $definition.threshold
-
-						if ($standardDefinitions.Severity.GetEnumerator().Name -contains $alert.severity) {
-							$alert.severity = $standardDefinitions.Severity.$($alert.severity)
-						}
-						else {
-							Write-Verbose "Setting default severity..."
-							$alert.severity = $definition.severity
+						if (!$alert.monitorOnPrem) {
+							$alert.query += "`n| where isnotempty(_ResourceId) and isnotnull(_ResourceId)"
 						}
 
-						$alert.description ??= $definition.description
-
+						$alert.enabled ??= $true
+						$alert.severity = $standardDefinitions.Severity.$($alert.severity)
 						$alert.actionGroupInfo = @{ actionGroup = @(); }
 
 						foreach ($actionGroup in $alert.service.dependencies.actionGroups) {
@@ -137,7 +184,7 @@ function New-CmAzMonitorLogAlerts {
 						$alerts += @{
 							name        = $alertName;
 							enabled     = $alert.enabled;
-							query       = $definition.query;
+							query       = $alert.query;
 							suppress    = $alert.suppress;
 							schedule    = $alert.schedule;
 							aznsAction  = $alert.actionGroupInfo;
