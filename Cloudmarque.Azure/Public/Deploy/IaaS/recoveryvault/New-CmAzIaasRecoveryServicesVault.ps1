@@ -58,7 +58,7 @@ function New-CmAzIaasRecoveryServicesVault {
 
     $ErrorActionPreference = "Stop"
 
-    Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+    Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
 
     $cmdletName = Get-CurrentCmdletName -ScriptRoot $PSCommandPath
 
@@ -66,7 +66,6 @@ function New-CmAzIaasRecoveryServicesVault {
     $PolicySettingsObject = Get-Settings -SettingsFile $PolicySettingsFile -SettingsObject $PolicySettingsObject -CmdletName "New-CmAzIaasRecoveryServicesPolicy"
 
     if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Backup Vaults")) {
-
 
         Write-Verbose "Generating standardised Resource Group Name from input: $($SettingsObject.resourceGroupName)"
         $resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Location $SettingsObject.location -Name $SettingsObject.resourceGroupName
@@ -147,5 +146,7 @@ function New-CmAzIaasRecoveryServicesVault {
         else {
             Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupName
         }
+
+        Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
     }
 }

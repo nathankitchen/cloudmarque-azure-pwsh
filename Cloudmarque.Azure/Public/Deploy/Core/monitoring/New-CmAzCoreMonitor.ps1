@@ -43,7 +43,7 @@ function New-CmAzCoreMonitor {
 
 	try {
 
-		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
 
 		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
@@ -218,7 +218,7 @@ function New-CmAzCoreMonitor {
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds @($resourceGroupName)
 
-			Write-Verbose "Finished!"
+			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}
 	}
 	catch {

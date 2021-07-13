@@ -79,7 +79,7 @@
 
 	try {
 
-		Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create networking solution")) {
 
@@ -1231,7 +1231,10 @@
 			$resourcesToSet += $resourceGroupObjectArray.zones.DNS
 
 			Write-Verbose "Started tagging for resources..."
+			
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
+		
+			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}
 	}
 	catch {

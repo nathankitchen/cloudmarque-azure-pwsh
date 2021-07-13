@@ -1,9 +1,16 @@
-function Get-InvocationInfo() {
+function Write-CommandStatus() {
 
     param(
         [parameter(Mandatory = $true)]
-        [string]$CommandName
+        [string]$CommandName,
+        [boolean]$Start = $true
     )
 
-    Write-Verbose "Invoking $CommandName"
+    if ($Start) {
+        Write-Verbose "Invoking $CommandName"
+    }
+    else {
+        Write-Verbose "Finished $CommandName!"
+    }
+
 }

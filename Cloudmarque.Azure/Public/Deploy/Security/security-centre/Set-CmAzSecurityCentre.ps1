@@ -40,7 +40,7 @@ function Set-CmAzSecurityCentre {
 
     try {
 
-        Get-InvocationInfo -CommandName $MyInvocation.MyCommand.Name
+        Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
 
         $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
@@ -68,7 +68,7 @@ function Set-CmAzSecurityCentre {
                 -SecurityContacts $SettingsObject.SecurityContacts `
                 -Workspace $workspace
 
-            Write-Verbose "Finished!"
+            Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
         }
     }
     catch {
