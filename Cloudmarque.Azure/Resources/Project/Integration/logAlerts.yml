@@ -41,7 +41,7 @@ groups:
     - name: OOD-Antimalware
       definition: VM_Antimalware_Not_Up_To_Date
     - name: Missing-Updates
-      definition: VM_Critical_Or_Security_Updates_Missing
+      definition: VM_Updates_Failed
     - name: Reboot
       definition: VM_Reboot
 

@@ -180,7 +180,7 @@ Queries:
       windows: 0
     schedule:
       frequencyInMinutes: 5
-      timeWindowInMinutes: 15
+      timeWindowInMinutes: 30
     severity: Warning
     defaults:
       _timeWindow: 15m
@@ -226,8 +226,8 @@ Queries:
       | summarize arg_max(TimeGenerated,*) by ResourceId
       | where ProtectionStatus == "Signatures out of date"
 
-  - definition: VM_Critical_Or_Security_Updates_Missing
-    description: VM does not have the latest critical and security updates.
+  - definition: VM_Updates_Failed
+    description: Latest batch of updates for vm have not been successful.
     threshold:
       operator: greaterThan
       value: 0
@@ -237,12 +237,12 @@ Queries:
       windows: 0
     schedule:
       frequencyInMinutes: 360
-      timeWindowInMinutes: 360
+      timeWindowInMinutes: 1440
     severity: Warning
     query: |-
-      Update
-      | where Classification in ("Security Updates", "Critical Updates")
-      | where UpdateState == "Needed" and Optional == false and Approved == true
+      UpdateRunProgress
+      | where InstallationStatus in ('Failed', 'FailedToStart', 'InstallFailed', 'MaintenanceWindowExceeded')
+      | summarize by bin(TimeGenerated, 7h), _ResourceId
 
   - definition: VM_Reboot
     description: VM/s have been rebooted.
