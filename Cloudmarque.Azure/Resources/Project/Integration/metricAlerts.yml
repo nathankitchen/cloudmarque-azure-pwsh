@@ -176,6 +176,28 @@ groups:
   #         frequencyInMinutes: 1                                # evaluationFrequency
   #         timeWindowInMinutes: 5                               # windowSize
 
+  # - name: StorageStandard
+  #   alertSets:
+  #   - name:                                                                             # Optional - It is recommended to use name when using multiple sets of alerts.
+  #     resourceType: Microsoft.StorageSync/storageSyncServices
+  #     alerts:
+  #     - name: Storage-Sync-Files-Not-Synced                                             # Optional - It is recommended to use name for more understandable alert names.
+  #       metricName: StorageSyncSyncSessionPerItemErrorsCount
+  #       targetResourceLocation: UK South
+  #       severity: Error
+  #       threshold:
+  #         operator: GreaterThan
+  #         value: 0
+  #         timeAggregation: Total
+  #       service:
+  #         dependencies:
+  #           actionGroups: [Core-Test-Ag1]
+  #           targetResources: [test1]
+  #         publish:
+  #           metricAlert: Mon-Test-Ma1
+  #       schedule:
+  #         frequencyInMinutes: 1                                # evaluationFrequency
+  #         timeWindowInMinutes: 15                              # windowSize
 
 # Notes:
 # 1. Refer to https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-supported
