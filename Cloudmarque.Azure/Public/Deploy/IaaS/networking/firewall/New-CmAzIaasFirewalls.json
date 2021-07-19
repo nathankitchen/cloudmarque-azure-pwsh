@@ -1,0 +1,101 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Firewalls": {
+            "type": "Array"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/Deployments",
+            "apiVersion": "2019-10-01",
+            "name": "[take(concat('cm_', parameters('Firewalls')[copyIndex('FirewallsCopy')].name, copyIndex('FirewallsCopy')), 64)]",
+            "resourceGroup": "[parameters('Firewalls')[copyIndex('FirewallsCopy')].resourceGroupName]",
+            "copy": {
+                "name": "FirewallsCopy",
+                "count": "[length(parameters('Firewalls'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "Firewall": {
+                        "value": "[parameters('Firewalls')[copyIndex('FirewallsCopy')]]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "Firewall": {
+                            "type": "Object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "condition": "[not(empty(parameters('Firewall').firewallSubnetPrefix))]",
+                            "type": "Microsoft.Network/virtualNetworks/subnets",
+                            "apiVersion": "2019-04-01",
+                            "name": "[concat(parameters('Firewall').vnetName, '/', 'AzureFirewallSubnet')]",
+                            "location": "[parameters('Firewall').location]",
+                            "properties": {
+                                "addressPrefix": "[parameters('Firewall').firewallSubnetPrefix]"
+                            }
+                        },
+                        {
+                            "apiVersion": "2019-02-01",
+                            "type": "Microsoft.Network/publicIpAddresses",
+                            "name": "[parameters('Firewall').publicIpAddressName]",
+                            "location": "[parameters('Firewall').location]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "zones": [],
+                            "properties": {
+                                "publicIPAllocationMethod": "Static"
+                            },
+                            "tags": {}
+                        },
+                        {
+                            "apiVersion": "2020-05-01",
+                            "type": "Microsoft.Network/azureFirewalls",
+                            "name": "[parameters('Firewall').name]",
+                            "location": "[parameters('Firewall').location]",
+                            "zones": "[parameters('Firewall').zones]",
+                            "dependsOn": [
+                                "[resourceId(parameters('Firewall').resourceGroupName, 'Microsoft.Network/publicIpAddresses', parameters('Firewall').publicIpAddressName)]"
+                            ],
+                            "tags": {
+                                "cm-sevice": "[parameters('Firewall').service.publish.firewall]"
+                            },
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "[parameters('Firewall').publicIpAddressName]",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[resourceId(parameters('Firewall').resourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', parameters('Firewall').vnetName, 'AzureFirewallSubnet')]"
+                                            },
+                                            "publicIpAddress": {
+                                                "id": "[resourceId(parameters('Firewall').resourceGroupName, 'Microsoft.Network/publicIPAddresses', parameters('Firewall').publicIpAddressName)]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "sku": {
+                                    "tier": "[parameters('Firewall').sku]"
+                                },
+                                "firewallPolicy": {
+                                    "id": "[resourceId(parameters('Firewall').firewallPolicy.resourceGroupName, 'Microsoft.Network/firewallPolicies', parameters('Firewall').firewallPolicy.name)]"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

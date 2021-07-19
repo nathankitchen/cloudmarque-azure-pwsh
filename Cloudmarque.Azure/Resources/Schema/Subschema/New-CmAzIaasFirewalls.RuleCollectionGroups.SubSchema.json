@@ -1,0 +1,334 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzIaasFirewalls.RulesCollectionGroups",
+    "type": "object",
+    "title": "New-CmAzIaasFirewalls.RulesCollectionGroups",
+    "description": "Settings for RulesCollectionGroups.",
+    "properties": {
+        "ruleCollectionGroups": {
+            "$id": "#/ruleCollectionGroups",
+            "type": ["array", "null"],
+            "title": "ruleCollectionGroups",
+            "description": "Container for configuration details of rules to added to Firewall Policy.",
+            "minItems": 1,
+            "items": {
+                "$id": "#/ruleCollectionGroups/items",
+                "allOf": [
+                    {
+                        "$id": "#/ruleCollectionGroups/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "priority"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/ruleCollectionGroups/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Name of rule collection group."
+                            },
+                            "priority": {
+                                "$id": "#/ruleCollectionGroups/items/allOf/priority",
+                                "type": "number",
+                                "title": "priority",
+                                "minimum": 100,
+                                "maximum": 1000,
+                                "description": "Priority of rule collection."
+                            },
+                            "ruleCollections": {
+                                "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections",
+                                "type":  ["array", "null"],
+                                "title": "ruleCollections",
+                                "description": "Collection of firewall rules.",
+                                "items": {
+                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/",
+                                            "type": "object",
+                                            "required": [
+                                                "priority",
+                                                "rules",
+                                                "name",
+                                                "type"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "name",
+                                                    "description": "Name of rule collection."
+                                                },
+                                                "type": {
+                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/type",
+                                                    "type": "string",
+                                                    "title": "type",
+                                                    "enum": ["dnat", "network", "application"],
+                                                    "description": "Type of rule collection."
+                                                },
+                                                "priority": {
+                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/priority",
+                                                    "type": "integer",
+                                                    "title": "priority",
+                                                    "description": "Priority of rule collection."
+                                                },
+                                                "rules": {
+                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules",
+                                                    "type": "array",
+                                                    "title": "rules",
+                                                    "additionalItems": false,
+                                                    "items": {
+                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items",
+                                                        "oneOf": [
+                                                            {
+                                                                "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/",
+                                                                "type": ["object", "null"],
+                                                                "title": "Dnat",
+                                                                "required": [
+                                                                    "destinationPorts",
+                                                                    "ipProtocols",
+                                                                    "name",
+                                                                    "sourceAddresses",
+                                                                    "translatedAddress",
+                                                                    "destinationAddresses",
+                                                                    "translatedPort"
+                                                                ],
+                                                                "properties": {
+                                                                    "sourceIpGroups": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/sourceIpGroups",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "sourceIpGroups",
+                                                                        "description": "Group of source Ips."
+                                                                    },
+                                                                    "destinationPorts": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/destinationPorts",
+                                                                        "type": "array",
+                                                                        "title": "destinationPorts",
+                                                                        "description": "Destination ports."
+                                                                    },
+                                                                    "ipProtocols": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/ipProtocols",
+                                                                        "type": "array",
+                                                                        "title": "ipProtocols",
+                                                                        "description": "Ip protocol to be TCP or UDP."
+                                                                    },
+                                                                    "name": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/name",
+                                                                        "type": "string",
+                                                                        "title": "name",
+                                                                        "description": "Name of DNAT rule."
+                                                                    },
+                                                                    "sourceAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/sourceAddresses",
+                                                                        "type": "array",
+                                                                        "title": "sourceAddresses",
+                                                                        "description": "Source Ip addresses."
+                                                                    },
+                                                                    "translatedAddress": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/translatedAddress",
+                                                                        "type": "string",
+                                                                        "title": "translatedAddress",
+                                                                        "description": "Translated Ip addresses."
+                                                                    },
+                                                                    "destinationAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/destinationAddresses",
+                                                                        "type": "array",
+                                                                        "title": "destinationAddresses",
+                                                                        "description": "Destination Ip addresses."
+                                                                    },
+                                                                    "translatedPort": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/translatedPort",
+                                                                        "type": "integer",
+                                                                        "title": "translatedPort",
+                                                                        "description": "Translated ports."
+                                                                    }
+                                                                },
+                                                                "additionalProperties": false
+                                                            },
+                                                            {
+                                                                "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/",
+                                                                "type": "object",
+                                                                "title": "network",
+                                                                "required": [
+                                                                    "destinationPorts",
+                                                                    "ipProtocols",
+                                                                    "name",
+                                                                    "sourceAddresses",
+                                                                    "destinationAddresses"
+                                                                ],
+                                                                "properties": {
+                                                                    "sourceIpGroups": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/sourceIpGroups",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "sourceIpGroups",
+                                                                        "description": "Group of source Ips."
+                                                                    },
+                                                                    "destinationPorts": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/destinationPorts",
+                                                                        "type": "array",
+                                                                        "title": "destinationPorts",
+                                                                        "description": "Destination ports."
+                                                                    },
+                                                                    "ipProtocols": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/ipProtocols",
+                                                                        "type": "array",
+                                                                        "title": "ipProtocols",
+                                                                        "description": "Ip protocol to be TCP or UDP."
+                                                                    },
+                                                                    "name": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/name",
+                                                                        "type": "string",
+                                                                        "title": "name",
+                                                                        "description": "Name of network rule."
+                                                                    },
+                                                                    "sourceAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/sourceAddresses",
+                                                                        "type": "array",
+                                                                        "title": "sourceAddresses",
+                                                                        "description": "Source Ip addresses."
+                                                                    },
+                                                                    "destinationIpGroups": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/destinationIpGroups",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "destinationIpGroups",
+                                                                        "description": "Group of destination Ips."
+                                                                    },
+                                                                    "destinationAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/destinationAddresses",
+                                                                        "type": "array",
+                                                                        "title": "destinationAddresses",
+                                                                        "description": "Destination Ip addresses."
+                                                                    },
+                                                                    "destinationFqdns": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/destinationFqdns",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "destinationFqdns",
+                                                                        "description": "Destination fully qualified domain names."
+                                                                    }
+                                                                },
+                                                                "additionalProperties": false
+                                                            },
+                                                            {
+                                                                "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application",
+                                                                "type": "object",
+                                                                "title": "Application rules",
+                                                                "description": "Contains application firewall rules.",
+                                                                "required": [
+                                                                    "name",
+                                                                    "protocols",
+                                                                    "targetFqdns",
+                                                                    "terminateTLS",
+                                                                    "sourceAddresses"
+                                                                 ],
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/name",
+                                                                        "type": "string",
+                                                                        "title": "name",
+                                                                        "description": "Name of application firewall rule."
+                                                                     },
+                                                                    "protocols": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols",
+                                                                        "type": "array",
+                                                                        "title": "protocols",
+                                                                        "description": "Defines protocol.",
+                                                                        "items": {
+                                                                            "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols/items",
+                                                                            "allOf": [
+                                                                                 {
+                                                                                    "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols/items/allOf",
+                                                                                    "type": "object",
+                                                                                    "required": [
+                                                                                        "protocolType",
+                                                                                        "port"
+                                                                                     ],
+                                                                                    "properties": {
+                                                                                        "protocolType": {
+                                                                                            "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols/items/allOf/protocolType",
+                                                                                            "type": "string",
+                                                                                            "title": "protocolType",
+                                                                                            "description": "Protocol Type."
+                                                                                         },
+                                                                                        "port": {
+                                                                                            "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols/items/allOf/port",
+                                                                                            "type": "integer",
+                                                                                            "title": "port",
+                                                                                            "description": "Application listen port."
+                                                                                         }
+                                                                                     },
+                                                                                    "additionalProperties": true
+                                                                                 }
+                                                                             ]
+                                                                         }
+                                                                     },
+                                                                    "targetFqdns": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/targetFqdns",
+                                                                        "type": "array",
+                                                                        "title": "targetFqdns",
+                                                                        "description": "Target fully qualified domain name."
+                                                                     },
+                                                                    "terminateTLS": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/terminateTLS",
+                                                                        "type": "boolean",
+                                                                        "title": "terminateTLS",
+                                                                        "description": "Enforce TLS."
+                                                                     },
+                                                                    "sourceAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/sourceAddresses",
+                                                                        "type": "array",
+                                                                        "title": "sourceAddresses",
+                                                                        "description": "Source Ip addresses."
+                                                                     },
+                                                                    "destinationAddresses": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/destinationAddresses",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "destinationAddresses",
+                                                                        "description": "Destination Ip addresses."
+                                                                     },
+                                                                    "sourceIpGroups": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/sourceIpGroups",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "sourceIpGroups",
+                                                                        "description": "Group of source Ip addresses."
+                                                                     },
+                                                                    "targetUrls": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/targetUrls",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "targetUrls",
+                                                                        "description": "Target URLs."
+                                                                     },
+                                                                    "fqdnTags": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/fqdnTags",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "fqdnTags",
+                                                                        "description": "Fully qualified domain name tags."
+                                                                     },
+                                                                    "webCategories": {
+                                                                        "$id": "#/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/webCategories",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "webCategories",
+                                                                        "description": "Web categories."
+                                                                     }
+                                                                 },
+                                                                "additionalProperties": true
+                                                             }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            }
+
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

@@ -92,6 +92,16 @@ resources:
   minLength: 1
   maxLength: 64
   generator: routeTable
+- name: firewall
+  shortname: fw
+  minLength: 1
+  maxLength: 64
+  generator: standard
+- name: firewallPolicy
+  shortname: fwply
+  minLength: 1
+  maxLength: 64
+  generator: standard
 - name: TrafficManagerProfile
   shortname: traf
   minLength: 1

@@ -12,5 +12,4 @@ function Write-CommandStatus() {
     else {
         Write-Verbose "Finished $CommandName!"
     }
-
 }

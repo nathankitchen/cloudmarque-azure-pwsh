@@ -1,0 +1,55 @@
+ruleCollectionGroups:
+- name: Iaas-RuleCollection-Group
+  priority: 100
+  ruleCollections:
+#   - name: Iaas-RuleCollection-Dnat
+#     type: dnat
+#     priority: 101
+#     rules:
+#     - name: Iaas-RuleCollection-Dnat-1
+#       translatedAddress: 192.168.10.0
+#       translatedPort: 8080
+#       ipProtocols: [TCP]
+#       sourceAddresses: ['*']
+#       destinationAddresses: [0.0.0.0]
+#       destinationPorts: [8080]
+#       sourceIpGroups: []
+
+  - name: Iaas-RuleCollection-Net
+    type: network
+    priority: 102
+    rules:
+    - name: Iaas-RuleCollection-Net-1
+      ipProtocols: [Any]
+      sourceAddresses: ['*']
+      destinationAddresses: ['*']
+      destinationPorts:
+        -  80
+      sourceIpGroups: []
+      destinationIpGroups: []
+      destinationFqdns: []
+
+  - name: Iaas-RuleCollection-Application
+    type: application
+    priority: 103
+    rules:
+    - name: Iaas-RuleCollection-App-1
+      protocols:
+      - protocolType: Http
+        port: 80
+      targetFqdns:
+      - '*'
+      terminateTLS: false
+      sourceAddresses:
+      - 192.168.0.1
+      destinationAddresses: []
+      sourceIpGroups: []
+      targetUrls: []
+      fqdnTags: []
+      webCategories: []
+
+# Notes:
+# 1. Firewall policy containing DNAT rules cannot be attached to new firewall.
+# 2. Priority order of rules should be: DNAT > Network > Application.
+
+

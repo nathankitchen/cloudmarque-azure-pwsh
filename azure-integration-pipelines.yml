@@ -108,7 +108,6 @@ stages:
             -Verbose `
             -Confirm:$false
 
-
   - job: IaasPrivateEndpoint
     displayName: Iaas - Private Endpoints
     dependsOn: IaasNetwork

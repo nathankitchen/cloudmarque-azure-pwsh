@@ -94,6 +94,13 @@ networking:
   - Iaas-Test-Spoke1-Vnet2-Snet-Udr-hpcman
   - Iaas-Test-Spoke1-Vnet2-Snet-Udr-hpcworker
 
+- ResourceGroupName: Iaas-Test-Firewall-Rg
+  service:
+    publish:
+      resourceGroup: Iaas-Test-Firewall-Rg
+  location: uksouth
+  vnets:
+  - Iaas-Test-Firewall-Vnet1
 # NOTE: vnets, networkSecurityGroups, routeTables are default folder locations for yaml files, but you can also provide relative path to files in different directories as well.
 # NOTE: Do not add .yml extension to filenames
 # NOTE: All the relative paths are resolved to the project root directory

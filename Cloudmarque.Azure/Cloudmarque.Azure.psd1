@@ -94,7 +94,7 @@ FunctionsToExport = 'Clear-CmAzContext', 'Get-CmAzContext', 'Get-CmAzResourceNam
                 'New-CmAzCoreKeyVault', 'New-CmAzCoreMonitor',
                 'New-CmAzRecoveryServicesVault', 'Set-CmAzTag',
                 'New-CmAzIaasBastionHost', 'New-CmAzIaasNetworking', 'New-CmAzIaasVm',
-                'Set-CmAzIaasUpdateManagement', 'New-CmAzIaasVpnGw',
+                'Set-CmAzIaasUpdateManagement', 'New-CmAzIaasVpnGw', 'New-CmAzIaasFirewalls',
                 'New-CmAzIaasWvd', 'New-CmAzPaasSql', 'New-CmAzPaasWeb', 'New-CmAzPaasFunction', 'New-CmAzDeployment',
                 'New-CmAzPaasWebStatic', 'Set-BlobStorageContentType', 'New-CmAzMonitorLogAlerts', 'New-CmAzMonitorMetricAlerts',
                 'New-CmAzSecurityPartner', 'Set-CmAzSecurityCentre', 'New-CmAzIaasStorage', 'New-CmAzIaasVnetPeerings', 'New-CmAzIaasPrivateEndpoints'

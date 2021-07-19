@@ -4,7 +4,8 @@ function Get-Settings() {
         [String]$SettingsFile,
         [Object]$SettingsObject,
         [parameter(Mandatory = $true)]
-        [String]$CmdletName
+        [String]$CmdletName,
+        [String]$SubSchema
     )
 
     if ($SettingsFile -and !$SettingsObject) {
@@ -14,12 +15,17 @@ function Get-Settings() {
         Write-Error "No valid input settings." -Category InvalidArgument -CategoryTargetName "SettingsObject"
     }
     elseif (!$CmdletName) {
-        Write-Error "Please provide the a cmdlet name, so the correct validation scshema can be loaded." -Category InvalidArgument -CategoryTargetName "CmdletName"
+        Write-Error "Please provide the a cmdlet name, so the correct validation schema can be loaded." -Category InvalidArgument -CategoryTargetName "CmdletName"
     }
 
     $ErrorActionPreference = "Stop"
 
-    $schemaFile = Get-SchemaPath -CmdletName $CmdletName
+    if ($SubSchema) {
+        $schemaFile = Get-SchemaPath -CmdletName $CmdletName -SubSchema $SubSchema
+    }
+    else {
+        $schemaFile = Get-SchemaPath -CmdletName $CmdletName
+    }
 
     $success = Test-Json -Json ($SettingsObject | ConvertTo-Json -Depth 32) -Schema (Get-Content -Path $schemaFile -Raw)
 

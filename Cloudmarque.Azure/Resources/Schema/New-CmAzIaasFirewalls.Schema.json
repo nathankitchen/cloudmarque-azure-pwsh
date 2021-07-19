@@ -1,0 +1,632 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzIaasFirewalls",
+    "type": "object",
+    "title": "New-CmAzIaasFirewalls",
+    "description": "Settings Root.",
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": ["object", "null"],
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": ["object", "null"],
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "properties": {
+                        "resourceGroup": {
+                            "$id": "#/service/dependencies/resourceGroup",
+                            "type": ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "vnet": {
+                            "$id": "#/service/dependencies/vnet",
+                            "type": ["string", "null"],
+                            "title": "Vnet",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": ["object", "null"],
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "properties": {
+                        "firewall": {
+                            "$id": "#/service/publish/firewall",
+                            "type": ["string", "null"],
+                            "title": "Firewall",
+                            "descrip,tion": "Global default value to publish on deployed resource type."
+                        },
+                        "firewallPolicy": {
+                            "$id": "#/service/publish/firewallPolicy",
+                            "type": ["string", "null"],
+                            "title": "FirewallPolicy",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "firewalls": {
+            "$id": "#/firewalls",
+            "type": ["array", "null"],
+            "title": "Firewalls",
+            "description": "Container for Firewalls configuration details.",
+            "minItems": 1,
+            "items": {
+                "$id": "#/firewalls/items",
+                "allOf": [
+                    {
+                        "$id": "#/firewalls/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "sku"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/firewalls/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of firewall name."
+                            },
+                            "zones": {
+                                "$id": "#/firewalls/items/allOf/zones",
+                                "type": ["array", "null"],
+                                "title": "zones",
+                                "description": "A list of availability zones."
+                            },
+                            "firewallSubnetPrefix": {
+                                "$id": "#/firewalls/items/allOf/firewallSubnetPrefix",
+                                "type": ["string", "null"],
+                                "title": "FirewallSubnetPrefix",
+                                "description": "Used to populate AzureFirewallSubnet cidr value."
+                            },
+                            "sku": {
+                                "$id": "#/firewalls/items/allOf/sku",
+                                "type": "string",
+                                "title": "sku",
+                                "enum": ["Standard", "Premium"],
+                                "description": "Firewall Sku."
+                            },
+                            "service": {
+                                "$id": "#/firewalls/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "dependencies": {
+                                        "$id": "#/firewalls/items/allOf/service/dependencies",
+                                        "type": ["object", "null"],
+                                        "title": "Dependencies",
+                                        "description": "Contains dependency details for service location.",
+                                        "properties": {
+                                            "vnet": {
+                                                "$id": "#/firewalls/items/allOf/service/dependencies/vnet",
+                                                "type": ["string", "null"],
+                                                "title": "Vnet",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            },
+                                            "firewallPolicy": {
+                                                "$id": "#/firewalls/items/allOf/service/dependencies/firewallPolicy",
+                                                "type": ["string", "null"],
+                                                "title": "FirewallPolicy",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "publish": {
+                                        "$id": "#/firewalls/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "firewall": {
+                                                "$id": "#/firewalls/items/allOf/service/publish/firewall",
+                                                "type": ["string", "null"],
+                                                "title": "Firewall",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        },
+        "firewallPolicies": {
+            "$id": "#/firewallPolicies",
+            "type": ["array", "null"],
+            "title": "FirewallPolicies",
+            "description": "Container for configuration details of Firewall Policies.",
+            "minItems": 1,
+            "items": {
+                "$id": "#/firewallPolicies/items",
+                "allOf": [
+                    {
+                        "$id": "#/firewallPolicies/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "location",
+                            "sku"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/firewallPolicies/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Becomes part of private endpoint name."
+                            },
+                            "location": {
+                                "$id": "#/firewallPolicies/items/allOf/location",
+                                "type": ["string", "null"],
+                                "title": "Location",
+                                "description": "Location to deploy resource."
+                            },
+                            "sku": {
+                                "$id": "#/firewallPolicies/items/allOf/sku",
+                                "type": "string",
+                                "title": "sku",
+                                "enum": ["Standard", "Premium"],
+                                "description": "Firewall Sku"
+                            },
+                            "ruleCollectionGroupsSettingFiles": {
+                                "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroupsSettingFiles",
+                                "type": ["array", "null"],
+                                "title": "RuleCollectionGroupsSettingFiles",
+                                "description": "Path to files containing firewall rules."
+                            },
+                            "ruleCollectionGroups": {
+                                "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups",
+                                "type": ["array", "null"],
+                                "title": "ruleCollectionGroups",
+                                "description": "Container for configuration details of rules to added to Firewall Policy.",
+                                "minItems": 1,
+                                "items": {
+                                    "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf",
+                                            "type": "object",
+                                            "required": [
+                                                "name",
+                                                "priority"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Name of rule collection group."
+                                                },
+                                                "priority": {
+                                                    "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/priority",
+                                                    "type": "number",
+                                                    "title": "priority",
+                                                    "minimum": 100,
+                                                    "maximum": 1000,
+                                                    "description": "Priority of rule collection."
+                                                },
+                                                "ruleCollections": {
+                                                    "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections",
+                                                    "type":  ["array", "null"],
+                                                    "title": "ruleCollections",
+                                                    "description": "Collection of firewall rules.",
+                                                    "items": {
+                                                        "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items",
+                                                        "allOf": [
+                                                            {
+                                                                "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/",
+                                                                "type": "object",
+                                                                "required": [
+                                                                    "priority",
+                                                                    "rules",
+                                                                    "name",
+                                                                    "type"
+                                                                ],
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/name",
+                                                                        "type": "string",
+                                                                        "title": "name",
+                                                                        "description": "Name of rule collection."
+                                                                    },
+                                                                    "type": {
+                                                                        "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/type",
+                                                                        "type": "string",
+                                                                        "title": "type",
+                                                                        "enum": ["dnat", "network", "application"],
+                                                                        "description": "Type of rule collection."
+                                                                    },
+                                                                    "priority": {
+                                                                        "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/priority",
+                                                                        "type": "integer",
+                                                                        "title": "priority",
+                                                                        "description": "Priority of rule collection."
+                                                                    },
+                                                                    "rules": {
+                                                                        "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules",
+                                                                        "type": "array",
+                                                                        "title": "rules",
+                                                                        "additionalItems": false,
+                                                                        "items": {
+                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items",
+                                                                            "oneOf": [
+                                                                                {
+                                                                                    "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/",
+                                                                                    "type": ["object", "null"],
+                                                                                    "title": "Dnat",
+                                                                                    "required": [
+                                                                                        "destinationPorts",
+                                                                                        "ipProtocols",
+                                                                                        "name",
+                                                                                        "sourceAddresses",
+                                                                                        "translatedAddress",
+                                                                                        "destinationAddresses",
+                                                                                        "translatedPort"
+                                                                                    ],
+                                                                                    "properties": {
+                                                                                        "sourceIpGroups": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/sourceIpGroups",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "sourceIpGroups",
+                                                                                            "description": "Group of source Ips."
+                                                                                        },
+                                                                                        "destinationPorts": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/destinationPorts",
+                                                                                            "type": "array",
+                                                                                            "title": "destinationPorts",
+                                                                                            "description": "Destination ports."
+                                                                                        },
+                                                                                        "ipProtocols": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/ipProtocols",
+                                                                                            "type": "array",
+                                                                                            "title": "ipProtocols",
+                                                                                            "description": "Ip protocol to be TCP or UDP."
+                                                                                        },
+                                                                                        "name": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/name",
+                                                                                            "type": "string",
+                                                                                            "title": "name",
+                                                                                            "description": "Name of DNAT rule."
+                                                                                        },
+                                                                                        "sourceAddresses": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/sourceAddresses",
+                                                                                            "type": "array",
+                                                                                            "title": "sourceAddresses",
+                                                                                            "description": "Source Ip addresses."
+                                                                                        },
+                                                                                        "translatedAddress": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/translatedAddress",
+                                                                                            "type": "string",
+                                                                                            "title": "translatedAddress",
+                                                                                            "description": "Translated Ip addresses."
+                                                                                        },
+                                                                                        "destinationAddresses": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/destinationAddresses",
+                                                                                            "type": "array",
+                                                                                            "title": "destinationAddresses",
+                                                                                            "description": "Destination Ip addresses."
+                                                                                        },
+                                                                                        "translatedPort": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/dnat/translatedPort",
+                                                                                            "type": "integer",
+                                                                                            "title": "translatedPort",
+                                                                                            "description": "Translated ports."
+                                                                                        }
+                                                                                    },
+                                                                                    "additionalProperties": false
+                                                                                },
+                                                                                {
+                                                                                    "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/",
+                                                                                    "type": "object",
+                                                                                    "title": "network",
+                                                                                    "required": [
+                                                                                        "destinationPorts",
+                                                                                        "ipProtocols",
+                                                                                        "name",
+                                                                                        "sourceAddresses",
+                                                                                        "destinationAddresses"
+                                                                                    ],
+                                                                                    "properties": {
+                                                                                        "sourceIpGroups": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/sourceIpGroups",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "sourceIpGroups",
+                                                                                            "description": "Group of source Ips."
+                                                                                        },
+                                                                                        "destinationPorts": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/destinationPorts",
+                                                                                            "type": "array",
+                                                                                            "title": "destinationPorts",
+                                                                                            "description": "Destination ports."
+                                                                                        },
+                                                                                        "ipProtocols": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/ipProtocols",
+                                                                                            "type": "array",
+                                                                                            "title": "ipProtocols",
+                                                                                            "description": "Ip protocol to be TCP or UDP."
+                                                                                        },
+                                                                                        "name": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/name",
+                                                                                            "type": "string",
+                                                                                            "title": "name",
+                                                                                            "description": "Name of network rule."
+                                                                                        },
+                                                                                        "sourceAddresses": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/sourceAddresses",
+                                                                                            "type": "array",
+                                                                                            "title": "sourceAddresses",
+                                                                                            "description": "Source Ip addresses."
+                                                                                        },
+                                                                                        "destinationIpGroups": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/destinationIpGroups",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "destinationIpGroups",
+                                                                                            "description": "Group of destination Ips."
+                                                                                        },
+                                                                                        "destinationAddresses": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/destinationAddresses",
+                                                                                            "type": "array",
+                                                                                            "title": "destinationAddresses",
+                                                                                            "description": "Destination Ip addresses."
+                                                                                        },
+                                                                                        "destinationFqdns": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/network/destinationFqdns",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "destinationFqdns",
+                                                                                            "description": "Destination fully qualified domain names."
+                                                                                        }
+                                                                                    },
+                                                                                    "additionalProperties": false
+                                                                                },
+                                                                                {
+                                                                                    "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application",
+                                                                                    "type": "object",
+                                                                                    "title": "Application rules",
+                                                                                    "description": "Contains application firewall rules.",
+                                                                                    "required": [
+                                                                                        "name",
+                                                                                        "protocols",
+                                                                                        "targetFqdns",
+                                                                                        "terminateTLS",
+                                                                                        "sourceAddresses"
+                                                                                     ],
+                                                                                    "properties": {
+                                                                                        "name": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/name",
+                                                                                            "type": "string",
+                                                                                            "title": "name",
+                                                                                            "description": "Name of application firewall rule."
+                                                                                         },
+                                                                                        "protocols": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols",
+                                                                                            "type": "array",
+                                                                                            "title": "protocols",
+                                                                                            "description": "Defines protocol.",
+                                                                                            "items": {
+                                                                                                "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols/items",
+                                                                                                "allOf": [
+                                                                                                     {
+                                                                                                        "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols/items/allOf",
+                                                                                                        "type": "object",
+                                                                                                        "required": [
+                                                                                                            "protocolType",
+                                                                                                            "port"
+                                                                                                         ],
+                                                                                                        "properties": {
+                                                                                                            "protocolType": {
+                                                                                                                "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols/items/allOf/protocolType",
+                                                                                                                "type": "string",
+                                                                                                                "title": "protocolType",
+                                                                                                                "description": "Protocol Type."
+                                                                                                             },
+                                                                                                            "port": {
+                                                                                                                "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/protocols/items/allOf/port",
+                                                                                                                "type": "integer",
+                                                                                                                "title": "port",
+                                                                                                                "description": "Application listen port."
+                                                                                                             }
+                                                                                                         },
+                                                                                                        "additionalProperties": true
+                                                                                                     }
+                                                                                                 ]
+                                                                                             }
+                                                                                         },
+                                                                                        "targetFqdns": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/targetFqdns",
+                                                                                            "type": "array",
+                                                                                            "title": "targetFqdns",
+                                                                                            "description": "Target fully qualified domain name."
+                                                                                         },
+                                                                                        "terminateTLS": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/terminateTLS",
+                                                                                            "type": "boolean",
+                                                                                            "title": "terminateTLS",
+                                                                                            "description": "Enforce TLS."
+                                                                                         },
+                                                                                        "sourceAddresses": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/sourceAddresses",
+                                                                                            "type": "array",
+                                                                                            "title": "sourceAddresses",
+                                                                                            "description": "Source Ip addresses."
+                                                                                         },
+                                                                                        "destinationAddresses": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/destinationAddresses",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "destinationAddresses",
+                                                                                            "description": "Destination Ip addresses."
+                                                                                         },
+                                                                                        "sourceIpGroups": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/sourceIpGroups",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "sourceIpGroups",
+                                                                                            "description": "Group of source Ip addresses."
+                                                                                         },
+                                                                                        "targetUrls": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/targetUrls",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "targetUrls",
+                                                                                            "description": "Target URLs."
+                                                                                         },
+                                                                                        "fqdnTags": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/fqdnTags",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "fqdnTags",
+                                                                                            "description": "Fully qualified domain name tags."
+                                                                                         },
+                                                                                        "webCategories": {
+                                                                                            "$id": "#/firewallPolicies/items/allOf/ruleCollectionGroups/items/allOf/ruleCollections/items/allOf/rules/items/oneOf/application/webCategories",
+                                                                                            "type": ["array", "null"],
+                                                                                            "title": "webCategories",
+                                                                                            "description": "Web categories."
+                                                                                         }
+                                                                                     },
+                                                                                    "additionalProperties": true
+                                                                                 }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "additionalProperties": false
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "threatIntelMode": {
+                                "$id": "#/firewallPolicies/items/allOf/threatIntelMode",
+                                "type": ["string", "null"],
+                                "title": "ThreatIntelMode",
+                                "enum": ["Alert", "Deny", "Off", null],
+                                "description": "Operation mode for Threat Intelligence."
+                            },
+                            "threatIntelWhitelist": {
+                                "$id": "#/firewallPolicies/items/allOf/threatIntelWhitelist",
+                                "type": ["object", "null"],
+                                "title": "threatIntelWhitelist",
+                                "properties": {
+                                    "ipAddresses": {
+                                        "$id": "#/firewallPolicies/items/allOf/threatIntelWhitelist/ipAddresses",
+                                        "type": ["array", "null"],
+                                        "title": "IpAddresses",
+                                        "description": "Contains white listed Ip addresses."
+                                    },
+                                    "fqdns": {
+                                        "$id": "#/firewallPolicies/items/allOf/threatIntelWhitelist/fqdns",
+                                        "type": ["array", "null"],
+                                        "title": "Fqdns",
+                                        "description": "Contains white listed Fqdns."
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "dnsSettings": {
+                                "$id": "#/firewallPolicies/items/allOf/dnsSettings",
+                                "type": ["object", "null"],
+                                "title": "dnsSettings",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "servers": {
+                                        "$id": "#/firewallPolicies/items/allOf/dnsSettings/servers",
+                                        "type": ["array", "null"],
+                                        "title": "Servers",
+                                        "description": "Contains list of DNS servers."
+                                    },
+                                    "enableProxy": {
+                                        "$id": "#/firewallPolicies/items/allOf/dnsSettings/enableProxy",
+                                        "type": ["boolean", "null"],
+                                        "title": "EnableProxy",
+                                        "description": "Configurs Azure Firewall to act as a DNS proxy."
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "service": {
+                                "$id": "#/firewallPolicies/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "dependencies": {
+                                        "$id": "#/firewallPolicies/items/allOf/service/dependencies",
+                                        "type": ["object", "null"],
+                                        "title": "Dependencies",
+                                        "description": "Contains dependency details for service location.",
+                                        "properties": {
+                                            "vnet": {
+                                                "$id": "#/firewallPolicies/items/allOf/service/dependencies/vnet",
+                                                "type": ["string", "null"],
+                                                "title": "Vnet",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            },
+                                            "resourceGroup": {
+                                                "$id": "#/firewallPolicies/items/allOf/service/dependencies/resourceGroup",
+                                                "type": ["string", "null"],
+                                                "title": "ResourceGroup",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            },
+                                            "baseFirewallPolicy": {
+                                                "$id": "#/firewallPolicies/items/allOf/service/dependencies/baseFirewallPolicy",
+                                                "type": ["string", "null"],
+                                                "title": "BaseFirewallPolicy",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    },
+                                    "publish": {
+                                        "$id": "#/firewallPolicies/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "firewallPolicy": {
+                                                "$id": "#/firewallPolicies/items/allOf/service/publish/firewallPolicy",
+                                                "type": ["string", "null"],
+                                                "title": "FirewallPolicy",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

@@ -2,10 +2,16 @@ function Get-SchemaPath {
 
     param(
         [parameter(Mandatory = $true)]
-        [String]$CmdletName
+        [String]$CmdletName,
+        [String]$SubSchema
 	)
 
-    $path = "$PSScriptRoot/../../Resources/Schema/$($CmdletName).Schema.json"
+    if ($SubSchema) {
+        $path = "$PSScriptRoot/../../Resources/Schema/Subschema/$SubSchema"
+    }
+    else {
+        $path = "$PSScriptRoot/../../Resources/Schema/$($CmdletName).Schema.json"
+    }
 
     if (!(Test-Path -Path $path -IsValid)) {
         Write-Error "Schema file path is invalid for $CmdletName." -Category InvalidArgument -CategoryTargetName "CmdletName"

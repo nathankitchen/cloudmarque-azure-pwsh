@@ -1,0 +1,14 @@
+vnetName: Iaas-Test-Firewall-Vnet1
+addressSpace:
+- 174.10.0.0/23
+dnsServers:
+location: uksouth
+service:
+  publish:
+    resourceGroup: Iaas-Test-Firewall-Rg
+    vnet: Iaas-Test-Firewall-Vnet1
+subnets:
+- subnetName: Iaas-Test-Firewall-Vnet1-Snet-ext1
+  cidr: 174.10.0.0/24
+  networkSecurityGroup:
+  routeTable:

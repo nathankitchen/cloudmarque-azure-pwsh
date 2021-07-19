@@ -1,0 +1,74 @@
+component: firewalls
+
+service:
+  dependencies:
+    resourceGroup: Iaas-Test-Firewall-Rg
+    vnet: Iaas-Test-Firewall-Vnet1
+  publish:
+    firewallPolicy: Iaas-Test-Firewall-Policy
+    firewall: Iaas-Test-Firewall
+
+firewallPolicies:
+- name: Iaas-Test-Firewall-Policy1
+  sku: Standard                                         # Standard / Premium
+  location: UK South
+  threatIntelMode:                                      # Optional - Alert, Deny, Off. Default - Alert
+  threatIntelWhitelist:                                 # Optional
+    ipAddresses: []
+    fqdns: []
+  dnsSettings:                                          # Optional
+    servers: []
+    enableProxy: false                                  # true/ false
+  service:
+    dependencies:
+      resourceGroup: Iaas-Test-Firewall-Rg
+      vnet:                                             # Optional - provide this to deploy policy in same rg.
+      baseFirewallPolicy:
+    publish:
+      firewallPolicy: Iaas-Test-Firewall-Policy1
+  ruleCollectionGroupsSettingFiles: ['./networking/firewall/rulesCollection/alpha.yml']
+
+
+- name: Iaas-Test-Firewall-Policy2
+  sku: Standard                                         # Standard / Premium
+  location: UK South
+  service:
+    dependencies:
+      resourceGroup: Iaas-Test-Firewall-Rg
+      vnet:                                             # Optional - provide this to deploy policy in same rg.
+    publish:
+      firewallPolicy: Iaas-Test-Firewall-Policy2
+  ruleCollectionGroups:
+    - name: Iaas-RuleCollection-Group
+      priority: 400
+      ruleCollections:
+      - name: Iaas-RuleCollection-Dnat
+        type: dnat
+        priority: 401
+        rules:
+        - name: Iaas-RuleCollection-Dnat-1
+          translatedAddress: 192.168.10.0
+          translatedPort: 8080
+          ipProtocols: [TCP]
+          sourceAddresses: ['*']
+          destinationAddresses: [0.0.0.0]
+          destinationPorts: [8080]
+          sourceIpGroups: []
+
+firewalls:
+- name: Iaas-Test-Firewall-1
+  zones:
+  sku: Standard
+  firewallSubnetPrefix: 174.10.1.0/24
+  service:
+    dependencies:
+      vnet:
+      firewallPolicy: Iaas-Test-Firewall-Policy1
+    publish:
+      firewall:
+
+# Notes:
+# 1. Firewall and vnets needs to be in same resource group and location.
+# 2. Firewall policy and firewall needs to have same sku.
+# 3. Firewall policy containing DNAT rules cannot be attached to new firewall.
+

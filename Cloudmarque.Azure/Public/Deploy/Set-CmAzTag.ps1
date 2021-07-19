@@ -132,13 +132,23 @@
 				}
 
 				Write-Verbose "Setting tags for $($resource.name)..."
-				if ($resource.ResourceType -eq 'Microsoft.Network/Frontdoors') {
 
-					# Work around as Azure FrontDoor does not support setting tags via PATCH operations
-					Set-AzFrontDoor -ResourceGroupName $resource.ResourceGroupName -Name $resource.Name -Tag $tagsToSet > $null
-				}
-				else {
-					Set-AzResource -ResourceID $resource.Id -Tag $tagsToSet -Force > $null
+				switch ($resource.ResourceType) {
+					'Microsoft.Network/Frontdoors' {
+						Set-AzFrontDoor -ResourceGroupName $resource.ResourceGroupName -Name $resource.Name -Tag $tagsToSet > $null
+					}
+
+					'Microsoft.Network/AzureFirewalls' {
+						Update-AzTag -ResourceId $resource.Id -Tag $tagsToSet -Operation Merge > $null
+					}
+
+					'Microsoft.Network/FirewallPolicies' {
+						Set-AzFirewallPolicy -ResourceId $resource.Id -Location $resource.location -Tag $tagsToSet > $null
+					}
+
+					Default {
+						Set-AzResource -ResourceID $resource.Id -Tag $tagsToSet -Force > $null
+					}
 				}
 			}
 
