@@ -146,6 +146,10 @@
 						Set-AzFirewallPolicy -ResourceId $resource.Id -Location $resource.location -Tag $tagsToSet > $null
 					}
 
+					'Microsoft.insights/Workbooks' {
+						Write-Verbose "Tagging workbook is not supported..."
+					}
+
 					Default {
 						Set-AzResource -ResourceID $resource.Id -Tag $tagsToSet -Force > $null
 					}

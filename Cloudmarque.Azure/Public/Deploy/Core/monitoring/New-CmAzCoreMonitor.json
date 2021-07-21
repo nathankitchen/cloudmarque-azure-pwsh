@@ -48,6 +48,9 @@
         },
         "WorkspaceName": {
             "type": "String"
+        },
+        "Workbook": {
+            "type": "object"
         }
     },
     "resources": [
@@ -179,6 +182,25 @@
             "copy": {
                 "name": "AlertsCopy",
                 "count": "[length(parameters('Alerts'))]"
+            }
+        },
+        {
+            "condition": "[not(parameters('Workbook').exists)]" ,
+            "name": "[parameters('Workbook').Guid]",
+            "type": "microsoft.insights/workbooks",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2018-06-17-preview",
+            "dependsOn": [],
+            "kind": "shared",
+            "tags": {
+                "cm-service": "[parameters('ServiceContainer').workbook]"
+            },
+            "properties": {
+                "displayName": "[parameters('Workbook').DisplayName]",
+                "sourceId": "Azure Monitor",
+                "serializedData": "[parameters('Workbook').serializedJson]",
+                "version": "1.0",
+                "category": "[parameters('Workbook').category]"
             }
         }
     ]

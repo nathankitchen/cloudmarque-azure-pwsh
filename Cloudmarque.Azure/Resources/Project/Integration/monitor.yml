@@ -16,6 +16,7 @@ service:
     solution: Core-Test-Sol
     storage: Core-Test-St
     workspace: Core-Test-Ws
+    workbook: Core-Test-wbk
   dependencies:
     keyvault: Core-Test-Kv
 

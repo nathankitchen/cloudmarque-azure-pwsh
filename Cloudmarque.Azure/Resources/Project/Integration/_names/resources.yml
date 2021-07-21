@@ -387,6 +387,11 @@ resources:
   minLength: 1
   maxLength: 64
   generator: standard
+- name: Workbook
+  shortname: wbk
+  minLength: 1
+  maxLength: 64
+  generator: standard
 - name: ApplicationInsights
   shortname: appi
   minLength: 1

@@ -64,8 +64,7 @@
                             "name": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].GatewayName]",
                             "location": "[parameters('location')]",
                             "dependsOn": [
-                                "[concat('Microsoft.Network/publicIPAddresses/', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].GatewayPublicIPName)]",
-                                "[concat(parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].virtualNetworkName, '/', 'GatewaySubnet')]"
+                                "[concat('Microsoft.Network/publicIPAddresses/', parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].GatewayPublicIPName)]"
                             ],
                             "tags": {
                                 "cm-service": "[parameters('vpnGwObject').vpnGw[copyIndex('vpnGatewayCopy')].service.publish.virtualNetworkGateway]"

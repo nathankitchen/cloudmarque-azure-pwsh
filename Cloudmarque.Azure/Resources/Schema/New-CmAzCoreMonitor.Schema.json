@@ -69,13 +69,20 @@
                         "resourceGroup",
                         "solution",
                         "storage",
-                        "workspace"
+                        "workspace",
+                        "workbook"
                     ],
                     "properties": {
                         "actionGroup": {
                             "$id": "#/service/publish/actionGroup",
                             "type": ["string", "null"],
                             "title": "ActionGroup",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "workbook": {
+                            "$id": "#/service/publish/workbook",
+                            "type": ["string", "null"],
+                            "title": "Workbook",
                             "description": "Global default value to publish on deployed resource type."
                         },
                         "keyvaultAdminAlert": {

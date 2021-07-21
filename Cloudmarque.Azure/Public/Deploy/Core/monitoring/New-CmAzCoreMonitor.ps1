@@ -61,6 +61,16 @@ function New-CmAzCoreMonitor {
 			$appInsights = Get-CmAzResourceName -Resource "ApplicationInsights" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
 			$workspace = Get-CmAzResourceName -Resource "LogAnalyticsWorkspace" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
 
+			$workbookService = Get-CmAzService -Service $SettingsObject.service.publish.workbook
+
+			$workbook = @{
+				DisplayName = Get-CmAzResourceName -Resource "Workbook" -Architecture "Core" -Location $SettingsObject.location -Name "workspaceUsage-$($SettingsObject.name)"
+				Category = "workbook"
+				Guid = New-Guid
+				exists = $workbookService ? $true : $false
+				serializedJson = (Get-CmAzSettingsFile -path "$PSScriptRoot/WorkspaceUsage.workbook.json") | ConvertTo-Json -Compress -Depth 100
+			}
+
 			Write-Verbose "Formatting action group receivers..."
 			$receiverTypes = @("armRoles", "emails", "functions", "itsm", "logicApps", "notifications", "runbooks", "sms", "voice", "webhooks")
 			$receiverTypesWithCommonSchema = @("armRoles", "emails", "functions", "logicApps", "runbooks", "webhooks")
@@ -211,7 +221,8 @@ function New-CmAzCoreMonitor {
 				-WorkspaceDataRetentionInDays $SettingsObject.workspaceDataRetentionInDays `
 				-ServiceContainer $SettingsObject.service.publish `
 				-WorkspaceName $workspace `
-				-Force
+				-Workbook $workbook `
+				-Force > $Null
 
 			Write-Verbose "Setting advisor configuration cpu threshold..."
 			Set-AzAdvisorConfiguration -LowCpuThreshold $SettingsObject.AdvisorLowCPUThresholdPercentage
