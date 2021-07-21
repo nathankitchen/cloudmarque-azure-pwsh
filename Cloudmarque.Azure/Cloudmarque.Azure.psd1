@@ -11,7 +11,7 @@
 RootModule = 'Cloudmarque.Azure.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.13'
+ModuleVersion = '1.0.14'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Core'
@@ -135,16 +135,12 @@ PrivateData = @{
         IconUri = 'https://github.com/Trustmarque/cloudmarque-azure-pwsh/blob/master/Cloudmarque.Azure/icon.png?raw=true'
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Added new cmdlet for deploying private endpoints - New-CmAzIaasPrivateEndpoints.
-* Added support for setting private endpoints on applicable resources.
-* Added support for cognitive services in networking service endpoints.
-* Added support for private DNS.
-* Added support for subnet delegation.
-* Added support for log alert suppression settings in the form of windows and minutes.
-* Added support for optional frontdoor deployment.
-* Added support for identity management in recovery service vaults.
-* Added supported skus for webpps and sql resources.
-* Amended how alert names are generated.'
+        ReleaseNotes = '* Added support for deploying a Workspace Spend Analysis Workbook.
+* Added example of the "Files not Syncing" Metric Alert for Azure Storage Sync Services in settings file.
+* Added initial implementation of functionality for deploying Azure Firewalls.
+* Amended existing Log Alert definition for missing Virtual Machine updates to detect failed updates instead.
+* Added ability to opt out of monitoring on-prem Virtual Machines.
+* Minor bug fixes.'
 
         # Prerelease string of this module
         # Prerelease = ''
