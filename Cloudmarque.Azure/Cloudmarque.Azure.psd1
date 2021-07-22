@@ -11,7 +11,7 @@
 RootModule = 'Cloudmarque.Azure.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.14'
+ModuleVersion = '1.0.14.1'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Core'
@@ -135,12 +135,7 @@ PrivateData = @{
         IconUri = 'https://github.com/Trustmarque/cloudmarque-azure-pwsh/blob/master/Cloudmarque.Azure/icon.png?raw=true'
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Added support for deploying a Workspace Spend Analysis Workbook.
-* Added example of the "Files not Syncing" Metric Alert for Azure Storage Sync Services in settings file.
-* Added initial implementation of functionality for deploying Azure Firewalls.
-* Amended existing Log Alert definition for missing Virtual Machine updates to detect failed updates instead.
-* Added ability to opt out of monitoring on-prem Virtual Machines.
-* Minor bug fixes.'
+        ReleaseNotes = '* Hotfix for the New-CmAzPaasWebStatic cmdlet, that was not passing in the correct resource group service dependency value into New-CmAzIaasStorage.'
 
         # Prerelease string of this module
         # Prerelease = ''

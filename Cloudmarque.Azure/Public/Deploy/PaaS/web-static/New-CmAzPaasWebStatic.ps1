@@ -74,7 +74,7 @@
 			location = $SettingsObject.Location;
 			service = @{
 				dependencies = @{
-					ResourceGroup = $SettingsObject.service.publish.resourceGroup
+					resourceGroup = $SettingsObject.service.publish.resourceGroup
 				};
 				publish = @{
 					storage = $SettingsObject.service.publish.storage
