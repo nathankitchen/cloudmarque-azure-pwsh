@@ -1,0 +1,5 @@
+component: services
+services:
+- value: NC-Test-Value1
+  resourceGroupIds: []
+  resourceIds: []

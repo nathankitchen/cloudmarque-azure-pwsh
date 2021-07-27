@@ -1,0 +1,95 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzService",
+    "type": "object",
+    "title": "New-CmAzService",
+    "description": "Settings Root.",
+    "required": [
+        "services"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "services": {
+            "$id": "#/services",
+            "type": "array",
+            "title": "Services",
+            "description": "List of service values and the ids of resources/resource groups to be set.",
+            "minItems": 1,
+            "items": {
+				"$id": "#/services/items",
+				"anyOf": [
+					{
+                        "$id": "#/services/items/anyOf/rgs",
+						"type": "object",
+						"required": [
+							"value",
+                            "resourceGroupIds"
+						],
+						"properties": {
+                            "value": {
+                                "$id": "#/services/items/anyOf/rgs/value",
+                                "type": "string",
+                                "title": "Value",
+                                "description": "Cm-service value to be set on resource groups/s."
+                            },
+                            "resourceGroupIds": {
+                                "$id": "#/services/items/anyOf/rgs/resourceGroupIds",
+                                "type": "array",
+                                "title": "Resource Group Ids",
+                                "description": "Resource group ids for which to set the cm-service value",
+                                "minItems": 1,
+                                "items": {
+                                    "$id": "#/services/items/anyOf/rgs/resourceGroupIds/items",
+                                    "allOf":[
+                                        {
+                                            "$id": "#/services/items/anyOf/rgs/resourceGroupIds/items/resourceGroupId",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "$id": "#/services/items/anyOf/rs",
+						"type": "object",
+						"required": [
+							"value",
+                            "resourceIds"
+						],
+						"properties": {
+                            "value": {
+                                "$id": "#/services/items/anyOf/rs/value",
+                                "type": "string",
+                                "title": "Value",
+                                "description": "Cm-service value to be set on resource/s."
+                            },
+                            "resourceIds": {
+                                "$id": "#/services/items/anyOf/rs/resourceIds",
+                                "type": "array",
+                                "title": "Resource Ids",
+                                "description": "Resource ids fow which to set the cm-service value.",
+                                "minItems": 1,
+                                "items": {
+                                    "$id": "#/services/items/anyOf/rgs/resourceGroupIds/items",
+                                    "allOf":[
+                                        {
+                                            "$id": "#/services/items/anyOf/rgs/resourceGroupIds/items/resourceGroupId",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}

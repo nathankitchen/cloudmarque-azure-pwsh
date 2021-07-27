@@ -137,6 +137,10 @@ function New-CmAzDeployment {
                 New-CmAzIaasRecoveryServicesVault -SettingsObject $SettingsObject -PolicySettingsObject $PolicySettingsObject -TagSettingsFile $TagSettingsFile
             }
 
+            services {
+                New-CmAzService -SettingsObject $SettingsObject
+            }
+
             storage {
                 New-CmAzIaasStorage -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
             }

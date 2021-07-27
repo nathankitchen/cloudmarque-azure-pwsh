@@ -16,7 +16,7 @@ Describe "Each deployment cmdlet settings file should have a correctly configure
 
     Context "<_.baseName> configuration" -ForEach $projectConfigs { 
 
-        $excludedFiles = @("deleteService.yml", "partners.yml", "recoveryPolicy.yml")
+        $excludedFiles = @("deleteService.yml", "partners.yml", "recoveryPolicy.yml", "services.yml")
         $settingsFiles = Get-ChildItem -Path $_.pspath -Filter "*.yml" -Exclude $excludedFiles -Depth 0 -Force
 
         It "<_.name> should pass schema validation." -ForEach $settingsFiles {
@@ -34,7 +34,7 @@ Describe "Each deployment cmdlet settings file should have a correctly configure
             elseif ($_.name -eq "recoveryvault.yml") {
                 { New-CmAzDeployment -SettingsFile $_.psPath -PolicySettingsFile "$($_.directory)\recoverypolicy.yml" -WhatIf } | Should -Not -Throw
             }
-            else  {
+            else {
                 { New-CmAzDeployment -SettingsFile $_.psPath -WhatIf } | Should -Not -Throw
             }
         }
