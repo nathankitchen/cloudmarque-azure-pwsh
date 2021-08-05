@@ -47,9 +47,9 @@
             "default": 90
         },
         "storageDataRetentionInDays": {
-            "$id": "#/workspaceDataRetentionInDays",
+            "$id": "#/storageDataRetentionInDays",
             "type": ["integer", "null"],
-            "title": "WorkspaceDataRetentionInDays",
+            "title": "StorageDataRetentionInDays",
             "description": "Storage diagnostic setting data retention in days.",
             "minimum": 0,
             "maximum": 365,

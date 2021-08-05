@@ -14,14 +14,14 @@ service:
     resourceGroup: Core-Test-Monitor-Rg
     solution: Core-Test-Sol
     workbook: Core-Test-wbk
-    appInsights: Core-Test-Ai                                         # Can use publish or dependency variants of these values.
-    storage: Core-Test-St                                             # Can use publish or dependency variants of these values.
-    workspace: Core-Test-Ws                                           # Can use publish or dependency variants of these values.
+    appInsights: Core-Test-Ai                                         # Can use publish or dependency variants of these values, if both are there then publish takes priority.
+    storage: Core-Test-St                                             # Can use publish or dependency variants of these values, if both are there then publish takes priority.
+    workspace: Core-Test-Ws                                           # Can use publish or dependency variants of these values, if both are there then publish takes priority.
   dependencies:
     keyvault: Core-Test-Kv
-    appInsights: Core-Test-Ai                                         # Can use publish or dependency variants of these values.
-    storage: Core-Test-St                                             # Can use publish or dependency variants of these values.
-    workspace: Core-Test-Ws                                           # Can use publish or dependency variants of these values.
+    appInsights: Core-Test-Ai                                         # Can use publish or dependency variants of these values, if both are there then publish takes priority.
+    storage: Core-Test-St                                             # Can use publish or dependency variants of these values, if both are there then publish takes priority.
+    workspace: Core-Test-Ws                                           # Can use publish or dependency variants of these values, if both are there then publish takes priority.
 
 alerts:
   keyvaultAdmin:                                                      # Activity log alerts for core keyvaults

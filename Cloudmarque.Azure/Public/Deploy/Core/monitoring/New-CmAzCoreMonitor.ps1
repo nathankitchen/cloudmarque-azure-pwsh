@@ -206,10 +206,10 @@ function New-CmAzCoreMonitor {
 						storageAccountName = $SettingsObject.name;
 						accountType = "Standard";
 						blobContainer = @(
-							@{ name = "insights-logs-addonazurebackuppolicy"},
-							@{ name = "insights-logs-azurebackupreport"},
-							@{ name = "insights-logs-coreazurebackup"},
-							@{ name = "insights-logs-networksecuritygroupflowevent"}
+							@{ name = "insights-logs-addonazurebackuppolicy"; },
+							@{ name = "insights-logs-azurebackupreport"; },
+							@{ name = "insights-logs-coreazurebackup"; },
+							@{ name = "insights-logs-networksecuritygroupflowevent"; }
 						)
 					})
 				}
@@ -219,6 +219,7 @@ function New-CmAzCoreMonitor {
 				$storageService = $SettingsObject.service.publish.storage
 			}
 			else {
+				Write-Verbose "Service locating existing storage account instance..."
 				$storageService = $SettingsObject.service.dependencies.storage
 			}
 
