@@ -58,9 +58,6 @@ function New-CmAzCoreMonitor {
 				}
 			}
 
-			$appInsights = Get-CmAzResourceName -Resource "ApplicationInsights" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
-			$workspace = Get-CmAzResourceName -Resource "LogAnalyticsWorkspace" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
-
 			$workbookService = Get-CmAzService -Service $SettingsObject.service.publish.workbook
 
 			$workbook = @{
@@ -169,7 +166,9 @@ function New-CmAzCoreMonitor {
 			}
 
 			$SettingsObject.alerts = @($keyvaultAdminAlert, $resourceHealthAlert, $serviceHealthAlert)
+
 			$SettingsObject.workspaceDataRetentionInDays ??= 90
+			$SettingsObject.storageDataRetentionInDays ??= 0
 
 			Write-Verbose "Generating resource names..."
 			$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "Core" -Location $SettingsObject.Location -Name $SettingsObject.name
@@ -181,35 +180,68 @@ function New-CmAzCoreMonitor {
 				-Tag @{ "cm-service" = $SettingsObject.service.publish.resourceGroup } `
 				-Force
 
-			Write-Verbose "Deploying storage..."
-			$storageObject = @{
-
-				location = $SettingsObject.location;
-				service = @{
-					dependencies = @{
-						resourceGroup = $SettingsObject.service.publish.resourceGroup
-					};
-					publish = @{
-						storage = $SettingsObject.service.publish.storage
-					}
-				}
-				storageAccounts = @(@{
-					storageAccountName = $SettingsObject.name;
-					accountType = "Standard";
-					blobContainer = @(
-						@{ name = "insights-logs-addonazurebackuppolicy"},
-						@{ name = "insights-logs-azurebackupreport"},
-						@{ name = "insights-logs-coreazurebackup"},
-						@{ name = "insights-logs-networksecuritygroupflowevent"}
-					)
-				})
+			if ($SettingsObject.service.publish.appInsights) {
+				$appInsightsName = Get-CmAzResourceName -Resource "ApplicationInsights" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
+			}
+			else {
+				Write-Verbose "Service locating existing app insights instance..."
+				$appInsightsName = (Get-CmAzService -Service $SettingsObject.service.dependencies.appInsights -ThrowIfUnavailable -ThrowIfMultiple).resourceName
 			}
 
-			New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags
+			if ($SettingsObject.service.publish.storage) {
+				
+				Write-Verbose "Deploying storage..."
+				$storageObject = @{
+	
+					location = $SettingsObject.location;
+					service = @{
+						dependencies = @{
+							resourceGroup = $SettingsObject.service.publish.resourceGroup
+						};
+						publish = @{
+							storage = $SettingsObject.service.publish.storage
+						}
+					}
+					storageAccounts = @(@{
+						storageAccountName = $SettingsObject.name;
+						accountType = "Standard";
+						blobContainer = @(
+							@{ name = "insights-logs-addonazurebackuppolicy"},
+							@{ name = "insights-logs-azurebackupreport"},
+							@{ name = "insights-logs-coreazurebackup"},
+							@{ name = "insights-logs-networksecuritygroupflowevent"}
+						)
+					})
+				}
+	
+				New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags
+
+				$storageService = $SettingsObject.service.publish.storage
+			}
+			else {
+				$storageService = $SettingsObject.service.dependencies.storage
+			}
+
+			$storageAccountId = (Get-CmAzService -Service $storageService -ThrowIfUnavailable -ThrowIfMultiple).Id
+
+			if ($SettingsObject.service.publish.workspace) {
+				$workspaceName = Get-CmAzResourceName -Resource "LogAnalyticsWorkspace" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name
+			}
+			else {
+				Write-Verbose "Service locating existing log analytics workspace instance..."
+				$workspaceName = (Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple).resourceName
+			}
 
 			Write-Verbose "Deploying monitor resources..."
 
 			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Location $SettingsObject.Location -Name "New-CmAzCoreMonitor"
+
+			$serviceContainer = @{
+				appInsights = $SettingsObject.service.publish.appInsights;
+				solution = $SettingsObject.service.publish.solution;
+				workbook = $SettingsObject.service.publish.workbook;
+				workspace = $SettingsObject.service.publish.workspace;
+			}
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
@@ -217,10 +249,12 @@ function New-CmAzCoreMonitor {
 				-TemplateFile "$PSScriptRoot/New-CmAzCoreMonitor.json" `
 				-ActionGroups $SettingsObject.actionGroups `
 				-Alerts $SettingsObject.alerts `
-				-AppInsightsName $appInsights `
+				-AppInsightsName $appInsightsName `
+				-StorageDataRetentionInDays $SettingsObject.storageDataRetentionInDays `
 				-WorkspaceDataRetentionInDays $SettingsObject.workspaceDataRetentionInDays `
-				-ServiceContainer $SettingsObject.service.publish `
-				-WorkspaceName $workspace `
+				-ServiceContainer $serviceContainer `
+				-StorageAccountId $storageAccountId `
+				-WorkspaceName $workspaceName `
 				-Workbook $workbook `
 				-Force > $Null
 

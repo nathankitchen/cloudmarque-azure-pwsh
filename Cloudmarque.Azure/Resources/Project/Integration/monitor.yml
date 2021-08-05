@@ -4,21 +4,24 @@ name: coretestmonitor042021
 location: UK South
 advisorLowCPUThresholdPercentage: 5									                  # Can be set to 0, 5, 10, 15 or 20
 workspaceDataRetentionInDays: 30                                      # Optional
-
+storageDataRetentionInDays: 125                                       # Defaults to indefinite data retention when nothing or so is provided.
 service:
   publish:
     actionGroup: Core-Test-Ag1
     keyvaultAdminAlert: Core-Test-Kv-Ala
     resourceHealthAlert: Core-Test-Rsc-Ala
     serviceHealthAlert: Core-Test-Svc-Ala
-    appInsights: Core-Test-Ai
     resourceGroup: Core-Test-Monitor-Rg
     solution: Core-Test-Sol
-    storage: Core-Test-St
-    workspace: Core-Test-Ws
     workbook: Core-Test-wbk
+    appInsights: Core-Test-Ai                                         # Can use publish or dependency variants of these values.
+    storage: Core-Test-St                                             # Can use publish or dependency variants of these values.
+    workspace: Core-Test-Ws                                           # Can use publish or dependency variants of these values.
   dependencies:
     keyvault: Core-Test-Kv
+    appInsights: Core-Test-Ai                                         # Can use publish or dependency variants of these values.
+    storage: Core-Test-St                                             # Can use publish or dependency variants of these values.
+    workspace: Core-Test-Ws                                           # Can use publish or dependency variants of these values.
 
 alerts:
   keyvaultAdmin:                                                      # Activity log alerts for core keyvaults

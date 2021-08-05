@@ -46,6 +46,15 @@
             "maximum": 90,
             "default": 90
         },
+        "storageDataRetentionInDays": {
+            "$id": "#/workspaceDataRetentionInDays",
+            "type": ["integer", "null"],
+            "title": "WorkspaceDataRetentionInDays",
+            "description": "Storage diagnostic setting data retention in days.",
+            "minimum": 0,
+            "maximum": 365,
+            "default": 0
+        },
         "service": {
             "$id": "#/service",
             "type": "object",
@@ -65,11 +74,8 @@
                         "keyvaultAdminAlert",
                         "resourceHealthAlert",
                         "serviceHealthAlert",
-                        "appInsights",
                         "resourceGroup",
                         "solution",
-                        "storage",
-                        "workspace",
                         "workbook"
                     ],
                     "properties": {
@@ -105,7 +111,7 @@
                         },
                         "appInsights": {
                             "$id": "#/service/publish/appInsights",
-                            "type": "string",
+                            "type": ["string", "null"],
                             "title": "AppInsights",
                             "description": "Value to publish on deployed resource type."
                         },
@@ -123,13 +129,13 @@
                         },
                         "storage": {
                             "$id": "#/service/publish/storage",
-                            "type": "string",
+                            "type": ["string", "null"],
                             "title": "Storage",
                             "description": "Value to publish on deployed resource type."
                         },
                         "workspace": {
                             "$id": "#/service/publish/workspace",
-                            "type": "string",
+                            "type": ["string", "null"],
                             "title": "Workspace",
                             "description": "Value to publish on deployed resource type."
                         }
@@ -149,6 +155,24 @@
                             "$id": "#/service/dependencies/keyvault",
                             "type": "string",
                             "title": "Keyvault",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "appInsights": {
+                            "$id": "#/service/dependencies/appInsights",
+                            "type": ["string", "null"],
+                            "title": "Storage",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "storage": {
+                            "$id": "#/service/dependencies/appInsights",
+                            "type": ["string", "null"],
+                            "title": "AppInsights",
+                            "description": "Dependency value to fetch existing resource type."
+                        },
+                        "workspace": {
+                            "$id": "#/service/dependencies/workspace",
+                            "type": ["string", "null"],
+                            "title": "Workspace",
                             "description": "Dependency value to fetch existing resource type."
                         }
                     },
