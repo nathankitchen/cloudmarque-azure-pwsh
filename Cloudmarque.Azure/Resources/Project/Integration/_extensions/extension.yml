@@ -1,0 +1,139 @@
+component: extension
+
+names:
+- newVm:
+    architecture: iaas
+    resource: virtualMachine
+    location: uksouth
+    name: Ext-Test
+    includeBuild: false
+- netInterface:
+    architecture: iaas
+    resource: networkInterfaceCard
+    location: uksouth
+    name: Ext-Test
+    includeBuild: false
+- publicIp:
+    architecture: iaas
+    resource: publicIPAddress
+    location: uksouth
+    name: Ext-Test
+    includeBuild: false
+- newNsg:
+    architecture: iaas
+    resource: networkSecurityGroup
+    location: uksouth
+    name: Ext-Test
+    includeBuild: false
+
+templates:
+  - name: template.json
+    service:
+     dependencies:
+        resourceGroup: Iaas-Test-Int-Rg
+    parameters:
+        location:
+            type: static
+            value: uksouth
+        subnetName:
+            type: static
+            value: Iaas-Test-Spoke1-Vnet1-Snet-hpcman
+        virtualNetworkId:
+            type: dependency
+            value: Iaas-Test-Spoke1-Vnet1
+            property: id
+        networkInterfaceName:
+            type: name
+            value: netInterface
+        networkSecurityGroupName:
+            type: name
+            value: newNsg
+        networkSecurityGroupRules:
+            type: static
+            value: [
+                {
+                    "name": "RDP",
+                    "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "3389"
+                    }
+                }
+            ]
+        patchMode:
+            type: static
+            value: AutomaticByOS
+        enableHotpatching:
+            type: static
+            value: false
+        publicIpAddressName:
+            type: name
+            value: publicIp
+        publicIpAddressType:
+            type: static
+            value: static
+        publicIpAddressSku:
+            type: static
+            value: Standard
+        virtualMachineName:
+            type: name
+            value: newVm
+        virtualMachineComputerName:
+            type: static
+            value: Ext-Test-Vm
+        osDiskType:
+            type: static
+            value: Premium_LRS
+        virtualMachineSize:
+            type: static
+            value: Standard_D2s_v3
+        adminUsername:
+            type: static
+            value: groot
+        adminPassword:
+            type: secureDependency
+            value: Core-Test-Kv
+            secretName: Ext-Test-Vm-Scrt
+        diagnosticsStorageAccountName:
+            type: dependency
+            value: Core-Test-St
+            property: resourceName
+            location: uksouth
+        diagnosticsStorageAccountId:
+            type: dependency
+            value: Core-Test-St
+            property: id
+            location: uksouth
+        zone:
+            type: static
+            value: 1
+
+# templates:
+#  - name: template.json                 # by default, locate these in ./_extensions folder relative to the  CmAzContext project.
+#    location: uksouth                   # required for subscription scoped deployment
+#    service:
+#     dependencies:
+#      resourceGroup:                    # If provided, triggers resourceGroup deployment scope.
+#    parameters:
+#     - staticParam:
+#         type: static                   # Simply pass this parameter to the ARM deployment as whatever value is supplied.
+#         value: "Here is a parameter"
+#     - dependentParam:
+#         type: dependency               # Service locate the full resource name from the dependencies list and provide as a parameter.
+#         value: Core-Test-Ws
+#         property: id                   # Optional
+#         throwIfMultiple: true          # Optional
+#         throwIfUnavailable: true       # Optional
+#         location: uksouth              # Optional
+#     - secretNameParam:
+#         type: secureDependency         # Service locate the keyvault.
+#         value: Core-Test-Ws
+#         secretName:                        # refer to secretName.
+#     - nameParam:
+#         type: name                     # Generate/pass the name from the name list (see names: section).
+#         value: newVm

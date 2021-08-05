@@ -134,6 +134,32 @@ stages:
 
           New-CmAzIaasPrivateEndpoints -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/privateendpoints.yml" -Verbose
 
+  - job: Extension
+    displayName: Extension
+    dependsOn: IaasNetwork
+    steps:
+    - task: AzurePowerShell@5
+      inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
+
+          New-CmAzCustomExtension -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/_extensions/extension.yml" -Verbose
+
 - stage: Paas
   condition: and(succeeded(), eq('${{ parameters.Paas }}', true))
   dependsOn: Iaas_NSP

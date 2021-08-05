@@ -5,13 +5,15 @@ function Resolve-FilePath() {
         [string]$NestedFile
     )
 
-    if ($NestedFile.StartsWith('./')) {
-        $NestedFile.replace('./', "$((Get-CmAzContext).ProjectRoot)/")
-    }
-    elseif ($NestedFile.StartsWith('.\')) {
-        $NestedFile.replace('.\', "$((Get-CmAzContext).ProjectRoot)\")
+    if ([System.IO.Path]::IsPathRooted($NestedFile)) {
+
+        return $NestedFile
     }
     else {
-        $NestedFile
+
+        $NestedFile = $NestedFile.replace('./', "$((Get-CmAzContext).ProjectRoot)/")
+        $NestedFile = $NestedFile.replace('.\', "$((Get-CmAzContext).ProjectRoot)\")
+
+        return $NestedFile
     }
 }

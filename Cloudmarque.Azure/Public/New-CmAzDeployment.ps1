@@ -81,6 +81,10 @@ function New-CmAzDeployment {
                 New-CmAzCoreAutomation -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
             }
 
+            extension {
+                New-CmAzCustomExtension -SettingsObject $SettingsObject
+            }
+
             logAlerts {
                 New-CmAzMonitorLogAlerts -SettingsObject $SettingsObject
             }

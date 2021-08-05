@@ -1,0 +1,137 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzCustomExtension",
+    "type": "object",
+    "title": "New-CmAzCustomExtension",
+    "description": "Settings Root.",
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": [
+                "string",
+                "null"
+            ],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "names": {
+            "$id": "#/names",
+            "type": "array",
+            "title": "Names",
+            "description": "Contains containers with properties required to create standard names for resources."
+        },
+        "templates": {
+            "$id": "#/templates",
+            "type": "array",
+            "title": "Templates",
+            "description": "Contains details required to deploy custom templates.",
+            "items": {
+                "$id": "#/templates/items",
+                "minItems": 1,
+                "allOf": [
+                    {
+                        "$id": "#/templates/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "parameters"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/templates/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Name and path of the template. Defaults to _extension folder."
+                            },
+                            "location": {
+                                "$id": "#/templates/items/allOf/location",
+                                "title": "Location",
+                                "description": "Location for subscription scoped deployment",
+                                "type": ["string", "null"]
+                            },
+                            "parameters": {
+                                "$id": "#/templates/items/allOf/parameters",
+                                "type": [
+                                    "array",
+                                    "object"
+                                ],
+                                "title": "Parameters",
+                                "description": "Parameters to be passed to template.",
+                                "patternProperties": {
+                                    "^[a-zA-Z0-9]+$": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "description": "Type of operation to be performed before returning value to template.",
+                                                "type": "string",
+                                                "enum": ["name", "static", "dependency", "secureDependency"]
+                                            },
+                                            "value": {
+                                                "description": "Value to be returned to template.",
+                                                "type": ["string", "array", "boolean", "integer", "null", "number", "object"]
+                                            },
+                                            "property": {
+                                                "description": "Used to return specific property of dependency.",
+                                                "type": ["string", "null"]
+                                            },
+                                            "throwIfMultiple": {
+                                                "description": "Check to enforce non-duplication of service located resource.",
+                                                "type": ["boolean", "null"],
+                                                "default": true
+                                            },
+                                            "throwIfUnavailable": {
+                                                "description": "Check to ensure dependency exists.",
+                                                "type": ["boolean", "null"],
+                                                "default": true
+                                            },
+                                            "location": {
+                                                "description": "Fetch resource from a particular location using service locator.",
+                                                "type": ["string", "null"]
+                                            },
+                                            "secretName": {
+                                                "description": "Name of key vault secret containing secure string.",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "type",
+                                            "value"
+                                        ],
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "service": {
+                                "$id": "#/templates/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "dependencies": {
+                                        "$id": "#/templates/items/allOf/service/dependencies",
+                                        "type": ["object", "null"],
+                                        "title": "Dependencies",
+                                        "description": "Contains dependency details for service location.",
+                                        "properties": {
+                                            "resourceGroup": {
+                                                "$id": "#/templates/items/allOf/service/dependencies/resourceGroup",
+                                                "type": ["string", "null"],
+                                                "title": "ResourceGroup",
+                                                "description": "Local overriding dependency value to fetch existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}
