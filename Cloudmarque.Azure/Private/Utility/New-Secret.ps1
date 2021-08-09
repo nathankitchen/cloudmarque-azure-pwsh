@@ -1,5 +1,5 @@
-function New-Secret() {
-    
+function New-Secret {
+
 	param(
 		[parameter(Mandatory = $true)]
         [int]$Count,

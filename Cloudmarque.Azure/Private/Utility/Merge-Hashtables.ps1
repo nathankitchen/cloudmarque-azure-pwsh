@@ -1,4 +1,4 @@
-function Merge-HashTables() {
+function Merge-HashTables {
 
     param(
         [parameter(Mandatory = $true)]

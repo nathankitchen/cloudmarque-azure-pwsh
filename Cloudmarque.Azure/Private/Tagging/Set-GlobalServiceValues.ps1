@@ -1,4 +1,4 @@
-function Set-GlobalServiceValues() {
+function Set-GlobalServiceValues {
 
     param(
         [parameter(Mandatory = $true)]

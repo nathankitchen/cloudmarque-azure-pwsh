@@ -1,4 +1,4 @@
-function Set-DeployedResourceTags() {
+function Set-DeployedResourceTags {
 
     param(
         [AllowEmptyString()]

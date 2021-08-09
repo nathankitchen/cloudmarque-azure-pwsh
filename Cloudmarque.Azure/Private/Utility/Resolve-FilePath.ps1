@@ -1,4 +1,4 @@
-function Resolve-FilePath() {
+function Resolve-FilePath {
 
     param(
         [parameter(Mandatory = $true)]

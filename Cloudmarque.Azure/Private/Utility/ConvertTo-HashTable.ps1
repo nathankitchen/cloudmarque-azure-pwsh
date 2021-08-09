@@ -1,4 +1,4 @@
-function ConvertTo-HashTable() {
+function ConvertTo-HashTable {
 
     param(
         [parameter(Mandatory = $true)]

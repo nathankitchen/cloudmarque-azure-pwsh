@@ -1,4 +1,4 @@
-function Write-CommandStatus() {
+function Write-CommandStatus {
 
     param(
         [parameter(Mandatory = $true)]

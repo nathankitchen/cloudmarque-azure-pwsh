@@ -1,4 +1,4 @@
-function Get-Settings() {
+function Get-Settings {
 
     param(
         [String]$SettingsFile,
