@@ -46,9 +46,11 @@
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		Write-CommandStatus -CommandName $commandName
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Azure - Frontdoor | Backendpool | Webapps along with routing rules")) {
 
@@ -120,6 +122,8 @@
 					foreach ($appServicePlan in $webSolution.AppServicePlans) {
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "appServicePlan" -ResourceServiceContainer $appServicePlan
+
+						$appServicePlan.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "PaaS" -Location $appServicePlan.location -Name "$commandName-$($appServicePlan.name)"
 						$appServicePlan.name = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Location $appServicePlan.location -Name $appServicePlan.name
 
 						if (!$appServicePlan.kind) {
@@ -240,6 +244,7 @@
 							$_.skucount = 1
 						}
 
+						$_.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "PaaS" -Location $_.location -Name "$commandName-$($_.Name)"
 						$_.generatedName = Get-CmAzResourceName -Resource "APImanagementServiceInstance" -Architecture "PaaS" -Location $_.location -Name $_.Name
 					}
 				}
@@ -259,7 +264,7 @@
 
 				Write-Verbose "Deploying Webapps..."
 
-				$deploymentNameWeb = Get-CmAzResourceName -Resource "Deployment" -Location $location -Architecture "PaaS" -Name "New-CmAzPaasWeb-WebApp"
+				$deploymentNameWeb = Get-CmAzResourceName -Resource "Deployment" -Location $location -Architecture "PaaS" -Name "$commandName-WebApp"
 
 				New-AzDeployment  `
 					-Name $deploymentNameWeb `
@@ -323,7 +328,7 @@
 
 				Write-Verbose "Deploying api management services..."
 
-				$deploymentNameApim = Get-CmAzResourceName -Resource "Deployment" -Location $location -Architecture "PaaS" -Name "New-CmAzPaasWeb-ApiMs"
+				$deploymentNameApim = Get-CmAzResourceName -Resource "Deployment" -Location $location -Architecture "PaaS" -Name "$commandName-ApiMs"
 
 				New-AzDeployment `
 					-Name $deploymentNameApim `
@@ -527,7 +532,7 @@
 
 				Write-Verbose "Deploying Frontdoor..."
 
-				$deploymentNameFd = Get-CmAzResourceName -Resource "Deployment" -Location "Global" -Architecture "PaaS" -Name "New-CmAzPaasWeb-Fd"
+				$deploymentNameFd = Get-CmAzResourceName -Resource "Deployment" -Location "Global" -Architecture "PaaS" -Name "$commandName-Fd"
 
 				New-AzResourceGroupDeployment  `
 					-Name $deploymentNameFd `
@@ -598,7 +603,7 @@
 			}
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
-			
+
 			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}
 	}

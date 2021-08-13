@@ -28,7 +28,7 @@
 
         {
             "condition": "[not(equals(parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].generatedName, 'none'))]",
-            "name": "[concat('ProximityPlacementGroupTemplate', copyIndex('ProximityPlacementGroupsCopy'))]",
+            "name": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].templateName]",
             "type": "Microsoft.Resources/Deployments",
             "resourceGroup": "[parameters('ProximityPlacementGroups')[copyIndex('ProximityPlacementGroupsCopy')].resourceGroupName]",
             "apiVersion": "2019-10-01",
@@ -71,7 +71,7 @@
         },
         {
             "condition": "[not(equals(parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].generatedName, 'none'))]",
-            "name": "[concat('AvailabilitySetsTemplate', copyIndex('AvailabilitySetsCopy'))]",
+            "name": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].templateName]",
             "type": "Microsoft.Resources/Deployments",
             "resourceGroup": "[parameters('AvailabilitySets')[copyIndex('AvailabilitySetsCopy')].resourceGroupName]",
             "apiVersion": "2019-10-01",
@@ -121,7 +121,7 @@
             }
         },
         {
-            "name": "[concat('VirtualMachineLevelTemplates', copyIndex('VirtualMachinesCopy'))]",
+            "name": "[parameters('VirtualMachines')[copyIndex('VirtualMachinesCopy')].templateName]",
             "type": "Microsoft.Resources/Deployments",
             "resourceGroup": "[parameters('VirtualMachines')[copyIndex('VirtualMachinesCopy')].resourceGroupName]",
             "apiVersion": "2019-10-01",

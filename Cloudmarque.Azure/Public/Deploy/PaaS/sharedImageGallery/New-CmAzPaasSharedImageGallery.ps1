@@ -39,9 +39,11 @@
 
     try {
 
-        Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+        $commandName = $MyInvocation.MyCommand.Name
 
-        $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+        Write-CommandStatus -CommandName $commandName
+
+        $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
         if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy shared image gallery")) {
 
@@ -62,6 +64,7 @@
                 Write-Error "Please provide appropriate service tag for existing resource group or provide unique name to create new."
             }
 
+            $SettingsObject.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "Paas" -Location $SettingsObject.location -Name "$commandName-$($SettingsObject.galleryName)"
             $SettingsObject.galleryName = Get-CmAzResourceName -Resource "SharedImageGallery" -Architecture "Paas" -Location $SettingsObject.location -Name $SettingsObject.galleryName
 
             $SettingsObject.imageDefinitions | ForEach-Object {
@@ -133,7 +136,7 @@
 
             Write-Verbose "Deploying Shared Image Gallery..."
 
-            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Paas" -Location $SettingsObject.location -Name "New-CmAzPaasSharedImageGallery"
+            $deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Paas" -Location $SettingsObject.location -Name $commandName
 
             New-AzResourceGroupDeployment `
                 -Name $deploymentName `
@@ -144,7 +147,7 @@
                 -GalleryName $SettingsObject.galleryName `
                 -Force
 
-            Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+            Write-CommandStatus -CommandName $commandName -Start $false
         }
     }
     catch {

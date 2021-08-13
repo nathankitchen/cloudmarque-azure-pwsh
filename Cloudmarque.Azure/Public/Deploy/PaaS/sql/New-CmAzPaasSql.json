@@ -14,7 +14,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat('Cm_', parameters('Servers')[copyIndex('ServerCopy')].resourceDetails.ServerName, '_', parameters('Servers')[copyIndex('ServerCopy')].resourceDetails.family)]",
+            "name": "[parameters('Servers')[copyIndex('ServerCopy')].resourceDetails.templateName]",
             "copy": {
                 "name": "ServerCopy",
                 "count": "[length(parameters('Servers'))]"

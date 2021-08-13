@@ -36,7 +36,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
             "dependsOn": ["[resourceId('Microsoft.Resources/resourceGroups', parameters('Environments')[copyIndex('WVDEnvironmentCopy')].resourceGroupName)]"],
-            "name": "[concat('WVDhostpool-Setup_', parameters('Environments')[copyIndex('WVDEnvironmentCopy')].workspaceName)]",
+            "name": "[parameters('Environments')[copyIndex('WVDEnvironmentCopy')].templateName]",
             "resourceGroup": "[parameters('Environments')[copyIndex('WVDEnvironmentCopy')].resourceGroupName]",
             "properties": {
                 "expressionEvaluationOptions": {

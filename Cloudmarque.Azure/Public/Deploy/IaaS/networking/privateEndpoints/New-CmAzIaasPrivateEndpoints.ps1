@@ -47,9 +47,11 @@ function New-CmAzIaasPrivateEndpoints {
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		Write-CommandStatus -CommandName $commandName
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create Private Endpoints")) {
 
@@ -103,6 +105,11 @@ function New-CmAzIaasPrivateEndpoints {
 					$endpoint.subResourceName ??= $SettingsObject.globalSubResourceName
 				}
 
+				$endpoint.templateName = Get-CmAzResourceName -Resource "deployment" `
+					-Architecture "IaaS" `
+					-Location $endpoint.location `
+					-Name "$commandName-$($endpoint.name)"
+
 				$endpoint.name = Get-CmAzResourceName -Resource "PrivateEndpoint" `
 					-Architecture "IaaS" `
 					-Location $endpoint.location `
@@ -114,7 +121,7 @@ function New-CmAzIaasPrivateEndpoints {
 			Write-Verbose "Configuring Private endpoints..."
 
 			$location = $SettingsObject.privateEndpoints[0].location
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasPrivateEndpoints"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name $commandName
 
 			New-AzDeployment `
 				-Name $deploymentName `
@@ -128,10 +135,10 @@ function New-CmAzIaasPrivateEndpoints {
 				$resourcesToSet += $SettingsObject.privateEndpoints.name
 
 				Write-Verbose "Started tagging for resources..."
-				
+
 				Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
-			
-				Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+
+				Write-CommandStatus -CommandName $commandName -Start $false
 			}
 		}
 	}

@@ -12,7 +12,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat('Cm_ApiManagementService_', copyIndex('ApiManagementServicesCopy'))]",
+            "name": "[parameters('ApiManagementServices')[copyIndex('ApiManagementServicesCopy')].templateName]",
             "resourceGroup": "[parameters('ApiManagementServices')[copyIndex('ApiManagementServicesCopy')].resourceGroupName]",
             "copy": {
                 "name": "ApiManagementServicesCopy",

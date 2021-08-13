@@ -10,7 +10,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[take(concat('cm_pe_', parameters('PrivateEndpoints')[copyIndex('PrivateEndpointsCopy')].name, copyIndex('PrivateEndpointsCopy')), 64)]",
+            "name": "[parameters('PrivateEndpoints')[copyIndex('PrivateEndpointsCopy')].templateName]",
             "resourceGroup": "[parameters('PrivateEndpoints')[copyIndex('PrivateEndpointsCopy')].resourceGroupName]",
             "copy": {
                 "name": "PrivateEndpointsCopy",

@@ -10,7 +10,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[take(concat('cm_fw_policy', parameters('FirewallPolicies')[copyIndex('FirewallPoliciesCopy')].name, copyIndex('FirewallPoliciesCopy')), 64)]",
+            "name": "[parameters('FirewallPolicies')[copyIndex('FirewallPoliciesCopy')].templateName]",
             "resourceGroup": "[parameters('FirewallPolicies')[copyIndex('FirewallPoliciesCopy')].resourceGroupName]",
             "copy": {
                 "name": "FirewallPoliciesCopy",

@@ -32,7 +32,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat('Cm_', parameters('GalleryName'), '_', parameters('ImageDefinitions')[copyIndex('ImageDefinitionsCopy')].definitionName)]",
+            "name": "[parameters('ImageDefinitions')[copyIndex('ImageDefinitionsCopy')].templateName]",
             "copy": {
                 "name": "ImageDefinitionsCopy",
                 "count": "[length(parameters('ImageDefinitions'))]"

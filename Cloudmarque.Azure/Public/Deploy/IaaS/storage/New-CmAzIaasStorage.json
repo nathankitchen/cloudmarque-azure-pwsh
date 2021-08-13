@@ -11,7 +11,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat('CmAz_', parameters('StorageSettingsArray')[copyIndex('StorageCopy')].storageAccountName)]",
+            "name": "[parameters('StorageSettingsArray')[copyIndex('StorageCopy')].templateName]",
             "copy": {
                 "name": "StorageCopy",
                 "count": "[length(parameters('StorageSettingsArray'))]"

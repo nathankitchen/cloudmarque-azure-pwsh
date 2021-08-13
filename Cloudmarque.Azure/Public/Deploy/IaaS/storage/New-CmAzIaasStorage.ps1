@@ -46,9 +46,11 @@
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		Write-CommandStatus -CommandName $commandName
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Storage Account/s.")) {
 
@@ -158,6 +160,7 @@
 					Write-Verbose "$($_.storageAccountName): Table configuration found."
 				}
 
+				$_.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "IaaS" -Location $_.location -Name "$commandName-$($_.storageAccountName)"
 				$_.storageAccountName = Get-CmAzResourceName -Resource "Storageaccount" -Architecture "IaaS" -Location $_.location -Name $_.storageAccountName
 			}
 
@@ -210,7 +213,7 @@
 				Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
 			}
 
-			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+			Write-CommandStatus -CommandName $commandName -Start $false
 		}
 	}
 	catch {

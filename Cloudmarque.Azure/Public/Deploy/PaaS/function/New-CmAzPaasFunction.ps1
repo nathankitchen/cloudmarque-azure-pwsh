@@ -51,9 +51,11 @@ function New-CmAzPaasFunction {
 
     try {
 
-        Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+        $commandName = $MyInvocation.MyCommand.Name
 
-        $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+        Write-CommandStatus -CommandName $commandName
+
+        $SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
         if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Azure Functions")) {
 
@@ -135,6 +137,7 @@ function New-CmAzPaasFunction {
                             $appServicePlan.resourceGroupName = $functionAppSolution.generatedResourceGroupName
                         }
 
+                        $appServicePlan.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "PaaS" -Location $appServicePlan.location -Name "$commandName-$($appServicePlan.name)"
                         $appServicePlan.exists = $functionAppSolution.transFrmWeb
                         $appServicePlan.reserved = $appServicePlan.kind -eq 'linux' ? $true : $false
 
@@ -178,6 +181,8 @@ function New-CmAzPaasFunction {
 
                         $function.resourceGroupName = $functionAppSolution.generatedResourceGroupName
                         $function.planName = Get-CmAzResourceName -Resource "AppServicePlan" -Architecture "PaaS" -Location $function.location -Name $function.name
+
+                        $function.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "PaaS" -Location $function.location -Name "$commandName-con-$($function.name)"
                         $function.name = Get-CmAzResourceName -Resource "FunctionApp" -Architecture "PaaS" -Location $function.location -Name $function.name
                         $function.functionsWorker = $function.runtime.split('|')
 
@@ -241,7 +246,9 @@ function New-CmAzPaasFunction {
                 Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupsToSet
             }
 
-            Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+            $commandName = $MyInvocation.MyCommand.Name
+
+            Write-CommandStatus -CommandName $commandName -Start $false
         }
     }
     catch {

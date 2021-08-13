@@ -58,9 +58,11 @@
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		Write-CommandStatus -CommandName $commandName
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Virtual Machines")) {
 
@@ -134,6 +136,7 @@
 					foreach ($placementGroup in $resourceGroup.proximityPlacementGroups) {
 						$placementGroup.location ??= $resourceGroup.location
 
+						$placementGroup.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "IaaS" -Location $placementGroup.location -Name "$commandName-pg-$($placementGroup.name)"
 						$placementGroup.generatedName = Get-CmAzResourceName -Resource "ProximityPlacementGroup" -Architecture "IaaS" -Location $placementGroup.location -Name $placementGroup.name
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "ProximityPlacementGroup" -ResourceServiceContainer $placementGroup
 
@@ -147,6 +150,7 @@
 					$placementGroup = @{
 						resourceGroupName = $resourceGroup.name
 						generatedName     = "none";
+						templateName	  = "none";
 						location          = "uksouth";
 						service           = @{
 							publish = @{
@@ -161,6 +165,7 @@
 				if ($resourceGroup.availabilitySets) {
 
 					foreach ($set in $resourceGroup.availabilitySets) {
+						$set.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "IaaS" -Location $set.location -Name "$commandName-avs-$($set.name)"
 						$set.generatedName = Get-CmAzResourceName -Resource "AvailabilitySet" -Architecture "IaaS" -Location $set.location -Name $set.name
 
 						if ($set.proximityPlacementGroup) {
@@ -184,12 +189,13 @@
 				}
 				else {
 					$set = @{
-						resourceGroupName         = $resourceGroup.name
+						resourceGroupName         = $resourceGroup.name;
 						generatedName             = "none";
+						templateName			  = "none;"
 						location                  = "uksouth";
 						platformFaultDomainCount  = "2";
 						platformUpdateDomainCount = "2";
-						sku                       = "aligned"
+						sku                       = "aligned";
 						service                   = @{
 							publish = @{
 								proximityPlacementGroup = "none"
@@ -234,6 +240,7 @@
 					$virtualMachine.networking.virtualNetworkId = $virtualNetwork.resourceId
 
 					Write-Verbose "Generating standardised resource names..."
+					$virtualMachine.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "Core" -Location $virtualMachine.location -Name "$commandName-$($virtualMachine.name)"
 					$virtualMachine.computerName = Get-CmAzResourceName -Resource "ComputerName" -Architecture "Core" -Location $virtualMachine.location -Name $virtualMachine.name -MaxLength 15
 					$virtualMachine.fullName = Get-CmAzResourceName -Resource "VirtualMachine" -Architecture "IaaS" -Location $virtualMachine.location -Name $virtualMachine.name
 					$virtualMachine.nicName = Get-CmAzResourceName -Resource "NetworkInterfaceCard" -Architecture "IaaS" -Location $virtualMachine.location -Name $virtualMachine.fullName
@@ -347,7 +354,7 @@
 			}
 			else {
 
-				$deploymentNameRgs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasVm-Rgs"
+				$deploymentNameRgs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "$commandName-Rgs"
 
 				New-AzDeployment `
 					-Name $deploymentNameRgs `
@@ -364,7 +371,7 @@
 					"LocalAdminPassword" = ConvertFrom-SecureString $LocalAdminPassword -AsPlainText;
 				}
 
-				$deploymentNameVm = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasVm"
+				$deploymentNameVm = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name $commandName
 
 				New-AzResourceGroupDeployment `
 					-Name $deploymentNameVm  `
@@ -382,7 +389,7 @@
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $allResourceGroups.name
 
-			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+			Write-CommandStatus -CommandName $commandName -Start $false
 		}
 	}
 	catch {

@@ -43,9 +43,10 @@ function New-CmAzCoreKeyVault {
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
+		Write-CommandStatus -CommandName $commandName
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Keyvault")) {
 
@@ -53,6 +54,8 @@ function New-CmAzCoreKeyVault {
 
 			Write-Verbose "Generating standardised Key Vault names..."
 			ForEach ($keyVault in $SettingsObject.keyVaults) {
+
+				$keyVault.templateName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Location $keyVault.location -Name "$commandName-$($keyVault.name)"
 				$keyVault.name = Get-CmAzResourceName -Resource "KeyVault" -Architecture "Core" -Location $keyVault.location -Name $keyVault.name -MaxLength 24
 
 				if ($null -eq $keyVault.enableSoftDelete) {
@@ -98,7 +101,7 @@ function New-CmAzCoreKeyVault {
 
 			Write-Verbose "Deploying Keyvaults..."
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Location $SettingsObject.location -Name "New-CmAzCoreKeyVault"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "Core" -Location $SettingsObject.location -Name $commandName
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
@@ -130,7 +133,7 @@ function New-CmAzCoreKeyVault {
 			}
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $keyVaultResourceGroup
-			
+
 			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}
 	}

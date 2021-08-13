@@ -12,7 +12,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[parameters('AppServicePlans')[copyIndex('AppServicePlansCopy')].name]",
+            "name": "[parameters('AppServicePlans')[copyIndex('AppServicePlansCopy')].templateName]",
             "resourceGroup": "[parameters('AppServicePlans')[copyIndex('AppServicePlansCopy')].resourceGroupName]",
             "copy": {
                 "name": "AppServicePlansCopy",

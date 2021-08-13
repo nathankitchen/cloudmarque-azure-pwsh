@@ -10,7 +10,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[take(concat('cm_', parameters('Firewalls')[copyIndex('FirewallsCopy')].name, copyIndex('FirewallsCopy')), 64)]",
+            "name": "[parameters('Firewalls')[copyIndex('FirewallsCopy')].templateName]",
             "resourceGroup": "[parameters('Firewalls')[copyIndex('FirewallsCopy')].resourceGroupName]",
             "copy": {
                 "name": "FirewallsCopy",

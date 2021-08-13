@@ -41,9 +41,11 @@ function New-CmAzIaasWvd {
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		Write-CommandStatus -CommandName $commandName
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Windows Virtual Desktop environment.")) {
 
@@ -52,6 +54,9 @@ function New-CmAzIaasWvd {
 
 				$wvdEnvironment.resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "IaaS" -Location $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
 				Write-Verbose "Generated resource group name: $($wvdEnvironment.resourceGroupName)"
+
+				$wvdEnvironment.templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "IaaS" -Location $wvdEnvironment.wvdEnvironmentLocation -Name "$commandName-$($wvdEnvironment.wvdEnvironmentName)"
+				$wvdEnvironment.postSetupTemplateName = Get-CmAzResourceName -Resource "deployment" -Architecture "IaaS" -Location $wvdEnvironment.wvdEnvironmentLocation -Name "$commandName-ps-$($wvdEnvironment.wvdEnvironmentName)"
 
 				$wvdEnvironment.workspaceName = Get-CmAzResourceName -Resource "WVDWorkspace" -Architecture "IaaS" -Location $wvdEnvironment.wvdEnvironmentLocation -Name $wvdEnvironment.wvdEnvironmentName
 				Write-Verbose "Generated Workspace name: $($wvdEnvironment.workspaceName)"
@@ -182,7 +187,7 @@ function New-CmAzIaasWvd {
 
 			Write-Verbose "Deploying WVD infrastructure..."
 
-			$deploymentNameEnv = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Env"
+			$deploymentNameEnv = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.azureDeploymentLocation -Name "$commandName-Env"
 
 			New-AzDeployment `
 				-Name $deploymentNameEnv `
@@ -235,7 +240,7 @@ function New-CmAzIaasWvd {
 
 			Write-Verbose "Deploying WVD hosts."
 
-			$deploymentNameHosts = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Hosts"
+			$deploymentNameHosts = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.azureDeploymentLocation -Name "$commandName-Hosts"
 
 			New-AzDeployment `
 				-Name $deploymentNameHosts `
@@ -245,7 +250,7 @@ function New-CmAzIaasWvd {
 
 			Write-Verbose "Deploying WVD host post setup."
 
-			$deploymentNamePs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.azureDeploymentLocation -Name "New-CmAzWVD-Ps"
+			$deploymentNamePs = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.azureDeploymentLocation -Name "$commandName-Ps"
 
 			New-AzDeployment `
 				-Name $deploymentNamePs `
@@ -254,7 +259,7 @@ function New-CmAzIaasWvd {
 				-Environments $SettingsObject.wvdEnvironments `
 				-LogAnalyticsID $logAnalyticsID
 
-			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+			Write-CommandStatus -CommandName $commandName -Start $false
 		}
     }
 	catch {

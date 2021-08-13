@@ -41,9 +41,11 @@
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		Write-CommandStatus -CommandName $commandName
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create Bastion Host in resource group")) {
 
@@ -62,12 +64,20 @@
 				$bastionHost.vnetName = (Get-CmAzService -Service $bastionHost.service.dependencies.vnet -ThrowIfUnavailable -ThrowIfMultiple).name
 				$vnetObject = Get-AzVirtualNetwork -Name $bastionHost.vnetName
 
-				$bastionHost.bastionPublicIPName = Get-CmAzResourceName -Resource "PublicIPAddress" `
+				$bastionHost.bastionPublicIPName = Get-CmAzResourceName `
+					-Resource "PublicIPAddress" `
 					-Architecture "IaaS" `
 					-Location $SettingsObject.location `
 					-Name $bastionHost.bastionHostName
 
-				$bastionHost.bastionHostName = Get-CmAzResourceName -Resource "BastionHost" `
+				$bastionHost.templateName = Get-CmAzResourceName `
+					-Resource "deployment" `
+					-Architecture "IaaS" `
+					-Location $SettingsObject.location `
+					-Name "$commandName-$($bastionHost.bastionHostName)"
+
+				$bastionHost.bastionHostName = Get-CmAzResourceName `
+					-Resource "BastionHost" `
 					-Architecture "IaaS" `
 					-Location $SettingsObject.location `
 					-Name $bastionHost.bastionHostName
@@ -94,7 +104,10 @@
 
 			Write-Verbose "Deploying Bastion Hosts.."
 
-			$deploymentName = Get-CmAzResourceName 	-Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasBastionHost"
+			$deploymentName = Get-CmAzResourceName `
+				-Resource "Deployment" -Architecture "IaaS" `
+				-Location $SettingsObject.location `
+				-Name $commandName
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
@@ -110,8 +123,8 @@
 			$resourcesToSet += $SettingsObject.bastionHosts.bastionHostName
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
-			
-			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+
+			Write-CommandStatus -CommandName $commandName -Start $false
 		}
 	}
 	catch {

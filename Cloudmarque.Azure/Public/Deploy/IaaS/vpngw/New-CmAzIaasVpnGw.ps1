@@ -42,9 +42,11 @@
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		Write-CommandStatus -CommandName $commandName
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Set Virtual private network Gateway in Azure Vnet")) {
 
@@ -86,6 +88,12 @@
 					-Architecture "IaaS" `
 					-Location $SettingsObject.location `
 					-Name $vpnGw.GatewayName
+
+				$vpnGw.templateName = Get-CmAzResourceName `
+					-Resource "deployment" `
+					-Architecture "IaaS" `
+					-Location $SettingsObject.location `
+					-Name "$commandName-$($vpnGw.GatewayName)"
 
 				$vpnGw.GatewayName = Get-CmAzResourceName `
 					-Resource "VirtualNetworkGateway" `
@@ -175,7 +183,7 @@
 			}
 			Write-Verbose "Deploying Vpn Gateways..."
 
-			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name "New-CmAzIaasVpnGw"
+			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name $commandName
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
@@ -189,8 +197,8 @@
 			$resourcesToBeSet += $SettingsObject.vpnGw.gatewayName
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourceIds
-			
-			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+
+			Write-CommandStatus -CommandName $commandName -Start $false
 		}
 	}
 	catch {

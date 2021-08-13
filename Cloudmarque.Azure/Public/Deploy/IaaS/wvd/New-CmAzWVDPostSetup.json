@@ -18,7 +18,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat('WVDHost_PostSetup_', parameters('Environments')[copyIndex('WVDHostPostSetup')].resourceGroupName)]",
+            "name": "[parameters('Environments')[copyIndex('WVDHostPostSetup')].postSetupTemplateName]",
             "resourceGroup": "[parameters('Environments')[copyIndex('WVDHostPostSetup')].resourceGroupName]",
             "properties": {
                 "expressionEvaluationOptions": {

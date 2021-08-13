@@ -17,7 +17,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[concat(parameters('BastionHosts')[copyIndex('BastionHostCopy')].bastionHostName, copyIndex('BastionHostCopy'))]",
+            "name": "[parameters('BastionHosts')[copyIndex('BastionHostCopy')].templateName]",
             "copy": {
                 "name": "BastionHostCopy",
                 "count": "[length(parameters('BastionHosts'))]"

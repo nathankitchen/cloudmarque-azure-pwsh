@@ -12,7 +12,7 @@
         {
             "type": "Microsoft.Resources/Deployments",
             "apiVersion": "2019-10-01",
-            "name": "[parameters('AppServiceDetails')[copyIndex('appServiceDetailsCopy')].name]",
+            "name": "[parameters('AppServiceDetails')[copyIndex('appServiceDetailsCopy')].templateName]",
             "resourceGroup": "[parameters('AppServiceDetails')[copyIndex('appServiceDetailsCopy')].resourceGroupName]",
             "copy": {
                 "name": "appServiceDetailsCopy",

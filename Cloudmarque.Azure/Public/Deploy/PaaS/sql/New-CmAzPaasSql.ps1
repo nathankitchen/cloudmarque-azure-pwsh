@@ -44,9 +44,10 @@
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
+		Write-CommandStatus -CommandName $commandName
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy SQL database")) {
 
@@ -113,6 +114,8 @@
 				$keyVault = Get-CmAzService -Service $_.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 
 				$preserveName = $_.serverName
+
+				$templateName = Get-CmAzResourceName -Resource "deployment" -Architecture "PaaS" -Location $SettingsObject.Location -Name "$commandName-$($_.serverName)"
 				$serverName = Get-CmAzResourceName -Resource "AzureSQLDatabaseserver" -Architecture "PaaS" -Location $SettingsObject.Location -Name $_.serverName
 
 				if ($UniqueSqlServerNames -contains $_.serverName) {
@@ -165,6 +168,7 @@
 					"resourceDetails"    = @{
 						"family"                = $dbFamily
 						"sharedServer"          = $sharedServer
+						"templateName"			= $templateName
 						"type"                  = ($_.type ?? "").Tolower()
 						"name"                  = $preserveName
 						"serverName"            = $serverName;
@@ -210,7 +214,7 @@
 
 				if ($_) {
 
-					$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Location $SettingsObject.Location -Name "New-CmAzPaasSql"
+					$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Location $SettingsObject.Location -Name $commandName
 
 					New-AzResourceGroupDeployment `
 						-Name $deploymentName `
@@ -256,8 +260,8 @@
 			$resourcesToSet += $joinedSqlServers.resourceDetails.serverName
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
-		
-			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+
+			Write-CommandStatus -CommandName $commandName -Start $false
 		}
 	}
 	catch {

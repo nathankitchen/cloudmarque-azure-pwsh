@@ -45,9 +45,11 @@ function New-CmAzIaasFirewalls {
 
 	try {
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name
+		$commandName = $MyInvocation.MyCommand.Name
 
-		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
+		Write-CommandStatus -CommandName $commandName
+
+		$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName $commandName
 
 		if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Create firewalls")) {
 
@@ -116,6 +118,11 @@ function New-CmAzIaasFirewalls {
 					$firewallPolicy.ruleCollectionGroups = @( @{ name = 'none'; ruleCollections = @() })
 				}
 
+				$firewallPolicy.templateName = Get-CmAzResourceName -Resource "deployment" `
+					-Architecture "IaaS" `
+					-Location $firewallPolicy.location `
+					-Name "$commandName-$($firewallPolicy.name)"
+
 				$firewallPolicy.name = Get-CmAzResourceName -Resource "firewallPolicy" `
 					-Architecture "IaaS" `
 					-Location $firewallPolicy.location `
@@ -129,7 +136,7 @@ function New-CmAzIaasFirewalls {
 				Write-Verbose "Configuring firewall policies..."
 
 				$location = $SettingsObject.firewallPolicies[0].location
-				$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasFirewalls-Policies"
+				$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "$commandName-Policies"
 
 				New-AzDeployment `
 					-Name $deploymentName `
@@ -163,6 +170,11 @@ function New-CmAzIaasFirewalls {
 				$firewall.resourceGroupName = $vnet.resourceGroupName
 				$firewall.vnetName = $vnet.resourceName
 
+				$firewall.templateName = Get-CmAzResourceName -Resource "deployment" `
+					-Architecture "IaaS" `
+					-Location $firewall.location `
+					-Name "$commandName-$($firewall.name)"
+
 				$firewall.name = Get-CmAzResourceName -Resource "firewall" `
 					-Architecture "IaaS" `
 					-Location $firewall.location `
@@ -181,7 +193,7 @@ function New-CmAzIaasFirewalls {
 				Write-Verbose "Configuring firewalls..."
 
 				$location = $SettingsObject.firewalls[0].location
-				$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name "New-CmAzIaasFirewalls"
+				$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $location -Name $commandName
 
 				New-AzDeployment `
 					-Name $deploymentName `
@@ -197,7 +209,7 @@ function New-CmAzIaasFirewalls {
 		Write-Verbose "Started tagging for firewall..."
 		Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $SettingsObject.firewalls.name
 
-		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+		Write-CommandStatus -CommandName $commandName -Start $false
 	}
 	catch {
 		$PSCmdlet.ThrowTerminatingError($PSItem)
