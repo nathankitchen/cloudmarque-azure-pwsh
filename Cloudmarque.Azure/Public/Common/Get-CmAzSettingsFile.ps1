@@ -14,6 +14,9 @@
 
 		.Parameter Path
 		 The file path of the settings file to parse.
+		 
+		.Parameter AsHashtable
+		 Parses JSON as hashtable.
 
 		.Example
 		 Get-CmAzSettingsFile -Path settings.yml
@@ -24,7 +27,9 @@
 	param(
 		[Parameter(Mandatory = $true)]
 		[String]
-		$Path
+		$Path,
+		[Switch]
+		$AsHashtable
 	)
 
 	$ResolvedPath = Resolve-FilePath -NestedFile $Path
@@ -42,7 +47,7 @@
 			$dataObject = ConvertFrom-YAML $content
 		}
 		"json|js" {
-			$dataObject = ConvertFrom-Json $content
+			$dataObject = ConvertFrom-Json $content -AsHashtable:$AsHashtable
 		}
 	}
 

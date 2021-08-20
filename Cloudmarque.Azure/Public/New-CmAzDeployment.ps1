@@ -145,6 +145,10 @@ function New-CmAzDeployment {
                 New-CmAzService -SettingsObject $SettingsObject
             }
 
+            securityPolicies {
+                New-CmAzSecurityPolicy -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
+            }
+
             storage {
                 New-CmAzIaasStorage -SettingsObject $SettingsObject -TagSettingsFile $TagSettingsFile
             }

@@ -1,0 +1,17 @@
+component: securityPolicies
+
+initiatives:
+  - name: Cloudmarque Policies
+    definitionDirectory: ./_policies                    # relative to project root. Defaults to _policies.
+    description: "Some example policies"
+    category: "Governance"
+    parameters:
+    - name: "allowedLocations"
+      value: [
+        Asia,
+        uksouth,
+        ukwest
+      ]
+    version: "1.0"
+    definitions:
+     - allowed-locations

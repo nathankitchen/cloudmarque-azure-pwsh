@@ -1,0 +1,123 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzSecurityPolicy",
+    "type": "object",
+    "title": "New-CmAzSecurityPolicy",
+    "description": "The settings file for security policy enables creation of custom initiatives by collecting policies defined in a target repo directory.",
+    "required": [
+        "initiatives"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "initiatives": {
+            "$id": "#/initiatives",
+            "type": ["array", "null"],
+            "title": "Initiatives",
+            "description": "List of details required to deploy initiatives.",
+            "items": {
+                "$id": "#/initiatives/items",
+                "allOf": [
+                    {
+                        "$id": "#/initiatives/items/allOf",
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "description",
+                            "category",
+                            "definitions"
+                        ],
+                        "properties": {
+                            "name": {
+                                "$id": "#/initiatives/items/allOf/name",
+                                "type": "string",
+                                "title": "Name",
+                                "description": "Name of the initiative."
+                            },
+                            "definitionDirectory": {
+                                "$id": "#/initiatives/items/allOf/definitionDirectory",
+                                "type": ["string", "null"],
+                                "title": "DefinitionDirectory",
+                                "default": "{projectRoot}/_policies",
+                                "description": "Becomes part of the generated resource group's name."
+                            },
+                            "description": {
+                                "$id": "#/initiatives/items/allOf/description",
+                                "type": "string",
+                                "title": "Description",
+                                "description": "Short description about the initiative."
+                            },
+                            "category": {
+                                "$id": "#/initiatives/items/allOf/category",
+                                "type": "string",
+                                "title": "Category",
+                                "description": "Category of the initiative."
+                            },
+                            "version": {
+                                "$id": "#/initiatives/items/allOf/version",
+                                "type": "string",
+                                "title": "Version",
+                                "description": "Initiative Version."
+                            },
+                            "definitions": {
+                                "$id": "#/initiatives/items/allOf/definitions",
+                                "type": "array",
+                                "title": "Definitions",
+                                "description": "Containers of definition policy file names.",
+                                "items": {
+                                    "$id": "#/initiatives/items/allOf/definitions/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/initiatives/items/allOf/definitions/items/allOf",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            },
+                            "parameters": {
+                                "$id": "#/initiatives/items/allOf/parameters",
+                                "type": ["array", "null"],
+                                "title": "parameters",
+                                "description": "Contains parameter values to be set on definition.",
+                                "items": {
+                                    "$id": "#/initiatives/items/allOf/parameters/items",
+                                    "allOf": [
+                                        {
+                                            "$id": "#/initiatives/items/allOf/parameters/items/allOf",
+                                            "type": ["object", "null"],
+                                            "required": [
+                                                "name",
+                                                "value"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "$id": "#/initiatives/items/allOf/parameters/items/allOf/name",
+                                                    "type": "string",
+                                                    "title": "Name",
+                                                    "description": "Name of the definition parameter."
+                                                },
+                                                "value": {
+                                                    "$id": "#/initiatives/items/allOf/parameters/items/allOf/value",
+                                                    "title": "Value",
+                                                    "description": "Value to be set for the parameter."
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            }
+
+                        },
+                        "additionalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": false
+}
