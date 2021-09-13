@@ -11,7 +11,7 @@
 RootModule = 'Cloudmarque.Azure.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.14.1'
+ModuleVersion = '1.0.16'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Core'
@@ -26,7 +26,7 @@ Author = 'Nathan Kitchen'
 CompanyName = 'Trustmarque'
 
 # Copyright statement for this module
-Copyright = '(c) 2020 Trustmarque. All rights reserved.'
+Copyright = '(c) 2020-2021 Trustmarque. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'Cloudmarque PowerShell Tools for Azure is a deployment and management framework for cloud resources following a DevOps/GitOps methodology aligned with the Cloudmarque Reference Architecture and Operating Model.'
