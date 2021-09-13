@@ -42,7 +42,7 @@
                                 "$id": "#/initiatives/items/allOf/definitionDirectory",
                                 "type": ["string", "null"],
                                 "title": "DefinitionDirectory",
-                                "default": "{projectRoot}/_policies",
+                                "default": "{projectRoot}/policies",
                                 "description": "Becomes part of the generated resource group's name."
                             },
                             "description": {

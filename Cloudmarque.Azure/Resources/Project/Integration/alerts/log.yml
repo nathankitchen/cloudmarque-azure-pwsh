@@ -4,8 +4,12 @@ service:
   dependencies:
     workspace: Core-Test-Ws
     actionGroups: [Core-Test-Ag1]
+    resourceGroup:
   publish:
     logAlert: Mon-Test-La
+    resourceGroup: Mon-Test-La-Rg                                                                     # Provide value for new resource group
+
+location: UK South
 
 groups:
   ## DEFAULT VM ALERT RULE SET ##

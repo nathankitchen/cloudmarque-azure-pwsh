@@ -21,7 +21,7 @@ function New-CmAzMonitorLogAlerts {
 		 Monitor
 
 		.Example
-		 New-CmAzMonitorLogAlerts -SettingsFile "c:\directory\settingsFile.yml"
+		 New-CmAzMonitorLogAlerts -SettingsFile "c:\directory\settingsFile.yml" -Confirm:$false
 
 		.Example
 		 New-CmAzMonitorLogAlerts -SettingsObject $settings
@@ -48,6 +48,8 @@ function New-CmAzMonitorLogAlerts {
 			$standardDefinitions = Get-CmAzSettingsFile -Path "$PSScriptRoot/standardDefinitions.yml"
 
 			$workspace = Get-CmAzService -Service $SettingsObject.service.dependencies.workspace -ThrowIfUnavailable -ThrowIfMultiple
+
+			$resourceGroup = Check-MonitorResourceGroup -AlertType "Log"
 
 			$alerts = @()
 
@@ -77,7 +79,7 @@ function New-CmAzMonitorLogAlerts {
 
 							if (!$alert.severity) {
 								$alert.severity = $definition.severity
-							} 
+							}
 
 							if (!$alert.suppress) {
 								$alert.suppress = $definition.suppress
@@ -100,14 +102,14 @@ function New-CmAzMonitorLogAlerts {
 								foreach ($default in $definition.defaults?.GetEnumerator()) {
 
 									$placeHolder = "@@@$($default.name)@@@"
-	
+
 									if (!$alert.parameters.$($default.name)) {
 										$value = $default.value
 									}
 									else {
 										$value = $alert.parameters.$($default.name)
 									}
-	
+
 									$definition.query = $definition.query.replace($placeHolder, $value)
 								}
 
@@ -144,7 +146,7 @@ function New-CmAzMonitorLogAlerts {
 						if (!$alert.query) {
 							Write-Error ($errorMessage -f "query", $alert.name) -Category InvalidArgument -CategoryTargetName "query"
 						}
-						
+
 						if (!$alert.suppress -or !$alert.suppress.enabled) {
 							$alert.suppress = ""
 						}
@@ -202,10 +204,12 @@ function New-CmAzMonitorLogAlerts {
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
 				-TemplateFile "$PSScriptRoot\New-CmAzMonitorLogAlerts.json" `
-				-ResourceGroupName $workspace.resourceGroupName `
+				-ResourceGroupName $resourceGroup.resourceGroupName `
 				-Alerts $alerts `
-				-Workspace $workspace `
-				-Force
+				-Mode "Complete" `
+				-Workspace $workspace
+
+			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroup.resourceGroupName
 
 			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}

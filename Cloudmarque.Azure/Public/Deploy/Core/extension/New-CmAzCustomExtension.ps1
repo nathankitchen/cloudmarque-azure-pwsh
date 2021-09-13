@@ -7,7 +7,7 @@ function New-CmAzCustomExtension {
 		.Description
 		 Has following features:
 			* Self-loading deployments using the component: "extension" header value.
-			* A library of reusable templates automatically resolved in a [REPO]/_extensions directory.
+			* A library of reusable templates automatically resolved in a [REPO]/extensions directory.
 			* The ability to plug into useful functionality like the name generator and service locator.
 			* Ability to use keyvault reference for secure strings.
 
@@ -174,10 +174,10 @@ function New-CmAzCustomExtension {
 					$templatePath = $template.name
 				}
 				else {
-					$defaultPath = "$((Get-CmAzContext).projectRoot)/_extensions/$($template.name)"
+					$defaultPath = "$((Get-CmAzContext).projectRoot)/extensions/$($template.name)"
 
 					if (Test-Path -Path $defaultPath) {
-						Write-Verbose "Template Found in _extensions..."
+						Write-Verbose "Template Found in extensions..."
 						$templatePath = $defaultPath
 					}
 					else {

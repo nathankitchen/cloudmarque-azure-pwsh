@@ -1,0 +1,53 @@
+component: serviceHealthAlerts
+
+service:
+  dependencies:
+    actionGroups: [Core-Test-Ag1]
+    resourceGroup:
+  publish:
+    resourceGroup: Monitor-Sha-Rg
+    serviceHealthAlert: Monitor-Test-Sha
+
+location: UK South
+
+alerts:
+- name: Monitor-Test-Sha-1
+  description: "All service health alerts"
+  enabled: true
+  services:                                                           # Defaults to all services
+  eventTypes:                                                         # Defaults to all eventTypes
+  regions: [
+    "Central US",
+    "East US",
+    "Global",
+    "North Europe",
+    "UK South",
+    "UK West",
+    "West Europe"
+  ]
+  service:
+      dependencies:
+        actionGroups: [Core-Test-Ag1]
+      publish:
+        serviceHealthAlert: Monitor-Test-Sha-1
+
+- name: Monitor-Test-Sha-2
+  services: [
+    "API Management",
+    "Action Groups",
+    "Activity Logs & Alerts"
+  ]
+  regions: [
+    "Global"
+  ]
+  eventTypes: [
+    "Maintenance",
+    "Informational",
+    "ActionRequired"
+  ]
+  service:
+      dependencies:
+        actionGroups: [Core-Test-Ag1]
+      publish:
+        serviceHealthAlert: Monitor-Test-Sha-2
+

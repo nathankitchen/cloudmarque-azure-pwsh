@@ -61,7 +61,7 @@ function New-CmAzSecurityPolicy {
 						$policyFolder = Resolve-FilePath -NestedFile $initiative.definitionDirectory
 					}
 					else {
-						$policyFolder = "$((Get-CmAzContext).projectRoot)/_policy"
+						$policyFolder = "$((Get-CmAzContext).projectRoot)/policies"
 					}
 
 					$policy = "$policyFolder/$definition.json"

@@ -134,8 +134,8 @@ stages:
 
           New-CmAzIaasPrivateEndpoints -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/privateendpoints.yml" -Verbose
 
-  - job: Extension
-    displayName: Extension
+  - job: Extension_and_Policies
+    displayName: Extension & Policies
     dependsOn: IaasNetwork
     steps:
     - task: AzurePowerShell@5
@@ -158,7 +158,9 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzCustomExtension -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/_extensions/extension.yml" -Verbose
+          New-CmAzCustomExtension -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/extensions/extension.yml" -Verbose
+          New-CmAzCustomExtension -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/policies/securityPolicies.yml" -Verbose
+
 
 - stage: Paas
   condition: and(succeeded(), eq('${{ parameters.Paas }}', true))
@@ -315,8 +317,11 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzMonitorLogAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/logAlerts.yml" -Verbose
-          New-CmAzMonitorMetricAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/metricAlerts.yml" -Verbose
+          New-CmAzMonitorLogAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/log.yml" -Verbose -Confirm:$false
+          New-CmAzMonitorMetricAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/metric.yml" -Verbose -Confirm:$false
+          New-CmAzMonitorResourceHealthAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/resourceHealth.yml" -verbose -Confirm:$false
+          New-CmAzMonitorActivityLogAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/activityLog.yml" -verbose -Confirm:$false
+          New-CmAzMonitorServiceHealthAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/serviceHealth.yml" -verbose -Confirm:$false
 
 - stage: TearDown
   dependsOn: [

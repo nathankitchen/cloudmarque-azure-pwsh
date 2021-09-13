@@ -10,7 +10,7 @@ Queries:
   - definition: High_CPU_Usage_Percent
     description: Critically high average CPU percentage usage.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -33,7 +33,7 @@ Queries:
   - definition: High_CPU_Usage_Percent_Range
     description: High average CPU percentage usage.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -57,7 +57,7 @@ Queries:
   - definition: Low_Disk_Space
     description: Low available disk space percentage and MB value.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -85,7 +85,7 @@ Queries:
   - definition: High_Memory_Usage_Percent
     description: Critically high average memory usage percentage.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -110,7 +110,7 @@ Queries:
   - definition: High_Memory_Usage_Percent_Range
     description: High average memory usage percentage.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -136,7 +136,7 @@ Queries:
   - definition: Corrupt_NTFS
     description: Corrupt NTFS on VM disk.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -154,7 +154,7 @@ Queries:
   - definition: Unexpected_Shutdown
     description: Unexpected VM shutdown.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -172,7 +172,7 @@ Queries:
   - definition: VM_NonResponsive
     description: VM not responsive.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -192,7 +192,7 @@ Queries:
   - definition: VM_Missing_Backup
     description: Missed scheduled VM backup.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -211,7 +211,7 @@ Queries:
   - definition: VM_Antimalware_Not_Up_To_Date
     description: Antimalware installed on vm is not up to date.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -229,7 +229,7 @@ Queries:
   - definition: VM_Updates_Failed
     description: Latest batch of updates for vm have not been successful.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -247,7 +247,7 @@ Queries:
   - definition: VM_Reboot
     description: VM/s have been rebooted.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -266,7 +266,7 @@ Queries:
   - definition: Failed_Recovery
     description: Triggers an alert whenever there are issues detected in connecting or opening to the master database.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -286,7 +286,7 @@ Queries:
   - definition: nFgs_In_System_FGs
     description: Triggers an alert whenever there are issues detected with the database filegroup.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -306,7 +306,7 @@ Queries:
   - definition: nMark_Suspect_Db
     description: Alert is triggered whenever there are corruption/inconsistency issues detected with the database and engine not being able to mark the database as suspect.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -326,7 +326,7 @@ Queries:
   - definition: nRvr_DB_UnRs_Txn
     description: Alert is triggered whenever there are inconsistency issues detected with the database.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -346,7 +346,7 @@ Queries:
   - definition: Low_Memory_Or_Disk
     description: Alert is triggered whenever there are low memory conditions detected.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -366,7 +366,7 @@ Queries:
   - definition: Low_Memory_CLR
     description: Alert is triggered whenever there are low memory conditions detected for CLR execution.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -386,7 +386,7 @@ Queries:
   - definition: Failed_DB_Recovery
     description: Alert is triggered whenever there are errors logged for database recovery.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -406,7 +406,7 @@ Queries:
   - definition: Max_User_Connection
     description: Alert is triggered whenever the connection pool is exhausted, can occur due to low memory condition and other performance issues
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -426,7 +426,7 @@ Queries:
   - definition: Failed_Backup
     description: Alert is triggered whenever the backup operation fails due performance issues.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -446,7 +446,7 @@ Queries:
   - definition: nCleanup
     description: Alert is created when there was no successful rollback of killed process.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -466,7 +466,7 @@ Queries:
   - definition: nForeign_Key
     description: Alert is created when there are database inconsistency detected.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -486,7 +486,7 @@ Queries:
   - definition: nSpace_For_Logfile
     description: Alert is created when the database logfiles go out of space.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -506,7 +506,7 @@ Queries:
   - definition: Exceeded_Capacity
     description: Alert is created when the database capacity threshold is exceeded.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -527,7 +527,7 @@ Queries:
   - definition: Failed_MSDTC_Txn
     description: Alert is fired when inconsistency is detected with the distributed transaction.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -547,7 +547,7 @@ Queries:
   - definition: Exceeded_Log_Capacity
     description: Alert is fired when log file Capacity threshold exceeded.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -568,7 +568,7 @@ Queries:
   - definition: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_DatabaseConsistencyErrors
     description: Alert is fired when inconsistency is detected with the distributed transaction.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -589,7 +589,7 @@ Queries:
   - definition: SQL_Microsoft_SQLServer_2014_Monitoring_Event_17063_SQLOpsJobExecutionfailures
     description: Alert is fired when SQL Server job execution fails event 17063.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -610,7 +610,7 @@ Queries:
   - definition: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Custom_Error_60200
     description: Alert is fired when SQL Server event id 60200 is fired.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -631,7 +631,7 @@ Queries:
   - definition: SQL_Microsoft_SQLServer_2014_Monitoring_Override_Event14151_ExpiredSubscription
     description: Alert is fired when event 14151.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -651,7 +651,7 @@ Queries:
   - definition: Failed_SQL_Server_Agent
     description: Alert is fired when SQL Server agent service could not be started.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -671,7 +671,7 @@ Queries:
   - definition: Unavailable_DB_Log
     description: Alert is fired when the log for database is not available.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -691,7 +691,7 @@ Queries:
   - definition: Exceeded_Txn_Repxn_Thd
     description: Alert is fired when SQL Server transactional replication latency threshold exceededs.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -712,10 +712,10 @@ Queries:
   - definition: Failed_Service_Broker
     description: Alert is fired when the Service Broker message fails to get delivered.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
-      enabled: false   
+      enabled: false
       mins: 10000
       windows: 0
     schedule:
@@ -732,7 +732,7 @@ Queries:
   - definition: Exceeded_Blocking_Thd
     description: Alert is fired when the blocking threshold exceededs.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -753,7 +753,7 @@ Queries:
   - definition: nPage_Available_FG
     description: Alert is fired when engine could not allocate new page for database. There are no more pages available in filegroup.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false
@@ -773,7 +773,7 @@ Queries:
   - definition: fileGroupFull
     description: Alert is fired when engine could not allocate space for object in database because the filegroup is full.
     threshold:
-      operator: greaterThan
+      operator: GreaterThan
       value: 0
     suppress:
       enabled: false

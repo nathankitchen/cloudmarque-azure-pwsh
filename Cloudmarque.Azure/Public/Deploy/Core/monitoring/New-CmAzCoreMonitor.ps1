@@ -189,10 +189,10 @@ function New-CmAzCoreMonitor {
 			}
 
 			if ($SettingsObject.service.publish.storage) {
-				
+
 				Write-Verbose "Deploying storage..."
 				$storageObject = @{
-	
+
 					location = $SettingsObject.location;
 					service = @{
 						dependencies = @{
@@ -213,7 +213,7 @@ function New-CmAzCoreMonitor {
 						)
 					})
 				}
-	
+
 				New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags
 
 				$storageService = $SettingsObject.service.publish.storage

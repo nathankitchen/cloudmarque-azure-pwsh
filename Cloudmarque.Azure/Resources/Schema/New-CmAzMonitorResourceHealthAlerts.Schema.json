@@ -1,0 +1,261 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "New-CmAzMonitorResourceHealthAlerts",
+    "type": "object",
+    "title": "New-CmAzMonitorResourceHealthAlerts",
+    "description": "Settings Root.",
+    "required": [
+        "component",
+        "alerts"
+    ],
+    "properties": {
+        "component": {
+            "$id": "#/component",
+            "type": ["string", "null"],
+            "title": "Component",
+            "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
+        },
+        "location": {
+            "$id": "#/location",
+            "type": ["string", "null"],
+            "title": "location",
+            "description": "Deployment location which is also used for created dedicated resource group if required."
+        },
+        "service": {
+            "$id": "#/service",
+            "type": "object",
+            "title": "Service",
+            "description": "Contains dependency and publish details for service location.",
+            "properties": {
+                "dependencies": {
+                    "$id": "#/service/dependencies",
+                    "type": "object",
+                    "title": "Dependencies",
+                    "description": "Contains dependency details for service location.",
+                    "properties": {
+                        "actionGroups": {
+                            "$id": "#/service/dependencies/actionGroups",
+                            "type": ["array", "null"],
+                            "title": "Action Groups",
+                            "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "resourceGroup": {
+                            "$id": "#/service/dependencies/resourceGroup",
+                            "type": ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Dependency value to fetch existing resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "publish": {
+                    "$id": "#/service/publish",
+                    "type": ["object", "null"],
+                    "title": "Publish",
+                    "description": "Contains publish details for service location.",
+                    "properties": {
+                        "resourceHealthAlert": {
+                            "$id": "#/service/publish/resourceHealthAlert",
+                            "type": ["string", "null"],
+                            "title": "Resource Health Alert",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type":  ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Global default value to publish on deployed resource type."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "alerts": {
+            "$id": "#/alerts",
+            "type": "array",
+            "title": "Groups",
+            "description": "Contains all details pertaining to logical groupings of alert sets.",
+            "items": {
+                "$id": "#/alerts/items",
+                "minItems": 1,
+                "allOf": [
+                    {
+                        "$id": "#/alerts/items/allOf",
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "$id": "#/alerts/items/allOf/name",
+                                "name": "string",
+                                "title": "Name",
+                                "description": "Becomes part of activity log alert rule generated name."
+                            },
+                            "description": {
+                                "$id": "#/alerts/items/allOf/description",
+                                "type": ["string", "null"],
+                                "title": "Description",
+                                "description": "Description of the activity log alert rule."
+                            },
+                            "enabled": {
+                                "$id": "#/alerts/items/allOf/severity",
+                                "type": ["boolean", "null"],
+                                "title": "Enabled",
+                                "description": "If the alert rule is enabled or not.",
+                                "default": true
+                            },
+                            "eventStatus": {
+                                "$id": "#/alerts/items/allOf/eventStatus",
+                                "type": ["array", "null"],
+                                "title": "EventTypes",
+                                "default": null,
+                                "description": "Event Status to report on.",
+                                "items": {
+                                    "$id": "#/alerts/items/allOf/eventStatus/items",
+                                    "enum": [
+                                       "Active",
+                                       "In Progress",
+                                       "Resolved",
+                                       "Updated",
+                                        null
+                                    ]
+
+                                }
+                            },
+                            "reasonType": {
+                                "$id": "#/alerts/items/allOf/reasonType",
+                                "type": ["array", "null"],
+                                "title": "EventTypes",
+                                "default": null,
+                                "description": "Event Status to report on.",
+                                "items": {
+                                    "$id": "#/alerts/items/allOf/reasonType/items",
+                                    "enum": [
+                                       "Platform Initiated",
+                                       "Unknown",
+                                       "User Initiated",
+                                        null
+                                    ]
+                                }
+                            },
+                            "resourceTypes": {
+                                "$id": "#/alerts/items/allOf/resourceTypes",
+                                "type": ["array", "null"],
+                                "title": "ResourceTypes",
+                                "default": null,
+                                "description": "Event Status to report on.",
+                                "items": {
+                                    "$id": "#/alerts/items/allOf/resourceTypes/items"
+                                }
+                            },
+                            "healthStatus": {
+                                "$id": "#/alerts/items/allOf/healthStatus",
+                                "type": ["object", "null"],
+                                "default": null,
+                                "title": "Health Status",
+                                "description": "Contains current and previous health details resource to report on.",
+                                "properties": {
+                                    "current": {
+                                        "$id": "#/alerts/items/allOf/healthStatus/current",
+                                        "type": ["array", "null"],
+                                        "title": "Current",
+                                        "description": "Current health status.",
+                                        "default": "Defaults to current subscription if all targets are null.",
+                                        "items": {
+                                            "$id": "#/alerts/items/allOf/healthStatus/current/items",
+                                            "enum": [
+                                                "Available",
+                                                "Degraded",
+                                                "Unavailable",
+                                                "Unknown"
+                                            ]
+                                        }
+                                    },
+                                    "previous": {
+                                        "$id": "#/alerts/items/allOf/healthStatus/previous",
+                                        "type": ["array", "null"],
+                                        "title": "Previous",
+                                        "description": "Previous health status.",
+                                        "items": {
+                                            "$id": "#/alerts/items/allOf/healthStatus/previous/items",
+                                            "enum": [
+                                                "Available",
+                                                "Degraded",
+                                                "Unavailable",
+                                                "Unknown"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "additonalProperties": false
+                            },
+                            "service": {
+                                "$id": "#/alerts/items/allOf/service",
+                                "type": ["object", "null"],
+                                "title": "Service",
+                                "description": "Contains dependency and publish details for service location.",
+                                "properties": {
+                                    "dependencies": {
+                                        "$id": "#/alerts/items/allOf/service/dependencies",
+                                        "type": ["object", "null"],
+                                        "title": "Dependencies",
+                                        "description": "Contains dependency details for service location.",
+                                        "default": "Defaults to current subscription if all targets are null.",
+                                        "properties": {
+                                            "actionGroups": {
+                                                "$id": "#/alerts/items/allOf/service/dependencies/actionGroups",
+                                                "type": ["array", "null"],
+                                                "title": "Action Groups",
+                                                "description": "Local overriding dependency value to fetch existing resource type.",
+                                                "items": {
+                                                    "$id": "#/alerts/items/allOf/service/dependencies/actionGroups/items"
+                                                }
+                                            },
+                                            "targetResources": {
+                                                "$id": "#/alerts/items/allOf/service/dependencies/targetResources",
+                                                "type": ["array", "null"],
+                                                "title": "TargetResources",
+                                                "description": "Service tag value to fetch existing resources of which to apply the metric alert rule.",
+                                                "items": {
+                                                    "$id": "#/alerts/items/allOf/service/dependencies/targetResources/items"
+                                                }
+                                            },
+                                            "targetResourceGroups": {
+                                                "$id": "#/alerts/items/allOf/service/dependencies/targetResourceGroups",
+                                                "type": ["array", "null"],
+                                                "title": "TargetResourceGroups",
+                                                "description": "Service tag value to fetch existing resource groups of which to apply the metric alert rule.",
+                                                "items": {
+                                                    "$id": "#/alerts/items/allOf/service/dependencies/targetResourceGroups/items"
+                                                }
+                                            }
+                                        },
+                                        "additonalProperties": false
+                                    },
+                                    "publish": {
+                                        "$id": "#/alerts/items/allOf/service/publish",
+                                        "type": ["object", "null"],
+                                        "title": "Publish",
+                                        "description": "Contains publish details for service location.",
+                                        "properties": {
+                                            "resourceHealthAlert": {
+                                                "$id": "#/alerts/items/allOf/service/publish/resourceHealthAlert",
+                                                "type": ["string", "null"],
+                                                "title": "Resource Health Alert",
+                                                "description": "Local overriding value to publish on deployed existing resource type."
+                                            }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additonalProperties": false
+                            }
+                        },
+                        "additonalProperties": false
+                    }
+                ]
+            }
+        }
+    },
+    "additonalProperties": false
+}

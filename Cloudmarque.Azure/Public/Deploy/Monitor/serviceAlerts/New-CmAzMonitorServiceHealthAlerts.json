@@ -1,0 +1,35 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Alerts": {
+            "type": "array"
+        }
+    },
+    "resources": [
+        {
+            "type": "microsoft.insights/activityLogAlerts",
+            "apiVersion": "2020-10-01",
+            "name": "[parameters('Alerts')[copyIndex('AlertCopy')].name]",
+            "location": "global",
+            "tags": {
+                "cm-service": "[parameters('Alerts')[copyIndex('AlertCopy')].service.publish.serviceHealthAlert]"
+            },
+            "properties": {
+                "description": "[parameters('Alerts')[copyIndex('AlertCopy')].description]",
+                "scopes": [
+                    "[subscription().id]"
+                ],
+                "condition": "[parameters('Alerts')[copyIndex('AlertCopy')].condition]",
+                "actions": {
+                    "actionGroups": "[parameters('Alerts')[copyIndex('AlertCopy')].actionGroups]"
+                },
+                "enabled": "[parameters('Alerts')[copyIndex('AlertCopy')].enabled]"
+            },
+            "copy": {
+                "name": "AlertCopy",
+                "count": "[length(parameters('Alerts'))]"
+            }
+        }
+    ]
+}

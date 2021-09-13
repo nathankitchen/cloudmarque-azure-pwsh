@@ -1,0 +1,241 @@
+component: metricAlerts
+
+service:
+  dependencies:
+    actionGroups: [Core-Test-Ag1]
+    resourceGroup:
+  publish:
+    metricAlert: Mon-Test-Ma
+    resourceGroup: Mon-Test-Ma-Rg                                                 # Provide value for new resource group
+
+location: UK South
+
+groups:
+- name: VMStandard
+  alertSets:
+  - name:                                                                         # Optional - It is recommended to use name when using multiple sets of alerts.
+    resourceType: Microsoft.Compute/virtualMachines
+    alerts:
+    - name: Used-OSDskBurst-Wrn                                                   # Optional - It is recommended to use name for more understandable alert names.
+      severity: Warning
+      targetResourceLocation: UK South
+      conditions:
+      - metricName: OS Disk Used Burst BPS Credits Percentage
+        threshold:
+          operator: GreaterThanOrEqual
+          value: 85
+          timeAggregation: Average
+      - metricName: Data Disk Used Burst BPS Credits Percentage
+        threshold:
+          operator: GreaterThanOrEqual
+          value: 95
+          timeAggregation: Average
+      schedule:
+        frequencyInMinutes: 15                                                    # evaluationFrequency
+        timeWindowInMinutes: 60                                                   # windowSize
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResources: [Iaas-Test-Vm]
+        publish:
+          metricAlert: Mon-Test-Ma1
+
+    - name: Used-OSDskBurst-Crt
+      targetResourceLocation: East US
+      severity: Critical
+      conditions:
+      - metricName: OS Disk Used Burst BPS Credits Percentage
+        threshold:
+          operator: GreaterThanOrEqual
+          value: 95
+          timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                                    # evaluationFrequency
+        timeWindowInMinutes: 60                                                   # windowSize
+
+    - name: Used-DataDskBurst-Wrn
+      targetResourceLocation: East US
+      severity: Warning
+      conditions:
+      - metricName: Data Disk Used Burst BPS Credits Percentage
+        threshold:
+          operator: GreaterThanOrEqual
+          value: 85
+          timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                                    # evaluationFrequency
+        timeWindowInMinutes: 60                                                   # windowSize
+
+    - name: Used-DataDskBurst-Crt
+      targetResourceLocation: East US
+      severity: Critical
+      conditions:
+      - metricName: Data Disk Used Burst BPS Credits Percentage
+        threshold:
+          operator: GreaterThanOrEqual
+          value: 95
+          timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                                      # evaluationFrequency
+        timeWindowInMinutes: 60                                                     # windowSize
+
+    - name: Used-OSDskIops-Wrn
+      targetResourceLocation: East US
+      severity: Warning
+      conditions:
+      - metricName: OS Disk IOPS Consumed Percentage
+        threshold:
+          operator: GreaterThanOrEqual
+          value: 95
+          timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                                      # evaluationFrequency
+        timeWindowInMinutes: 60                                                     # windowSize
+
+    - name: Used-OSDskIops-Crt
+      targetResourceLocation: East US
+      severity: Critical
+      conditions:
+      - metricName: OS Disk IOPS Consumed Percentage
+        threshold:
+          operator: Equals
+          value: 100
+          timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                                      # evaluationFrequency
+        timeWindowInMinutes: 60                                                     # windowSize
+
+    - name: Used-DataDskIops-Wrn
+      targetResourceLocation: East US
+      severity: Warning
+      conditions:
+      - metricName: Data Disk IOPS Consumed Percentage
+        threshold:
+          operator: GreaterThanOrEqual
+          value: 95
+          timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                                      # evaluationFrequency
+        timeWindowInMinutes: 60                                                     # windowSize
+
+    - name: Used-DataDskIops-Crt
+      targetResourceLocation: East US
+      severity: Critical
+      conditions:
+      - metricName: Data Disk IOPS Consumed Percentage
+        threshold:
+          operator: Equals
+          value: 100
+          timeAggregation: Average
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Vm-Rg2]
+        publish:
+          metricAlert: Mon-Test-Ma1
+      schedule:
+        frequencyInMinutes: 15                                                        # evaluationFrequency
+        timeWindowInMinutes: 60                                                       # windowSize
+
+- name: VMStandard-rg
+  alertSets:
+  - resourceType: Microsoft.Compute/virtualMachines
+    alerts:
+    - targetResourceLocation: UK South
+      severity: Critical
+      conditions:
+      - metricName: CPU Credits Remaining
+        threshold:
+          operator: GreaterThan
+          value: 0
+          timeAggregation: Average
+      service:
+        dependencies:
+          targetResourceGroups:
+            - Iaas-Test-VmX
+      schedule:
+        frequencyInMinutes: 1                                                          # evaluationFrequency
+        timeWindowInMinutes: 5                                                         # windowSize
+
+# - name: publicIps-DDos
+#   alertSets:
+#   - resourceType: Microsoft.Network/publicIPAddresses
+#     alerts:
+#     - targetResourceLocation: UK South
+#       severity: Critical
+#       conditions:
+#       - metricName: IfUnderDDoSAttack
+#         threshold:
+#           operator: GreaterThan
+#           value: 0
+#           timeAggregation: Maximum
+#       service:
+#         dependencies:
+#           targetResources:
+#       schedule:
+#         frequencyInMinutes: 1                                                         # evaluationFrequency
+#         timeWindowInMinutes: 5                                                        # windowSize
+
+# - name: StorageStandard
+#   alertSets:
+#   - name:                                                                             # Optional - It is recommended to use name when using multiple sets of alerts.
+#     resourceType: Microsoft.StorageSync/storageSyncServices
+#     alerts:
+#     - name: Storage-Sync-Files-Not-Synced                                             # Optional - It is recommended to use name for more understandable alert names.
+#       targetResourceLocation: UK South
+#       severity: Error
+#       conditions:
+#       - metricName: StorageSyncSyncSessionPerItemErrorsCount
+#         threshold:
+#           operator: GreaterThan
+#           value: 0
+#           timeAggregation: Total
+#       service:
+#         dependencies:
+#           actionGroups: [Core-Test-Ag1]
+#           targetResources: [test1]
+#         publish:
+#           metricAlert: Mon-Test-Ma1
+#       schedule:
+#         frequencyInMinutes: 1                                                         # evaluationFrequency
+#         timeWindowInMinutes: 15                                                       # windowSize
+
+# Notes:
+# 1. Refer to https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-supported
+# 2. Multi-resource metric alert rules are only available for multiple resources in the same location.

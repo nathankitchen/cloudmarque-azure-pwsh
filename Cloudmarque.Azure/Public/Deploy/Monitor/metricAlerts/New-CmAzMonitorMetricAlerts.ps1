@@ -19,7 +19,7 @@ function New-CmAzMonitorMetricAlerts {
 		 Monitor
 
 		.Example
-		 New-CmAzMonitorMetricAlerts -SettingsFile "c:\directory\settingsFile.yml"
+		 New-CmAzMonitorMetricAlerts -SettingsFile "c:\directory\settingsFile.yml" -Confirm:$false
 
 		.Example
 		 New-CmAzMonitorMetricAlerts -SettingsObject $settings
@@ -46,9 +46,9 @@ function New-CmAzMonitorMetricAlerts {
 			$standardDefinitions = Get-CmAzSettingsFile -Path "$PSScriptRoot/standardDefinitions.yml"
 			$definitionSeverityNames = $standardDefinitions.Severity.GetEnumerator().Name
 
-			$alerts = @()
+			$resourceGroup = Check-MonitorResourceGroup -AlertType "Metric"
 
-			$resourceGroup = Get-CmAzService -Service $SettingsObject.service.dependencies.resourceGroup -IsResourceGroup -ThrowIfUnavailable
+			$alerts = @()
 
 			foreach ($group in $SettingsObject.groups) {
 
@@ -57,6 +57,20 @@ function New-CmAzMonitorMetricAlerts {
 					for ($i = 0; $i -lt $alertSet.alerts.count; $i++) {
 
 						$alert = $alertSet.alerts[$i]
+
+						$name = $group.name
+
+						if($alertSet.name) {
+							$name += "-$($alertSet.name)"
+						}
+
+						if($alert.name) {
+							$name += "-$($alert.name)"
+						}
+
+						$alert.name = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Location $alert.targetResourceLocation -Name "mtr-$name-$i"
+
+						Write-Verbose "Working on alert: $($alert.name)"
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "actionGroups" -ResourceServiceContainer $alert -IsDependency
 
@@ -84,6 +98,23 @@ function New-CmAzMonitorMetricAlerts {
 
 						$alert.actionGroups = @()
 						$alert.scopes = @()
+						$alert.criterias = @()
+
+						for ($j = 0; $j -lt $alert.conditions.count; $j++) {
+
+							$alert.conditions[$j].dimensions ??= @()
+
+							$alert.criterias += @{
+
+								name = "Alert Criteria $j"
+								metricName = $alert.conditions[$j].metricName
+								metricNamespace = $alertSet.resourceType
+								dimensions = $alert.conditions[$j].dimensions
+								operator = $alert.conditions[$j].threshold.operator
+								threshold = $alert.conditions[$j].threshold.value
+								timeAggregation = $alert.conditions[$j].threshold.timeAggregation
+							}
+						}
 
 						foreach ($actionGroup in $alert.service.dependencies.actionGroups) {
 							$alert.actionGroups += @{
@@ -108,30 +139,11 @@ function New-CmAzMonitorMetricAlerts {
 
 						Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "metricAlert" -ResourceServiceContainer $alert
 
-						$name = $group.name
-
-						if($alertSet.name) {
-							$name += "-$($alertSet.name)"
+						$alert += @{
+							resourceType = $alertSet.resourceType
 						}
 
-						if($alert.name) {
-							$name += "-$($alert.name)"
-						}
-
-						$alerts += @{
-							name = Get-CmAzResourceName -Resource "Alert" -Architecture "Monitor" -Location $alert.targetResourceLocation -Name "mtr-$name-$i";
-							metricName = $alert.metricName;
-							resourceType = $alertSet.resourceType;
-							targetResourceLocation = $alert.targetResourceLocation;
-							schedule = $alert.schedule;
-							actionGroups = $alert.actionGroups;
-							scopes = $alert.scopes;
-							threshold = $alert.threshold;
-							severity = $alert.severity;
-							service = $alert.service;
-							description = $alert.description;
-							enabled = $alert.enabled;
-						}
+						$alerts += $alert
 					}
 				}
 			}
@@ -143,7 +155,9 @@ function New-CmAzMonitorMetricAlerts {
 				-TemplateFile "$PSScriptRoot\New-CmAzMonitorMetricAlerts.json" `
 				-ResourceGroupName $resourceGroup.resourceGroupName `
 				-Alerts $alerts `
-				-Force
+				-Mode "Complete"
+
+			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroup.resourceGroupName
 
 			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}

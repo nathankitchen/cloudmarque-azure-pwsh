@@ -2,7 +2,7 @@ component: securityPolicies
 
 initiatives:
   - name: Cloudmarque Policies
-    definitionDirectory: ./_policies                    # relative to project root. Defaults to _policies.
+    definitionDirectory: ./policies                    # relative to project root. Defaults to policies.
     description: "Some example policies"
     category: "Governance"
     parameters:

@@ -1,0 +1,91 @@
+component: activityLogAlerts
+
+service:
+  dependencies:
+    actionGroups: [Core-Test-Ag1]
+    resourceGroup:
+  publish:
+    activityLogAlert: Mon-Test-ala
+    resourceGroup: Mon-Test-ala-Rg
+
+location: UK South
+
+groups:
+- name: operations
+  alertSets:
+  - name: allinfo
+    alerts:
+    - name: rg
+      enabled: true
+      conditions:
+      - field: category
+        equals: Administrative
+      - field: resourceType
+        equals: microsoft.resources/subscriptions/resourcegroups
+      service:
+        dependencies:                                                                # Keep all target resource, resourceGroup, subscription default targets current subscription for alert.
+          actionGroups: [Core-Test-Ag1]
+          targetResourceGroups: [Iaas-Test-Int-Rg]
+        publish:
+          activityLogAlert: Mon-Test-ala1
+    - name: vm
+      enabled: true
+      conditions:
+      - field: category
+        equals: Administrative
+      - field: operationName
+        equals: Microsoft.Compute/virtualMachines/capture/action
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResources: [Iaas-Test-Vm]
+          targetSubscriptionId:                                                      # Subscription ID to target
+        publish:
+          activityLogAlert: Mon-Test-ala1
+
+- name: policies
+  alertSets:
+  - name:                                                                             # Optional - It is recommended to use name when using multiple sets of alerts.
+    alerts:
+    - name: audit-action                                                              # Optional - It is recommended to use name for more understandable alert names.
+      enabled: true
+      conditions:
+      - field: category
+        equals: Policy
+      - field: operationName
+        equals: Microsoft.Authorization/policies/audit/action
+      - field: level
+        containsAny: [
+            critical,
+            error,
+            verbose
+        ]
+      - field: status
+        containsAny: [
+            failed
+        ]
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResources:                                                           # Keep all target resource, resourceGroup, subscription default targets current subscription for alert.
+          targetResourceGroups:
+          targetSubscriptionId:                                                      # Subscription ID to target
+        publish:
+          activityLogAlert: Mon-Test-ala1
+    - name: deployIfNotExists-action                                                                  # Optional - It is recommended to use name for more understandable alert names.
+      enabled: true
+      conditions:
+      - field: category
+        equals: Policy
+      - field: operationName
+        equals: Microsoft.Authorization/policies/deployIfNotExists/action
+      service:
+        dependencies:
+          actionGroups: [Core-Test-Ag1]
+          targetResources:                                                           # Keep all target resource, resourceGroup, subscription default targets current subscription for alert.
+          targetResourceGroup:
+          targetSubscriptionId:                                                      # Subscription ID to target
+        publish:
+          activityLogAlert: Mon-Test-ala1
+
+# Note: For activity log alerts - collection of rules in conditions form a single alert level condition.

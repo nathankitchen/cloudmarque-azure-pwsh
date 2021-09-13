@@ -114,7 +114,7 @@ templates:
             value: 1
 
 # templates:
-#  - name: template.json                 # by default, locate these in ./_extensions folder relative to the  CmAzContext project.
+#  - name: template.json                 # by default, locate these in ./extensions folder relative to the  CmAzContext project.
 #    location: uksouth                   # required for subscription scoped deployment
 #    service:
 #     dependencies:

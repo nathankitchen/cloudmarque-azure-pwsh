@@ -1,0 +1,59 @@
+component: resourceHealthAlerts
+
+service:
+  dependencies:
+    actionGroups: [Core-Test-Ag1]
+    resourceGroup:
+  publish:
+    resourceGroup: Monitor-Test-Rha-Rg                               # Provide Publish value to create new dedicated resource group
+    resourceHealthAlert: Monitor-Test-Rha
+
+location: UK South
+
+alerts:
+- name: Monitor-Test-Rha-1
+  description: "All service health alerts"
+  enabled: true
+  service:
+      dependencies:
+        actionGroups: [Core-Test-Ag1]
+        targetResourceGroups:
+        targetResources:
+      publish:
+        resourceHealthAlert: Monitor-Test-Rha-1
+  resourceTypes: [
+    "Microsoft.Compute/virtualMachines"
+  ]
+  healthStatus:
+    current: [
+      "Available",
+      "Degraded",
+      "Unavailable",
+      "Unknown"
+    ]
+    previous: [
+      "Available",
+      "Degraded",
+      "Unavailable",
+      "Unknown"
+    ]
+  eventStatus: [
+    "Active",
+    "In Progress",
+    "Resolved",
+    "Updated"
+  ]
+  reasonType: [
+    "Platform Initiated",
+    "Unknown",
+    "User Initiated"
+  ]
+
+# - name: Monitor-Test-Rha-2
+#   service:
+#     dependencies:
+#       actionGroups: [Core-Test-Ag1]
+#       targetResourceGroups:
+#       targetResources:
+#     publish:
+#       resourceHealthAlert: Monitor-Test-Rha-2

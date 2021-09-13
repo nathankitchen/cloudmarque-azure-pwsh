@@ -15,6 +15,12 @@
             "title": "Component",
             "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
         },
+        "location": {
+            "$id": "#/location",
+            "type": ["string", "null"],
+            "title": "location",
+            "description": "Deployment location which is also used for created dedicated resource group if required."
+        },
         "service": {
             "$id": "#/service",
             "type": "object",
@@ -44,6 +50,12 @@
                             "type": ["array", "null"],
                             "title": "Action Groups",
                             "description": "Global default dependency value to fetch existing resource type."
+                        },
+                        "resourceGroup": {
+                            "$id": "#/service/dependencies/resourceGroup",
+                            "type":  ["string", "null"],
+                            "title": "ResourceGroup",
+                            "description": "Dependency value to fetch existing resource type."
                         }
                     },
                     "additionalProperties": false
@@ -58,6 +70,12 @@
                             "$id": "#/service/publish/logAlert",
                             "type": ["string", "null"],
                             "title": "Log Alert",
+                            "description": "Global default value to publish on deployed resource type."
+                        },
+                        "resourceGroup": {
+                            "$id": "#/service/publish/resourceGroup",
+                            "type":  ["string", "null"],
+                            "title": "ResourceGroup",
                             "description": "Global default value to publish on deployed resource type."
                         }
                     },
@@ -277,7 +295,7 @@
                                                                                 "description": "Contains publish details for service location.",
                                                                                 "properties": {
                                                                                     "logAlert": {
-                                                                                        "$id": "#/service/publish/logAlert",
+                                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/service/publish/logAlert",
                                                                                         "type": ["string", "null"],
                                                                                         "title": "Log Alert",
                                                                                         "description": "Local overriding value to publish on deployed existing resource type."

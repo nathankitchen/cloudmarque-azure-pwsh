@@ -93,6 +93,18 @@ function New-CmAzDeployment {
                 New-CmAzMonitorMetricAlerts -SettingsObject $SettingsObject
             }
 
+            activityLogAlerts {
+                New-CmAzMonitorActivityLogAlerts -SettingsObject $SettingsObject
+            }
+
+            serviceHealthAlerts {
+                New-CmAzMonitorServiceHealthAlerts -SettingsObject $SettingsObject
+            }
+
+            resourceHealthAlerts {
+                New-CmAzMonitorResourceHealthAlerts -SettingsObject $SettingsObject
+            }
+
             deleteservice {
                 Set-CmAzCoreAutomationDeleteResource -SettingsObject $SettingsObject
             }

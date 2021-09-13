@@ -31,17 +31,7 @@
                 "windowSize": "[parameters('Alerts')[copyIndex('AlertCopy')].schedule.timeWindowInMinutes]",
                 "criteria": {
                     "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
-                    "allOf": [
-                        {
-                            "name" : "Alert Critirion",
-                            "metricName": "[parameters('Alerts')[copyIndex('AlertCopy')].metricName]",
-                            "metricNamespace": "[parameters('Alerts')[copyIndex('AlertCopy')].resourceType]",
-                            "dimensions":[],
-                            "operator": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.operator]",
-                            "threshold" : "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.value]",
-                            "timeAggregation": "[parameters('Alerts')[copyIndex('AlertCopy')].threshold.timeAggregation]"
-                        }
-                    ]
+                    "allOf": "[parameters('Alerts')[copyIndex('AlertCopy')].criterias]"
                 },
                 "actions":  "[parameters('Alerts')[copyIndex('AlertCopy')].actionGroups]"
             }
