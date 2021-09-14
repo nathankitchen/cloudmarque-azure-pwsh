@@ -36,7 +36,7 @@ groups:
       service:
         dependencies:
           actionGroups: [Core-Test-Ag1]
-          targetResources: [Iaas-Test-Vm]
+          targetResources: [Iaas-Test-Vm1]
         publish:
           metricAlert: Mon-Test-Ma1
 
