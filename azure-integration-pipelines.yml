@@ -47,7 +47,7 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmazCore -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/core.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/core.yml" -Verbose
 
 - stage: Iaas_NSP
   displayName: Iaas - Network, Storage and Private Endpoints
@@ -77,7 +77,7 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmazDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/storage.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/storage.yml" -Verbose
 
   - job: IaasNetwork
     displayName: Iaas - Networking
@@ -103,7 +103,7 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzIaasNetworking `
+          New-CmAzDeployment `
             -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/yml/networking.yml" `
             -Verbose `
             -Confirm:$false
@@ -132,7 +132,7 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzIaasPrivateEndpoints -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/privateendpoints.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/privateendpoints.yml" -Verbose
 
   - job: Extension_and_Policies
     displayName: Extension & Policies
@@ -158,8 +158,8 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzCustomExtension -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/extensions/extension.yml" -Verbose
-          New-CmAzCustomExtension -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/policies/securityPolicies.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/extensions/extension.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/policies/securityPolicies.yml" -Verbose
 
 
 - stage: Paas
@@ -192,7 +192,7 @@ stages:
           # New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/web.yml" -Verbose
           # New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/webstatic.yml" -Verbose
           New-AzResourceGroup -Name "Web-Test-Rg" -location uksouth -tag @{'cm-service' = "Web-Test-Rg"; 'cm-integration-test-delete' = "true" } -Force
-          New-CmazPaasSql -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/sql.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/sql.yml" -Verbose
 
 - stage: Iaas
   condition: and(succeeded(), eq('${{ parameters.Iaas }}', true))
@@ -221,13 +221,13 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzIaasVm `
+          New-CmAzDeployment `
             -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/virtualmachines.yml" `
             -LocalAdminUsername (ConvertTo-SecureString $(AdminUsername) -AsPlainText -Force) `
             -LocalAdminPassword (ConvertTo-SecureString $(AdminPassword) -AsPlainText -Force) `
             -Verbose
 
-          New-CmAzIaasRecoveryServicesVault `
+          New-CmAzDeployment `
             -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/recoveryvault.yml" `
             -PolicySettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/recoverypolicy.yml" `
             -Verbose
@@ -286,7 +286,7 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          Set-CmAzSecurityCentre -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/security.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/security.yml" -Verbose
 
 - stage: Monitor
   dependsOn: [
@@ -317,11 +317,11 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzMonitorLogAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/log.yml" -Verbose -Confirm:$false
-          New-CmAzMonitorMetricAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/metric.yml" -Verbose -Confirm:$false
-          New-CmAzMonitorResourceHealthAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/resourceHealth.yml" -verbose -Confirm:$false
-          New-CmAzMonitorActivityLogAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/activityLog.yml" -verbose -Confirm:$false
-          New-CmAzMonitorServiceHealthAlerts -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/serviceHealth.yml" -verbose -Confirm:$false
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/log.yml" -Verbose -Confirm:$false
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/metric.yml" -Verbose -Confirm:$false
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/resourceHealth.yml" -verbose -Confirm:$false
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/activityLog.yml" -verbose -Confirm:$false
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/alerts/serviceHealth.yml" -verbose -Confirm:$false
 
 - stage: TearDown
   dependsOn: [
