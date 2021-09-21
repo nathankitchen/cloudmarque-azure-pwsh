@@ -38,7 +38,7 @@ groups:
       service:
         dependencies:
           actionGroups: [Core-Test-Ag1]
-          targetResources: [Iaas-Test-Vm]
+          targetResources: [Iaas-Test-Vm1]
           targetSubscriptionId:                                                      # Subscription ID to target
         publish:
           activityLogAlert: Mon-Test-ala1

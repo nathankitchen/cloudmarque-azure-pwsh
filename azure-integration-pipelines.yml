@@ -47,7 +47,9 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/core.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/core.yml" `
+          -TagSettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/_tags/coreTags.yml" `
+          -Verbose
 
 - stage: Iaas_NSP
   displayName: Iaas - Network, Storage and Private Endpoints
@@ -105,6 +107,7 @@ stages:
 
           New-CmAzDeployment `
             -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/networking/yml/networking.yml" `
+            -TagSettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/_tags/neworkTags.yml" `
             -Verbose `
             -Confirm:$false
 
@@ -132,7 +135,9 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/privateendpoints.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/privateendpoints.yml" `
+                      -TagSettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/_tags/neworkTags.yml" `
+                      -Verbose
 
   - job: Extension_and_Policies
     displayName: Extension & Policies
@@ -191,12 +196,12 @@ stages:
           # Below resources are not being deployed because of known cdn api issue with Set-AzResource in Set-CmAzTag
           # New-CmazPaasWeb -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/web.yml" -Verbose
           # New-CmazPaasWebStatic -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/webstatic.yml" -Verbose
-          New-AzResourceGroup -Name "Web-Test-Rg" -location uksouth -tag @{'cm-service' = "Web-Test-Rg"; 'cm-integration-test-delete' = "true" } -Force
+          New-AzResourceGroup -Name "Web-Test-Rg" -location uksouth -tag @{'cm-service' = "Web-Test-Rg"; 'cm-integration-nnet-test-delete' = "true" } -Force
           New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/sql.yml" -Verbose
 
 - stage: Iaas
   condition: and(succeeded(), eq('${{ parameters.Iaas }}', true))
-  dependsOn: [Iaas_NSP, Security]
+  dependsOn: [Iaas_NSP]
   jobs:
   - job: IaasVmPatchVault
     displayName: Iaas - Vms, Recovery Vaults and Patching
@@ -234,8 +239,8 @@ stages:
 
           Set-CmAzIaasUpdateManagement -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/updateManagement.yml" -Verbose
 
-  - job: IaasBastionVPN
-    displayName: Iaas - Bastion Host and VPN Gateway
+  - job: IaasBastion
+    displayName: Iaas - Bastion Host
     steps:
     - task: AzurePowerShell@5
       inputs:
@@ -258,7 +263,31 @@ stages:
             -Verbose
 
           New-CmAzIaasBastionHost -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/bastionHost.yml" -Verbose
-          New-CmAzIaasVpnGw -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/vpngw.yml" -Verbose
+
+  - job: IaasVPN
+    displayName: Iaas - VPN Gateway
+    steps:
+    - task: AzurePowerShell@5
+      inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)"  `
+            -Verbose
+
+          New-CmAzIaasBastionHost -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/bastionHost.yml" -Verbose
 
 - stage: Security
   condition: and(succeeded(), eq('${{ parameters.Security }}', true))
@@ -286,7 +315,7 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)" `
             -Verbose
 
-          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/security.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/security.yml" -Debug
 
 - stage: Monitor
   dependsOn: [
@@ -334,7 +363,8 @@ stages:
   condition: and(always(), eq('${{ parameters.TearDown }}', true))
   displayName: Tear Down
   jobs:
-  - job:
+  - job: DeleteNonNet
+    displayName: Delete Other Resources
     steps:
      - task: AzurePowerShell@5
        inputs:
@@ -369,7 +399,7 @@ stages:
             $errorThrown = $false
 
             Write-Verbose "Fetching resource groups.."
-            $resources = Get-CmAzService -ServiceKey "cm-integration-test-delete" -Service "true" -IsResourceGroup -Verbose
+            $resources = Get-CmAzService -ServiceKey "cm-integration-nnet-test-delete" -Service "true" -IsResourceGroup -Verbose
 
             $resources | ForEach-Object {
 
@@ -383,3 +413,98 @@ stages:
 
           }
           while ($errorThrown)
+
+  - job: DeleteNet
+    displayName: Delete Networking Resources
+    dependsOn: [
+      "DeleteNonNet"
+    ]
+    steps:
+     - task: AzurePowerShell@5
+       inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
+
+          do {
+
+            Write-Verbose "Removing tagged resources..."
+            $errorThrown = $false
+
+            Write-Verbose "Fetching resource groups.."
+            $resources = Get-CmAzService -ServiceKey "cm-integration-net-test-delete" -Service "true" -IsResourceGroup -Verbose
+
+            $resources | ForEach-Object {
+
+              try {
+                Remove-AzResourceGroup -Name $_.resourceGroupName -Verbose -Force
+              }
+              catch {
+                $errorThrown = $true
+              }
+            }
+
+          }
+          while ($errorThrown)
+
+  - job: DeleteCore
+    displayName: Delete Core Resources
+    dependsOn: [
+      "DeleteNonNet"
+    ]
+    steps:
+     - task: AzurePowerShell@5
+       inputs:
+        azureSubscription: $(ServiceConnection)
+        workingDirectory: $(Build.SourcesDirectory)
+        pwsh: true
+        errorActionPreference: Stop
+        ScriptType: InlineScript
+        FailOnStandardError: true
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+
+          ./Initialise-Cloudmarque.ps1 `
+            -ProjectDirectory "$(Build.SourcesDirectory)" `
+            -Environment "$(environment)" `
+            -BuildNumber "$(Build.BuildNumber)" `
+            -RepositoryName "$(Build.Repository.Name)" `
+            -DefinitionName "$(Build.DefinitionName)" `
+            -DefinitionVersion "$(Build.DefinitionVersion)" `
+            -Verbose
+
+          do {
+
+            Write-Verbose "Removing tagged resources..."
+            $errorThrown = $false
+
+            Write-Verbose "Fetching resource groups.."
+            $resources = Get-CmAzService -ServiceKey "cm-integration-core-test-delete" -Service "true" -IsResourceGroup -Verbose
+
+            $resources | ForEach-Object {
+
+              try {
+                Remove-AzResourceGroup -Name $_.resourceGroupName -Verbose -Force
+              }
+              catch {
+                $errorThrown = $true
+              }
+            }
+
+          }
+          while ($errorThrown)
+

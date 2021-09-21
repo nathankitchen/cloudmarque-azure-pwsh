@@ -7,4 +7,4 @@ tags:
     cm-charge: Core-Test-An3            # Required - Cost code
     cm-apps:  Tag-Test-Apps             # Required - App name
   custom:
-    cm-integration-nnet-test-delete: "true"        # Optional
+    cm-integration-net-test-delete: "true"        # Optional

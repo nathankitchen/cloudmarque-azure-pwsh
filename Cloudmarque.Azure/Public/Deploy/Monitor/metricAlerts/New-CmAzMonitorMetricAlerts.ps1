@@ -125,7 +125,7 @@ function New-CmAzMonitorMetricAlerts {
 						foreach ($targetResourceService in $alert.service.dependencies.targetResources) {
 
 							$targetResource = Get-CmAzService -Service $targetResourceService -ThrowIfUnavailable
-							$alert.scopes += ($targetResource | Where-object { $_.location -eq $alert.targetResourceLocation.replace(' ', '') }).resourceId
+							$alert.scopes += ($targetResource | Where-object { $_.location -eq $alert.targetResourceLocation.replace(' ', '') -and $_.resourceType -eq $alertSet.resourceType}).resourceId
 						}
 
 						foreach ($targetResourceGroupService in $alert.service.dependencies.targetResourceGroups) {

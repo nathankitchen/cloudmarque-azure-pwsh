@@ -188,7 +188,7 @@ groups:
       service:
         dependencies:
           targetResourceGroups:
-            - Iaas-Test-VmX
+            - Iaas-Test-Vm-Rg2
       schedule:
         frequencyInMinutes: 1                                                          # evaluationFrequency
         timeWindowInMinutes: 5                                                         # windowSize
