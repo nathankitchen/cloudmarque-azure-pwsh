@@ -1024,7 +1024,9 @@
 					-Name $deploymentNameRg `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.ResourceGroups.json `
 					-Location $resourceGroupObjectArray[0].resourceGroup.location `
-					-NetworkingArrayObject $resourceGroupObjectArray
+					-TemplateParameterObject @{
+						NetworkingArrayObject = $resourceGroupObjectArray
+					}
 			}
 
 			if ($resourceGroupObjectArray.networkSecurityGroups.nsgName[0] -ne 'none' -and $resourceGroupObjectArray.networkSecurityGroups.nsgName -ne 'none') {
@@ -1106,10 +1108,12 @@
 					-Name $deploymentNameNsg `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.Nsgs.json `
 					-Location $workspace.location `
-					-Locations (($resourceGroupObjectArray.networkSecurityGroups | Where-Object { $_.nsgname -ne "none" } ).location | Sort-Object | Get-Unique) `
-					-NetworkWatcherResourceGroupName $networkWatcherResourceGroupName `
-					-Nsgs ($resourceGroupObjectArray.networkSecurityGroups | Where-Object { $_.nsgname -ne "none" }) `
-					-Workspace $workspace
+					-TemplateParameterObject @{
+						Locations = (($resourceGroupObjectArray.networkSecurityGroups | Where-Object { $_.nsgname -ne "none" } ).location | Sort-Object | Get-Unique)
+						NetworkWatcherResourceGroupName = $networkWatcherResourceGroupName
+						Nsgs = ($resourceGroupObjectArray.networkSecurityGroups | Where-Object { $_.nsgname -ne "none" })
+						Workspace = $workspace
+					}
 			}
 
 			if (($resourceGroupObjectArray.vnets.vnetName | Where-Object { $_ -ne "none" }) -or ($resourceGroupObjectArray.routeTables.tableName | Where-Object { $_ -ne "none" })) {
@@ -1122,7 +1126,9 @@
 					-Name $deploymentNameVu `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.json `
 					-Location $resourceGroupObjectArray[0].resourceGroup.location `
-					-NetworkingArrayObject $resourceGroupObjectArray
+					-TemplateParameterObject @{
+						NetworkingArrayObject = $resourceGroupObjectArray
+					}
 			}
 
 			if ($resourceGroupObjectArray.vnets.virtualnetworkpeers) {
@@ -1157,7 +1163,9 @@
 					-Name $deploymentNamePeerings `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.vnetPeerings.json `
 					-Location $resourceGroupObjectArray[0].resourceGroup.location `
-					-VnetPeeringsObjectArray $vnetPeeringsObjectArray
+					-TemplateParameterObject @{
+						VnetPeeringsObjectArray = $vnetPeeringsObjectArray
+					}
 			}
 
 			if ( $resourceGroupObjectArray | Where-Object { $_.zones.DNS } ) {
@@ -1210,7 +1218,9 @@
 					-Name $deploymentNameZones `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasNetworking.Zones.json `
 					-Location $deploymentLocationZone `
-					-privateDnsZones $filteredResourceGroupObject.zones
+					-TemplateParameterObject @{
+						PrivateDnsZones = $filteredResourceGroupObject.zones
+					}
 			}
 
 			$resourceGroupsToSet = @()
@@ -1231,9 +1241,9 @@
 			$resourcesToSet += $resourceGroupObjectArray.zones.DNS
 
 			Write-Verbose "Started tagging for resources..."
-			
+
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceIds $resourcesToSet
-		
+
 			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}
 	}

@@ -107,10 +107,11 @@ function New-CmAzCoreKeyVault {
 				-Name $deploymentName `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreKeyVault.json" `
 				-ResourceGroupName $keyVaultResourceGroup `
-				-KeyvaultDetails $SettingsObject `
-				-ObjectId $objectId `
-				-Workspace $workspace `
-				-Force
+				-TemplateParameterObject @{
+					KeyvaultDetails = $SettingsObject
+					ObjectId        = $objectId
+					Workspace       = $workspace
+				}
 
 			Write-Verbose "Generating key encryption keys..."
 			$SettingsObject.keyvaults | ForEach-Object -Parallel {

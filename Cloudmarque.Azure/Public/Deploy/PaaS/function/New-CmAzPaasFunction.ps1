@@ -210,13 +210,18 @@ function New-CmAzPaasFunction {
 
                 $deploymentNameAsp = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Location $location -Name "New-CmAzPaasFunction"
 
+                $appServicePlans = @()
+                $appServicePlans += $SettingsObject.functionAppSolutions.AppServicePlans
+
                 New-AzDeployment `
                     -Name $deploymentNameAsp `
                     -Location $location `
                     -TemplateFile "$PSScriptRoot\New-CmAzPaasFunction.AppServicePlan.json" `
-                    -AppServicePlans $SettingsObject.functionAppSolutions.AppServicePlans
+                    -TemplateParameterObject @{
+                        AppServicePlans = $appServicePlans
+                    }
 
-                if ($SettingsObject.functionAppSolutions.appServicePlans.functions.privateEndpoints) {
+                if ( $SettingsObject.functionAppSolutions.appServicePlans.functions.privateEndpoints ) {
 
                     Write-Verbose "Building private endpoints for function in appservice plan..."
                     Build-PrivateEndpoints -SettingsObject @{ functions = $SettingsObject.functionAppSolutions.appServicePlans.functions } `
@@ -235,11 +240,16 @@ function New-CmAzPaasFunction {
 
                 $deploymentNameCon = Get-CmAzResourceName -Resource "Deployment" -Architecture "PaaS" -Location $location -Name "New-CmAzPaasFunction"
 
+                $consumptionPlans = @()
+                $consumptionPlans += $SettingsObject.functionAppSolutions.ConsumptionPlans
+
                 New-AzDeployment `
                     -Name $deploymentNameCon `
                     -Location $location `
                     -TemplateFile "$PSScriptRoot\New-CmAzPaasFunction.Consumption.json" `
-                    -ConsumptionPlans $SettingsObject.functionAppSolutions.ConsumptionPlans
+                    -TemplateParameterObject @{
+                        ConsumptionPlans = $consumptionPlans
+                    }
             }
 
             if (!$OmitTags) {

@@ -37,13 +37,13 @@
 
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
 	[OutputType([Hashtable])]
-    param(
-      [parameter(Mandatory=$true, ParameterSetName = "Settings File")]
-      [String]$SettingsFile,
-      [parameter(Mandatory=$true, ParameterSetName = "Settings Object")]
-      [Object]$SettingsObject,
-	  [String]$TagSettingsFile
-    )
+	param(
+		[parameter(Mandatory = $true, ParameterSetName = "Settings File")]
+		[String]$SettingsFile,
+		[parameter(Mandatory = $true, ParameterSetName = "Settings Object")]
+		[Object]$SettingsObject,
+		[String]$TagSettingsFile
+	)
 
 	$ErrorActionPreference = "Stop"
 
@@ -51,7 +51,7 @@
 
 	$SettingsObject = Get-Settings -SettingsFile $SettingsFile -SettingsObject $SettingsObject -CmdletName (Get-CurrentCmdletName -ScriptRoot $PSCommandPath)
 
-	if($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy infrastructure for a static website")) {
+	if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy infrastructure for a static website")) {
 
 		Write-Verbose "Generating resource names..."
 		$resourceGroupName = Get-CmAzResourceName -Resource "ResourceGroup" -Architecture "PaaS" -Location $SettingsObject.Location -Name $SettingsObject.Name
@@ -64,31 +64,32 @@
 
 		$providerNamespace = "Microsoft.CDN"
 
-		if ((Get-AzResourceProvider -Location $SettingsObject.Location -ProviderNamespace $providerNamespace | Where-Object { $_.RegistrationState -ne "Registered" }).Count -gt 0)
-		{
+		if ((Get-AzResourceProvider -Location $SettingsObject.Location -ProviderNamespace $providerNamespace | Where-Object { $_.RegistrationState -ne "Registered" }).Count -gt 0) {
 			Register-AzResourceProvider -ProviderNamespace $providerNamespace
 		}
 
 		Write-Verbose "Deploying storage account..."
 		$storageObject = @{
-			location = $SettingsObject.Location;
-			service = @{
+			location        = $SettingsObject.Location;
+			service         = @{
 				dependencies = @{
 					resourceGroup = $SettingsObject.service.publish.resourceGroup
 				};
-				publish = @{
+				publish      = @{
 					storage = $SettingsObject.service.publish.storage
 				}
 			}
-			storageAccounts = @(@{
-				storageAccountName = $SettingsObject.Name;
-				accountType = "Standard";
-				blobContainer = @(@{
-						name = "`$web";
-						publicAccess = "blob"
-					}
-				)
-			})
+			storageAccounts = @(
+				@{
+					storageAccountName = $SettingsObject.Name;
+					accountType        = "Standard";
+					blobContainer      = @(@{
+							name         = "`$web";
+							publicAccess = "blob"
+						}
+					)
+				}
+			)
 		}
 
 		Write-Verbose "Creating storage account..."
@@ -104,11 +105,12 @@
 			-Name $deploymentNameCdn `
 			-ResourceGroupName $resourceGroupName `
 			-TemplateFile "$PSScriptRoot/New-CmAzPaasWebStatic.Cdn.json" `
-			-StorageName $storageName `
-			-EndpointName $endpointName `
-			-ProfileName $profileName `
-			-ServiceContainer $SettingsObject.service.publish `
-			-Force > $null
+			-TemplateParameterObject @{
+			StorageName      = $storageName
+			EndpointName     = $endpointName
+			ProfileName      = $profileName
+			ServiceContainer = $SettingsObject.service.publish
+		} > $null
 
 		Write-Verbose "Writng cdn rules..."
 		$ruleOrder = 0
@@ -170,7 +172,7 @@
 		Set-AzCdnEndpoint -CdnEndpoint $endpoint > $null
 
 		Write-Verbose "Setting custom domain..."
-		if((Test-AzCdnCustomDomain -CdnEndpoint $endpoint -CustomDomainHostName $SettingsObject.CustomDomain).CustomDomainValidated) {
+		if ((Test-AzCdnCustomDomain -CdnEndpoint $endpoint -CustomDomainHostName $SettingsObject.CustomDomain).CustomDomainValidated) {
 			New-AzCdnCustomDomain -CustomDomainName $SettingsObject.CustomDomain -HostName $SettingsObject.CustomDomain -CdnEndpoint $endpoint -ErrorAction SilentlyContinue
 		}
 
@@ -179,6 +181,6 @@
 
 		Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroupName
 
-        Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
+		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 	}
 }

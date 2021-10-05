@@ -7,7 +7,7 @@
     "required": [
         "location",
         "service",
-        "vpnGw"
+        "vpnGws"
     ],
     "properties": {
         "component": {
@@ -91,17 +91,17 @@
             },
             "additionalProperties": false
         },
-        "vpnGw": {
-            "$id": "#/vpnGw",
+        "vpnGws": {
+            "$id": "#/vpnGws",
             "type": "array",
-            "title": "VPNGw",
+            "title": "Configuration of vpn gateways",
             "description": "Contains list of details required to deploy vpn gateways and its dependent resources.",
             "items": {
-                "$id": "#/vpnGw/items",
+                "$id": "#/vpnGws/items",
                 "minItems": 1,
                 "allOf": [
                     {
-                        "$id": "#/vpnGw/items/allOf",
+                        "$id": "#/vpnGws/items/allOf",
                         "type": "object",
                         "required": [
                             "gatewayName",
@@ -109,31 +109,31 @@
                         ],
                         "properties": {
                             "gatewayName": {
-                                "$id": "#/vpnGw/items/allOf/gatewayName",
+                                "$id": "#/vpnGws/items/allOf/gatewayName",
                                 "type": "string",
                                 "title": "GatewayName",
                                 "description": "Becomes part of the generated local network gateway, public ip address and virtual network gateway names."
                             },
                             "service": {
-                                "$id": "#/vpnGw/items/allOf/service",
+                                "$id": "#/vpnGws/items/allOf/service",
                                 "type": ["object", "null"],
                                 "title": "Service",
                                 "description": "Contains dependency and publish details for service location.",
                                 "properties": {
                                     "dependencies": {
-                                        "$id": "#/vpnGw/items/allOf/service/dependencies",
+                                        "$id": "#/vpnGws/items/allOf/service/dependencies",
                                         "type": ["object", "null"],
                                         "title": "Dependencies",
                                         "description": "Contains dependency details for service location.",
                                         "properties": {
                                             "keyVault": {
-                                                "$id": "#/vpnGw/items/allOf/service/dependencies/keyVault",
+                                                "$id": "#/vpnGws/items/allOf/service/dependencies/keyVault",
                                                 "type": ["string", "null"],
                                                 "title": "KeyVault",
                                                 "description": "Local overriding dependency value to fetch existing resource type."
                                             },
                                             "vnet": {
-                                                "$id": "#/vpnGw/items/allOf/service/dependencies/vnet",
+                                                "$id": "#/vpnGws/items/allOf/service/dependencies/vnet",
                                                 "type": ["string", "null"],
                                                 "title": "Vnet",
                                                 "description": "Local overriding dependency value to fetch existing resource type."
@@ -142,25 +142,25 @@
                                         "additionalProperties": false
                                     },
                                     "publish": {
-                                        "$id": "#/vpnGw/items/allOf/service/publish",
+                                        "$id": "#/vpnGws/items/allOf/service/publish",
                                         "type": ["object", "null"],
                                         "title": "Publish",
                                         "description": "Contains publish details for service location.",
                                         "properties": {
                                             "publicIp": {
-                                                "$id": "#/vpnGw/items/allOf/service/publish/publicIp",
+                                                "$id": "#/vpnGws/items/allOf/service/publish/publicIp",
                                                 "type": ["string", "null"],
                                                 "title": "PublicIp",
                                                 "description": "Local overriding value to publish on deployed existing resource type."
                                             },
                                             "virtualNetworkGateway": {
-                                                "$id": "#/vpnGw/items/allOf/service/publish/virtualNetworkGateway",
+                                                "$id": "#/vpnGws/items/allOf/service/publish/virtualNetworkGateway",
                                                 "type": ["string", "null"],
                                                 "title": "VirtualNetworkGateway",
                                                 "description": "Local overriding value to publish on deployed existing resource type."
                                             },
                                             "localNetworkGateway": {
-                                                "$id": "#/vpnGw/items/allOf/service/publish/localNetworkGateway",
+                                                "$id": "#/vpnGws/items/allOf/service/publish/localNetworkGateway",
                                                 "type": ["string", "null"],
                                                 "title": "LocalNetworkGateway",
                                                 "description": "Local overriding value to publish on deployed existing resource type."
@@ -172,19 +172,19 @@
                                 "additionalProperties": false
                             },
                             "sku": {
-                                "$id": "#/vpnGw/items/allOf/sku",
+                                "$id": "#/vpnGws/items/allOf/sku",
                                 "type": "string",
                                 "title": "Sku",
                                 "description": "Sku name and tier."
                             },
                             "gatewaySubnetPrefix": {
-                                "$id": "#/vpnGw/items/allOf/gatewaySubnetPrefix",
+                                "$id": "#/vpnGws/items/allOf/gatewaySubnetPrefix",
                                 "type": ["string", "null"],
                                 "title": "GatewaySubnetPrefix",
                                 "description": "Gateway subnet address prefix."
                             },
                             "p2s": {
-                                "$id": "#/vpnGw/items/allOf/p2s",
+                                "$id": "#/vpnGws/items/allOf/p2s",
                                 "type": ["object", "null"],
                                 "title": "P2s",
                                 "description": "Contains P2s Configuration.",
@@ -194,14 +194,14 @@
                                 },
                                 "properties": {
                                     "vpnAddressPool": {
-                                        "$id": "#/vpnGw/items/allOf/p2s/vpnAddressPool",
+                                        "$id": "#/vpnGws/items/allOf/p2s/vpnAddressPool",
                                         "type": ["string", "null"],
                                         "title": "VpnAddressPool",
                                         "description": "The vpn ip address pool.",
                                         "default": ""
                                     },
                                     "rootCertificateName": {
-                                        "$id": "#/vpnGw/items/allOf/p2s/rootCertificateName",
+                                        "$id": "#/vpnGws/items/allOf/p2s/rootCertificateName",
                                         "type": ["string", "null"],
                                         "title": "RootCertificateName",
                                         "description": "Secret name of root certificate in an existing key vault.",
@@ -211,7 +211,7 @@
                                 "additionalProperties": false
                             },
                             "s2s": {
-                                "$id": "#/vpnGw/items/allOf/s2s",
+                                "$id": "#/vpnGws/items/allOf/s2s",
                                 "type": ["object", "null"],
                                 "title": "S2s",
                                 "description": "Contains S2s Configuration.",
@@ -221,13 +221,13 @@
                                 },
                                 "properties": {
                                     "keyVaultSecret": {
-                                        "$id": "#/vpnGw/items/allOf/s2s/keyvaultSecret",
+                                        "$id": "#/vpnGws/items/allOf/s2s/keyvaultSecret",
                                         "type": ["string", "null"],
                                         "title": "KeyvaultSecret",
                                         "description": "Name of secret to fetch from an existing key vault."
                                     },
                                     "clientSitePublicIP": {
-                                        "$id": "#/vpnGw/items/allOf/s2s/clientSitePublicIP",
+                                        "$id": "#/vpnGws/items/allOf/s2s/clientSitePublicIP",
                                         "type": ["string", "null"],
                                         "title": "ClientSitePublicIP",
                                         "description": "Client site Public ip address.",
@@ -235,22 +235,22 @@
                                         "default": ""
                                     },
                                     "sharedKey": {
-                                        "$id": "#/vpnGw/items/allOf/s2s/sharedKey",
+                                        "$id": "#/vpnGws/items/allOf/s2s/sharedKey",
                                         "type": "string",
                                         "title": "SharedKey",
                                         "description": "key vault secret containing the shared key."
 
                                     },
                                     "cidrBlocks": {
-                                        "$id": "#/vpnGw/items/allOf/s2s/cidrBlocks",
+                                        "$id": "#/vpnGws/items/allOf/s2s/cidrBlocks",
                                         "type": ["array", "null"],
                                         "title": "CidrBlocks",
                                         "description": "Cidr blocks allowed over vpn.",
                                         "items": {
-                                            "$id": "#/vpnGw/items/allOf/s2s/cidrBlocks/items",
+                                            "$id": "#/vpnGws/items/allOf/s2s/cidrBlocks/items",
                                             "allOf": [
                                                 {
-                                                    "$id": "#/vpnGw/items/allOf/s2s/cidrBlocks/items/allOf",
+                                                    "$id": "#/vpnGws/items/allOf/s2s/cidrBlocks/items/allOf",
                                                     "type": "string",
                                                     "description": "List of allowed cidr ranges."
                                                 }

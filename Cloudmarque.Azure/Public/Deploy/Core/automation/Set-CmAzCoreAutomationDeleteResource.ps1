@@ -120,8 +120,10 @@
 			New-AzResourceGroupDeployment `
 				-ResourceGroupName $automationService.resourceGroupName `
 				-TemplateFile "$PSScriptRoot/Set-CmAzCoreAutomationDeleteResource.json" `
-				-AutomationAccountName $automationService.name `
-				-UpdateSchedule $schedule `
+				-TemplateParameterObject @{
+					AutomationAccountName = $automationService.name
+					UpdateSchedule 	   	  = $schedule
+				} `
 				-Force
 
 			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false

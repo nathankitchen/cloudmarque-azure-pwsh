@@ -61,12 +61,14 @@ function Set-CmAzSecurityCentre {
 
             New-AzDeployment `
                 -Name $deploymentName `
-                -AssignUkNhs $SettingsObject.EnableUkNhs `
                 -Location $SettingsObject.Location `
                 -TemplateFile "$PSScriptRoot/Set-CmAzSecurityCentre.json" `
-                -InitiativeLocation $SettingsObject.Location `
-                -SecurityContacts $SettingsObject.SecurityContacts `
-                -Workspace $workspace
+                -TemplateParameterObject @{
+                    AssignUkNhs        = $SettingsObject.EnableUkNhs
+                    InitiativeLocation = $SettingsObject.Location
+                    SecurityContacts   = $SettingsObject.SecurityContacts
+                    Workspace          = $workspace
+                }
 
             Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
         }

@@ -133,9 +133,10 @@ function Set-CmAzIaasUpdateManagement {
 			-Name $deploymentName `
 			-ResourceGroupName $automationAccount.resourceGroupName `
 			-TemplateFile "$PSScriptRoot/Set-CmAzIaasUpdateManagement.json" `
-			-AutomationAccountName $automationAccount.name `
-			-UpdateSchedules $schedules `
-			-Force
+			-TemplateParameterObject @{
+				AutomationAccountName = $automationAccount.name
+				UpdateSchedules 	  = $schedules
+			}
 
 		Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 	}

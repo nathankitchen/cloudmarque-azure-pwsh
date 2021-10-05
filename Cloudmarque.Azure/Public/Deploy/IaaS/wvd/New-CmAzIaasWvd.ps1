@@ -118,7 +118,7 @@ function New-CmAzIaasWvd {
 						Write-Verbose "Locating latest gallery image for: $($wvdEnvironment.hostVm.hostVmImage)"
 						# Selecting the latest image is commented out and instead forcing '19h2-evd' due to issues with the WVD agent on later Windows 10 versions.
 						#$latestImage = Get-AzVMImageSku -Location $wvdEnvironment.hostVm.hostVmLocation -PublisherName "MicrosoftWindowsDesktop" -Offer $wvdEnvironment.hostVm.hostVmImage | Where-Object {$_.Skus -like "*-evd" -and $_.Skus -notlike "rs*"} | Select-Object -Last 1
-						$latestImage = (Get-AzVMImageSku -Location $wvdEnvironment.hostVm.hostVmLocation -PublisherName "MicrosoftWindowsDesktop" -Offer $wvdEnvironment.hostVm.hostVmImage | Where-Object {$_.Skus -eq "19h2-evd"})
+						$latestImage = (Get-AzVMImageSku -Location $wvdEnvironment.hostVm.hostVmLocation -PublisherName "MicrosoftWindowsDesktop" -Offer $wvdEnvironment.hostVm.hostVmImage | Where-Object { $_.Skus -eq "19h2-evd" })
 
 						if (!$latestImage) {
 							Write-Error "No valid images returned from Azure Gallery." -Category InvalidArgument -CategoryTargetName "Gallery image"
@@ -133,7 +133,7 @@ function New-CmAzIaasWvd {
 					{ $_ -eq "customimage" } {
 
 						Write-Verbose "Locating custom image with name: $($wvdEnvironment.hostVm.hostVmImage)."
-						$wvdEnvironment.hostVm.customImageId = (Get-AzResource -Name $wvdEnvironment.hostVm.hostVmImage | Where-Object {$_.ResourceType -like "Microsoft.Compute/*images"}).ResourceId
+						$wvdEnvironment.hostVm.customImageId = (Get-AzResource -Name $wvdEnvironment.hostVm.hostVmImage | Where-Object { $_.ResourceType -like "Microsoft.Compute/*images" }).ResourceId
 
 						if (!$wvdEnvironment.hostVm.customImageId) {
 							Write-Error "No custom images found with name: $($wvdEnvironment.hostVm.hostVmImage)." -Category InvalidArgument -CategoryTargetName "hostVmImage"
@@ -148,28 +148,28 @@ function New-CmAzIaasWvd {
 					}
 				}
 
-				$vmSize = Get-AzVMSize -Location $($wvdEnvironment.hostvm.hostVmLocation).Replace(" ","")
+				$vmSize = Get-AzVMSize -Location $($wvdEnvironment.hostvm.hostVmLocation).Replace(" ", "")
 
 				$vmTemplateString = @{
-					"domain" = $wvdEnvironment.hostvm.hostVmDomain
-					"galleryImageOffer" = $wvdEnvironment.hostvm.hostVmImage
-					"galleryImagePublisher"= $wvdEnvironment.hostvm.hostVmLatestImagePublisher
-					"galleryImageSKU" = $wvdEnvironment.hostvm.hostVmLatestImageSku
-					"galleryItemId" = "{0}.{1}{2}" -f $wvdEnvironment.hostvm.hostVmLatestImagePublisher, $wvdEnvironment.hostvm.hostVmImage, $wvdEnvironment.hostvm.hostVmLatestImageSku
-					"imageType" = $wvdEnvironment.hostVm.hostVmImageType
-					"imageUri" = $null
-					"customImageId" = $wvdEnvironment.hostVm.customImageId
-					"namePrefix" = $wvdEnvironment.hostvm.hostVmNamePrefix
-					"osDiskType" = "StandardSSD_LRS"
-					"useManagedDisks" = $true
-					"vmSize" = @{
-						"id" = $wvdEnvironment.hostvm.hostVmSize
-						"cores" = ($vmSize | Where-Object {$_.name -eq $wvdEnvironment.hostvm.hostVmSize}).NumberOfCores
-						"ram" = ($vmSize | Where-Object {$_.name -eq $wvdEnvironment.hostvm.hostVmSize}).MemoryInMB / 1Gb
+					"domain"                = $wvdEnvironment.hostvm.hostVmDomain
+					"galleryImageOffer"     = $wvdEnvironment.hostvm.hostVmImage
+					"galleryImagePublisher" = $wvdEnvironment.hostvm.hostVmLatestImagePublisher
+					"galleryImageSKU"       = $wvdEnvironment.hostvm.hostVmLatestImageSku
+					"galleryItemId"         = "{0}.{1}{2}" -f $wvdEnvironment.hostvm.hostVmLatestImagePublisher, $wvdEnvironment.hostvm.hostVmImage, $wvdEnvironment.hostvm.hostVmLatestImageSku
+					"imageType"             = $wvdEnvironment.hostVm.hostVmImageType
+					"imageUri"              = $null
+					"customImageId"         = $wvdEnvironment.hostVm.customImageId
+					"namePrefix"            = $wvdEnvironment.hostvm.hostVmNamePrefix
+					"osDiskType"            = "StandardSSD_LRS"
+					"useManagedDisks"       = $true
+					"vmSize"                = @{
+						"id"    = $wvdEnvironment.hostvm.hostVmSize
+						"cores" = ($vmSize | Where-Object { $_.name -eq $wvdEnvironment.hostvm.hostVmSize }).NumberOfCores
+						"ram"   = ($vmSize | Where-Object { $_.name -eq $wvdEnvironment.hostvm.hostVmSize }).MemoryInMB / 1Gb
 					}
 				}
 
-				$wvdEnvironment.hostVm.vmTemplateString = ($vmTemplateString | ConvertTo-Json).Replace("`r`n","") -Replace (' +',"")
+				$wvdEnvironment.hostVm.vmTemplateString = ($vmTemplateString | ConvertTo-Json).Replace("`r`n", "") -Replace (' +', "")
 			}
 
 			if (!$SettingsObject.azureDeploymentLocation) {
@@ -193,9 +193,11 @@ function New-CmAzIaasWvd {
 				-Name $deploymentNameEnv `
 				-Location $SettingsObject.azureDeploymentLocation `
 				-TemplateFile "$PSScriptRoot\New-CmAzWVDEnvironment.json" `
-				-Environments $SettingsObject.wvdEnvironments `
-				-LogAnalyticsLinkName $logAnalyticsLinkName `
-				-LogAnalyticsID $logAnalyticsID
+				-TemplateParameterObject @{
+				Environments         = $SettingsObject.wvdEnvironments
+				LogAnalyticsLinkName = $logAnalyticsLinkName
+				LogAnalyticsID       = $logAnalyticsID
+			}
 
 			Write-Verbose "Beginning WVD host\s object creation."
 			foreach ($wvdEnvironment in $SettingsObject.wvdEnvironments) {
@@ -246,7 +248,9 @@ function New-CmAzIaasWvd {
 				-Name $deploymentNameHosts `
 				-Location $SettingsObject.azureDeploymentLocation `
 				-TemplateFile "$PSScriptRoot\New-CmAzWVDHosts.json" `
-				-Environments $SettingsObject.wvdEnvironments
+				-TemplateParameterObject @{
+				Environments = $SettingsObject.wvdEnvironments
+			}
 
 			Write-Verbose "Deploying WVD host post setup."
 
@@ -256,12 +260,14 @@ function New-CmAzIaasWvd {
 				-Name $deploymentNamePs `
 				-Location $SettingsObject.azureDeploymentLocation `
 				-TemplateFile "$PSScriptRoot\New-CmAzWVDPostSetup.json" `
-				-Environments $SettingsObject.wvdEnvironments `
-				-LogAnalyticsID $logAnalyticsID
+				-TemplateParameterObject @{
+				Environments   = $SettingsObject.wvdEnvironments
+				LogAnalyticsID = $logAnalyticsID
+			}
 
 			Write-CommandStatus -CommandName $commandName -Start $false
 		}
-    }
+	}
 	catch {
 		$PSCmdlet.ThrowTerminatingError($PSItem);
 	}

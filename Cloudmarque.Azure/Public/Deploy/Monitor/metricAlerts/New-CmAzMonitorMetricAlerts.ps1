@@ -154,8 +154,10 @@ function New-CmAzMonitorMetricAlerts {
 				-Name $deploymentName `
 				-TemplateFile "$PSScriptRoot\New-CmAzMonitorMetricAlerts.json" `
 				-ResourceGroupName $resourceGroup.resourceGroupName `
-				-Alerts $alerts `
-				-Mode "Complete"
+				-Mode "Complete" `
+				-TemplateParameterObject @{
+					Alerts = $alerts
+				}
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroup.resourceGroupName
 

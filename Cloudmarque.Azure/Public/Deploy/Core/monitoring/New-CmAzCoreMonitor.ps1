@@ -53,7 +53,7 @@ function New-CmAzCoreMonitor {
 
 				$alert = $SettingsObject.alerts[$key]
 
-				if (($SettingsObject.actionGroups | Where-Object { $_.name -eq $alert.actionGroupName}).count -eq 0) {
+				if (($SettingsObject.actionGroups | Where-Object { $_.name -eq $alert.actionGroupName }).count -eq 0) {
 					Write-Error "Action group $($alert.actionGroupName) not found in settings." -Category InvalidArgument -CategoryTargetName "actionGroupName"
 				}
 			}
@@ -61,10 +61,10 @@ function New-CmAzCoreMonitor {
 			$workbookService = Get-CmAzService -Service $SettingsObject.service.publish.workbook
 
 			$workbook = @{
-				DisplayName = Get-CmAzResourceName -Resource "Workbook" -Architecture "Core" -Location $SettingsObject.location -Name "workspaceUsage-$($SettingsObject.name)"
-				Category = "workbook"
-				Guid = New-Guid
-				exists = $workbookService ? $true : $false
+				DisplayName    = Get-CmAzResourceName -Resource "Workbook" -Architecture "Core" -Location $SettingsObject.location -Name "workspaceUsage-$($SettingsObject.name)"
+				Category       = "workbook"
+				Guid           = New-Guid
+				exists         = $workbookService ? $true : $false
 				serializedJson = (Get-CmAzSettingsFile -path "$PSScriptRoot/WorkspaceUsage.workbook.json") | ConvertTo-Json -Compress -Depth 100
 			}
 
@@ -76,7 +76,7 @@ function New-CmAzCoreMonitor {
 
 			foreach ($actionGroup in $SettingsObject.actionGroups) {
 
-				if(!$actionGroup.name -or !$actionGroup.shortName) {
+				if (!$actionGroup.name -or !$actionGroup.shortName) {
 					Write-Error "Please ensure a action group has a name, a shortname and at least one receiver." -Category InvalidArgument -CategoryTargetName "ActionGroups"
 				}
 
@@ -107,60 +107,60 @@ function New-CmAzCoreMonitor {
 
 			Write-Verbose "Setting alerts..."
 			$keyvaultAdminAlert = @{
-				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Location "Global"-Name "$($SettingsObject.name)-KeyvaultAdmin";
+				$nameKey          = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Location "Global"-Name "$($SettingsObject.name)-KeyvaultAdmin";
 				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Location "Global" -Name $SettingsObject.alerts.keyvaultAdmin.actionGroupName;
-				"enabled" = $SettingsObject.alerts.keyvaultAdmin.enabled ??= $false;
-				"servicePublish" = $SettingsObject.service.publish.keyvaultAdminAlert;
-				"conditions" = @(
+				"enabled"         = $SettingsObject.alerts.keyvaultAdmin.enabled ??= $false;
+				"servicePublish"  = $SettingsObject.service.publish.keyvaultAdminAlert;
+				"conditions"      = @(
 					@{
-						"field" = "category";
+						"field"  = "category";
 						"equals" = "Administrative";
 					},
 					@{
-						"field" = "resourceType";
+						"field"  = "resourceType";
 						"equals" = "Microsoft.Keyvault/Vaults";
 					}
 				);
 			}
 
 			$resourceHealthAlert = @{
-				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Location "Global"-Name "$($SettingsObject.name)-ResourceHealth";
+				$nameKey          = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Location "Global"-Name "$($SettingsObject.name)-ResourceHealth";
 				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Location "Global" -Name $SettingsObject.alerts.resourceHealth.actionGroupName;
-				"enabled" = $SettingsObject.alerts.resourceHealth.enabled ??= $false;
-				"servicePublish" = $SettingsObject.service.publish.resourceHealthAlert;
-				"conditions" = @(
+				"enabled"         = $SettingsObject.alerts.resourceHealth.enabled ??= $false;
+				"servicePublish"  = $SettingsObject.service.publish.resourceHealthAlert;
+				"conditions"      = @(
 					@{
-						"field" = "category";
+						"field"  = "category";
 						"equals" = "ResourceHealth";
 					},
 					@{
-						"field" = "resourceType";
+						"field"  = "resourceType";
 						"equals" = "Microsoft.Keyvault/Vaults";
 					},
 					@{
-						"field" = "resourceType";
+						"field"  = "resourceType";
 						"equals" = "Microsoft.OperationalInsights/Workspaces";
 					},
 					@{
-						"field" = "resourceType";
+						"field"  = "resourceType";
 						"equals" = "Microsoft.Storage/StorageAccounts";
 					}
 				);
 			}
 
 			$serviceHealthAlert = @{
-				$nameKey = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Location "Global"-Name "$($SettingsObject.name)-ServiceHealth";
+				$nameKey          = Get-CmAzResourceName -Resource "Alert" -Architecture "Core" -Location "Global"-Name "$($SettingsObject.name)-ServiceHealth";
 				"actionGroupName" = Get-CmAzResourceName -Resource "ActionGroup" -Architecture "Core" -Location "Global" -Name $SettingsObject.alerts.serviceHealth.actionGroupName;
-				"enabled" = $SettingsObject.alerts.serviceHealth.enabled ??= $false;
-				"servicePublish" = $SettingsObject.service.publish.serviceHealthAlert;
-				"conditions" = @(
+				"enabled"         = $SettingsObject.alerts.serviceHealth.enabled ??= $false;
+				"servicePublish"  = $SettingsObject.service.publish.serviceHealthAlert;
+				"conditions"      = @(
 					@{
-					   "field" = "category";
-					   "equals" = "ServiceHealth";
+						"field"  = "category";
+						"equals" = "ServiceHealth";
 					},
 					@{
-					   "field" = "properties.impactedServices[*].ImpactedRegions[*].RegionName";
-					   "containsAny" = $SettingsObject.alerts.serviceHealth.impactedLocations ?? @($SettingsObject.location);
+						"field"       = "properties.impactedServices[*].ImpactedRegions[*].RegionName";
+						"containsAny" = $SettingsObject.alerts.serviceHealth.impactedLocations ?? @($SettingsObject.location);
 					}
 				);
 			}
@@ -193,25 +193,25 @@ function New-CmAzCoreMonitor {
 				Write-Verbose "Deploying storage..."
 				$storageObject = @{
 
-					location = $SettingsObject.location;
-					service = @{
+					location        = $SettingsObject.location;
+					service         = @{
 						dependencies = @{
 							resourceGroup = $SettingsObject.service.publish.resourceGroup
 						};
-						publish = @{
+						publish      = @{
 							storage = $SettingsObject.service.publish.storage
 						}
 					}
 					storageAccounts = @(@{
-						storageAccountName = $SettingsObject.name;
-						accountType = "Standard";
-						blobContainer = @(
-							@{ name = "insights-logs-addonazurebackuppolicy"; },
-							@{ name = "insights-logs-azurebackupreport"; },
-							@{ name = "insights-logs-coreazurebackup"; },
-							@{ name = "insights-logs-networksecuritygroupflowevent"; }
-						)
-					})
+							storageAccountName = $SettingsObject.name;
+							accountType        = "Standard";
+							blobContainer      = @(
+								@{ name = "insights-logs-addonazurebackuppolicy"; },
+								@{ name = "insights-logs-azurebackupreport"; },
+								@{ name = "insights-logs-coreazurebackup"; },
+								@{ name = "insights-logs-networksecuritygroupflowevent"; }
+							)
+						})
 				}
 
 				New-CmAzIaasStorage -SettingsObject $storageObject -OmitTags
@@ -239,25 +239,26 @@ function New-CmAzCoreMonitor {
 
 			$serviceContainer = @{
 				appInsights = $SettingsObject.service.publish.appInsights;
-				solution = $SettingsObject.service.publish.solution;
-				workbook = $SettingsObject.service.publish.workbook;
-				workspace = $SettingsObject.service.publish.workspace;
+				solution    = $SettingsObject.service.publish.solution;
+				workbook    = $SettingsObject.service.publish.workbook;
+				workspace   = $SettingsObject.service.publish.workspace;
 			}
 
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
 				-ResourceGroupName $resourceGroupName `
 				-TemplateFile "$PSScriptRoot/New-CmAzCoreMonitor.json" `
-				-ActionGroups $SettingsObject.actionGroups `
-				-Alerts $SettingsObject.alerts `
-				-AppInsightsName $appInsightsName `
-				-StorageDataRetentionInDays $SettingsObject.storageDataRetentionInDays `
-				-WorkspaceDataRetentionInDays $SettingsObject.workspaceDataRetentionInDays `
-				-ServiceContainer $serviceContainer `
-				-StorageAccountId $storageAccountId `
-				-WorkspaceName $workspaceName `
-				-Workbook $workbook `
-				-Force > $Null
+				-TemplateParameterObject @{
+					ActionGroups                 = $SettingsObject.actionGroups
+					Alerts                       = $SettingsObject.alerts
+					AppInsightsName              = $appInsightsName
+					StorageDataRetentionInDays   = $SettingsObject.storageDataRetentionInDays
+					WorkspaceDataRetentionInDays = $SettingsObject.workspaceDataRetentionInDays
+					ServiceContainer             = $serviceContainer
+					StorageAccountId             = $storageAccountId
+					WorkspaceName                = $workspaceName
+					Workbook                     = $workbook
+				}
 
 			Write-Verbose "Setting advisor configuration cpu threshold..."
 			Set-AzAdvisorConfiguration -LowCpuThreshold $SettingsObject.AdvisorLowCPUThresholdPercentage

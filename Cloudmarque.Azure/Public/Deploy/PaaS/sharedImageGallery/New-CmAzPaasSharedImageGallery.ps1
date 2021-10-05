@@ -142,10 +142,11 @@
                 -Name $deploymentName `
                 -ResourceGroupName $resourceGroup.ResourceGroupName `
                 -TemplateFile "$PSScriptRoot\New-CmAzPaasSharedImageGallery.json" `
-                -Location $SettingsObject.location `
-                -ImageDefinitions $SettingsObject.imageDefinitions `
-                -GalleryName $SettingsObject.galleryName `
-                -Force
+                -TemplateParameterObject @{
+                Location         = $SettingsObject.location
+                ImageDefinitions = $SettingsObject.imageDefinitions
+                GalleryName      = $SettingsObject.galleryName
+            }
 
             Write-CommandStatus -CommandName $commandName -Start $false
         }

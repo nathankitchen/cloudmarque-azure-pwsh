@@ -122,11 +122,14 @@
 				-Name $deploymentName `
 				-ResourceGroupName $resourceGroupName `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreAutomation.json" `
-				-AutomationAccountName $automationAccountName `
-				-Location $SettingsObject.automation.location `
-				-AutomationService $SettingsObject.service.publish.automation `
-				-WorkspaceObject $workspace `
-				-Identity $identity
+				-TemplateParameterObject @{
+					AutomationAccountName = $automationAccountName
+					Location              = $SettingsObject.automation.location
+					AutomationService     = $SettingsObject.service.publish.automation
+					WorkspaceObject       = $workspace
+					Identity              = $identity
+				}
+
 
 			$principle = (Get-AzAutomationAccount -ResourceGroupName $resourceGroupName -Name $automationAccountName).Identity.PrincipalId
 
@@ -146,7 +149,8 @@
 					New-AzRoleAssignment `
 						-ObjectId $principle `
 						-Scope $SettingsObject.automation.managedIdentity.scope `
-						-RoleDefinitionName $SettingsObject.automation.managedIdentity.role
+						-RoleDefinitionName $SettingsObject.automation.managedIdentity.role `
+						-ErrorAction Ignore
 				}
 			}
 			else {

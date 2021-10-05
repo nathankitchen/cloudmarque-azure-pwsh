@@ -101,8 +101,9 @@ function New-CmAzIaasRecoveryServicesVault {
             -Name $deploymentNameRv `
             -ResourceGroupName $resourceGroupName `
             -TemplateFile "$PSScriptRoot\New-CmAzIaasRecoveryServicesVault.json" `
-            -RecoveryServicesVaults $SettingsObject.recoveryServicesVaults `
-            -Force
+            -TemplateParameterObject @{
+                RecoveryServicesVaults = $SettingsObject.recoveryServicesVaults
+            }
 
         Write-Verbose "Deploying Recovery Services Diagnostics..."
         Foreach ($vault in $SettingsObject.recoveryServicesVaults) {
@@ -113,9 +114,10 @@ function New-CmAzIaasRecoveryServicesVault {
                 -Name $deploymentNameRvSd `
                 -ResourceGroupName $resourceGroupName `
                 -TemplateFile "$PSScriptRoot\New-CmAzIaasRecoveryServicesDiagnostics.json" `
-                -VaultName $vault.name `
-                -Workspace $workspace `
-                -Force
+                -TemplateParameterObject @{
+                    VaultName = $vault.name
+                    Workspace = $workspace
+                }
         }
 
         if ($PolicySettingsObject) {
@@ -129,8 +131,10 @@ function New-CmAzIaasRecoveryServicesVault {
                     -Name $deploymentNameRvSp `
                     -ResourceGroupName $resourceGroupName `
                     -TemplateFile "$PSScriptRoot\New-CmAzIaasRecoveryServicesPolicy.json" `
-                    -VaultName $vault.name `
-                    -Policies $PolicySettingsObject.policies
+                    -TemplateParameterObject @{
+                        VaultName = $vault.name
+                        Policies  = $PolicySettingsObject.policies
+                    }
             }
         }
 

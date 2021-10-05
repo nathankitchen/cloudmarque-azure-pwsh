@@ -270,7 +270,9 @@
 					-Name $deploymentNameWeb `
 					-Location $location `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-Webapp.json" `
-					-AppServiceDetails $AppServiceDetails
+					-TemplateParameterObject @{
+						AppServiceDetails = $AppServiceDetails
+					}
 
 				if ($SettingsObject.WebSolutions.appServicePlans.functions) {
 
@@ -334,7 +336,9 @@
 					-Name $deploymentNameApim `
 					-Location $location `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-ApiManagementServices.json" `
-					-ApiManagementServices $ApiManagementServices
+					-TemplateParameterObject @{
+						ApiManagementServices = $ApiManagementServices
+					}
 			}
 
 
@@ -538,9 +542,10 @@
 					-Name $deploymentNameFd `
 					-ResourceGroupName $frontdoorRG `
 					-TemplateFile "$PSScriptRoot\New-CmAzPaasWeb-Frontdoor.json" `
-					-Frontdoor $SettingsObject.frontdoor `
-					-FrontdoorService $SettingsObject.service.publish.frontDoor `
-					-Verbose
+					-TemplateParameterObject @{
+						Frontdoor = $SettingsObject.frontdoor
+					    FrontdoorService = $SettingsObject.service.publish.frontDoor
+					}
 
 				if ($SettingsObject.frontDoor.customDomains.domainName) {
 

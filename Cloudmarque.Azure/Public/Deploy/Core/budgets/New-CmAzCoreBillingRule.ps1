@@ -112,7 +112,9 @@ function New-CmAzCoreBillingRule {
 				-Name $deploymentName `
 				-Location $SettingsObject.location `
 				-TemplateFile "$PSScriptRoot\New-CmAzCoreBillingRule.json" `
-				-Budgets $SettingsObject.budgets
+				-TemplateParameterObject @{
+					Budgets = $SettingsObject.budgets
+				}
 
 			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}

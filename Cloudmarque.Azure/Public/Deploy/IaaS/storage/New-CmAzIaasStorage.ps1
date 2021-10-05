@@ -192,8 +192,9 @@
 				-Name $deploymentName `
 				-ResourceGroupName $resourceGroup.resourceGroupName `
 				-TemplateFile "$PSScriptRoot/New-CmAzIaasStorage.json" `
-				-StorageSettingsArray $SettingsObject.storageAccounts `
-				-Force
+				-TemplateParameterObject @{
+					StorageSettingsArray = $SettingsObject.storageAccounts
+				}
 
 			if ($SettingsObject.storageAccounts.privateEndpoints) {
 

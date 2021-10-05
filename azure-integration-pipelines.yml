@@ -262,7 +262,7 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)"  `
             -Verbose
 
-          New-CmAzIaasBastionHost -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/bastionHost.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/bastionHost.yml" -Verbose
 
   - job: IaasVPN
     displayName: Iaas - VPN Gateway
@@ -287,7 +287,7 @@ stages:
             -DefinitionVersion "$(Build.DefinitionVersion)"  `
             -Verbose
 
-          New-CmAzIaasBastionHost -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/bastionHost.yml" -Verbose
+          New-CmAzDeployment -SettingsFile "$(Build.SourcesDirectory)/$(moduleName)/Resources/Project/Integration/vpngw.yml" -Verbose
 
 - stage: Security
   condition: and(succeeded(), eq('${{ parameters.Security }}', true))

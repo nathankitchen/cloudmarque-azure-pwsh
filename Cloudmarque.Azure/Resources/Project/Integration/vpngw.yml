@@ -12,8 +12,7 @@ service:
     virtualNetworkGateway: Iaas-Test-Vng
     localNetworkGateway: Iaas-Test-Lng
 
-vpnGw:
-
+vpnGws:
 - gatewayName: Iaas-Test-Vpn-Gw1
   service:
     dependencies:
@@ -27,8 +26,10 @@ vpnGw:
   gatewaySubnetPrefix:                                        # Optional: Required only if you dont have GatewaySubnet already in the Vnet.
   p2s:
     vpnAddressPool: 172.0.0.0/16                              # VPN IP address pool ex: 172.0.0.0/16
-    rootCertificateName: Automation-Core-Test-Auto042021      # Name of uploaded certificate in Key Vault
+    rootCertificateName:                                      # Name of uploaded certificate in Key Vault
   s2s:
     keyVaultSecret: Iaas-Test-Vpn-Scrt                        # Name of secret in Key Vault
     clientSitePublicIP: 172.0.0.13                            # On site VPN Gateway public IP
-    cidrBlocks: []
+    cidrBlocks: [
+      "192.16.0.0/16"
+    ]

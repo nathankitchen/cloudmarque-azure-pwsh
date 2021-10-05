@@ -127,7 +127,9 @@ function New-CmAzIaasPrivateEndpoints {
 				-Name $deploymentName `
 				-TemplateFile $PSScriptRoot\New-CmAzIaasPrivateEndpoints.json `
 				-Location $location `
-				-privateEndpoints $SettingsObject.privateEndpoints
+				-TemplateParameterObject @{
+					PrivateEndpoints = $SettingsObject.privateEndpoints
+				}
 
 			if (!$OmitTags) {
 				$resourcesToSet = @()

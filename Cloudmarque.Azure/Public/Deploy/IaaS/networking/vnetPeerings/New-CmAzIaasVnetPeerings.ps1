@@ -72,7 +72,9 @@ function New-CmAzIaasVnetPeerings {
                 -Name $deploymentName `
                 -TemplateFile $PSScriptRoot\New-CmAzIaasVnetPeerings.json `
                 -Location $location `
-                -VnetPeerings $vnetPeerings
+				-TemplateParameterObject @{
+					VnetPeerings = $vnetPeerings
+				}
 
 			Write-CommandStatus -CommandName $MyInvocation.MyCommand.Name -Start $false
 		}

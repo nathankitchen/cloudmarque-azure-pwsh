@@ -150,7 +150,7 @@
 					$placementGroup = @{
 						resourceGroupName = $resourceGroup.name
 						generatedName     = "none";
-						templateName	  = "none";
+						templateName      = "none";
 						location          = "uksouth";
 						service           = @{
 							publish = @{
@@ -191,7 +191,7 @@
 					$set = @{
 						resourceGroupName         = $resourceGroup.name;
 						generatedName             = "none";
-						templateName			  = "none;"
+						templateName              = "none;"
 						location                  = "uksouth";
 						platformFaultDomainCount  = "2";
 						platformUpdateDomainCount = "2";
@@ -281,13 +281,13 @@
 					}
 					else {
 						$virtualMachine.antimalware = @{
-							enable = $false
+							enable     = $false
 							exclusions = @{
 								Path       = "";
 								Extensions = "";
 								Processes  = "";
 							}
-							schedule = @{ isEnabled = "false" }
+							schedule   = @{ isEnabled = "false" }
 						}
 					}
 
@@ -359,8 +359,10 @@
 				New-AzDeployment `
 					-Name $deploymentNameRgs `
 					-TemplateFile "$PSScriptRoot\New-CmAzIaasVm.ResourceGroups.json" `
-					-ResourceGroups $allResourceGroups `
-					-Location $SettingsObject.location
+					-Location $SettingsObject.location `
+					-TemplateParameterObject @{
+						ResourceGroups = $allResourceGroups
+					}
 
 				# Cross resource group deployments for VMs appear to still to require the use of New-AzResourceGroupDeployment, instead of subscription level deployment
 				# through New-AzDeployment, which doesn't seem right.
@@ -375,16 +377,17 @@
 
 				New-AzResourceGroupDeployment `
 					-Name $deploymentNameVm  `
-					-TemplateFile "$PSScriptRoot\New-CmAzIaasVm.json" `
 					-ResourceGroupName $allResourceGroups[0].name `
-					-Credentials $credentials `
-					-VirtualMachines $allVirtualMachines `
-					-ProximityPlacementGroups $allProximityPlacementGroups `
-					-AvailabilitySets $allAvailabilitySets `
-					-WorkspaceId $workspace.resourceId `
-					-KeyVault $keyVaultDetails `
-					-AutomationAccount $automationAccount `
-					-Force
+					-TemplateFile "$PSScriptRoot\New-CmAzIaasVm.json" `
+					-TemplateParameterObject @{
+						Credentials              = $credentials
+						VirtualMachines          = $allVirtualMachines
+						ProximityPlacementGroups = $allProximityPlacementGroups
+						AvailabilitySets         = $allAvailabilitySets
+						WorkspaceId              = $workspace.resourceId
+						KeyVault                 = $keyVaultDetails
+						AutomationAccount        = $automationAccount
+					}
 			}
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $allResourceGroups.name

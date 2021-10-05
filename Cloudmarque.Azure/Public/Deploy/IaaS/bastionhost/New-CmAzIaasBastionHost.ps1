@@ -113,10 +113,11 @@
 				-Name $deploymentName `
 				-ResourceGroupName $resourceGroupName `
 				-TemplateFile "$PSScriptRoot\New-CmAzIaasBastionHost.json" `
-				-BastionHosts $SettingsObject.bastionHosts `
-				-Location $SettingsObject.location `
-				-Workspace $workspace `
-				-Force
+				-TemplateParameterObject @{
+					BastionHosts = $SettingsObject.bastionHosts
+					Location 	 = $SettingsObject.location
+					Workspace 	 = $workspace
+				}
 
 			$resourcesToSet = @()
 			$resourcesToSet += $SettingsObject.bastionHosts.bastionPublicIPName

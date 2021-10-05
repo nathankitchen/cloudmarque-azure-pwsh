@@ -54,7 +54,7 @@
 
 			$resourcesToBeSet = @()
 
-			foreach ($vpnGw in $SettingsObject.VpnGw) {
+			foreach ($vpnGw in $SettingsObject.VpnGws) {
 
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "vnet" -ResourceServiceContainer $vpnGw -IsDependency
 				Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "resourceGroup" -ResourceServiceContainer $vpnGw -IsDependency
@@ -102,12 +102,12 @@
 					-Name $vpnGw.GatewayName
 
 
-				if ($vpnGw.P2s -or $vpnGw.S2s) {
+				if ( $vpnGw.P2s -or $vpnGw.S2s ) {
 					Write-Verbose "P2s or S2s configuration found. Checking dependencies.."
 					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $vpnGw -IsDependency
 				}
 
-				if (!$vpnGw.P2s.VpnAddressPool -or !$vpnGw.service.dependencies.keyvault -or !$vpnGw.P2s.RootCertificateName) {
+				if ( !$vpnGw.P2s.VpnAddressPool -or !$vpnGw.service.dependencies.keyvault ) {
 
 					Write-Verbose "P2s configuration not found."
 					$vpnGw.P2s = @{}
@@ -119,53 +119,54 @@
 
 					$keyVaultService = Get-CmAzService -Service $vpnGw.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 
-					# This approach is because Vpn Gw expects Raw certificate data
+					if ( !$vpnGw.P2s.RootCertificateName ) {
+						$vpnGw.P2s.RootCertificateName = "certificate-p2s-$($vpnGw.GatewayName)"
+
+						$keyVaultCertificateObject = Get-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $vpnGw.P2s.RootCertificateName
+
+						if (!$keyVaultCertificateObject) {
+
+							$Policy = New-AzKeyVaultCertificatePolicy -SecretContentType "application/x-pkcs12" -SubjectName "CN=cloudmarque.azure.default" -IssuerName "Self" -ValidityInMonths 6 -ReuseKeyOnRenewal
+							Add-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $vpnGw.P2s.RootCertificateName -CertificatePolicy $Policy > $Null
+						}
+					}
+
 					$keyVaultCertificateObject = Get-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $vpnGw.P2s.RootCertificateName
 
 					if (!$keyVaultCertificateObject) {
-
-						Write-Verbose "Certificate Not Found! P2s will not be configured."
-						$vpnGw.P2s = @{}
-						$vpnGw.P2s.VpnAddressPool = ""
-						$vpnGw.P2s.RootCertificateName = ""
-						$vpnGw.P2s.ClientRootCertData = ""
+						Write-Error "P2S certificate not found!!!" -Category ObjectNotFound -TargetObject $vpnGw.P2s.RootCertificateName
 					}
 					else {
+
 						Write-Verbose "Certificate $($vpnGw.P2s.RootCertificateName) found, p2s will be configured."
 						$clientRootCertData = $keyVaultCertificateObject.Certificate.GetRawCertData()
 						$vpnGw.P2s.ClientRootCertData = [Convert]::ToBase64String($clientRootCertData)
 					}
 				}
 
-				if (!$vpnGw.S2s.ClientSitePublicIP -or !$vpnGw.S2s.CidrBlocks -or !$vpnGw.service.dependencies.keyvault ) {
+				if ( !$vpnGw.S2s.ClientSitePublicIP -or !$vpnGw.S2s.CidrBlocks -or !$vpnGw.service.dependencies.keyvault ) {
 
-						Write-Verbose "S2s configuration not found."
-						$vpnGw.S2s = @{}
-						$vpnGw.S2s.CidrBlocks = @()
-						$vpnGw.S2s.ClientSitePublicIP = ""
-						$vpnGw.S2s.SharedKey = ""
-						$vpnGw.S2s.localGatewayName = "none"
+					Write-Verbose "S2s configuration not found."
+					$vpnGw.S2s = @{}
+					$vpnGw.S2s.CidrBlocks = @()
+					$vpnGw.S2s.ClientSitePublicIP = ""
+					$vpnGw.S2s.SharedKey = ""
+					$vpnGw.S2s.localGatewayName = "none"
 				}
 				else {
 
 					# This apporach is because Key vault reference cannot be used directly in Arm template because of conflict with copy
-					# SharedKeyObject is created to resolve with CLIXML type of object created when you run Az commands.
 					$keyVaultService = Get-CmAzService -Service $vpnGw.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
-					$vpnGw.S2s.SharedKey = @()
-					$vpnGw.S2s.SharedKeyObject = (Get-AzKeyVaultSecret -Name $vpnGw.S2s.KeyVaultSecret -VaultName ($keyVaultService.name)).SecretValueText
+					$vpnGw.S2s.SharedKey = ConvertFrom-SecureString (Get-AzKeyVaultSecret -Name $vpnGw.S2s.KeyVaultSecret -VaultName $keyVaultService.name).SecretValue -AsPlainText
 
-					if (!$vpnGw.S2s.SharedKeyObject) {
+					if (!$vpnGw.S2s.SharedKey) {
 
-						Write-Verbose "Secret could not be retrieved! S2s configuration will be skipped."
-						$vpnGw.S2s = @{}
-						$vpnGw.S2s.CidrBlocks = @()
-						$vpnGw.S2s.ClientSitePublicIP = ""
-						$vpnGw.S2s.SharedKey = ""
-						$vpnGw.S2s.localGatewayName = "none"
+						Write-Error "S2s configuration secret could not be retrieved!" -Category ObjectNotFound -TargetObject $vpnGw.S2s
 					}
 					else {
 
 						Write-Verbose "Secret '$($vpnGw.S2s.KeyVaultSecret)' was found, s2s will be configured."
+
 						$vpnGw.S2s.localGatewayName = Get-CmAzResourceName `
 							-Resource "LocalNetworkGateway" `
 							-Architecture "IaaS" `
@@ -173,7 +174,6 @@
 							-Name $vpnGw.GatewayName
 
 						$resourcesToBeSet += $vpnGw.S2s.localGatewayName
-						$vpnGw.S2s.SharedKey = $vpnGw.S2s.SharedKeyObject.ToString()
 					}
 				}
 
@@ -185,13 +185,16 @@
 
 			$deploymentName = Get-CmAzResourceName -Resource "Deployment" -Architecture "IaaS" -Location $SettingsObject.location -Name $commandName
 
+			# VpnGwsSecureObject (SecureObject) is passed to mask s2s and p2s secrets
+
 			New-AzResourceGroupDeployment `
 				-Name $deploymentName `
 				-ResourceGroupName $SettingsObject.ResourceGroupName `
 				-TemplateFile "$PSScriptRoot\New-CmAzIaasVpnGw.json" `
-				-VpnGwObject $SettingsObject `
-				-Location $SettingsObject.location `
-				-Force
+				-TemplateParameterObject @{
+					VpnGwsSecureObject   = $SettingsObject
+					Location = $SettingsObject.location
+				}
 
 			$resourcesToBeSet += $SettingsObject.vpnGw.gatewayPublicIpName
 			$resourcesToBeSet += $SettingsObject.vpnGw.gatewayName

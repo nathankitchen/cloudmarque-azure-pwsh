@@ -142,7 +142,9 @@ function New-CmAzIaasFirewalls {
 					-Name $deploymentName `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasFirewallPolicies.json `
 					-Location $location `
-					-firewallPolicies $SettingsObject.firewallPolicies
+					-TemplateParameterObject @{
+						FirewallPolicies = $SettingsObject.firewallPolicies
+					}
 			}
 
 
@@ -199,7 +201,9 @@ function New-CmAzIaasFirewalls {
 					-Name $deploymentName `
 					-TemplateFile $PSScriptRoot\New-CmAzIaasFirewalls.json `
 					-Location $location `
-					-firewalls $SettingsObject.firewalls
+					-TemplateParameterObject @{
+						Firewalls = $SettingsObject.firewalls
+					}
 			}
 		}
 

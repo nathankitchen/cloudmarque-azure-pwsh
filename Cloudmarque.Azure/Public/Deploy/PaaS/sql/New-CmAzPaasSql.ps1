@@ -168,7 +168,7 @@
 					"resourceDetails"    = @{
 						"family"                = $dbFamily
 						"sharedServer"          = $sharedServer
-						"templateName"			= $templateName
+						"templateName"          = $templateName
 						"type"                  = ($_.type ?? "").Tolower()
 						"name"                  = $preserveName
 						"serverName"            = $serverName;
@@ -220,9 +220,10 @@
 						-Name $deploymentName `
 						-ResourceGroupName $resourceGroup.ResourceGroupName `
 						-TemplateFile "$PSScriptRoot\New-CmAzPaasSql.json" `
-						-Servers $_ `
-						-Location $SettingsObject.Location `
-						-Force
+						-TemplateParameterObject @{
+						Servers  = $_
+						Location = $SettingsObject.Location
+					}
 				}
 			}
 

@@ -122,7 +122,9 @@ function New-CmAzMonitorServiceHealthAlerts {
 				-Name $deploymentName `
 				-TemplateFile "$PSScriptRoot\New-CmAzMonitorServiceHealthAlerts.json" `
 				-ResourceGroupName $resourceGroup.resourceGroupName `
-				-Alerts $alerts `
+				-TemplateParameterObject @{
+                    Alerts = $alerts
+                } `
 				-Mode "Complete"
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroup.resourceGroupName

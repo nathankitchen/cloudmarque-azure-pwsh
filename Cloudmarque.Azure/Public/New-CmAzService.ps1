@@ -43,7 +43,7 @@ function New-CmAzService {
         if ($PSCmdlet.ShouldProcess((Get-CmAzSubscriptionName), "Deploy Service Locator Tag/s")) {
 
             $SettingsObject.services | ForEach-Object -Parallel {
-                
+
                 $service = $_
                 $serviceTag = @{ "cm-service" = $service.value }
 

@@ -127,8 +127,10 @@ function New-CmAzMonitorActivityLogAlerts {
 				-Name $deploymentName `
 				-TemplateFile "$PSScriptRoot\New-CmAzMonitorActivityLogAlerts.json" `
 				-ResourceGroupName $resourceGroup.resourceGroupName `
-				-Alerts $alerts `
-				-Mode "Complete"
+				-Mode "Complete" `
+				-TemplateParameterObject @{
+					Alerts = $alerts
+				}
 
 			Set-DeployedResourceTags -TagSettingsFile $TagSettingsFile -ResourceGroupIds $resourceGroup.resourceGroupName
 
