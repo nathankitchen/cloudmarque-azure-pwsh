@@ -1,8 +1,5 @@
 component: automation                                           # Required to use settings with New-CmAzDeployment
 
-location: UK South
-name: Core-Test-Auto042021
-
 service:
   dependencies:
     keyvault: Core-Test-Kv
@@ -14,34 +11,41 @@ service:
     automation: Core-Test-Auto
 
 automation:
-  certificateName:                                              # Optional: Name of Certificate in Key Vault.
-  certificateSecretName: Core-Test-Auto-Pass1                   # Optional: Keyvault secret which contains password. This will be used for certificate. This can be overwritten by passing cmdline password
+  name: Core-Test-Auto042021
+  location: UK South
+  managedIdentity:
+    enabled: true                                               # Default - True.
+    scope:                                                      # Format - /subscriptions/<Sub id>
+    role: Contributor                                           # Optional: Defaults to Contributor. Use "None" if no role should be assigned.
   sourceControl:
     keyVaultPersonalAccessToken:                                # Optional: (only if repoURL): keyvault secret name for PAT to access Repo.
     url:                                                        # Optional: For repo intergration.
     type:                                                       # Optional: (only if repoURL): github | git | tvfc.
     branch:                                                     # Optional: Branch to pull from. Not required for tvfc. Default is master.
     folderPath:                                                 # Optional: (only if repoURL): Path to folder which contains runbook or DSC files.
-  # privateEndpoints:
-  # - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
-  #   name:                                                       # Defaults to resource name.
-  #   subResourceName: Webhook
-  #   service:
-  #     dependencies:
-  #       vnet: Iaas-Test-Hub1-Vnet1
-  #       privateZones:
-  #       - privatelink-automation
-  #     publish:
-  #       privateEndpoint: Auto-endpoint
-  # - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
-  #   subResourceName: DSCAndHybridWorker
-  #   service:
-  #     dependencies:
-  #       vnet: Iaas-Test-Hub1-Vnet1
-  #       privateZones:
-  #       - privatelink-automation
-  #     publish:
-  #       privateEndpoint: Auto-endpoint
+    service:
+      dependencies:
+        keyvault:
+# privateEndpoints:
+# - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+#   name:                                                       # Defaults to resource name.
+#   subResourceName: Webhook
+#   service:
+#     dependencies:
+#       vnet: Iaas-Test-Hub1-Vnet1
+#       privateZones:
+#       - privatelink-automation
+#     publish:
+#       privateEndpoint: Auto-endpoint
+# - subnetName: Iaas-Test-Hub1-Vnet1-Snet-Dc1
+#   subResourceName: DSCAndHybridWorker
+#   service:
+#     dependencies:
+#       vnet: Iaas-Test-Hub1-Vnet1
+#       privateZones:
+#       - privatelink-automation
+#     publish:
+#       privateEndpoint: Auto-endpoint
 
 # Note - As automation account is deployed with core, private endpoints are deployed with privateendpoints.yml once IaaS dependencies are resolved.
 # Note - Above option is available to be deployed after dependencies are deployed.

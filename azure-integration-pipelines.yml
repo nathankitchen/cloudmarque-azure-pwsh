@@ -495,7 +495,7 @@ stages:
             Write-Verbose "Fetching resource groups.."
             $resources = Get-CmAzService -ServiceKey "cm-integration-core-test-delete" -Service "true" -IsResourceGroup -Verbose
 
-            $resources | ForEach-Object {
+            $resources | ForEach-Object -parallel {
 
               try {
                 Remove-AzResourceGroup -Name $_.resourceGroupName -Verbose -Force

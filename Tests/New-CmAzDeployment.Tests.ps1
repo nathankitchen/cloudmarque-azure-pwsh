@@ -6,40 +6,48 @@ Describe "New-CmAzDeployment Tests" {
         $settingsFiles = Get-ChildItem -Path $_.pspath -Filter "*.yml" -Exclude $excludedFiles -Depth 0 -Force
 
         It "should be able to call the correctly associated command for <_.baseName>" -ForEach $settingsFiles {
-            
+
             $deployments = ""
 
+            $name = $_.name
+            $path = $_.psPath
+            $directory = $_.directory
+
             {
-                if ($_.name -eq "virtualmachines.yml") {
+                $deployments = switch ($name) {
 
-                    # Workaround as secure string doesn't work being passed in as params to dynamic invoke-expression calls
-                    $username = ConvertTo-SecureString 'testUser' -AsPlainText -Force
-                    $password = ConvertTo-SecureString 'testPass' -AsPlainText -Force
+                    "virtualmachines.yml" {
 
-                    $deployments = New-CmAzDeployment `
-                        -SettingsFile $_.psPath `
-                        -LocalAdminUsername $username `
-                        -LocalAdminPassword $password `
-                        -WhatIf `
-                        -Verbose 4>&1
-                }
-                elseif ($_.name -eq "recoveryvault.yml") {
-                    
-                    $deployments = New-CmAzDeployment `
-                        -SettingsFile $_.psPath `
-                        -PolicySettingsFile "$($_.directory)\recoverypolicy.yml" `
-                        -WhatIf `
-                        -Verbose 4>&1
-                }
-                else  {
-                    
-                    $deployments = New-CmAzDeployment `
-                        -SettingsFile $_.psPath `
-                        -WhatIf `
-                        -Verbose 4>&1
+                        $username = ConvertTo-SecureString 'testUser' -AsPlainText -Force
+                        $password = ConvertTo-SecureString 'testPass' -AsPlainText -Force
+
+                        New-CmAzDeployment `
+                            -SettingsFile $path `
+                            -LocalAdminUsername $username `
+                            -LocalAdminPassword $password `
+                            -WhatIf `
+                            -Verbose 4>&1
+                    }
+
+                    "recoveryvault.yml" {
+
+                        New-CmAzDeployment `
+                            -SettingsFile $path `
+                            -PolicySettingsFile "$directory\recoverypolicy.yml" `
+                            -WhatIf `
+                            -Verbose 4>&1
+                    }
+
+                    Default {
+
+                        New-CmAzDeployment `
+                            -SettingsFile $path `
+                            -WhatIf `
+                            -Verbose 4>&1
+                    }
                 }
 
-                $deployments.toString() | Should -Not -BeNullOrEmpty 
+                $deployments.toString() | Should -Not -BeNullOrEmpty
 
             } | Should -Not -Throw
         }

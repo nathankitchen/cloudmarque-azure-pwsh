@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "2.0.0.0",
     "parameters": {
-        "AccountName": {
+        "AutomationAccountName": {
             "type": "String"
         },
         "Location": {
@@ -10,20 +10,81 @@
         },
         "AutomationService": {
             "type": "String"
+        },
+        "Identity": {
+            "type": "String"
+        },
+        "WorkspaceObject": {
+            "type": "Object"
         }
     },
     "resources": [
         {
             "type": "Microsoft.Automation/automationAccounts",
-            "apiVersion": "2015-10-31",
-            "name": "[parameters('AccountName')]",
+            "apiVersion": "2020-01-13-preview",
+            "name": "[parameters('AutomationAccountName')]",
             "location": "[parameters('Location')]",
+             "identity": {
+                "type": "[parameters('Identity')]"
+            },
             "tags": {
                 "cm-service": "[parameters('AutomationService')]"
             },
             "properties": {
                 "sku": {
                     "name": "Basic"
+                }
+            }
+        },
+        {
+            "name": "Automation-Workspace-Link",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "resourceGroup": "[parameters('WorkspaceObject').resourceGroupName]",
+            "dependsOn": [
+                "[parameters('AutomationAccountName')]"
+            ],
+            "properties": {
+                "parameters": {
+                    "WorkspaceObject": {
+                        "value": "[parameters('WorkspaceObject')]"
+                    },
+                    "AutomationAccountName": {
+                        "value": "[parameters('AutomationAccountName')]"
+                    },
+                    "AutomationResourceGroup": {
+                        "value": "[resourceGroup().name]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "WorkspaceObject": {
+                            "type": "Object"
+                        },
+                        "AutomationAccountName": {
+                            "type": "String"
+                        },
+                        "AutomationResourceGroup": {
+                            "type": "String"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.OperationalInsights/Workspaces/LinkedServices",
+                            "apiVersion": "2020-03-01-preview",
+                            "name": "[concat(parameters('WorkspaceObject').resourceName, '/automation')]",
+                            "location": "[parameters('WorkspaceObject').location]",
+                            "properties": {
+                                "resourceId": "[resourceId(parameters('AutomationResourceGroup'), 'Microsoft.Automation/automationAccounts', parameters('AutomationAccountName'))]"
+                            }
+                        }
+                    ]
+                },
+                 "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
                 }
             }
         }

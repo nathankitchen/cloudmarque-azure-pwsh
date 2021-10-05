@@ -55,7 +55,7 @@ RequiredModules = @(
     @{ ModuleName = 'Az.Advisor'; RequiredVersion = '1.1.1'; },
     @{ ModuleName = 'Az.ApiManagement'; RequiredVersion = '2.1.0'; },
     @{ ModuleName = 'Az.ApplicationInsights'; RequiredVersion = '1.1.0'; },
-    @{ ModuleName = 'Az.Automation'; RequiredVersion = '1.4.0'; },
+    @{ ModuleName = 'Az.Automation'; RequiredVersion = '1.7.1'; },
     @{ ModuleName = 'Az.Cdn'; RequiredVersion = '1.4.3'; },
     @{ ModuleName = 'Az.Compute'; RequiredVersion = '4.3.1'; },
     @{ ModuleName = 'Az.DesktopVirtualization'; RequiredVersion = '2.0.0'; },

@@ -5,8 +5,6 @@
     "title": "New-CmAzCoreAutomation",
     "description": "Settings Root.",
     "required": [
-        "location",
-        "name",
         "service",
         "automation"
     ],
@@ -16,18 +14,6 @@
             "type": ["string", "null"],
             "title": "Component",
             "description": "Value to determine what cmdlet should be dynamically loaded for these settings."
-        },
-        "location": {
-            "$id": "#/location",
-            "type": "string",
-            "title": "Location",
-            "description": "Automation account deployment location."
-        },
-        "name": {
-            "$id": "#/name",
-            "type": "string",
-            "title": "Name",
-            "description": "Becomes part of the generated automation account name."
         },
         "service": {
             "$id": "#/service",
@@ -45,13 +31,12 @@
                     "title": "Dependencies",
                     "description": "Contains dependency details for service location.",
                     "required": [
-                        "keyvault",
                         "workspace"
                     ],
                     "properties": {
                         "keyvault": {
                             "$id": "#/service/dependencies/keyvault",
-                            "type": "string",
+                            "type": ["string", "null"],
                             "title": "Keyvault",
                             "description": "Dependency value to fetch existing resource type."
                         },
@@ -82,8 +67,8 @@
                     "title": "Publish",
                     "description": "Contains publish details for service location.",
                     "required": [
-                        "resourceGroup",
-                        "automation"
+                        "automation",
+                        "resourceGroup"
                     ],
                     "properties": {
                         "resourceGroup": {
@@ -116,26 +101,61 @@
             "title": "Automation",
             "description": "Contains details required to deploy an Automation Account.",
             "required": [
-                "certificateSecretName"
+                "name",
+                "location"
             ],
             "properties": {
-                "certificateName": {
-                    "$id": "#/automation/certificateName",
-                    "type": ["string", "null"],
-                    "title": "CertificateName",
-                    "description": "Name of certificate in an existing key vault."
-                },
-                "certificateSecretName": {
-                    "$id": "#/automation/certificateSecretName",
+                "location": {
+                    "$id": "#/automation/location",
                     "type": "string",
-                    "title": "CertificateSecretName",
-                    "description": "Name of certificate secret in an existing key vault."
+                    "title": "Location",
+                    "description": "Automation account deployment location."
+                },
+                "name": {
+                    "$id": "#/automation/name",
+                    "type": "string",
+                    "title": "Name",
+                    "description": "Becomes part of the generated automation account name."
+                },
+                "managedIdentity": {
+                    "$id": "#/automation/managedIdentity",
+                    "type": ["object", "null"],
+                    "title": "ManagedIdentity",
+                    "description": "Configure system assigned managed identity. *Preview",
+                    "properties": {
+                        "scope": {
+                            "$id": "#/automation/managedIdentity/scope",
+                            "type": ["string", "null"],
+                            "title": "Scope",
+                            "description": "Scope of managed identity.",
+                            "default": "/Subscription/<Context subscription Id>/"
+                        },
+                        "role": {
+                            "$id": "#/automation/managedIdentity/role",
+                            "type": ["string", "null"],
+                            "title": "role",
+                            "description": "Azure role to be assinged to managed identity of automation account. Use None to disable this feature.",
+                            "default": "Contributor"
+                        },
+                        "enabled": {
+                            "$id": "#/automation/managedIdentity/enabled",
+                            "type": ["boolean", "null"],
+                            "title": "Enabled",
+                            "description": "Create managed identity.",
+                            "default": true
+                        }
+                    }
                 },
                 "sourceControl": {
                     "$id": "#/automation/sourceControl",
                     "type": ["object", "null"],
                     "title": "SourceControl",
                     "description": "Container for an existing repo in source control.",
+                    "required": [
+                        "url",
+                        "keyVaultPersonalAccessToken",
+                        "type"
+                    ],
                     "properties": {
                         "keyVaultPersonalAccessToken": {
                             "$id": "#/automation/sourceControl/keyVaultPersonalAccessToken",
@@ -169,6 +189,30 @@
                             "title": "FolderPath",
                             "description": "Directory path of Runbook or DSC files.",
                             "default": "/"
+                        },
+                        "service": {
+                            "$id": "#/automation/privateEndpoints/items/allOf/service",
+                            "type": ["object", "null"],
+                            "title": "Service",
+                            "description": "Contains dependency and publish details for service location.",
+                            "properties": {
+                                "dependencies": {
+                                    "$id": "#/automation/privateEndpoints/items/allOf/service/dependencies",
+                                    "type": ["object", "null"],
+                                    "title": "Dependencies",
+                                    "description": "Contains dependency details for service location.",
+                                    "properties": {
+                                        "keyvault": {
+                                            "$id": "#/service/dependencies/keyvault",
+                                            "type": ["string", "null"],
+                                            "title": "Keyvault",
+                                            "description": "Dependency value to fetch existing resource type."
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                }
+                            },
+                            "additionalProperties": false
                         }
                     },
                     "additionalProperties": false
