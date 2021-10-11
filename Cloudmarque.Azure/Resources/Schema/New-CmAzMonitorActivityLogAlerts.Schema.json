@@ -43,7 +43,7 @@
                             "$id": "#/service/dependencies/resourceGroup",
                             "type": ["string", "null"],
                             "title": "ResourceGroup",
-                            "description": "Dependency value to fetch existing resource type."
+                            "description": "Dependency value to fetch existing resource type. Alerts are deployed in compelete mode."
                         }
                     },
                     "additionalProperties": false
@@ -64,7 +64,7 @@
                             "$id": "#/service/publish/resourceGroup",
                             "type":  ["string", "null"],
                             "title": "ResourceGroup",
-                            "description": "Global default value to publish on deployed resource type."
+                            "description": "Global default value to publish on deployed resource type. Alerts are deployed in compelete mode."
                         }
                     },
                     "additionalProperties": false
@@ -167,7 +167,7 @@
                                                                                             "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/conditions/items/allOf/field",
                                                                                             "name": "string",
                                                                                             "title": "activity log field",
-                                                                                            "description": "Activity log alert namespace field."
+                                                                                            "description": "Activity log alert namespace."
                                                                                         },
                                                                                         "equals": {
                                                                                             "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/conditions/items/allOf/equals",
@@ -188,7 +188,7 @@
                                                                                             "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/conditions/items/allOf/equals/anyOf",
                                                                                             "type": ["array", "null"],
                                                                                             "title": "anyOf",
-                                                                                            "description": "An Activity Log Alert rule condition that is met when at least one of its member leaf conditions are met..",
+                                                                                            "description": "An Activity Log Alert rule condition that is met when at least one of its member leaf conditions are met.",
                                                                                             "items": {
                                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/conditions/items/allOf/anyOf/items"
                                                                                             }

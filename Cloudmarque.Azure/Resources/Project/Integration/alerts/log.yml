@@ -18,10 +18,15 @@ groups:
   - name:                                                                                             # Optional - It is recommended to use name when using multiple sets of alerts.
     type: VirtualMachines
     alerts:
-    - name: High-CPU-Crt                                                                              # Optional - It is recommended to use name for more understandable alert names.
+    - name: High-CPU-Test-Crt                                                                         # Optional - It is recommended to use name for more understandable alert names.
       definition: High_CPU_Usage_Percent
       severity: Critical
       monitorOnPrem: false
+      parameters:
+        _minPercentage: 1
+        _timeWindow: 5m
+      exclusions:                                                                                     # Optional
+        - IaasTestVm3
     - name: High-CPU-Wrn
       definition: High_CPU_Usage_Percent_Range
     - name: Low-Dsk-Crt

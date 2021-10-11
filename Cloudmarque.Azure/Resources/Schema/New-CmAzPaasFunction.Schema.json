@@ -44,12 +44,6 @@
                             "title": "Function",
                             "description": "Global default value to publish on deployed resource type."
                         },
-						"function": {
-                            "$id": "#/service/publish/function",
-                            "type": ["string", "null"],
-                            "title": "Function",
-                            "description": "Global default value to publish on deployed resource type."
-                        },
                         "privateEndpoint": {
                             "$id": "#/service/publish/privateEndpoint",
                             "type": ["string", "null"],
@@ -146,7 +140,7 @@
 								"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans",
 								"type": ["array", "null"],
                                 "title": "consumptionPlans",
-                                "description": "List of details required to deploy all app service plans and functions.",
+                                "description": "List of details required to deploy functions on consumption plan.",
 								"items": {
 									"$id": "#/functionAppSolutions/items/oneOf/con/consumptionPlans/items",
 									"minItems": 1,
@@ -295,6 +289,7 @@
 								"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans",
 								"type": "array",
 								"title": "AppServicePlans",
+								"description": "List of details required to deploy functions on app service plan.",
 								"items": {
 									"$id": "#/functionAppSolutions/items/oneOf/asp/appServicePlans/items",
 									"minItems": 1,

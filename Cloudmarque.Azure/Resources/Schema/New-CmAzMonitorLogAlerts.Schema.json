@@ -55,7 +55,7 @@
                             "$id": "#/service/dependencies/resourceGroup",
                             "type":  ["string", "null"],
                             "title": "ResourceGroup",
-                            "description": "Dependency value to fetch existing resource type."
+                            "description": "Dependency value to fetch existing resource type. Alerts are deployed in compelete mode."
                         }
                     },
                     "additionalProperties": false
@@ -70,7 +70,7 @@
                             "$id": "#/service/publish/logAlert",
                             "type": ["string", "null"],
                             "title": "Log Alert",
-                            "description": "Global default value to publish on deployed resource type."
+                            "description": "Global default value to publish on deployed resource type. Alerts are deployed in compelete mode."
                         },
                         "resourceGroup": {
                             "$id": "#/service/publish/resourceGroup",
@@ -140,7 +140,7 @@
                                                     "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts",
                                                     "type": "array",
                                                     "title": "Alerts",
-                                                    "description": "Contains all details of the log alert rules to be deployed.",
+                                                    "description": "Container to specify log alerts details.",
                                                     "items": {
                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items",
                                                         "minItems": 1,
@@ -310,19 +310,19 @@
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/customisedActions",
                                                                         "type": ["object", "null"],
                                                                         "title": "Customised Actions",
-                                                                        "description": "Container of additonal custom actions for when an alert is triggered.",
+                                                                        "description": "Container of additional custom actions to perform once alert is triggered.",
                                                                         "properties": {
                                                                             "emailSubject": {
                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/customisedActions/emailSubject",
                                                                                 "type": "string",
                                                                                 "title": "Email Subject",
-                                                                                "description": "Subject of email sent from action group."
+                                                                                "description": "Subject of email sent through action group."
                                                                             },
                                                                             "webhookJsonPayload": {
                                                                                 "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/customisedActions/webhookJsonPayload",
                                                                                 "type": "string",
                                                                                 "title": "Webhook Json Payload",
-                                                                                "description": "Specify a custom json payload that gets sent to the webhook instead of the default alert payload."
+                                                                                "description": "Override alerts json payload."
                                                                             }
                                                                         },
                                                                         "additonalProperties": false
@@ -331,8 +331,19 @@
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/parameters",
                                                                         "type": ["object", "null"],
                                                                         "title": "Parameters",
-                                                                        "description": "Any required parameters for the log alert",
+                                                                        "description": "Override log alert parameters.",
                                                                         "additonalProperties": true
+                                                                    },
+                                                                    "exclusions": {
+                                                                        "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/exclusions",
+                                                                        "type": ["array", "null"],
+                                                                        "title": "Exclusions",
+                                                                        "description": "Excludes resources from alert as per provided tag value.",
+                                                                        "default": "Checks for cm-monitor-exception or cm-service, in that order.",
+                                                                        "items": {
+                                                                            "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/exclusions/items",
+                                                                            "type": ["string", "null"]
+                                                                        }
                                                                     }
                                                                 },
                                                                 "additonalProperties": false

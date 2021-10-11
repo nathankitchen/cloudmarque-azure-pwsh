@@ -23,11 +23,14 @@ Queries:
     defaults:
       _minPercentage: 100
       _timeWindow: 1h
+    propertiesAvailable:
+      - Computer
+      - _ResourceId
     query: |-
       InsightsMetrics
       | where Origin == "vm.azm.ms"
       | where Namespace == "Processor" and Name == "UtilizationPercentage"
-      | summarize AverageCPUPercentage = avg(Val) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId
+      | summarize AverageCPUPercentage = avg(Val) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId, Computer
       | where AverageCPUPercentage >= @@@_minPercentage@@@
 
   - definition: High_CPU_Usage_Percent_Range
@@ -47,11 +50,14 @@ Queries:
       _minPercentage: 95
       _maxPercentage: 99
       _timeWindow: 30m
+    propertiesAvailable:
+      - Computer
+      - _ResourceId
     query: |-
       InsightsMetrics
       | where Origin == "vm.azm.ms"
       | where Namespace == "Processor" and Name == "UtilizationPercentage"
-      | summarize AverageCPUPercentage = avg(Val) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId
+      | summarize AverageCPUPercentage = avg(Val) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId, Computer
       | where AverageCPUPercentage >= @@@_minPercentage@@@ and AverageCPUPercentage <= @@@_maxPercentage@@@
 
   - definition: Low_Disk_Space
@@ -71,6 +77,11 @@ Queries:
       _maxValueMB: 153600
       _maxPercentage: 15
       _timeWindow: 1h
+    propertiesAvailable:
+      - Computer
+      - _ResourceId
+      - FreeSpaceMB
+      - Disk
     query: |-
       InsightsMetrics
       | where Origin == "vm.azm.ms"
@@ -79,7 +90,7 @@ Queries:
       | extend TotalSpaceMB = toreal(todynamic(Tags)["vm.azm.ms/diskSizeMB"])
       | extend FreeSpacePercentage = Val / TotalSpaceMB * 100
       | extend FreeSpaceMB = Val
-      | summarize AverageFreeSpacePercentage = avg(FreeSpacePercentage) by bin(TimeGenerated, @@@_timeWindow@@@), FreeSpaceMB, _ResourceId, Disk
+      | summarize AverageFreeSpacePercentage = avg(FreeSpacePercentage) by bin(TimeGenerated, @@@_timeWindow@@@), FreeSpaceMB, _ResourceId, Computer, Disk
       | where AverageFreeSpacePercentage <= @@@_maxPercentage@@@ and FreeSpaceMB <= @@@_maxValueMB@@@
 
   - definition: High_Memory_Usage_Percent
@@ -98,13 +109,16 @@ Queries:
     defaults:
       _minPercentage: 1
       _timeWindow: 1h
+    propertiesAvailable:
+      - Computer
+      - _ResourceId
     query: |-
       InsightsMetrics
       | where Origin == "vm.azm.ms"
       | where Namespace == "Memory" and Name == "AvailableMB"
       | extend TotalMemory = toreal(todynamic(Tags)["vm.azm.ms/memorySizeMB"])
       | extend AvailableMemoryPercentage = (toreal(Val) / TotalMemory) * 100.0
-      | summarize AverageAvailableMemoryPercentage = avg(AvailableMemoryPercentage) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId
+      | summarize AverageAvailableMemoryPercentage = avg(AvailableMemoryPercentage) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId, Computer
       | where AverageAvailableMemoryPercentage < @@@_minPercentage@@@
 
   - definition: High_Memory_Usage_Percent_Range
@@ -124,13 +138,16 @@ Queries:
       _minPercentage: 1
       _maxPercentage: 5
       _timeWindow: 30m
+    propertiesAvailable:
+      - Computer
+      - _ResourceId
     query: |-
       InsightsMetrics
       | where Origin == "vm.azm.ms"
       | where Namespace == "Memory" and Name == "AvailableMB"
       | extend TotalMemory = toreal(todynamic(Tags)["vm.azm.ms/memorySizeMB"])
       | extend AvailableMemoryPercentage = (toreal(Val) / TotalMemory) * 100.0
-      | summarize AverageAvailableMemoryPercentage = avg(AvailableMemoryPercentage) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId
+      | summarize AverageAvailableMemoryPercentage = avg(AvailableMemoryPercentage) by bin(TimeGenerated, @@@_timeWindow@@@), _ResourceId, Computer
       | where AverageAvailableMemoryPercentage >= @@@_minPercentage@@@ and AverageAvailableMemoryPercentage <= @@@_maxPercentage@@@
 
   - definition: Corrupt_NTFS
@@ -149,7 +166,7 @@ Queries:
     query: |-
       Event
       | where EventLog == "System" and Source == "DISK" or Source == "Ntfs" and EventID == 55
-      | project _ResourceId
+      | project _ResourceId, Computer
 
   - definition: Unexpected_Shutdown
     description: Unexpected VM shutdown.
@@ -167,7 +184,7 @@ Queries:
     query: |-
       Event
       | where EventLog == "System" and EventID == 6008
-      | project _ResourceId
+      | project _ResourceId, Computer
 
   - definition: VM_NonResponsive
     description: VM not responsive.
@@ -242,7 +259,7 @@ Queries:
     query: |-
       UpdateRunProgress
       | where InstallationStatus in ('Failed', 'FailedToStart', 'InstallFailed', 'MaintenanceWindowExceeded')
-      | summarize by bin(TimeGenerated, 7h), _ResourceId
+      | summarize by bin(TimeGenerated, 7h), _ResourceId, Computer
 
   - definition: VM_Reboot
     description: VM/s have been rebooted.
@@ -260,7 +277,7 @@ Queries:
     query: |-
       AzureActivity
       | where OperationName == "Restart Virtual Machine"
-      | summarize by bin(TimeGenerated, 45m), _ResourceId
+      | summarize by bin(TimeGenerated, 45m), _ResourceId, Computer
 
 - SQL:
   - definition: Failed_Recovery

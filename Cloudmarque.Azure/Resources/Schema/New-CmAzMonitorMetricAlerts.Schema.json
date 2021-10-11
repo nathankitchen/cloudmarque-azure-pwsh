@@ -43,7 +43,7 @@
                             "$id": "#/service/dependencies/resourceGroup",
                             "type":  ["string", "null"],
                             "title": "ResourceGroup",
-                            "description": "Dependency value to fetch existing resource type."
+                            "description": "Dependency value to fetch existing resource type. Alerts are deployed in compelete mode."
                         }
                     },
                     "additionalProperties": false
@@ -64,7 +64,7 @@
                             "$id": "#/service/publish/resourceGroup",
                             "type":  ["string", "null"],
                             "title": "ResourceGroup",
-                            "description": "Global default value to publish on deployed resource type."
+                            "description": "Global default value to publish on deployed resource type. Alerts are deployed in compelete mode."
                         }
                     },
                     "additionalProperties": false
@@ -116,19 +116,19 @@
                                                     "$id": "#/groups/items/allOf/alertSets/items/allOf/resourceType",
                                                     "type": "string",
                                                     "title": "Resource Type",
-                                                    "description": "The resource Type as defined in the Azure namespace."
+                                                    "description": "The resource type as defined in the Azure namespace."
                                                 },
                                                 "name": {
                                                     "$id": "#/groups/items/allOf/alertSets/items/allOf/name",
                                                     "name": "string",
                                                     "title": "Name",
-                                                    "description": "Becomes part of metric alert rule generated name."
+                                                    "description": "Becomes part of metric alert rule's generated name."
                                                 },
                                                 "alerts": {
                                                     "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts",
                                                     "type": "array",
                                                     "title": "Alerts",
-                                                    "description": "Contains all details of the metric alert rules to be deployed.",
+                                                    "description": "Contains all the details for the metric alert rules to be deployed.",
                                                     "items": {
                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items",
                                                         "minItems": 1,
@@ -207,7 +207,7 @@
                                                                                                     "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/conditions/items/allOf/threshold/value",
                                                                                                     "type": "integer",
                                                                                                     "title": "Value",
-                                                                                                    "description": "The threshold value that triggers the alert."
+                                                                                                    "description": "The threshold value to trigger the alert."
                                                                                                 },
                                                                                                 "timeAggregation": {
                                                                                                     "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/conditions/items/allOf/threshold/timeAggregation",

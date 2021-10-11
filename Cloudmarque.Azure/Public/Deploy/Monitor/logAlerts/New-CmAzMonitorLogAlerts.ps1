@@ -155,6 +155,27 @@ function New-CmAzMonitorLogAlerts {
 							$alert.query += "`n| where isnotempty(_ResourceId) and isnotnull(_ResourceId)"
 						}
 
+						if ( $alert.exclusions -and $definition.propertiesAvailable -contains "Computer" ) {
+
+							Write-Verbose "Found computer exclusion..."
+
+							$exclusions = @()
+
+							foreach ($service in $alert.exclusions) {
+
+								$resource = Get-CmAzService -Service $service -ServiceKey "cm-monitor-exception"
+
+								if (!$resource) {
+
+									$resource = Get-CmAzService -Service $service -ThrowIfUnavailable
+								}
+
+								$exclusions += $resource.resourceName
+							}
+
+							$alert.query += "`n| where Computer !in~ ($('"{0}"' -f ($exclusions -join '","')))"
+						}
+
 						$alert.enabled ??= $true
 						$alert.severity = $standardDefinitions.Severity.$($alert.severity)
 						$alert.actionGroupInfo = @{ actionGroup = @(); }

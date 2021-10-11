@@ -43,7 +43,7 @@
                             "$id": "#/service/dependencies/resourceGroup",
                             "type": ["string", "null"],
                             "title": "ResourceGroup",
-                            "description": "Dependency value to fetch existing resource type."
+                            "description": "Dependency value to fetch existing resource type. Alerts are deployed in compelete mode."
                         }
                     },
                     "additionalProperties": false
@@ -64,7 +64,7 @@
                             "$id": "#/service/publish/resourceGroup",
                             "type":  ["string", "null"],
                             "title": "ResourceGroup",
-                            "description": "Global default value to publish on deployed resource type."
+                            "description": "Global default value to publish on deployed resource type. Alerts are deployed in compelete mode."
                         }
                     },
                     "additionalProperties": false
@@ -89,13 +89,13 @@
                                 "$id": "#/alerts/items/allOf/name",
                                 "name": "string",
                                 "title": "Name",
-                                "description": "Becomes part of activity log alert rule generated name."
+                                "description": "Becomes part of service health alert rule generated name."
                             },
                             "description": {
                                 "$id": "#/alerts/items/allOf/description",
                                 "type": ["string", "null"],
                                 "title": "Description",
-                                "description": "Description of the activity log alert rule."
+                                "description": "Description of the service health alert rule."
                             },
                             "enabled": {
                                 "$id": "#/alerts/items/allOf/severity",

@@ -43,7 +43,7 @@
                             "$id": "#/service/dependencies/resourceGroup",
                             "type": ["string", "null"],
                             "title": "ResourceGroup",
-                            "description": "Dependency value to fetch existing resource type."
+                            "description": "Dependency value to fetch existing resource type. Alerts are deployed in compelete mode."
                         }
                     },
                     "additionalProperties": false
@@ -64,7 +64,7 @@
                             "$id": "#/service/publish/resourceGroup",
                             "type":  ["string", "null"],
                             "title": "ResourceGroup",
-                            "description": "Global default value to publish on deployed resource type."
+                            "description": "Global default value to publish on deployed resource type. Alerts are deployed in compelete mode."
                         }
                     },
                     "additionalProperties": false
@@ -76,7 +76,7 @@
             "$id": "#/alerts",
             "type": "array",
             "title": "Groups",
-            "description": "Contains all details pertaining to logical groupings of alert sets.",
+            "description": "Contains all details pertaining to logical groupings of alerts.",
             "items": {
                 "$id": "#/alerts/items",
                 "minItems": 1,
@@ -89,13 +89,13 @@
                                 "$id": "#/alerts/items/allOf/name",
                                 "name": "string",
                                 "title": "Name",
-                                "description": "Becomes part of activity log alert rule generated name."
+                                "description": "Becomes part of health alert rule generated name."
                             },
                             "description": {
                                 "$id": "#/alerts/items/allOf/description",
                                 "type": ["string", "null"],
                                 "title": "Description",
-                                "description": "Description of the activity log alert rule."
+                                "description": "Description of the health alert rule."
                             },
                             "enabled": {
                                 "$id": "#/alerts/items/allOf/severity",
@@ -125,9 +125,9 @@
                             "reasonType": {
                                 "$id": "#/alerts/items/allOf/reasonType",
                                 "type": ["array", "null"],
-                                "title": "EventTypes",
+                                "title": "ReasonType",
                                 "default": null,
-                                "description": "Event Status to report on.",
+                                "description": "Reason to generate alert.",
                                 "items": {
                                     "$id": "#/alerts/items/allOf/reasonType/items",
                                     "enum": [
@@ -143,7 +143,7 @@
                                 "type": ["array", "null"],
                                 "title": "ResourceTypes",
                                 "default": null,
-                                "description": "Event Status to report on.",
+                                "description": "Azure namespace to idenity resource type.",
                                 "items": {
                                     "$id": "#/alerts/items/allOf/resourceTypes/items"
                                 }
