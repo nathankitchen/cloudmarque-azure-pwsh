@@ -223,7 +223,7 @@ function New-CmAzCoreMonitor {
 				$storageService = $SettingsObject.service.dependencies.storage
 			}
 
-			$storageAccountId = (Get-CmAzService -Service $storageService -ThrowIfUnavailable -ThrowIfMultiple).Id
+			$storageAccountId = (Get-CmAzService -Service $storageService -Location $SettingsObject.location -ThrowIfUnavailable -ThrowIfMultiple).Id
 
 			if ($SettingsObject.service.publish.workspace) {
 				$workspaceName = Get-CmAzResourceName -Resource "LogAnalyticsWorkspace" -Architecture "Core" -Location $SettingsObject.location -Name $SettingsObject.name

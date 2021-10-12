@@ -107,7 +107,7 @@
 					Set-GlobalServiceValues -GlobalServiceContainer $SettingsObject -ServiceKey "keyvault" -ResourceServiceContainer $vpnGw -IsDependency
 				}
 
-				if ( !$vpnGw.P2s.VpnAddressPool -or !$vpnGw.service.dependencies.keyvault ) {
+				if ( !$vpnGw.P2s.VpnAddressPool -or !$vpnGw.service.dependencies.keyvault -or !$vpnGw.P2s.RootCertificateName ) {
 
 					Write-Verbose "P2s configuration not found."
 					$vpnGw.P2s = @{}
@@ -117,19 +117,8 @@
 				}
 				else {
 
+					Write-Verbose "Checking P2s Config..."
 					$keyVaultService = Get-CmAzService -Service $vpnGw.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
-
-					if ( !$vpnGw.P2s.RootCertificateName ) {
-						$vpnGw.P2s.RootCertificateName = "certificate-p2s-$($vpnGw.GatewayName)"
-
-						$keyVaultCertificateObject = Get-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $vpnGw.P2s.RootCertificateName
-
-						if (!$keyVaultCertificateObject) {
-
-							$Policy = New-AzKeyVaultCertificatePolicy -SecretContentType "application/x-pkcs12" -SubjectName "CN=cloudmarque.azure.default" -IssuerName "Self" -ValidityInMonths 6 -ReuseKeyOnRenewal
-							Add-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $vpnGw.P2s.RootCertificateName -CertificatePolicy $Policy > $Null
-						}
-					}
 
 					$keyVaultCertificateObject = Get-AzKeyVaultCertificate -VaultName $keyVaultService.name -Name $vpnGw.P2s.RootCertificateName
 
@@ -139,6 +128,7 @@
 					else {
 
 						Write-Verbose "Certificate $($vpnGw.P2s.RootCertificateName) found, p2s will be configured."
+
 						$clientRootCertData = $keyVaultCertificateObject.Certificate.GetRawCertData()
 						$vpnGw.P2s.ClientRootCertData = [Convert]::ToBase64String($clientRootCertData)
 					}
@@ -155,6 +145,7 @@
 				}
 				else {
 
+					Write-Verbose "Checking S2s Config..."
 					# This apporach is because Key vault reference cannot be used directly in Arm template because of conflict with copy
 					$keyVaultService = Get-CmAzService -Service $vpnGw.service.dependencies.keyvault -ThrowIfUnavailable -ThrowIfMultiple
 					$vpnGw.S2s.SharedKey = ConvertFrom-SecureString (Get-AzKeyVaultSecret -Name $vpnGw.S2s.KeyVaultSecret -VaultName $keyVaultService.name).SecretValue -AsPlainText

@@ -338,7 +338,7 @@
                                                                         "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/exclusions",
                                                                         "type": ["array", "null"],
                                                                         "title": "Exclusions",
-                                                                        "description": "Excludes resources from alert as per provided tag value. Checks for cm-monitor-exception or cm-service, in that order.",
+                                                                        "description": "Excludes resources from alert as per provided tag value.",
                                                                         "default": "Checks for cm-monitor-exception or cm-service, in that order.",
                                                                         "items": {
                                                                             "$id": "#/groups/items/allOf/alertSets/items/allOf/alerts/items/allOf/exclusions/items",

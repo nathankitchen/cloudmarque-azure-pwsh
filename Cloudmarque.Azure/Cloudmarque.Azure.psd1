@@ -11,7 +11,7 @@
 RootModule = 'Cloudmarque.Azure.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.17'
+ModuleVersion = '1.0.17.1'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Core'
@@ -137,7 +137,7 @@ PrivateData = @{
         IconUri = 'https://github.com/Trustmarque/cloudmarque-azure-pwsh/blob/master/Cloudmarque.Azure/icon.png?raw=true'
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Hotfix for the New-CmAzPaasWebStatic cmdlet, that was not passing in the correct resource group service dependency value into New-CmAzIaasStorage.'
+        ReleaseNotes = 'This release includes Alert Exclusions, a move to Managed Identity for Automation, and bugfixes'
 
         # Prerelease string of this module
         # Prerelease = ''
